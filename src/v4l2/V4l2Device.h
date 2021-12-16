@@ -18,7 +18,6 @@
 #define TCAM_V4L2DEVICE_H
 
 #include "../DeviceInterface.h"
-#include "../FormatHandlerInterface.h"
 #include "../VideoFormat.h"
 #include "../VideoFormatDescription.h"
 #include "V4L2PropertyBackend.h"
@@ -53,8 +52,6 @@ public:
 
     bool set_video_format(const VideoFormat&) override;
 
-    bool validate_video_format(const VideoFormat&) const;
-
     VideoFormat get_active_video_format() const override;
 
     std::vector<VideoFormatDescription> get_available_video_formats() override;
@@ -75,14 +72,10 @@ public:
 
     bool stop_stream() override;
 
-    bool is_lost() const;
-
 private:
     std::atomic<bool> m_is_stream_on { false };
-    std::atomic<bool> m_is_lost { false };
 
     std::thread m_work_thread;
-    std::thread m_notification_thread;
 
     int m_fd = -1;
 
@@ -155,7 +148,8 @@ private:
     bool extension_unit_is_loaded();
 
     void generate_properties( const std::vector<v4l2_queryctrl>& qctrl_list );
-    void index_controls();
+    void create_properties();
+    void create_videoformat_dependent_properties();
     void update_dependency_information();
 
     std::shared_ptr<tcam::v4l2::V4L2PropertyBackend> p_property_backend;
@@ -172,12 +166,11 @@ private:
     struct buffer_info
     {
         std::shared_ptr<ImageBuffer> buffer;
-        bool is_queued;
+        bool is_queued = false;
     };
 
     std::atomic<int> m_stream_timeout_sec { 10 };
 
-    // std::vector<std::shared_ptr<ImageBuffer>> buffers;
     std::vector<buffer_info> m_buffers;
 
     std::weak_ptr<SinkInterface> m_listener;

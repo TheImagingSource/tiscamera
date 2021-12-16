@@ -59,8 +59,6 @@ public:
     /// @return shared pointer to the opened usb camera; Returns nullptr on failure
     // std::shared_ptr<UsbCamera> open_camera (std::string serial);
 
-    std::shared_ptr<UsbSession> get_session();
-
     /**
      * event related stuff
      * used for async bulk transactions

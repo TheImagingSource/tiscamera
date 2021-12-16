@@ -18,6 +18,7 @@
 
 #include "../../DeviceIndex.h"
 #include "../../logging.h"
+#include "../../utils.h"
 #include "mainsrc_gst_device.h"
 
 #include <algorithm>
@@ -162,7 +163,8 @@ static void run_update_logic(std::unique_lock<std::mutex>& /*lck*/,
 
 static void update_device_list(TcamMainSrcDeviceProvider* self)
 {
-    std::unique_lock<std::mutex> lck(self->state->mtx_);
+    tcam::set_thread_name( "tcam_gstdevlst" );
+    std::unique_lock<std::mutex> lck( self->state->mtx_ );
     while (self->state->run_updates_)
     {
         {

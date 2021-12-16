@@ -176,7 +176,7 @@ bool tcam::V4l2Device::load_extension_unit()
 }
 
 
-void tcam::V4l2Device::index_controls()
+void tcam::V4l2Device::create_properties()
 {
     bool extension_unit_exists = extension_unit_is_loaded();
 

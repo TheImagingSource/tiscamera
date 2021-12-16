@@ -16,12 +16,14 @@
 
 #include "UsbHandler.h"
 
-#include "LibusbDevice.h"
 #include "../logging.h"
+#include "LibusbDevice.h"
 
 #include <cstdio>
 #include <cstring>
-#include <iostream>
+//#include <iostream>
+#include "../utils.h"
+
 #include <stdexcept>
 
 namespace tcam
@@ -35,7 +37,7 @@ UsbHandler& UsbHandler::get_instance()
 }
 
 
-UsbHandler::UsbHandler() : session(new UsbSession()), run_event_thread(true)
+UsbHandler::UsbHandler() : session(std::make_shared<UsbSession>()), run_event_thread(true)
 {
     event_thread = std::thread(&UsbHandler::handle_events, this);
 }
@@ -90,7 +92,7 @@ std::unique_ptr<LibusbDevice> UsbHandler::open_device_(const std::string& serial
             continue;
         }
 
-        char tmp_str[sizeof(tcam_device_info::serial_number)];
+        char tmp_str[sizeof(tcam_device_info::serial_number)] = {};
 
         libusb_get_string_descriptor_ascii(dev,
                                            desc.iSerialNumber,
@@ -99,7 +101,7 @@ std::unique_ptr<LibusbDevice> UsbHandler::open_device_(const std::string& serial
         if (serial.compare(tmp_str) == 0)
         {
             libusb_close(dev);
-            ret = std::unique_ptr<LibusbDevice>(new LibusbDevice(session, devs[i]));
+            ret = std::make_unique<LibusbDevice>(session, devs[i]);
             break;
         }
 
@@ -111,46 +113,46 @@ std::unique_ptr<LibusbDevice> UsbHandler::open_device_(const std::string& serial
     return ret;
 }
 
-
-void printdev(libusb_device* dev)
-{
-    libusb_device_descriptor desc;
-    int r = libusb_get_device_descriptor(dev, &desc);
-    if (r < 0)
-    {
-        std::cout << "failed to get device descriptor" << std::endl;
-        return;
-    }
-    std::cout << "Number of possible configurations: " << (int)desc.bNumConfigurations << " ";
-    std::cout << "Device Class: " << (int)desc.bDeviceClass << " ";
-    std::cout << "VendorID: " << desc.idVendor << " ";
-    std::cout << "ProductID: " << desc.idProduct << std::endl;
-    libusb_config_descriptor* config;
-    libusb_get_config_descriptor(dev, 0, &config);
-    std::cout << "Interfaces: " << (int)config->bNumInterfaces << " ||| ";
-    const libusb_interface* inter;
-    const libusb_interface_descriptor* interdesc;
-    const libusb_endpoint_descriptor* epdesc;
-    for (int i = 0; i < (int)config->bNumInterfaces; i++)
-    {
-        inter = &config->interface[i];
-        std::cout << "Number of alternate settings: " << inter->num_altsetting << " | ";
-        for (int j = 0; j < inter->num_altsetting; j++)
-        {
-            interdesc = &inter->altsetting[j];
-            std::cout << "Interface Number: " << (int)interdesc->bInterfaceNumber << " | ";
-            std::cout << "Number of endpoints: " << (int)interdesc->bNumEndpoints << " | ";
-            for (int k = 0; k < (int)interdesc->bNumEndpoints; k++)
-            {
-                epdesc = &interdesc->endpoint[k];
-                std::cout << "Descriptor Type: " << (int)epdesc->bDescriptorType << " | ";
-                std::cout << "EP Address: " << (int)epdesc->bEndpointAddress << " | ";
-            }
-        }
-    }
-    std::cout << std::endl << std::endl << std::endl;
-    libusb_free_config_descriptor(config);
-}
+//
+//void printdev(libusb_device* dev)
+//{
+//    libusb_device_descriptor desc;
+//    int r = libusb_get_device_descriptor(dev, &desc);
+//    if (r < 0)
+//    {
+//        std::cout << "failed to get device descriptor" << std::endl;
+//        return;
+//    }
+//    std::cout << "Number of possible configurations: " << (int)desc.bNumConfigurations << " ";
+//    std::cout << "Device Class: " << (int)desc.bDeviceClass << " ";
+//    std::cout << "VendorID: " << desc.idVendor << " ";
+//    std::cout << "ProductID: " << desc.idProduct << std::endl;
+//    libusb_config_descriptor* config;
+//    libusb_get_config_descriptor(dev, 0, &config);
+//    std::cout << "Interfaces: " << (int)config->bNumInterfaces << " ||| ";
+//    const libusb_interface* inter;
+//    const libusb_interface_descriptor* interdesc;
+//    const libusb_endpoint_descriptor* epdesc;
+//    for (int i = 0; i < (int)config->bNumInterfaces; i++)
+//    {
+//        inter = &config->interface[i];
+//        std::cout << "Number of alternate settings: " << inter->num_altsetting << " | ";
+//        for (int j = 0; j < inter->num_altsetting; j++)
+//        {
+//            interdesc = &inter->altsetting[j];
+//            std::cout << "Interface Number: " << (int)interdesc->bInterfaceNumber << " | ";
+//            std::cout << "Number of endpoints: " << (int)interdesc->bNumEndpoints << " | ";
+//            for (int k = 0; k < (int)interdesc->bNumEndpoints; k++)
+//            {
+//                epdesc = &interdesc->endpoint[k];
+//                std::cout << "Descriptor Type: " << (int)epdesc->bDescriptorType << " | ";
+//                std::cout << "EP Address: " << (int)epdesc->bEndpointAddress << " | ";
+//            }
+//        }
+//    }
+//    std::cout << std::endl << std::endl << std::endl;
+//    libusb_free_config_descriptor(config);
+//}
 
 
 struct libusb_device_handle* UsbHandler::open_device(const std::string& serial)
@@ -223,7 +225,7 @@ struct libusb_device_handle* UsbHandler::open_device(const std::string& serial)
 
 std::vector<DeviceInfo> UsbHandler::get_device_list()
 {
-    libusb_device** devs;
+    libusb_device** devs = nullptr;
 
     int cnt = libusb_get_device_list(this->session->get_session(), &devs);
 
@@ -282,15 +284,9 @@ std::vector<DeviceInfo> UsbHandler::get_device_list()
     return ret;
 }
 
-
-std::shared_ptr<UsbSession> UsbHandler::get_session()
-{
-    return this->session;
-}
-
-
 void UsbHandler::handle_events()
 {
+    tcam::set_thread_name("tcam_usbhand");
     struct timeval tv = {};
     tv.tv_usec = 200;
     while (run_event_thread)

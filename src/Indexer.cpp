@@ -3,6 +3,7 @@
 
 #include "BackendLoader.h"
 #include "logging.h"
+#include "utils.h"
 
 #include <algorithm>
 
@@ -61,6 +62,7 @@ std::shared_ptr<Indexer> Indexer::get_instance()
 
 void Indexer::update_device_list_thread()
 {
+    tcam::set_thread_name("tcam_indexer");
     auto first_list = fetch_device_list_backend();
 
     std::unique_lock<std::mutex> lock(mtx_);
@@ -86,7 +88,8 @@ void Indexer::update_device_list_thread()
 
         for (const auto& d : device_list_)
         {
-            auto f = [&d](const DeviceInfo& info) {
+            auto f = [&d](const DeviceInfo& info)
+            {
                 if (d.get_serial().compare(info.get_serial()) == 0)
                 {
                     return true;
@@ -98,9 +101,8 @@ void Indexer::update_device_list_thread()
 
             if (found == tmp_dev_list.end())
             {
-                SPDLOG_INFO("Lost device {} - {}. Contacting callbacks",
-                            d.get_name(),
-                            d.get_serial());
+                SPDLOG_INFO(
+                    "Lost device {} - {}. Contacting callbacks", d.get_name(), d.get_serial());
                 lost_list.push_back(d);
             }
         }
@@ -146,7 +148,8 @@ void Indexer::sort_device_list(std::vector<DeviceInfo>& lst)
       sorted serials, if no name is given
     */
 
-    auto compareDeviceInfo = [](const DeviceInfo& info1, const DeviceInfo& info2) {
+    auto compareDeviceInfo = [](const DeviceInfo& info1, const DeviceInfo& info2)
+    {
         if (info1.get_device_type() >= info2.get_device_type())
         {
             if (info1.get_serial() > info2.get_serial())

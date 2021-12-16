@@ -51,8 +51,8 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
     m_monitor_v4l2_thread = std::thread(&V4l2Device::monitor_v4l2_thread_func, this);
 
     p_property_backend = std::make_shared<tcam::v4l2::V4L2PropertyBackend>(m_fd);
-    //this->index_all_controls(property_handler);
-    this->index_controls();
+
+    this->create_properties();
     this->index_formats();
 
     determine_active_video_format();
@@ -67,24 +67,12 @@ V4l2Device::~V4l2Device()
         stop_stream();
     }
 
-    this->m_is_stream_on = false;
-
     this->m_stop_monitor_v4l2_thread = true;
 
     if (this->m_fd != -1)
     {
         close(m_fd);
         m_fd = -1;
-    }
-
-    if (m_work_thread.joinable())
-    {
-        m_work_thread.join();
-    }
-
-    if (m_notification_thread.joinable()) // join this just in case stop_stream was not called
-    {
-        m_notification_thread.join();
     }
 
     if (m_monitor_v4l2_thread.joinable())
@@ -109,7 +97,7 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
     }
 
     SPDLOG_DEBUG("Requested format change to '{}' {:x}",
-                 new_format.to_string().c_str(),
+                 new_format.to_string(),
                  new_format.get_fourcc());
 
     // dequeue all buffers
@@ -175,13 +163,6 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
 
     return true;
 }
-
-
-bool V4l2Device::validate_video_format(const VideoFormat& format __attribute__((unused))) const
-{
-    return false;
-}
-
 
 VideoFormat V4l2Device::get_active_video_format() const
 {
@@ -428,11 +409,6 @@ bool V4l2Device::stop_stream()
         m_work_thread.join();
     }
 
-    if (m_notification_thread.joinable())
-    { // wait for possible device lost notification to end
-        m_notification_thread.join();
-    }
-
     SPDLOG_DEBUG("Stopped stream");
 
     if (ret < 0)
@@ -604,7 +580,7 @@ image_scaling V4l2Device::get_current_scaling()
 
         if (!ret)
         {
-            SPDLOG_ERROR("Unable to retrieve value for 'Override Scanning Mode': {}", ret.as_failure().error().message());
+            SPDLOG_ERROR("Unable to retrieve value for 'Override Scanning Mode': {}", ret.error().message());
             return {};
         }
 
@@ -1136,6 +1112,8 @@ bool V4l2Device::extension_unit_is_loaded()
 
 void V4l2Device::stream()
 {
+    tcam::set_thread_name("tcam_v4l2_strm");
+
     m_already_received_valid_image = false;
     static const int log_repetition = 10;
     int log_repetition_counter = 0;
@@ -1397,6 +1375,7 @@ tcam_image_size V4l2Device::get_sensor_size() const
 
 void V4l2Device::monitor_v4l2_thread_func()
 {
+    tcam::set_thread_name( "tcam_v4l2_mon" );
     auto udev = udev_new();
     if (!udev)
     {

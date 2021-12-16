@@ -574,6 +574,7 @@ std::vector<std::shared_ptr<tcam::property::IPropertyBase>> PipelineManager::get
 
 void PipelineManager::run_pipeline()
 {
+    tcam::set_thread_name("tcam_pipeline");
     while (true)
     {
         std::shared_ptr<tcam::ImageBuffer> current_buffer;
