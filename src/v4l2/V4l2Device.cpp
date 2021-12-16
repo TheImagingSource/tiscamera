@@ -1384,7 +1384,7 @@ tcam_image_size V4l2Device::get_sensor_size() const
     {
         for (const auto& r : f.get_resolutions())
         {
-            if (r.max_size.width > size.width || r.max_size.height > size.width)
+            if (r.max_size.width > size.width || r.max_size.height > size.height)
             {
                 size = r.max_size;
             }
