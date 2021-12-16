@@ -31,7 +31,9 @@ namespace v4l2
 enum class v4l2_device_type
 {
     unknown,
-    dfk72,
+    dxk72,
+    dxk42,
+    dxk22,
 };
 
 v4l2_device_type get_device_type(const DeviceInfo&);

@@ -36,8 +36,10 @@ struct converter_scale
     func_type_to_device to_device_ = nullptr;
     func_type_from from_device_ = nullptr;
 
-    std::optional<double> step_ = std::nullopt;
-    std::optional<double> default_ = std::nullopt;
+    std::optional<double> overwrite_min_ = std::nullopt;
+    std::optional<double> overwrite_max_ = std::nullopt;
+    std::optional<double> overwrite_stp_ = std::nullopt;
+    std::optional<double> overwrite_def_ = std::nullopt;
     int64_t to_device(double val) const
     {
         return to_device_ ? to_device_(val) : val;

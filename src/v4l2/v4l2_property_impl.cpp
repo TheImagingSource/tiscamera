@@ -164,18 +164,25 @@ tcam::v4l2::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
     : V4L2PropertyImplBase(queryctrl, static_info, backend), m_converter(scale),
       p_static_info(static_info)
 {
-    range_ = { static_cast<int64_t>(m_converter.from_device(queryctrl.minimum)),
-               static_cast<int64_t>(m_converter.from_device(queryctrl.maximum)) };
+    if (scale.overwrite_max_.has_value())
+        range_.max = static_cast<int64_t>(scale.overwrite_max_.value());
+    else
+        range_.max = static_cast<int64_t>(m_converter.from_device(queryctrl.maximum));
 
-    if (scale.step_.has_value())
-        range_.stp = static_cast<int64_t>(scale.step_.value());
+    if (scale.overwrite_min_.has_value())
+        range_.min = static_cast<int64_t>(scale.overwrite_min_.value());
+    else
+        range_.min = static_cast<int64_t>(m_converter.from_device(queryctrl.minimum));
+
+    if (scale.overwrite_stp_.has_value())
+        range_.stp = static_cast<int64_t>(scale.overwrite_stp_.value());
     else
         range_.stp = static_cast<int64_t>(m_converter.from_device(queryctrl.step));
 
-    if (scale.default_.has_value())
-        m_default = scale.default_.value();
+    if (scale.overwrite_def_.has_value())
+        m_default = static_cast<int64_t>(scale.overwrite_def_.value());
     else
-        m_default = m_converter.from_device(queryctrl.default_value);
+        m_default = static_cast<int64_t>(m_converter.from_device(queryctrl.default_value));
 
     check_and_fixup_range(get_internal_name(), range_, m_default);
 }
@@ -224,12 +231,19 @@ outcome::result<void> tcam::v4l2::V4L2PropertyIntegerImpl::set_value(int64_t new
 {
     if (range_.min > new_value || new_value > range_.max)
     {
-        SPDLOG_DEBUG("Property '{}', value of {} is not in range of [{},{}].", get_internal_name(), new_value, range_.min, range_.max);
+        SPDLOG_DEBUG("Property '{}', value of {} is not in range of [{},{}].",
+                     get_internal_name(),
+                     new_value,
+                     range_.min,
+                     range_.max);
         return tcam::status::PropertyOutOfBounds;
     }
     if ((new_value % range_.stp) != 0)
     {
-        SPDLOG_DEBUG("Property '{}', value of {} is incompatible with step size of {}.", get_internal_name(), new_value, range_.stp);
+        SPDLOG_DEBUG("Property '{}', value of {} is incompatible with step size of {}.",
+                     get_internal_name(),
+                     new_value,
+                     range_.stp);
         return tcam::status::PropertyOutOfBounds;
     }
 
@@ -245,15 +259,23 @@ tcam::v4l2::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
     : V4L2PropertyImplBase(queryctrl, static_info, backend), m_converter(scale),
       p_static_info(static_info)
 {
-    range_ = { m_converter.from_device(queryctrl.minimum),
-               m_converter.from_device(queryctrl.maximum) };
-    if (scale.step_.has_value())
-        range_.stp = scale.step_.value();
+    if (scale.overwrite_max_.has_value())
+        range_.max = scale.overwrite_max_.value();
+    else
+        range_.max = m_converter.from_device(queryctrl.maximum);
+
+    if (scale.overwrite_min_.has_value())
+        range_.min = scale.overwrite_min_.value();
+    else
+        range_.min = m_converter.from_device(queryctrl.minimum);
+
+    if (scale.overwrite_stp_.has_value())
+        range_.stp = scale.overwrite_stp_.value();
     else
         range_.stp = m_converter.from_device(queryctrl.step);
 
-    if (scale.default_.has_value())
-        m_default = scale.default_.value();
+    if (scale.overwrite_def_.has_value())
+        m_default = scale.overwrite_def_.value();
     else
         m_default = m_converter.from_device(queryctrl.default_value);
 
@@ -305,7 +327,11 @@ outcome::result<void> tcam::v4l2::V4L2PropertyDoubleImpl::set_value(double new_v
 {
     if (range_.min > new_value || new_value > range_.max)
     {
-        SPDLOG_DEBUG("Property '{}', value of {} is not in range of [{},{}].", get_internal_name(), new_value, range_.min, range_.max);
+        SPDLOG_DEBUG("Property '{}', value of {} is not in range of [{},{}].",
+                     get_internal_name(),
+                     new_value,
+                     range_.min,
+                     range_.max);
         return tcam::status::PropertyOutOfBounds;
     }
 
@@ -399,7 +425,8 @@ outcome::result<void> tcam::v4l2::V4L2PropertyEnumImpl::set_value_str(
     auto value_to_set = get_entry_value(new_value);
     if (value_to_set.has_error())
     {
-        SPDLOG_DEBUG("Property '{}', value of {} is not in enumeration.", get_internal_name(), new_value);
+        SPDLOG_DEBUG(
+            "Property '{}', value of {} is not in enumeration.", get_internal_name(), new_value);
         return value_to_set.error();
     }
 

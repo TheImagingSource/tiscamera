@@ -186,7 +186,15 @@ tcam::v4l2::v4l2_device_type tcam::v4l2::get_device_type(const DeviceInfo& info)
 
     if (add_info == "8307" || add_info == "8207")
     {
-        return v4l2_device_type::dfk72;
+        return v4l2_device_type::dxk72;
+    }
+    if (add_info == "8308" || add_info == "8208")
+    {
+        return v4l2_device_type::dxk42;
+    }
+    if (add_info == "8302" || add_info == "8202")
+    {
+        return v4l2_device_type::dxk22;
     }
     return v4l2_device_type::unknown;
 }
