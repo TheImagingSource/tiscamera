@@ -19,12 +19,14 @@
 #include "logging.h"
 
 //#include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstring>
 //#include <dutils_img/image_transform_base.h>
 #include <errno.h>
 #include <fstream>
 #include <limits>
+#include <pthread.h>
 #include <signal.h> // kill
 #include <sys/ioctl.h>
 
@@ -230,4 +232,15 @@ std::string tcam::get_environment_variable(const std::string& name, const std::s
     }
 
     return value;
+}
+
+int tcam::set_thread_name(const char* name, pthread_t thrd /*= pthread_self()*/)
+{
+    return pthread_setname_np(thrd, name);
+}
+
+int set_thread_name(const std::string& name, pthread_t thrd /*= pthread_self()*/)
+{
+    assert(name.size() <= 16);
+    return set_thread_name(name.c_str(), thrd);
 }

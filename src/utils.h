@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+
 VISIBILITY_INTERNAL
 
 namespace tcam
@@ -89,6 +90,16 @@ double map_value_ranges(double input_start,
  * @return value of the environment variable or backup
  */
 std::string get_environment_variable(const std::string& name, const std::string& backup);
+
+/**
+ * @brief set the thread name (for debuggers) of the specified thread.
+ * @param thrd the thread specified.
+ * @param name the name to set
+ *
+ * @return 0 on success, otherwise the error value returned by pthread_setname_np
+ */
+int set_thread_name(const char* name, pthread_t thrd = pthread_self());
+int set_thread_name(const std::string& name, pthread_t thrd = pthread_self());
 
 } /* namespace tcam */
 
