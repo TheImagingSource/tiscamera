@@ -14,7 +14,7 @@
 # limitations under the License.
 
 
-if(BUILD_ARAVIS)
+if(TCAM_BUILD_ARAVIS)
 
   configure_file(tcam-gige-daemon.service.cmake ${CMAKE_CURRENT_BINARY_DIR}/tcam-gige-daemon.service)
 
@@ -22,4 +22,4 @@ if(BUILD_ARAVIS)
     DESTINATION ${TCAM_INSTALL_SYSTEMD}
     COMPONENT tcam-gige-daemon)
 
-endif(BUILD_ARAVIS)
+endif(TCAM_BUILD_ARAVIS)
