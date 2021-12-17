@@ -42,4 +42,5 @@ target_link_libraries(tcamgstbase
   dutils_img::base
   spdlog::spdlog
   tcam::gst-helper-dutils
+  stdc++fs
   )

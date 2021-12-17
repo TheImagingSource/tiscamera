@@ -50,6 +50,7 @@ target_link_libraries(tcam-backend-v4l2
   tcam-uvc-extension
   tcamprop1::base
   ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES}
+  stdc++fs
   )
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
