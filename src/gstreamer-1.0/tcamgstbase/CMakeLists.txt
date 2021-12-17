@@ -30,6 +30,8 @@ add_library(tcamgstbase STATIC
 
 set_project_warnings(tcamgstbase)
 
+target_compile_definitions(tcamgstbase PUBLIC JSON_HAS_CPP_11)
+
 target_include_directories(tcamgstbase
 PUBLIC
 ${GSTREAMER_INCLUDE_DIRS}
@@ -42,5 +44,4 @@ target_link_libraries(tcamgstbase
   dutils_img::base
   spdlog::spdlog
   tcam::gst-helper-dutils
-  stdc++fs
   )
