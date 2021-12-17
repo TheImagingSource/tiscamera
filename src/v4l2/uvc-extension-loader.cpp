@@ -262,11 +262,16 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file(
         return mappings;
     }
 
+    std::string tmp_content(std::istreambuf_iterator<char>{ifs}, {});
+
     json json_desc;
 
     try
     {
-        ifs >> json_desc;
+        json_desc = json::parse(tmp_content,
+                                nullptr, // callback
+                                true, // allow exceptions
+                                true); //ignore comments
     }
     catch (json::parse_error& err)
     {
@@ -309,15 +314,6 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file(
         map.offset = m.at("offset_bits").get<int>();
 
         map.data_type = parse_uvc_type(m.at("uvc_type").get<std::string>());
-
-        // 0 is UVC_CTRL_DATA_TYPE_RAW
-        // if (map.data_type == 0)
-        // {
-        //     std::string msg = "data_type for '" + m.at("name").get<std::string>()
-        //         + "' does not make sense.";
-        //     cb(msg);
-        //     continue;
-        // }
 
         map.v4l2_type = parse_v4l2_type(m.at("v4l2_type").get<std::string>());
         if (map.v4l2_type == 0)
