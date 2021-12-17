@@ -55,9 +55,17 @@ include(CMakeOptions.cmake)
 
 add_compile_options( -Wno-psabi )   # disable ABI change message of g++8
 add_compile_options( -Wall -Wextra -pedantic -pthread )
+
 set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_POSITION_INDEPENDENT_CODE ON )
+
+# external/json defaults to the highest cpp standard it can find
+# this causes inclusion of std::filesystem
+# which is not present on older systems (Ubuntu 18.04 LTS)
+# add_definitions is used instead of
+# target_compile_definitions as that would require cmake >= 1.12
+add_definitions(-DJSON_HAS_CPP_11)
 
 include(CMakeInstall.cmake)
 

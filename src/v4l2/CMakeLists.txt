@@ -43,8 +43,6 @@ add_library(tcam-backend-v4l2 STATIC
   v4l2_api.cpp
   )
 
-target_compile_definitions(tcam-backend-v4l2 PUBLIC JSON_HAS_CPP_11)
-
 target_link_libraries(tcam-backend-v4l2
   PUBLIC
   tcam-base
