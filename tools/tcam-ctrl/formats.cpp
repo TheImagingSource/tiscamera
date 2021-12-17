@@ -182,6 +182,8 @@ int convert (const std::string& element_name,
              ElementPadDirection user_direction,
              const std::string& caps_str)
 {
+    std::cout << "Probing " << element_name << ":" << std::endl;
+
     auto element = open_element(element_name.c_str());
 
     if (!element)
