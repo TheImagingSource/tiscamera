@@ -204,6 +204,11 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
         }
     }
 
+    // sort tabs alphabetically
+    // to get more predictable behavior
+    auto compare_function = [] (std::string a, std::string b) {return a<b;};
+    std::sort(known_categories.begin(), known_categories.end(), compare_function);
+
     for (const auto& cat : known_categories)
     {
         std::vector<Property*> props;
