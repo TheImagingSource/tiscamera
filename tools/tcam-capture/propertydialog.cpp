@@ -22,6 +22,9 @@
 #include <QFormLayout>
 #include <tcam-property-1.0.h>
 
+#include <QAction>
+#include <QKeyEvent>
+
 PropertyTree::PropertyTree(const std::vector<Property*>& properties, QWidget* parent)
     : QWidget(parent), m_properties(properties)
 {
@@ -75,7 +78,6 @@ PropertyDialog::~PropertyDialog()
 {
     delete ui;
 
-    p_worker->stop();
     if (p_work_thread->isRunning())
     {
         p_work_thread->quit();
@@ -86,8 +88,33 @@ PropertyDialog::~PropertyDialog()
 
 void PropertyDialog::notify_device_lost(const QString& info)
 {
-    p_worker->stop();
     emit device_lost(info);
+}
+
+
+void PropertyDialog::update_tab(int index)
+{
+    auto name = ui->tabWidget->tabText(index);
+    emit this->update_category(name);
+}
+
+
+void PropertyDialog::refresh()
+{
+    int index = ui->tabWidget->currentIndex();
+    update_tab(index);
+}
+
+
+void PropertyDialog::keyPressEvent(QKeyEvent* event)
+{
+    // this is to ensure the property dialog behaves
+    // like a normal dialog
+    // esc == quit
+    if (event->key() == Qt::Key_Escape)
+    {
+        this->close();
+    }
 }
 
 
@@ -192,4 +219,15 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
 
         ui->tabWidget->addTab(tab_tree, cat.c_str());
     }
+
+    // tab change causes update for affected properties
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &PropertyDialog::update_tab);
+    // updates shall be done in another context
+    connect(this, &PropertyDialog::update_category, p_worker, &PropertyWorker::update_category);
+
+    // connect buttons
+    connect(ui->button_update, &QPushButton::clicked, this, &PropertyDialog::refresh);
+    connect(ui->button_close, &QPushButton::clicked, this, &PropertyDialog::close);
+
+
 }

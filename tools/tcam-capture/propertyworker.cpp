@@ -17,30 +17,11 @@
 #include "propertyworker.h"
 
 #include "propertywidget.h"
+#include <QThread>
 
 PropertyWorker::PropertyWorker()
-{
-    p_timer = new QTimer(this);
+{}
 
-    connect(p_timer, SIGNAL(timeout()), this, SLOT(run()));
-
-    p_timer->start(2000);
-}
-
-PropertyWorker::~PropertyWorker()
-{
-    stop();
-
-    p_timer->stop();
-
-    delete p_timer;
-}
-
-
-void PropertyWorker::stop()
-{
-    m_run = false;
-}
 
 void PropertyWorker::add_properties(const std::vector<Property*>& new_props)
 {
@@ -51,21 +32,27 @@ void PropertyWorker::add_properties(const std::vector<Property*>& new_props)
 void PropertyWorker::write_property(Property* p)
 {
     p->set_in_backend();
+
+    const auto cat = p->get_category();
+    const auto name = p->get_name();
+
+    for (auto& prop : m_properties)
+    {
+        if (name != prop->get_name() && prop->get_category() == cat)
+        {
+            prop->update();
+        }
+    }
 }
 
-void PropertyWorker::run()
-{
-    if (!m_run)
-    {
-        return;
-    }
 
-    for (auto& p : m_properties)
+void PropertyWorker::update_category(QString category)
+{
+    for (auto& prop : m_properties)
     {
-        p->update();
-        if (!m_run)
+        if (prop->get_category() == category.toStdString())
         {
-            break;
+            prop->update();
         }
     }
 }

@@ -57,10 +57,15 @@ public:
 public slots:
 
     void notify_device_lost(const QString& info);
+    void refresh();
+    void update_tab(int);
+
+    void keyPressEvent(QKeyEvent* event);
 
 signals:
 
     void device_lost(const QString& info);
+    void update_category(QString name);
 
 private:
     void initialize_dialog(TcamCollection& collection);

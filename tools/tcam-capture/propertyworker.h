@@ -27,23 +27,17 @@ class PropertyWorker : public QObject
     Q_OBJECT
 public:
     PropertyWorker();
-    ~PropertyWorker();
 
-    void stop();
     void add_properties(const std::vector<Property*>& new_props);
 
 public slots:
 
-    void write_property(Property* p);
+    void update_category(QString category);
 
-    void run();
+    void write_property(Property* p);
 
 private:
     std::vector<Property*> m_properties;
-
-    QTimer* p_timer = nullptr;
-
-    bool m_run = true;
 };
 
 #endif // PROPERTYWORKER_H

@@ -76,7 +76,7 @@ static QString generate_tooltip(TcamPropertyBase* p_prop)
 {
     // the font tagging is used to make the
     // tool tip text 'feature rich'
-    // this enabled auto wrapping
+    // this enables auto wrapping
     QString toolTip = QString("<font>");
     toolTip += tcam_property_base_get_description(p_prop);
     toolTip += "<p>API ID: ";
