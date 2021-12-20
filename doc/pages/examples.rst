@@ -50,8 +50,11 @@ These examples exist in all available example languages.
      - Read meta information like is-damaged, camera capture time, etc.
        Currently only in available in C.
    * - 11
-     - device-state
+     - json-state
      - Save and load JSON device state
+   * - 12
+     - tcam-properties
+     - Save and load properties via GstStructure
 
 It may be neccessary to install additional development packages when using pre-compiled tiscamera packages.
 See :ref:`dependencies`.

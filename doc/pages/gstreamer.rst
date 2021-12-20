@@ -259,6 +259,11 @@ This leads the `tcamsrc` to select the caps it thinks a best.
    refer tcamsrc caps preferences
    write caps preferences
 
+The simplest way to see what caps the camera offers is `tcam-ctrl`.
+   
+.. code-block:: sh
+
+   tcam-ctrl -c <SERIAL>
 
    
 .. code-block:: sh
@@ -294,6 +299,10 @@ it will use bggr.
 Here tcamconvert is being told that the appsink will only accept BGRx.
 This leads to tcamconvert only using caps for the negotiations with tcamsrc that can be converted to BGRx.
 Since multiple formats can be converted to BGRx the tcamsrc once again can choose according to its own preferences.
+
+.. code-block:: sh
+
+   tcam-ctrl --transform --out video/x-raw,format=BGRx -e tcamconvert
 
 To prevent auto selection explicit caps have to be given.
 

@@ -29,9 +29,8 @@ The following tools are required for a firmware update:
 
       ``tcam-firmware-update``
 
-      firmware-update is not part of a standard tiscamera installation.
-      To get the tool you have to manually compile the tiscamera repository.
-      firmware-update can then be found in the build directory under `tools/firmware-update/`.
+      tcam-firmware-update is not part of a standard tiscamera installation.
+      You can find it here: https://github.com/theimagingsource/tcam-firmware-update
 
    .. group-tab:: Usb-3.X
 
@@ -39,8 +38,6 @@ The following tools are required for a firmware update:
 
       tcam-firmware-update is not part of a standard tiscamera installation.
       You can find it here: https://github.com/theimagingsource/tcam-firmware-update
-      To get the tool you have to manually compile the tiscamera repository.
-      firmware-update can then be found in the build directory under `tools/firmware-update/`.
                   
    .. group-tab:: GigE
 

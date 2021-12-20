@@ -6,7 +6,7 @@ To upgrade to tiscamera 1.0 you have to be aware of the following changes:
 
 Some cameras are no longer supported.
 The most important being all 23 cameras.
-For a complete overview ???? ink to supported devices
+For a complete overview see `supported devices <https://www.theimagingsource.com/documentation/tiscamera/supported_devices.html>`.
 
 ## Compilation
 
@@ -17,8 +17,8 @@ Ubuntu LTS 18.04 is not capable of compiling this out of the box.
 
 You can set the cmake option `TCAM_DOWNLOAD_MESON` to `ON` to have tiscamera handle this case for you.
 
+All build flags now have the prefix `TCAM_`.
 The configuration flags `TCAM_BUILD_ARAVIS` and `TCAM_BUILD_DOCUMENTATION` now have the default `ON`.
-
 
 ## Device discovery
 
@@ -36,8 +36,9 @@ The property `use-dutils` has been replaced by the enum `conversion-element`.
 To explicitly use tcamdutils set `conversion-element` to `tcamdutils`.
 Default is `auto`.
 
-The property `state` requires the element to be at least in the `GST_STATE_READY` state.
-This is to ensure that a device has been opened.
+The property `state` has been renamed to `tcam-properties-json`.
+It requires the element to be at least in the `GST_STATE_READY` state. This is to ensure that a device has been opened.
+It can only be set on the tcambin.
 
 ### Removed elements
 
@@ -129,15 +130,14 @@ GstCaps have been expanded with the following fields:
 GstCaps can now contain the value 'binning'.
 If you have not yet used binning this does not affect you.
 
-See documentation for further details ???? link
+See `documentation <https://www.theimagingsource.com/documentation/tiscamera/gstreamer.html#how-to-read-caps>` for further details.
 
 ### skipping
 
 GstCaps can now contain the value skipping'.
 If you have not yet used skipping this does not affect you.
 
-See documentation for further details ???? link
-
+See `documentation <https://www.theimagingsource.com/documentation/tiscamera/gstreamer.html#how-to-read-caps>` for further details.
 
 ## tools
 
@@ -158,7 +158,8 @@ tcam-capture has been rewritten in C++.
 
 #### Saving images/videos
 
-Removed. Write own script or use tis-measure as replacement TODO: ???? link to tis-measure
+Removed. Write own script or use tis-measure as a replacement.
+tis-measure can be found `in our download section <https://www.theimagingsource.com/support/downloads-for-linux/end-user-software/icmeasureappimage/>`.
 
 #### camera-ip-conf
 

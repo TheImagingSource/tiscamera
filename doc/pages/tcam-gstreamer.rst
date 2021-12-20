@@ -2,8 +2,7 @@
 The Imaging Source Gstreamer Plugins
 ####################################
 
-The following plugins are offered by us.
-When an element property is also available through the property interface its name in said interface will be explicitly listed as "PI: property-name".
+The following plugins are offered by `The Imaging Source`.
 
 .. _tcammainsrc:
 
@@ -28,12 +27,12 @@ Always use tcamsrc. tcammainsrc is considered an internal element.
    * - serial
      - string
      - Serial number of the device that shall be used
-     - `< GST_STATE_READY`
+     - `GST_STATE_NULL`
      - always
    * - type
      - string
      - Backend the camera shall use. Available options: v4l2, aravis, libusb, unknown
-     - `< GST_STATE_READY`
+     - `GST_STATE_NULL`
      - always
    * - camera-buffers
      - int
@@ -53,10 +52,43 @@ Always use tcamsrc. tcammainsrc is considered an internal element.
      - always
    * - :ref:`tcam-properties<tcam-properties>`
      - GstStructure
-     - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcammainsrc tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
+     - Property that can be used to set/get the current TcamPropertyProvider properties.
+       This can be used like: `gst-launch-1.0 tcammainsrc tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
      - always
      - always
 
+.. .. _tcammainsrc_caps_selection:
+       
+Caps Auto Selection
+-------------------
+
+tcammainsrc will prefer certain GStreamer Caps over others when no explicit caps are given.
+
+**format**:
+    | prefer bayer 8-bit over everything else
+    | if bayer 8-bit does not exist order according to the following list:
+    | - color formats like BGR
+    | - color formats like YUV
+    | - formats like MJPEG
+    | - GRAY16
+    | - GRAY8
+    | - pwl bayer
+    | - bayer12/16
+    | - polarized bayer
+    | - polarized mono
+**width**:
+    | Will default to the highest value for the available range for the selected format.
+    | If no format has been selected, one will be selected before a width is selected.
+**height**:
+    | Will default to the highest value for the available range for the selected format.
+    | If no format has been selected, one will be selected before a height is selected.
+**framerate**:
+    | Will default to the highest framerate for the selected resolution.
+    | If no resolution has been given it will be selected before a framerate is selected.
+**binning**:
+    Will default to '1x1' and omitted.
+**skipping**:
+    Will default to '1x1' and omitted.
 
 MetaData
 --------
@@ -215,6 +247,16 @@ It is a convenience wrapper and offers no additional properties.
      - always
      - `>= GST_STATE_READY`
 
+Caps Auto Selection
+-------------------
+
+The caps auto selection is dependent on the internally used source element.
+
+If your device uses the tcammainsrc (v4l2, aravis, libusb), see :ref:`here<tcammainsrc_caps_auto_selection>`.
+
+.. todo:: check if pimipisrc and tegrasrc actually document what they are doing.
+          they don't. add to their docs
+
 .. _tcamdutils:
 
 tcamdutils
@@ -232,6 +274,23 @@ For more information read `the documentation <https://www.theimagingsource.com/d
    notify you with a GStreamer warning log message and a GstBus message.
    This can be overwritten by manually setting the tcambin property `conversion-element` to `tcamdutils`.
 
+.. _tcamdutils_cuda:
+
+tcamdutils-cuda
+###############
+
+Closed source optional transformation and interpretation filter.
+Allows the transformation of bayer 12-bit and 16-bit formats to BGRx 64-Bit.
+Optimized for NVidia Jetson platforms. Part of the package `tis-tegra-filters`.
+
+.. note::
+   When using tcamdutils-cuda with tcambin a version check is undertaken.
+   tiscamera and tcamdutils-cuda are version locked, meaning their major.minor version have to match.
+   If a mismatch is detected, tcambin will disable the usage of the tcamdutils element and
+   notify you with a GStreamer warning log message and a GstBus message.
+   This can be overwritten by manually setting the tcambin property `conversion-element` to `tcamdutils-cuda`.
+   
+   
 .. _tcambin:
 
 tcambin
@@ -245,11 +304,9 @@ The offered caps are the sum of unfiltered camera caps and caps that will be ava
 
 The format that can always be expected to work is `BGRx`. All other formats depend on the used device.
 
-.. todo:: Add cuda package name
-
 .. note::
-   When using tiscamera-dutils or ?????? with tcambin a version check is undertaken.
-   tiscamera and tiscamera-dutils/????? are version locked, meaning their major.minor version have to match.
+   When using tcamdutils or tcamdutils-cuda with tcambin a version check is undertaken.
+   tiscamera and tcamdutils/tcamdutils-cuda are version locked, meaning their major.minor version have to match.
    If a mismatch is detected, tcambin will disable the usage of the tcamdutils/tcamdutils-cuda element and
    notify you with a GStreamer warning log message and a GstBus message.
    This can be overwritten by manually setting `conversion-element` to the concerning element name.
@@ -267,17 +324,17 @@ The format that can always be expected to work is `BGRx`. All other formats depe
    * - serial
      - string
      - Serial number of the device that shall be used
-     - `< GST_STATE_READY`
+     - `GST_STATE_NULL`
      - always
    * - type
      - string
      - Backend the camera shall use. Available options: v4l2, aravis, libusb, pimipi, unknown
-     - `< GST_STATE_READY`
+     - `GST_STATE_NULL`
      - always
    * - :ref:`tcam-device<tcam-device>`
      - GstDevice
      - Assigns a GstDevice to open when transitioning from `GST_STATE_NULL` to `GST_STATE_READY`.
-     - `< GST_STATE_READY`
+     - `GST_STATE_NULL`
      - never
    * - available-caps
      - string
@@ -311,7 +368,7 @@ The format that can always be expected to work is `BGRx`. All other formats depe
        
        Possible values: `auto`, `tcamconvert`, `tcamdutils`, `tcamdutils-cuda`
        Default: `auto`
-     - `< GST_STATE_READY`
+     - `GST_STATE_NULL`
      - always
 
 Internal pipelines will always be created when the element state is set to READY.
@@ -319,6 +376,8 @@ Internal pipelines will always be created when the element state is set to READY
     tcamsrc -> capsfilter -> tcamconvert
 
     tcamsrc -> capsfilter -> tcamdutils
+    
+    tcamsrc -> capsfilter -> tcamdutils-cuda
 
     tcamsrc -> capsfilter -> jpegdec
 
@@ -356,7 +415,7 @@ E.g:
 GObject property `tcam-properties`
 --------------------------------------
 
-In ``state ==  GST_STATE_NULL``:
+In ``state == GST_STATE_NULL``:
 
 * Set on `tcam-properties` copies the passed in structure. This structure gets applied to the device when transitioning to `GST_STATE_READY`.
 * Get on `tcam-properties` returns either the previously passed in structure or if nothing was set, an empty structure.
