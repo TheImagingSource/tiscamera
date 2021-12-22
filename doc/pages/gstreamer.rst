@@ -254,10 +254,8 @@ The sending element can then decide what to use and reduce the offered caps furt
 In this pipeline `appsink` will offer the caps `ANY`, meaning any fixed caps will be accepted.
 This leads the `tcamsrc` to select the caps it thinks a best.
 
-.. todo::
+For information about tcamsrc auto negotiation see :ref:`here <tcamsrc_caps_auto_selection>`.
 
-   refer tcamsrc caps preferences
-   write caps preferences
 
 The simplest way to see what caps the camera offers is `tcam-ctrl`.
    
@@ -284,13 +282,8 @@ resulting in a failed negotiation.
 
    
 This pipeline is the same as the one before, except that the tcamsrc can choose between bggr and bggr16.
-Due to its own preferences
-
-.. todo::
-   
-   link to caps preferences
-
-it will use bggr.
+Due to its own preferences it will use bggr.
+For information about tcamsrc auto negotiation see :ref:`here <tcamsrc_caps_auto_selection>`.
 
 .. code-block:: sh
 

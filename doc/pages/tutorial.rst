@@ -124,6 +124,10 @@ Camera Interactions
 
 This sections describes how a program can interact with a camera.
 
+.. todo::
+
+   add cmake/pkg-config/python steps when necessary
+
 The API
 =======
 
@@ -219,6 +223,8 @@ For a quick listing of available devices, execute the following in a terminal:
                                                                  struc.get_string("type")))
 
 
+.. todo:: link examples page
+                                                                 
 This code can be found in the example `00-list-devices`.
 
 Opening and Closing a Camera
@@ -247,7 +253,8 @@ The recommended way of addressing a camera is by using its serial number.
              g_object_set_property(G_OBJECT(source), "serial", &val);
          }
    
-         /* in the READY state the camera will always be initialized */
+         /* in the READY state the camera will be initialized
+            and properties will be available */
          gst_element_set_state(source, GST_STATE_READY);
 
    .. group-tab:: python
@@ -257,17 +264,18 @@ The recommended way of addressing a camera is by using its serial number.
          # Set this to a serial string for a specific camera
          serial = None
 
-         camera = Gst.ElementFactory.make("tcambin")
+         source = Gst.ElementFactory.make("tcambin")
    
          if serial:
              # This is gstreamer set_property
-             camera.set_property("serial", serial)
+             source.set_property("serial", serial)
    
-         # in the READY state the camera will always be initialized
-         camera.set_state(Gst.State.READY)
+         # in the READY state the camera will be initialized
+         # and properties will be available
+         source.set_state(Gst.State.READY)
 
-To close a device, it is sufficient to set the GStreamer state to NULL
-which will free up all hardware resources.
+To close a device, it is sufficient to set the GStreamer state to NULL.
+All hardware resources will be freed.
                   
 .. tabs::
 
@@ -284,7 +292,7 @@ which will free up all hardware resources.
       .. code-block:: python
 
          # cleanup, reset state
-         camera.set_state(Gst.State.NULL)
+         source.set_state(Gst.State.NULL)
                            
 This code can be found in the example `02-set-properties`.
 
@@ -463,7 +471,7 @@ To enable image retrieval, the following steps need to be taken.
          # tell appsink what function to call when it notifies us
          sink.connect("new-sample", callback, user_data)
                   
-The image `sample` that is given to the function contains the image, video caps and other additional information that maybe required for image processing.
+The image `sample` that is given to the function contains the image, video caps and other additional information that may be required for image processing.
 
 
 .. tabs::
@@ -582,11 +590,8 @@ For an overview of available properties, type the following into a terminal:
 
              switch(type)
              {
-                 case TCAM_PROPERTY_TYPE_INTEGER:
-                 {
-                     TcamPropertyInteger* integer = TCAM_PROPERTY_INTEGER(base_property);
-                     break;
-                 }
+                 // differentiate between specific property types
+                 // ...
              }
              
              if (base_property)
@@ -611,16 +616,21 @@ For an overview of available properties, type the following into a terminal:
 
          for name in property_names:
 
-             (ret, value,
-              min_value, max_value,
-              default_value, step_size,
-              value_type, flags,
-              category, group) = camera.get_tcam_property(name)
+             try:
+                 base_property = camera.get_tcam_property("name")
 
-             if not ret:
+                 property_type = base_property.get_property_type()
+
+                 # differentiate between specific property types
+                 
+             except GLib.Error as e:
                  print("could not receive value {}".format(name))
                   
 This code can be found in the example `01-list-properties`.
+
+A differentiation between property types is necessary to have access to property values.
+
+
 
   
 Set Property

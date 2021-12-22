@@ -6,60 +6,407 @@ Examples
 ########
 
 The following is a list of examples and their purpose.
-These examples exist in all available example languages.
+These examples exist in C and Python3.
 
-.. list-table:: Example purpose
-   :header-rows: 1
-   :widths: 10 20 70
-
-   * - No.
-     - Name
-     - What it teaches
-   * - 00
-     - list-devices
-     - Shows what cameras there are and how to identify them
-   * - 01
-     - list-properties
-     - Shows the properties of a camera and their settings (range, current value, etc.)
-   * - 02
-     - set-property
-     - Shows how to set a specific property
-   * - 03
-     - live-stream
-     - Delivers live-image stream from the camera
-   * - 04
-     - list-formats
-     - Lists what formats the camera offers
-   * - 05
-     - set-format
-     - Sets the camera to a specific format
-   * - 06
-     - softwaretrigger
-     - Triggers single images - instead of a continuous image stream
-   * - 07
-     - appsink
-     - Receives images in an application instead of just showing them.
-   * - 08
-     - save-stream
-     - Stores a stream in a file.
-   * - 09
-     - device-lost
-     - Receives device-lost and other messages and react to them
-   * - 10
-     - metadata
-     - Read meta information like is-damaged, camera capture time, etc.
-       Currently only in available in C.
-   * - 11
-     - json-state
-     - Save and load JSON device state
-   * - 12
-     - tcam-properties
-     - Save and load properties via GstStructure
+The standard installation path for examples is `/usr/share/theimagingsource/tiscamera/examples`.
 
 It may be neccessary to install additional development packages when using pre-compiled tiscamera packages.
 See :ref:`dependencies`.
 
+00 - list-devices
+=================
 
+Shows what cameras there are and how to identify them.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/00-list-devices.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/00-list-devices.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+            
+.. raw:: html
+         
+   </details>
+
+                    
+01 - list-properties
+====================
+
+Shows the properties of a camera and their settings (range, current value, etc.).
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/01-list-properties.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/01-list-properties.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+        
+02 - set-properties
+===================
+Shows how to set a specific property.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/02-set-properties.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/02-set-properties.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+        
+03 - live-stream
+================
+Delivers live-image stream from the camera.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/03-live-stream.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/03-live-stream.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+        
+04 - list-format
+================
+Lists what formats the camera offers.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/04-list-formats.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/04-list-formats.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+        
+05 - set format
+===============
+Sets the camera to a specific format.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/05-set-format.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/05-set-format.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+        
+06 - softwaretrigger
+====================
+Triggers single images - instead of a continuous image stream.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/06-softwaretrigger.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/06-softwaretrigger.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+        
+07 - appsink
+============
+Receives images in an application instead of just showing them.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/07-appsink.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/07-appsink.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+        
+08 - save-stream
+================
+Stores a stream in a file.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/08-save-stream.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/08-save-stream.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+        
+09 - device-lost
+================
+Receives device-lost and other messages and react to them.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/09-device-lost.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/09-device-lost.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+        
+10 - metadata
+=============
+Read meta information like is-damaged, camera capture time, etc.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/10-metadata.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/10-metadata.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+        
+11 - json-state
+===============
+Save and load JSON device state.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/11-json-state.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/11-json-state.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+
+        
+12 - tcam-properties
+====================
+Save and load properties via GstStructure.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+   
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/12-tcamproperties.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                          
+      .. literalinclude:: ../../examples/python/12-tcamproperties.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+         
+   </details>
+
+
+                    
 .. _examples_further:
 
 Further Examples

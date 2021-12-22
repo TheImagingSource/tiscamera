@@ -82,6 +82,16 @@ To see which devices are supported by tiscamera, see :ref:`supported devices<sup
 Property Dialog
 ===============
 
+The property dialog allows interaction with all device properties.
+
+Properties on the same tab are refreshed when:
+- The active tab is switched
+- The `Refresh` button is clicked
+- The user presses `F5`.
+- A property is changed
+
+
+  
 .. TODO::
 
    describe
@@ -123,10 +133,8 @@ Conversion Element
 
 Selector for the tcambin property `conversion-element`.
 
-.. TODO::
-
-   link to tcambin
-
+See :ref:`tcambin properties <tcambin_properties>` for details.
+   
 Apply properties on start
 -------------------------
 

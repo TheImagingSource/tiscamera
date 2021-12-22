@@ -8,7 +8,7 @@ The tcam-uvc-extension-loader is our internal replacement for uvcdynctrl.
 
 Its only purpose is to load UVC extension units for USB cameras.
 
-The description files for the extension units are written in json and are a
+The description files for the extension units are written in json (with comments allowed) and are a
 direct representation of the underlying struct that is submitted to the kernel.
 
 For a description of the UVC driver mapping command, please refer to the `kernel
@@ -37,45 +37,47 @@ Extension Unit
 The following description is a generic example showing
 what a file that is loadable by this program must look like.
 
+C-Style comments are allowed.
+
 .. code-block:: text
 
     {
-        # execute `lsusb -vd vid:pid`
-        # and search for `guidExtensionCode`
-        # the guid from that field has to be entered here
+        // execute `lsusb -vd vid:pid`
+        // and search for `guidExtensionCode`
+        // the guid from that field has to be entered here
         "guid": "0aba49de-5c0b-49d5-8f71-0be40f94a67a",
 
-        # the list of mappings
+        // the list of mappings
         "mappings": [
             {
-                # string containing the u32 id number that V4L2
-                # will give when querying the device
+                // string containing the u32 id number that V4L2
+                // will give when querying the device
                 "id": "0x199e9999",
-                # String containing the name. Maximum of 31 characters
+                // String containing the name. Maximum of 31 characters
                 "name", "My property",
-                # UVC control selector
+                // UVC control selector
                 "selector": "0xB1",
-                # type the UVC property has.
-                # possible values are: unsigned, signed, raw, enum, booean, bitmask
+                // type the UVC property has.
+                // possible values are: unsigned, signed, raw, enum, booean, bitmask
                 "uvc_type": "",
-                # type the V4L2 property has.
-                # possible values are: bitmask, boolean, button, integer, menu, string
+                // type the V4L2 property has.
+                // possible values are: bitmask, boolean, button, integer, menu, string
                 v4l2_type: "",
-                # size of the UVC property in bit
+                // size of the UVC property in bit
                 size_bits: 8,
-                # size of the offset in bit.
-                # It is possible to map multiple V4L2 onto the same UVC property field.
-                # E.g. this offset allows access to single bit in a bitfield.
+                // size of the offset in bit.
+                // It is possible to map multiple V4L2 onto the same UVC property field.
+                // E.g. this offset allows access to single bit in a bitfield.
                 offset_bits 0,
 
-                # entries is an optional field.
-                # It is a list of menu entries
-                # That shall be mapped
+                // entries is an optional field.
+                // It is a list of menu entries
+                // That shall be mapped
                 entries: [
                     {
-                        # integer value the V4L2 property shall set in UVC upon selection.
+                        // integer value the V4L2 property shall set in UVC upon selection.
                         value: 999,
-                        # String for the entry. Maximum of 31 characters
+                        // String for the entry. Maximum of 31 characters
                         "entry": "My Menu Entry"
                     }
                 ]

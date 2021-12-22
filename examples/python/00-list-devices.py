@@ -42,7 +42,7 @@ def print_device(device):
 
 def bus_function(bus, message, user_data):
     """
-
+    Callback for the GstBus watch
     """
 
     if message.type == Gst.MessageType.DEVICE_ADDED:
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     bus.add_watch(GLib.PRIORITY_DEFAULT, bus_function, None)
 
     monitor.start()
-    print("Now listening to device changes. Disconnect your camera to see a remove event. Press Ctrl-C to end.\n")
+    print("Now listening to device changes. Disconnect your camera to see a remove event. Connect it to see a connect event. Press Ctrl-C to end.\n")
 
     # This is simply used to wait for events or the user to end this script
     loop = GLib.MainLoop.new(None, False)

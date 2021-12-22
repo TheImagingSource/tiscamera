@@ -59,7 +59,11 @@ gboolean bus_function(GstBus* bus __attribute__((unused)), GstMessage* message, 
             gst_object_unref(device);
             break;
         }
-        case GST_MESSAGE_DEVICE_CHANGED: // not used by tiscamera
+        /*
+        // not used by tiscamera
+        // requires gstreamer 1.16
+        case GST_MESSAGE_DEVICE_CHANGED:
+        */
         default:
         {
             break;
@@ -121,7 +125,7 @@ int main(int argc, char* argv[])
     // actually start the dynamic monitoring
     gst_device_monitor_start(monitor);
 
-    printf("Now listening to device changes. Disconnect your camera to see a remove event. Press Ctrl-C to end.\n");
+    printf("Now listening to device changes. Disconnect your camera to see a remove event. Connect it to see a connect event. Press Ctrl-C to end.\n");
 
     // This is simply used to wait for events or the user to end this script
     GMainLoop* loop = g_main_loop_new(NULL, FALSE);

@@ -57,10 +57,10 @@ Always use tcamsrc. tcammainsrc is considered an internal element.
      - always
      - always
 
-.. .. _tcammainsrc_caps_selection:
+.. _tcammainsrc_caps_auto_selection:
        
-Caps Auto Selection
--------------------
+TcamMainsSrc Caps Auto Selection
+--------------------------------
 
 tcammainsrc will prefer certain GStreamer Caps over others when no explicit caps are given.
 
@@ -247,8 +247,10 @@ It is a convenience wrapper and offers no additional properties.
      - always
      - `>= GST_STATE_READY`
 
-Caps Auto Selection
--------------------
+.. _tcamsrc_caps_auto_selection:
+       
+TcamSrc Caps Auto Selection
+---------------------------
 
 The caps auto selection is dependent on the internally used source element.
 
@@ -311,6 +313,8 @@ The format that can always be expected to work is `BGRx`. All other formats depe
    notify you with a GStreamer warning log message and a GstBus message.
    This can be overwritten by manually setting `conversion-element` to the concerning element name.
 
+.. _tcambin_properties:
+   
 .. list-table:: TcamBin properties
    :header-rows: 1
    :widths: 15 10 55 10 10
