@@ -18,6 +18,7 @@
 #define ABOUTDIALOG_H
 
 #include <QDialog>
+#include <QLabel>
 
 #include <gst/gst.h>
 
@@ -30,10 +31,15 @@ class AboutDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AboutDialog(QWidget *parent = nullptr);
+    explicit AboutDialog(const QString& pipeline_str, QWidget *parent = nullptr);
     ~AboutDialog();
 
     void set_tcambin(GstElement* bin);
+    void set_device_caps(const QString&);
+
+public slots:
+
+    void update_meta(GstStructure* meta);
 
 private slots:
 
@@ -42,12 +48,16 @@ private slots:
 
 private:
 
+    void fill_stream();
     void fill_versions();
     void fill_state();
 
     Ui::AboutDialog *ui;
 
     GstElement* p_tcambin = nullptr;
+    QString m_pipeline_str;
+    QLabel* p_label_device_caps = nullptr;
+    QWidget* p_meta = nullptr;
 };
 
 #endif // ABOUTDIALOG_H

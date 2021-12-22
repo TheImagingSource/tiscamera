@@ -33,6 +33,7 @@
 #include <glib-object.h>
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
+#include "../../src/gstreamer-1.0/tcamsrc/gstmetatcamstatistics.h"
 
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -96,11 +97,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // status bar stuff
 
     p_fps_label = new QLabel();
-    p_settings_label = new QLabel();
 
-    p_settings_label->setText("");
-
-    this->statusBar()->addPermanentWidget(p_settings_label);
     this->statusBar()->addPermanentWidget(p_fps_label);
 
     enable_device_gui_elements(false);
@@ -151,7 +148,7 @@ bool MainWindow::open_device(const QString& serial)
 }
 
 
-static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user_data)
+gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user_data)
 {
     switch (GST_MESSAGE_TYPE(message))
     {
@@ -172,7 +169,12 @@ static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user
                 s = s.remove(QRegExp("\\(\\w*\\)"));
                 s = s.section(":", 1);
 
-                ((MainWindow*)user_data)->set_settings_string(s);
+                auto mw = ((MainWindow*)user_data);
+                if (mw->p_about)
+                {
+                    mw->p_about->set_device_caps(s);
+                }
+                mw->m_device_caps = s;
             }
 
             if (err)
@@ -531,7 +533,12 @@ void MainWindow::close_pipeline()
         if (p_about)
         {
             p_about->set_tcambin(nullptr);
+
+            p_about->set_device_caps("");
         }
+
+        m_device_caps.clear();
+
         p_source = nullptr;
     }
 
@@ -614,12 +621,19 @@ void MainWindow::open_about_triggered()
         return;
     }
 
-    p_about = new AboutDialog(this);
+    p_about = new AboutDialog(m_config.pipeline, this);
 
     if (p_source)
     {
         p_about->set_tcambin(p_source);
     }
+
+    if (!m_device_caps.isEmpty())
+    {
+        p_about->set_device_caps(m_device_caps);
+    }
+
+    connect(this, &MainWindow::new_meta, p_about, &AboutDialog::update_meta);
 
     p_about->show();
 }
@@ -650,11 +664,6 @@ void MainWindow::enable_device_gui_elements(bool toggle)
         p_about->set_tcambin(p_source);
     }
 
-    if (!toggle)
-    {
-        set_settings_string("");
-    }
-
     QString window_title = "tcam-capture";
     if (toggle)
     {
@@ -677,6 +686,39 @@ void MainWindow::reset_fps_tick()
 void MainWindow::fps_tick(double new_fps)
 {
     p_fps_label->setText("FPS: " + QString::number(new_fps));
+
+    GstElement* sink = nullptr;
+
+    g_object_get(p_displaysink, "video-sink", &sink, nullptr);
+
+    GstSample* sample = nullptr;
+
+    g_object_get(sink, "last-sample", &sample, nullptr);
+
+    if (sample)
+    {
+
+        GstBuffer* buffer = gst_sample_get_buffer(sample);
+
+        // if you need the associated caps
+        // GstCaps* c = gst_sample_get_caps(sample);
+
+        GstMeta* meta = gst_buffer_get_meta(buffer, g_type_from_name("TcamStatisticsMetaApi"));
+
+        if (meta)
+        {
+            GstStructure* struc = ((TcamStatisticsMeta*)meta)->structure;
+
+            // will be freed by receiver
+            emit new_meta(gst_structure_copy(struc));
+        }
+        else
+        {
+            qWarning("No meta data available");
+        }
+
+        gst_sample_unref(sample);
+    }
 }
 
 
@@ -715,15 +757,6 @@ void MainWindow::device_lost(const QString& message)
     error_dialog->setText(s);
 
     error_dialog->exec();
-}
-
-
-void MainWindow::set_settings_string(const QString str)
-{
-    if (p_settings_label)
-    {
-        p_settings_label->setText(str);
-    }
 }
 
 

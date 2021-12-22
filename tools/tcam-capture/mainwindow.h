@@ -53,9 +53,11 @@ public:
 
     void closeEvent(QCloseEvent* event) override;
 
-    void set_settings_string(const QString str);
-
     bool open_device(const QString& serial);
+
+signals:
+
+    void new_meta(GstStructure*);
 
 public slots:
 
@@ -117,9 +119,10 @@ private:
     gulong m_fps_signal_id = 0;
 
     QLabel* p_fps_label = nullptr;
-    QLabel* p_settings_label = nullptr;
 
     FPSCounter m_fps_counter;
+
+    static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user_data);
 
     void reset_fps_tick();
     GstCaps* open_format_dialog();
@@ -132,8 +135,7 @@ private:
 
     QTimer* p_fps_timer = nullptr;
 
-    bool m_use_dutils = true;
-
     GstCaps* p_selected_caps = nullptr;
+    QString m_device_caps;
 };
 #endif // MAINWINDOW_H

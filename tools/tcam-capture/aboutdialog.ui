@@ -19,6 +19,12 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <widget class="QWidget" name="tab_stream">
+      <attribute name="title">
+       <string>Stream</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayout_2"/>
+     </widget>
      <widget class="QWidget" name="tab_versions">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
