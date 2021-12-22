@@ -31,7 +31,7 @@ struct TcamCaptureConfig
     // if a capsfilter element named device-caps exists it will have the configured caps set
     // all tcam-property elements are named: tcam0, tcam1, etc
     // tcam0 is always source
-    QString pipeline = "tcambin name=tcam0 ! video/x-raw,format=BGRx ! queue ! videoconvert "
+    QString pipeline = "tcambin name=tcam0 ! video/x-raw,format=BGRx ! queue leaky=downstream ! videoconvert n-threads=4 "
         "! fpsdisplaysink video-sink={video-sink-element} sync=false name=sink text-overlay=false signal-fps-measurements=true";
 
 
