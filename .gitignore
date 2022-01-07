@@ -13,6 +13,7 @@
 */c/09-device-lost
 */c/10-metadata
 */c/11-device-state
+*/c/12-tcam-properties
 
 # ### VCS ###
 
@@ -114,18 +115,15 @@ nbproject
 
 .gdb_history
 
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-tools/tcam-gigetool/tcamgigetool/version.py
-tools/camera-ip-conf/version.h
-tools/tcam-gigetool/TisGigETool.egg-info/
+/CMakeCache.txt
+/CMakeFiles
+/CMakeScripts
+/Testing
+/Makefile
+/cmake_install.cmake
+/install_manifest.txt
+/compile_commands.json
+/CTestTestfile.cmake
 
 external/aravis
 external/meson
