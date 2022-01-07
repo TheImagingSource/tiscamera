@@ -112,7 +112,7 @@ AFU050PropertyDoubleImpl::AFU050PropertyDoubleImpl(
     control_definition ctrl,
     std::shared_ptr<tcam::property::AFU050DeviceBackend> cam,
     double modifier)
-    : m_cam(cam), m_name(name), m_ctrl(ctrl), m_modifier(modifier)
+    : m_cam(cam), m_name(name), m_modifier(modifier), m_ctrl(ctrl)
 {
     if (auto ptr = m_cam.lock())
     {

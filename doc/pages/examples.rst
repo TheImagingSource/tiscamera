@@ -389,14 +389,14 @@ Save and load properties via GstStructure.
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/12-tcamproperties.c
+      .. literalinclude:: ../../examples/c/12-tcam-properties.c
          :language: c
          :linenos:
          :lines: 16-
 
    .. group-tab:: python
                           
-      .. literalinclude:: ../../examples/python/12-tcamproperties.py
+      .. literalinclude:: ../../examples/python/12-tcam-properties.py
          :language: python
          :linenos:
          :lines: 1, 16-

@@ -21,7 +21,7 @@
 
 
 OptionsDialog::OptionsDialog(TcamCaptureConfig& config,
-                             const OptionsSettings& settings,
+                             const OptionsSettings& /*settings*/,
                              QWidget* parent)
     : QDialog(parent), ui(new Ui::OptionsDialog)
 {
