@@ -59,11 +59,12 @@ static auto create_unmapped_prop(
 
 void tcam::V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qctrl_list)
 {
-    auto dev_type = v4l2::get_device_type(this->device);
+    const auto dev_type = v4l2::get_device_type(this->device);
+    const auto product_id = v4l2::fetch_product_id(this->device);
 
     for (const auto& qctrl : qctrl_list)
     {
-        auto map_info = tcam::v4l2::find_mapping_info(dev_type, qctrl.id);
+        auto map_info = tcam::v4l2::find_mapping_info(dev_type, product_id, qctrl.id);
         if (map_info.preferred_v4l2_id && is_id_present(qctrl_list, map_info.preferred_v4l2_id))
         {
             SPDLOG_TRACE("Skipping property id={:#x} due to presence of id={:#x}.",

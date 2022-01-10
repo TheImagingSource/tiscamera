@@ -153,20 +153,20 @@ tcam::v4l2::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
     : V4L2PropertyImplBase(queryctrl, static_info, backend), m_converter(scale),
       p_static_info(static_info)
 {
-    if (scale.overwrite_max_.has_value())
-        range_.max = static_cast<int64_t>(scale.overwrite_max_.value());
-    else
-        range_.max = static_cast<int64_t>(m_converter.from_device(queryctrl.maximum));
+    range_ = tcamprop1::prop_range_integer {
+        static_cast<int64_t>(m_converter.from_device(queryctrl.minimum)),
+        static_cast<int64_t>(m_converter.from_device(queryctrl.maximum)),
+        static_cast<int64_t>(m_converter.from_device(queryctrl.step))
+    };
 
     if (scale.overwrite_min_.has_value())
         range_.min = static_cast<int64_t>(scale.overwrite_min_.value());
-    else
-        range_.min = static_cast<int64_t>(m_converter.from_device(queryctrl.minimum));
+
+    if (scale.overwrite_max_.has_value())
+        range_.max = static_cast<int64_t>(scale.overwrite_max_.value());
 
     if (scale.overwrite_stp_.has_value())
         range_.stp = static_cast<int64_t>(scale.overwrite_stp_.value());
-    else
-        range_.stp = static_cast<int64_t>(m_converter.from_device(queryctrl.step));
 
     if (scale.overwrite_def_.has_value())
         m_default = static_cast<int64_t>(scale.overwrite_def_.value());
@@ -248,20 +248,18 @@ tcam::v4l2::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
     : V4L2PropertyImplBase(queryctrl, static_info, backend), m_converter(scale),
       p_static_info(static_info)
 {
-    if (scale.overwrite_max_.has_value())
-        range_.max = scale.overwrite_max_.value();
-    else
-        range_.max = m_converter.from_device(queryctrl.maximum);
+    range_ = tcamprop1::prop_range_float { m_converter.from_device(queryctrl.minimum),
+                                           m_converter.from_device(queryctrl.maximum),
+                                           m_converter.from_device(queryctrl.step) };
 
     if (scale.overwrite_min_.has_value())
         range_.min = scale.overwrite_min_.value();
-    else
-        range_.min = m_converter.from_device(queryctrl.minimum);
+
+    if (scale.overwrite_max_.has_value())
+        range_.max = scale.overwrite_max_.value();
 
     if (scale.overwrite_stp_.has_value())
         range_.stp = scale.overwrite_stp_.value();
-    else
-        range_.stp = m_converter.from_device(queryctrl.step);
 
     if (scale.overwrite_def_.has_value())
         m_default = scale.overwrite_def_.value();
@@ -316,21 +314,21 @@ outcome::result<void> tcam::v4l2::V4L2PropertyDoubleImpl::set_value(double new_v
 {
     if (range_.stp >= 0 && (new_value < range_.min || new_value > range_.max))
     {
-        if( new_value < range_.min && (new_value + range_.stp) >= range_.min )
+        if (new_value < range_.min && (new_value + range_.stp) >= range_.min)
         { // if new_value is slightly smaller then range_.min, we assume a float/double rounding error and just use min
             new_value = range_.min;
         }
-        else if( new_value > range_.max && (new_value - range_.stp) <= range_.max )
-        {// if new_value is slightly larger then range_.max, we assume a float/double rounding error and just use max
+        else if (new_value > range_.max && (new_value - range_.stp) <= range_.max)
+        { // if new_value is slightly larger then range_.max, we assume a float/double rounding error and just use max
             new_value = range_.max;
         }
         else
         {
             SPDLOG_DEBUG("Property '{}', value of {} is not in range of [{},{}].",
-                        get_internal_name(),
-                        new_value,
-                        range_.min,
-                        range_.max);
+                         get_internal_name(),
+                         new_value,
+                         range_.min,
+                         range_.max);
             return tcam::status::PropertyOutOfBounds;
         }
     }

@@ -23,6 +23,8 @@
 
 using namespace tcam;
 
+//#define ENABLE_23U_SUPPORT 1
+
 namespace tcam::v4l2
 {
 struct v4l2_genicam_mapping
@@ -99,8 +101,10 @@ int64_t gamma_from_std_to_dev(double value)
     return std::llround(value * 100.0);
 }
 
-static const converter_scale gamma_converter = { gamma_from_std_to_dev, gamma_from_dev_to_std };
-
+static const converter_scale gamma_converter = {
+    gamma_from_std_to_dev,
+    gamma_from_dev_to_std,
+};
 
 int64_t exposure_absolute_from_std_to_dev(double value)
 {
@@ -112,9 +116,10 @@ double exposure_absolute_from_dev_to_std(int64_t value)
     return value * 100.;
 }
 
-static const converter_scale exposure_absolute_converter = { exposure_absolute_from_std_to_dev,
-                                                             exposure_absolute_from_dev_to_std };
-
+static const converter_scale exposure_absolute_converter = {
+    exposure_absolute_from_std_to_dev,
+    exposure_absolute_from_dev_to_std,
+};
 
 int64_t wb_256_channel_from_std_to_dev(double value)
 {
@@ -132,28 +137,23 @@ double wb_256_channel_from_dev_to_std(int64_t value)
     return value * std_max / dev_max;
 }
 
-static const converter_scale wb_256_channel_converter = { wb_256_channel_from_std_to_dev,
-                                                          wb_256_channel_from_dev_to_std };
+static const converter_scale wb_256_channel_converter = {
+    wb_256_channel_from_std_to_dev,
+    wb_256_channel_from_dev_to_std,
+};
 
-static const converter_scale saturation_converter = { [](double v) -> int64_t
-                                                      { return std::lround(v / 100. * 64.); },
-                                                      [](int64_t v) -> double
-                                                      {
-                                                          return v / 64. * 100.;
-                                                      } };
-static const converter_scale gain_converter = { [](double v) -> int64_t
-                                                { return std::lround(v * 100.); },
-                                                [](int64_t v) -> double
-                                                {
-                                                    return v / 100.;
-                                                } };
-static const converter_scale trigger_delay_100ns_converter = { [](double v) -> int64_t
-                                                               { return std::lround(v * 10.); },
-                                                               [](int64_t v) -> double
-                                                               {
-                                                                   return v / 10.;
-                                                               } };
-
+static const converter_scale saturation_converter = {
+    [](double v) -> int64_t { return std::lround(v / 100. * 64.); },
+    [](int64_t v) -> double { return v / 64. * 100.; },
+};
+static const converter_scale gain_converter = {
+    [](double v) -> int64_t { return std::lround(v * 100.); },
+    [](int64_t v) -> double { return v / 100.; },
+};
+static const converter_scale trigger_delay_100ns_converter = {
+    [](double v) -> int64_t { return std::lround(v * 10.); },
+    [](int64_t v) -> double { return v / 10.; },
+};
 
 auto fetch_menu_entries_v4l2_ExposureAuto()
 {
@@ -195,11 +195,6 @@ menu_entry_list fetch_menu_entries_TriggerOperation()
     return convert_to_menu_entry_list(prop_lst::TriggerOperation_enum_entries);
 }
 
-//menu_entry_list fetch_menu_entries_TriggerSelector()
-//{
-//    return convert_to_menu_entry_list(prop_lst::TriggerSelector_enum_entries);
-//}
-
 // clang-format off
 static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     { 0x00980900 /*V4L2_CID_BRIGHTNESS*/,       &prop_lst::BlackLevel },
@@ -210,7 +205,11 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     { 0x0098090e /*V4L2_CID_RED_BALANCE*/,      &prop_lst::BalanceWhiteRed, wb_256_channel_converter },
     { 0x0098090f /*V4L2_CID_BLUE_BALANCE*/,     &prop_lst::BalanceWhiteBlue, wb_256_channel_converter },
     { 0x00980910 /*V4L2_CID_GAMMA*/,            &prop_lst::Gamma, gamma_converter },
+#if defined ENABLE_23U_SUPPORT
     { 0x00980913 /*V4L2_CID_GAIN*/,             &prop_lst::Gain, 0x199e204 },
+#else
+    { 0x00980913 /*V4L2_CID_GAIN*/,             &prop_lst::Gain },
+#endif
 
     { 0x009a0901 /*V4L2_CID_EXPOSURE_AUTO*/,    &prop_lst::ExposureAuto, fetch_menu_entries_v4l2_ExposureAuto, 0x199e203 },
     { 0x009a0902 /*V4L2_CID_EXPOSURE_ABSOLUTE*/,&prop_lst::ExposureTime, exposure_absolute_converter, 0x199e201 },
@@ -221,7 +220,9 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     { 0x199e201, &prop_lst::ExposureTime },                                        // usb23 usb33 "Exposure Time (us)"
     { 0x199e202, &prop_lst::ExposureAuto, fetch_menu_entries_off_continuous },     // usb23 usb33 "Auto Shutter"
     { 0x199e203, &prop_lst::ExposureAutoReference },                               // usb23 usb33 
+#if defined ENABLE_23U_SUPPORT
     { 0x199e204, &prop_lst::Gain, gain_converter },                                // usb23 "Gain (dB/100)"
+#endif
     { 0x199e205, &prop_lst::GainAuto, fetch_menu_entries_off_continuous },         // usb23 usb33
     { V4L2_CID_TIS_WHITEBALANCE_ONE_PUSH, mapping_type::internal },                // usb23 usb33 "White Balance One Push"
     { 0x199e207, &prop_lst::BalanceWhiteAutoPreset },                              // usb23 usb33 "White Balance Preset"
@@ -263,7 +264,7 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     { 0x199e238, &prop_lst::TriggerDebouncer },            // usb23 usb33 "Trigger Debounce Time (us)",
     { 0x199e239, &prop_lst::TriggerMask },                 // usb23 usb33 "Trigger Mask Time (us)",
     // 0x0199e23a - 0x0199e23f not set
-    { 0x199e240, &prop_lst::TriggerDenoise },              // usb23 usb33 "Trigger Noise Suppression Time"
+    { 0x199e240, &prop_lst::TriggerDenoise },               // usb23 usb33 "Trigger Noise Suppression Time"
     { 0x199e241, &prop_lst::AutoFunctionsROIEnable },      // usb23 usb33 "Auto Functions ROI Control",
     { 0x199e242, &prop_lst::AutoFunctionsROILeft },        // usb23 usb33
     { 0x199e243, &prop_lst::AutoFunctionsROITop },         // usb23 usb33
@@ -289,17 +290,17 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     { 0x199e261, &prop_lst::TriggerOperation, fetch_menu_entries_TriggerOperation },   // usb23 usb33 "Trigger Global Reset Release" boolean
     { 0x199e262, &prop_lst::IMXLowLatencyTriggerMode },                                // usb33
 
-    { 0x199e263, mapping_type::internal },                                          // usb23 usb33 Scanning Mode Selector
-    { 0x199e264, mapping_type::internal },                                          // usb23 usb33 Scanning Mode Identifier
-    { 0x199e265, mapping_type::internal },                                          // usb23 usb33 Scanning Mode Scale Horizontal
-    { 0x199e266, mapping_type::internal },                                          // usb23 usb33 Scanning Mode Scale Vertical
-    { 0x199e267, mapping_type::internal },                                          // usb23 usb33 Scanning Mode Binning H
-    { 0x199e268, mapping_type::internal },                                          // usb23 usb33 Scanning Mode Binning V
-    { 0x199e269, mapping_type::internal },                                          // usb23 usb33 Scanning Mode Skipping H
-    { 0x199e270, mapping_type::internal },                                          // usb23 usb33 Scanning Mode Skipping V
-    { 0x199e271, mapping_type::internal },                                          // usb23 usb33 Scanning Mode Flag
+    { 0x199e263, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Selector
+    { 0x199e264, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Identifier
+    { 0x199e265, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Scale Horizontal
+    { 0x199e266, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Scale Vertical
+    { 0x199e267, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Binning H
+    { 0x199e268, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Binning V
+    { 0x199e269, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Skipping H
+    { 0x199e270, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Skipping V
+    { 0x199e271, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Flag
 
-    { 0x199e272, &prop_lst::TriggerDelay, trigger_delay_100ns_converter },          // usb33 "Trigger Delay (100ns)"
+    { 0x199e272, &prop_lst::TriggerDelay, trigger_delay_100ns_converter },              // usb33 "Trigger Delay (100ns)"
 
     { 0x199e920, mapping_type::internal },                                             // usb2 "ExtO"
     // 0x199e921- 0x199e923 Gain channels
@@ -405,12 +406,31 @@ static const v4l2_genicam_mapping    dxk22_conv_dict[] =
 {
     { 0x00980913 /*V4L2_CID_GAIN*/, &prop_lst::Gain, dxk22_gain_mul_dB_converter },
 };
+
+
+static const converter_scale dxk33u_trigger_denoise_quirk = {
+    nullptr,
+    nullptr,
+    {},
+    { 100'000. } // we override TriggerDenoise.Maximum, It is reported as 1e6, but should be 1e5
+};
+
+static const v4l2_genicam_mapping    dxk33u_conv_dict[] =
+{
+    { 0x199e240, &prop_lst::TriggerDenoise, dxk33u_trigger_denoise_quirk },  // usb23 usb33 "Trigger Noise Suppression Time"
+};
+
+static const v4l2_genicam_mapping    dxk37u_conv_dict[] =
+{
+    { 0x199e240, &prop_lst::TriggerDenoise, dxk33u_trigger_denoise_quirk },  // usb23 usb33 "Trigger Noise Suppression Time"
+};
+
 // clang-format on
 
 
 template<size_t N>
-static const tcam::v4l2::v4l2_genicam_mapping* find_mapping(const v4l2_genicam_mapping (&arr)[N],
-                                                            uint32_t v4l2_id)
+static const tcam::v4l2::v4l2_genicam_mapping* find_mapping_(const v4l2_genicam_mapping (&arr)[N],
+                                                             uint32_t v4l2_id)
 {
     for (const auto& entry : arr)
     {
@@ -426,24 +446,35 @@ static const tcam::v4l2::v4l2_genicam_mapping* find_mapping(const v4l2_genicam_m
 
 
 tcam::v4l2::v4l2_genicam_mapping_info tcam::v4l2::find_mapping_info(v4l2_device_type dev_type,
+                                                                    uint32_t /*product_id*/,
                                                                     uint32_t v4l2_id)
 {
     const tcam::v4l2::v4l2_genicam_mapping* ptr = nullptr;
     switch (dev_type)
     {
-        case tcam::v4l2::v4l2_device_type::dxk72:   // MT9P031
+        case tcam::v4l2::v4l2_device_type::dxk72: // MT9P031
         {
-            ptr = find_mapping(dxk72_conv_dict, v4l2_id);
+            ptr = find_mapping_(dxk72_conv_dict, v4l2_id);
             break;
         }
-        case tcam::v4l2::v4l2_device_type::dxk42:   // MT9M021
+        case tcam::v4l2::v4l2_device_type::dxk42: // MT9M021
         {
-            ptr = find_mapping(dxk42_conv_dict, v4l2_id);
+            ptr = find_mapping_(dxk42_conv_dict, v4l2_id);
             break;
         }
-        case tcam::v4l2::v4l2_device_type::dxk22:   // MT9V023
+        case tcam::v4l2::v4l2_device_type::dxk22: // MT9V023
         {
-            ptr = find_mapping(dxk22_conv_dict, v4l2_id);
+            ptr = find_mapping_(dxk22_conv_dict, v4l2_id);
+            break;
+        }
+        case tcam::v4l2::v4l2_device_type::dxk33u:
+        {
+            ptr = find_mapping_(dxk33u_conv_dict, v4l2_id);
+            break;
+        }
+        case tcam::v4l2::v4l2_device_type::dxk37u:
+        {
+            ptr = find_mapping_(dxk37u_conv_dict, v4l2_id);
             break;
         }
         case tcam::v4l2::v4l2_device_type::unknown:
@@ -452,7 +483,7 @@ tcam::v4l2::v4l2_genicam_mapping_info tcam::v4l2::find_mapping_info(v4l2_device_
     }
     if (ptr == nullptr)
     {
-        ptr = find_mapping(v4l2_conv_dict, v4l2_id);
+        ptr = find_mapping_(v4l2_conv_dict, v4l2_id);
     }
     if (!ptr)
     {

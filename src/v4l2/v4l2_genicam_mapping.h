@@ -45,7 +45,7 @@ struct v4l2_genicam_mapping_info
     const v4l2_genicam_mapping* item = nullptr;
 };
 
-v4l2_genicam_mapping_info find_mapping_info(v4l2_device_type dev_type, uint32_t v4l2_id);
+v4l2_genicam_mapping_info find_mapping_info(v4l2_device_type dev_type, uint32_t product_id, uint32_t v4l2_id);
 
 auto create_mapped_prop(v4l2_device_type dev_type,
                         const std::vector<v4l2_queryctrl>& device_qctrl_list,

@@ -178,23 +178,56 @@ tcam::v4l2::v4l2_device_type tcam::v4l2::get_device_type(const DeviceInfo& info)
     {
         return v4l2_device_type::unknown;
     }
-    std::string add_info = info.get_info().additional_identifier;
-    if (add_info.empty())
+    auto product_id = std::strtol(info.get_info().additional_identifier, nullptr, 16);
+    if (product_id == 0)
     {
         return v4l2_device_type::unknown;
     }
 
-    if (add_info == "8307" || add_info == "8207")
+    if (product_id == 0x8307 || product_id == 0x8207)
     {
         return v4l2_device_type::dxk72;
     }
-    if (add_info == "8308" || add_info == "8208")
+    if (product_id == 0x8308 || product_id == 0x8208)
     {
         return v4l2_device_type::dxk42;
     }
-    if (add_info == "8302" || add_info == "8202")
+    if (product_id == 0x8302 || product_id == 0x8202)
     {
         return v4l2_device_type::dxk22;
     }
+
+    if (product_id == 0x9041 || product_id == 0x90C1 || product_id == 0x9851
+        || product_id == 0x98D1)
+    { // polarization cameras
+        return v4l2_device_type::dxk33u;
+    }
+
+    if ((product_id & 0xFF00) == 0x9000)
+    {
+        return v4l2_device_type::dxk33u;
+    }
+    if ((product_id & 0xFF00) == 0x9400)
+    {
+        return v4l2_device_type::dxk37u;
+    }
+    if ((product_id & 0xFF00) == 0x9800)
+    {
+        return v4l2_device_type::dxk33u;
+    }
+    if ((product_id & 0xFF00) == 0x9C00)
+    {
+        return v4l2_device_type::dxk33u;
+    }
+
     return v4l2_device_type::unknown;
+}
+
+uint32_t tcam::v4l2::fetch_product_id(const DeviceInfo& info)
+{
+    if (info.get_device_type() != TCAM_DEVICE_TYPE_V4L2)
+    {
+        return 0;
+    }
+    return std::strtol(info.get_info().additional_identifier, nullptr, 16);
 }

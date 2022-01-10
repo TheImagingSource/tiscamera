@@ -34,9 +34,12 @@ enum class v4l2_device_type
     dxk72,
     dxk42,
     dxk22,
+    dxk33u,
+    dxk37u,
 };
 
 v4l2_device_type get_device_type(const DeviceInfo&);
+uint32_t fetch_product_id(const DeviceInfo&);
 }
 /**
  * @name get_v4l2_device_list
