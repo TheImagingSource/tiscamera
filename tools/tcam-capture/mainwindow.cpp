@@ -620,6 +620,10 @@ void MainWindow::open_about_triggered()
 {
     if (p_about)
     {
+        qInfo("Reshowing info dialog");
+        // if closed -> display again
+        p_about->show();
+        // if not in focus -> put in foreground
         p_about->activateWindow();
         return;
     }
