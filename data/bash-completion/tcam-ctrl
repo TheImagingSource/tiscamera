@@ -24,6 +24,7 @@ _tcam-ctrl () {
         "--load"
         "--save-json"
         "--load-json"
+        "--transform"
     )
 
     local command i
@@ -41,7 +42,11 @@ _tcam-ctrl () {
                 # COMPREPLY=( $( compgen -W "$( tcam-ctrl -- | awk -print 'NF>1{print $5}' )" -- "$cur" ) )
                 COMPREPLY=( $( compgen -W "$( tcam-ctrl --list-serial-long)" -- "$cur" ) )
                 return 0
-            ;;
+                ;;
+            --transform)
+                COMPREPLY=("-e" "--in" "--out")
+                return 0
+                ;;
         esac
     fi
 
