@@ -336,7 +336,12 @@ The most commonly used git commands are:
         """
         if self.args.package == "deb":
 
-            self.__print_deb_list(self.collect_dependencies(False, True))
+            # Ensure runtime is always true
+            # These dependencies always have to be listed
+            if not self.args.runtime:
+                self.args.runtime = True
+
+            self.__print_deb_list(self.collect_dependencies(self.args.compilation, self.args.runtime))
             return
 
         # entry string for all lines
