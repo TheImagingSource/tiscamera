@@ -51,6 +51,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // toolbar stuff
 
+    // prevent context menus that allow removal of the main toolbar
+    setContextMenuPolicy(Qt::NoContextMenu);
+
     // ownership of p_action* lies with the toolbar
     // we retain pointer to them to enable/disable them later
     // of no concern otherwise
