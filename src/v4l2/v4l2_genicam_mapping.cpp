@@ -415,14 +415,32 @@ static const converter_scale dxk33u_trigger_denoise_quirk = {
     { 100'000. } // we override TriggerDenoise.Maximum, It is reported as 1e6, but should be 1e5
 };
 
+
+static const converter_scale dxk33u_ExposureTime_default_quirk = {
+    nullptr,
+    nullptr,
+    {},
+    {},
+    {},
+    { 33'333.0 },   // We fix the default value to 33'333 us
+};
+
 static const v4l2_genicam_mapping    dxk33u_conv_dict[] =
 {
-    { 0x199e240, &prop_lst::TriggerDenoise, dxk33u_trigger_denoise_quirk },  // usb23 usb33 "Trigger Noise Suppression Time"
+    { 0x199e201, &prop_lst::ExposureTime, dxk33u_ExposureTime_default_quirk },      // "Exposure Time (us)"
+
+    { 0x199e240, &prop_lst::TriggerDenoise, dxk33u_trigger_denoise_quirk }, // "Trigger Noise Suppression Time"
+
+    { 0x199e256, &prop_lst::ExposureAutoUpperLimit, dxk33u_ExposureTime_default_quirk },    // usb23 usb33 "Exposure Auto Upper Limit (us)"
 };
 
 static const v4l2_genicam_mapping    dxk37u_conv_dict[] =
 {
-    { 0x199e240, &prop_lst::TriggerDenoise, dxk33u_trigger_denoise_quirk },  // usb23 usb33 "Trigger Noise Suppression Time"
+    { 0x199e201, &prop_lst::ExposureTime, dxk33u_ExposureTime_default_quirk },      // "Exposure Time (us)"
+
+    { 0x199e240, &prop_lst::TriggerDenoise, dxk33u_trigger_denoise_quirk },  //"Trigger Noise Suppression Time"
+
+    { 0x199e256, &prop_lst::ExposureAutoUpperLimit, dxk33u_ExposureTime_default_quirk },    // usb23 usb33 "Exposure Auto Upper Limit (us)"
 };
 
 // clang-format on
