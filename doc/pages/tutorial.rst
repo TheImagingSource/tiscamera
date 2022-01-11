@@ -128,6 +128,18 @@ This sections describes how a program can interact with a camera.
 
    add cmake/pkg-config/python steps when necessary
 
+.. tabs::
+
+   .. group-tab:: c
+
+      A pkg-config named `tcam` is available.
+
+   .. group-tab:: python
+
+      No additional steps necessary.
+      
+      For custom installations :ref:`custom environment variables<environment>` may be necessary.
+
 The API
 =======
 
@@ -223,9 +235,7 @@ For a quick listing of available devices, execute the following in a terminal:
                                                                  struc.get_string("type")))
 
 
-.. todo:: link examples page
-                                                                 
-This code can be found in the example `00-list-devices`.
+This code can be found in the example :ref:`00-list-devices<examples_list_devices>`.
 
 Opening and Closing a Camera
 ----------------------------
@@ -294,7 +304,7 @@ All hardware resources will be freed.
          # cleanup, reset state
          source.set_state(Gst.State.NULL)
                            
-This code can be found in the example `02-set-properties`.
+This code can be found in the example :ref:`02-set-properties<examples_set_properties>`.
 
 
 .. _tutorial_streaming:
@@ -341,7 +351,7 @@ The printed caps are GStreamer compatible and can be copy-pasted for configurati
          source.set_state(Gst.State.READY)
          caps = source.get_static_pad("src").query_caps()
 
-This code can be found in the example `04-list-formats`.
+This code can be found in the example :ref:`04-list-formats<examples_list_format>`.
 
             
 Setting Caps
@@ -400,7 +410,7 @@ Setting Caps
              structure, end = structure.from_string(struc_string)
 
                   
-This code can be found in the example `05-set-format`.
+This code can be found in the example :ref:`05-set-format<examples_set_format>`.
 
 As an alternative to creating the GstCaps manually, you can also use ``gst_caps_from_string``.
 This function takes a format string description and converts it to a valid GstCaps instance.
@@ -418,7 +428,7 @@ A simple pipeline would look like this:
 
 ``tcambin ! videoconvert ! ximagesink``
 
-Working code can be found in the example `05-live-stream`.
+Working code can be found in the example :ref:`03-live-stream<examples_live_stream>`.
 
 An alternative to simple trial-and-error setups is the use of the program ``gst-launch-1.0``.
 This program enables the creation of pipelines on the command line, allowing for quick setups. 
@@ -528,7 +538,7 @@ The image `sample` that is given to the function contains the image, video caps 
 
              return Gst.FlowReturn.OK
 
-This code can be found in the example `07-appsink`.
+This code can be found in the example :ref:`07-appsink<examples_appsink>`.
 
 .. _tutorial_properties:
 
@@ -626,7 +636,7 @@ For an overview of available properties, type the following into a terminal:
              except GLib.Error as e:
                  print("could not receive value {}".format(name))
                   
-This code can be found in the example `01-list-properties`.
+This code can be found in the example :ref:`01-list-properties<examples_list_properties>`.
 
 A differentiation between property types is necessary to have access to property values.
 
@@ -684,7 +694,7 @@ Set Property
              print("Unable to set error: {}", err.message)
 
                   
-This code can be found in the example `02-set-properties`.
+This code can be found in the example :ref:`02-set-properties<examples_set_properties>`.
 
 Where to go from here
 =====================

@@ -13,6 +13,8 @@ The standard installation path for examples is `/usr/share/theimagingsource/tisc
 It may be neccessary to install additional development packages when using pre-compiled tiscamera packages.
 See :ref:`dependencies`.
 
+.. _examples_list_devices:
+
 00 - list-devices
 =================
 
@@ -43,6 +45,7 @@ Shows what cameras there are and how to identify them.
          
    </details>
 
+.. _examples_list_properties:
                     
 01 - list-properties
 ====================
@@ -74,6 +77,7 @@ Shows the properties of a camera and their settings (range, current value, etc.)
          
    </details>
 
+.. _examples_set_properties:
         
 02 - set-properties
 ===================
@@ -104,6 +108,7 @@ Shows how to set a specific property.
          
    </details>
 
+.. _examples_live_stream:
         
 03 - live-stream
 ================
@@ -134,6 +139,7 @@ Delivers live-image stream from the camera.
          
    </details>
 
+.. _examples_list_format:
         
 04 - list-format
 ================
@@ -164,7 +170,8 @@ Lists what formats the camera offers.
          
    </details>
 
-        
+.. _examples_set_format:
+
 05 - set format
 ===============
 Sets the camera to a specific format.
@@ -194,6 +201,7 @@ Sets the camera to a specific format.
          
    </details>
 
+.. _examples_softwaretrigger:
         
 06 - softwaretrigger
 ====================
@@ -224,6 +232,7 @@ Triggers single images - instead of a continuous image stream.
          
    </details>
 
+.. _examples_appsink:
         
 07 - appsink
 ============
@@ -254,6 +263,7 @@ Receives images in an application instead of just showing them.
          
    </details>
 
+.. _examples_save_stream:
         
 08 - save-stream
 ================
@@ -284,6 +294,7 @@ Stores a stream in a file.
          
    </details>
 
+.. _examples_device_lost:
         
 09 - device-lost
 ================
@@ -314,6 +325,7 @@ Receives device-lost and other messages and react to them.
          
    </details>
 
+.. _examples_metadata:
         
 10 - metadata
 =============
@@ -344,6 +356,7 @@ Read meta information like is-damaged, camera capture time, etc.
          
    </details>
 
+.. _examples_json_state:
         
 11 - json-state
 ===============
@@ -374,7 +387,7 @@ Save and load JSON device state.
          
    </details>
 
-
+.. _examples_tcam_properties:
         
 12 - tcam-properties
 ====================
