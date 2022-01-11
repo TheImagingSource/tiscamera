@@ -191,6 +191,11 @@ static menu_entry_list fetch_menu_entries_StrobePolarity()
     return convert_to_menu_entry_list(prop_lst::StrobePolarity_enum_entries);
 }
 
+static menu_entry_list fetch_menu_entries_StrobeOperation()
+{
+    return menu_entry_list { { 0, "FixedDuration" }, { 1, "Exposure" } };
+}
+
 menu_entry_list fetch_menu_entries_TriggerOperation()
 {
     return convert_to_menu_entry_list(prop_lst::TriggerOperation_enum_entries);
@@ -232,7 +237,7 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x199e210, &prop_lst::TriggerDelay, 0x199e272 },                             // usb23 
     { 0x199e211, &prop_lst::StrobeEnable, fetch_menu_entries_off_on },             // usb2 usb23 usb33
     { 0x199e212, &prop_lst::StrobePolarity, fetch_menu_entries_StrobePolarity },   // usb2 usb23 usb33
-    { 0x199e213, &prop_lst::StrobeOperation },                                     // usb23 usb33 "Strobe Exposure"/"Strobe Operation"
+    { 0x199e213, &prop_lst::StrobeOperation, fetch_menu_entries_StrobeOperation },                                     // usb23 usb33 "Strobe Exposure"/"Strobe Operation"
     { 0x199e214, &prop_lst::StrobeDuration },                                      // usb23 usb33
     { 0x199e215, &prop_lst::StrobeDelay },                                         // usb23 usb33
     { 0x199e216, &prop_lst::GPOut },                                               // usb23 usb33 "GPOUT" boolean

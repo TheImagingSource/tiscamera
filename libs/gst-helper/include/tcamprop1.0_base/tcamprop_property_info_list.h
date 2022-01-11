@@ -117,7 +117,7 @@ namespace tcamprop1::prop_list
 
     // strobe stuff
     constexpr const std::array<std::string_view, 2> StrobePolarity_enum_entries = { "ActiveHigh", "ActiveLow" };
-    constexpr const std::array<std::string_view, 2> StrobeOperation_enum_entries = { "Exposure", "Fixed Duration"};
+    constexpr const std::array<std::string_view, 2> StrobeOperation_enum_entries = { "Exposure", "FixedDuration"};
 
     extern const prop_static_info_enumeration StrobeEnable; // enum_entries_off_on
     extern const prop_static_info_enumeration StrobePolarity;
