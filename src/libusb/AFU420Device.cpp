@@ -555,7 +555,7 @@ tcam_image_size tcam::AFU420Device::calculate_auto_offset(uint32_t fourcc,
         max = max_sensor_dim_by12;
     }
 
-    return calculate_auto_center(max, size);
+    return calculate_auto_center(max, step, size);
 }
 
 
