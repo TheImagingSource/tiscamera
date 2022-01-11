@@ -293,7 +293,7 @@ bool AFU420Device::create_offsets()
 
     std::map<int, std::string> offset_entries = { { { 0, "Off" }, { 1, "On" } } };
     m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>(
-        "OffsetAuto", tcam::afu420::AFU420Property::OffsetAuto, offset_entries, m_backend));
+        "OffsetAutoCenter", tcam::afu420::AFU420Property::OffsetAuto, offset_entries, m_backend));
 
     return true;
 }
