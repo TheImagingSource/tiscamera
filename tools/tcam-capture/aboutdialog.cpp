@@ -23,6 +23,7 @@
 #include <QFormLayout>
 #include <QApplication>
 #include <QClipboard>
+#include <QFileDialog>
 
 
 namespace {
@@ -209,9 +210,13 @@ void AboutDialog::fill_state()
 {
     auto apply_button = ui->buttonBox_2->button(QDialogButtonBox::Apply);
     auto reset_button = ui->buttonBox_2->button(QDialogButtonBox::Reset);
+    auto save_button = ui->buttonBox_2->button(QDialogButtonBox::Save);
+    auto open_button = ui->buttonBox_2->button(QDialogButtonBox::Open);
 
     connect(apply_button, &QPushButton::clicked, this, &AboutDialog::write_state);
     connect(reset_button, &QPushButton::clicked, this, &AboutDialog::update_state);
+    connect(save_button, &QPushButton::clicked, this, &AboutDialog::save_state);
+    connect(open_button, &QPushButton::clicked, this, &AboutDialog::open_state);
 }
 
 
@@ -264,4 +269,46 @@ void AboutDialog::write_state()
 
     g_object_set(p_tcambin, "tcam-properties-json", str.toStdString().c_str(), nullptr);
 
+}
+
+
+void AboutDialog::open_state()
+{
+    auto filename = QFileDialog::getOpenFileName(this,
+                                                 "Open JSON State",
+                                                 QString(),
+                                                 ("*.json"));
+
+    if (filename.isEmpty())
+    {
+        return;
+    }
+
+    QFile f(filename);
+
+    f.open(QIODevice::ReadOnly);
+    ui->state_field->setPlainText(f.readAll().toStdString().c_str());
+
+    f.close();
+}
+
+
+void AboutDialog::save_state()
+{
+    auto filename = QFileDialog::getSaveFileName(this,
+                                                 "Save JSON State",
+                                                 QString(),
+                                                 ("*.json"));
+
+    if (filename.isEmpty())
+    {
+        return;
+    }
+
+    QFile f(filename);
+
+    f.open(QIODevice::WriteOnly);
+    f.write(ui->state_field->toPlainText().toUtf8());
+
+    f.close();
 }

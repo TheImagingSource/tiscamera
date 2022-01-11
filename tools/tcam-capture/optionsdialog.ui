@@ -21,7 +21,10 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="0" column="1">
+    <widget class="QComboBox" name="combo_convert_options"/>
+   </item>
+   <item row="1" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -34,7 +37,7 @@
      </property>
     </spacer>
    </item>
-   <item row="3" column="1">
+   <item row="2" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -43,23 +46,6 @@
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Apply properties on start:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QCheckBox" name="check_apply_properties">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QComboBox" name="combo_convert_options"/>
    </item>
   </layout>
  </widget>

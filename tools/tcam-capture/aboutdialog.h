@@ -46,6 +46,9 @@ private slots:
     void update_state();
     void write_state();
 
+    void open_state();
+    void save_state();
+
 private:
 
     void fill_stream();

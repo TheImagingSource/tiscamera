@@ -37,7 +37,6 @@ enum class OptionsConversionElement
 struct OptionsSettings
 {
     OptionsConversionElement conversion_element = OptionsConversionElement::Auto;
-    bool enable_apply_properties = true;
     bool enable_restart_device = true;
 };
 
