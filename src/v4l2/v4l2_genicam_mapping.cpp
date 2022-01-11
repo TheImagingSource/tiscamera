@@ -277,8 +277,8 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x199e249, &prop_lst::BalanceWhiteTemperaturePreset, mapping_type::blacklist },  // usb23 "White Balance Temp. Preset"
     // 0x0199e24a - 0x0199e24f not set
     { 0x199e250, &prop_lst::BalanceWhiteTemperature, mapping_type::blacklist },        // usb23 usb33 "White Balance Temperature",
-    { 0x199e251, &prop_lst::ReverseY },                                                // usb23 usb33 "Flip Horizontal",
-    { 0x199e252, &prop_lst::ReverseX },                                                // usb23 usb33 "Flip Vertical"
+    { 0x199e251, &prop_lst::ReverseX },                                                // usb23 usb33 "Flip Horizontal",
+    { 0x199e252, &prop_lst::ReverseY },                                                // usb23 usb33 "Flip Vertical"
     { 0x199e253, &prop_lst::ExposureAutoHighlightReduction },                          // usb23 usb33 "Highlight Reduction"
     { 0x199e254, &prop_lst::ExposureAutoUpperLimitAuto },                              // usb23 usb33
     { 0x199e255, &prop_lst::ExposureAutoLowerLimit },                                  // usb23 usb33 "Exposure Auto Lower Limit (us)"
