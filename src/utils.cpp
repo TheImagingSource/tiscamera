@@ -126,7 +126,8 @@ std::vector<double> tcam::create_steps_for_range(double min, double max)
 
 tcam_image_size tcam::calculate_auto_center(const tcam_image_size& sensor,
                                             const tcam_image_size& step,
-                                            const tcam_image_size& image)
+                                            const tcam_image_size& image,
+                                            const image_scaling& scale)
 {
     tcam_image_size ret = {};
 
@@ -135,11 +136,19 @@ tcam_image_size tcam::calculate_auto_center(const tcam_image_size& sensor,
         return ret;
     }
 
-    ret.width = (sensor.width / 2) - (image.width / 2);
-    ret.height = (sensor.height / 2) - (image.height / 2);
+
+
+    ret.width = (sensor.width / 2) - (image.width * (scale.binning_h * scale.skipping_h) / 2);
+    ret.height = (sensor.height / 2) - (image.height * (scale.binning_v * scale.skipping_v)  / 2);
 
     ret.width -= ret.width % step.width;
     ret.height -= ret.height % step.height;
+
+    if (!scale.legal_resolution(sensor, ret))
+    {
+        SPDLOG_ERROR("Unable to calculate auto center. This should not happen!");
+        return {0, 0};
+    }
 
     return ret;
 }

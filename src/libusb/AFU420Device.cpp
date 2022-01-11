@@ -462,27 +462,9 @@ void AFU420Device::create_formats()
 {
     std::vector<stream_fmt_data> fmt_list {
         stream_fmt_data {
-            0, 8, FOURCC_GBRG8, FOURCC_BGRA32, min_sensor_dim_, max_sensor_dim_, step, 2.0, 30.0 },
+            0, 8, FOURCC_GBRG8, min_sensor_dim_, max_sensor_dim_, step, 2.0, 30.0 },
         stream_fmt_data {
-            1, 8, FOURCC_GBRG8, FOURCC_Y800, min_sensor_dim_, max_sensor_dim_, step, 2.0, 30.0 },
-        stream_fmt_data { 2,
-                          12,
-                          FOURCC_GBRG12_MIPI_PACKED,
-                          FOURCC_BGRA64,
-                          min_sensor_dim_,
-                          max_sensor_dim_by12,
-                          step,
-                          2.0,
-                          30.0 },
-        stream_fmt_data { 3,
-                          12,
-                          FOURCC_GBRG12_MIPI_PACKED,
-                          FOURCC_Y16,
-                          min_sensor_dim_,
-                          max_sensor_dim_by12,
-                          step,
-                          2.0,
-                          30.0 },
+            2, 12, FOURCC_GBRG12_MIPI_PACKED, min_sensor_dim_, max_sensor_dim_by12, step, 2.0, 30.0 },
     };
 
     // assign to member for frame rate checks
@@ -492,12 +474,12 @@ void AFU420Device::create_formats()
     {
         struct tcam_video_format_description desc = {};
 
-        desc.fourcc = fmt.fmt_in;
+        desc.fourcc = fmt.fmt;
         memcpy(desc.description, img::fcc_to_string(desc.fourcc).c_str(), sizeof(desc.description));
 
         std::vector<struct framerate_mapping> rf;
 
-        auto add_res = [&rf, this](stream_fmt_data& _fmt, tcam_image_size& size) {
+        auto add_res = [&rf, this](stream_fmt_data& _fmt, tcam_image_size& size, const image_scaling& scale) {
             struct tcam_resolution_description res = {};
             res.type = TCAM_RESOLUTION_TYPE_FIXED;
             res.min_size.width = size.width;
@@ -505,10 +487,12 @@ void AFU420Device::create_formats()
             res.max_size.width = size.width;
             res.max_size.height = size.height;
 
+            res.scaling = scale;
+
             double fps_min = 0;
             double fps_max = 0;
 
-            this->get_frame_rate_range(_fmt.fmt_in, 1, size, fps_min, fps_max);
+            this->get_frame_rate_range(_fmt.fmt, 1, size, fps_min, fps_max);
 
             std::vector<double> f = create_steps_for_range(fps_min, fps_max);
 
@@ -516,21 +500,30 @@ void AFU420Device::create_formats()
             rf.push_back(r);
         };
 
-        add_res(fmt, fmt.dim_max);
+        // max resolution only with binning 1x1
+        add_res(fmt, fmt.dim_max, {1, 1, 1, 1});
 
         for (auto& f : get_standard_resolutions(fmt.dim_min, fmt.dim_max))
         {
-
             if (f.width % 4 || f.width % 12 || f.height % 4)
             {
                 continue;
             }
-            get_frame_rate_range(fmt.id, 0, f, fmt.fps_min, fmt.fps_max);
 
-            add_res(fmt, f);
+            for (const auto& s : m_available_scaling)
+            {
+                if (s.legal_resolution(fmt.dim_max, f))
+                {
+                    add_res(fmt, f, s);
+                }
+            }
         }
 
-        add_res(fmt, fmt.dim_min);
+        // smallest resolution works with all scalings
+        for (const auto& s : m_available_scaling)
+        {
+            add_res(fmt, fmt.dim_min, s);
+        }
 
         VideoFormatDescription format(nullptr, desc, rf);
         available_videoformats.push_back(format);
@@ -541,7 +534,8 @@ void AFU420Device::create_formats()
 
 
 tcam_image_size tcam::AFU420Device::calculate_auto_offset(uint32_t fourcc,
-                                                          tcam_image_size size) const
+                                                          const tcam_image_size& size,
+                                                          const tcam_image_size& binning) const
 {
     tcam_image_size max = {};
 
@@ -555,13 +549,19 @@ tcam_image_size tcam::AFU420Device::calculate_auto_offset(uint32_t fourcc,
         max = max_sensor_dim_by12;
     }
 
-    return calculate_auto_center(max, step, size);
+    return calculate_auto_center(max, step, size, {binning.width, binning.height, 1, 1});
 }
 
 
 AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf(
     const VideoFormat& format)
 {
+
+    tcam_image_size binning = {
+        format.get_scaling().binning_h,
+        format.get_scaling().binning_v
+    };
+
     tcam_image_size offset = { 0, 0 };
 
     if (m_offset_auto)
@@ -572,7 +572,7 @@ AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf
         }
         else
         {
-            offset = calculate_auto_offset(format.get_fourcc(), format.get_size());
+            offset = calculate_auto_offset(format.get_fourcc(), format.get_size(), binning);
         }
     }
     else
@@ -580,7 +580,7 @@ AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf
         offset = m_offset;
     }
 
-    auto conf = CreateResolutionConf(offset, format.get_size(), m_binning);
+    auto conf = CreateResolutionConf(offset, format.get_size(), binning);
 
     return conf;
 }

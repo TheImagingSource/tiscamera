@@ -299,27 +299,6 @@ bool AFU420Device::create_offsets()
 }
 
 
-bool AFU420Device::create_binning()
-{
-    std::map<int, std::string> binning_entries = {
-        { { 1, "X1" }, { 2, "X2" }, { 4, "X4" }, { 8, "X8" } }
-    };
-
-    m_properties.push_back(
-        std::make_shared<AFU420PropertyEnumImpl>("BinningHorizontal",
-                                                 tcam::afu420::AFU420Property::BinningHorizontal,
-                                                 binning_entries,
-                                                 m_backend));
-
-    m_properties.push_back(
-        std::make_shared<AFU420PropertyEnumImpl>("BinningVertical",
-                                                 tcam::afu420::AFU420Property::BinningVertical,
-                                                 binning_entries,
-                                                 m_backend));
-    return true;
-}
-
-
 bool AFU420Device::create_ois()
 {
     std::map<int, std::string> map2;
@@ -381,7 +360,6 @@ void AFU420Device::create_properties()
 
     create_color_gain();
     //create_strobe();
-    create_binning();
     create_offsets();
 }
 
@@ -634,11 +612,6 @@ bool AFU420Device::set_color_gain_factor(color_gain eColor, double value)
     {
         SPDLOG_ERROR("Could not set color gain value. Libsub returned {}", ret);
         return false;
-    }
-
-    if (ushColor == 0)
-    {
-        int ret = control_write(ADVANCED_PC_TO_USB_COLOR_GAIN, ushValue, 3);
     }
 
     return true;

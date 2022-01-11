@@ -199,8 +199,7 @@ private:
 
         int src_bpp;
 
-        uint32_t fmt_in;
-        uint32_t fmt_out;
+        uint32_t fmt;
 
         tcam_image_size dim_min;
         tcam_image_size dim_max;
@@ -216,6 +215,12 @@ private:
 
     std::condition_variable cv;
     std::mutex mtx;
+
+    const std::vector<image_scaling> m_available_scaling = { {1, 1, 1, 1},
+                                                             {2, 2, 1, 1},
+                                                             {4, 4, 1, 1},
+                                                             {8, 8, 1, 1},
+    };
 
     VideoFormat active_video_format;
 
@@ -406,7 +411,6 @@ private:
     bool create_strobe();
 
     bool create_offsets();
-    bool create_binning();
     bool create_ois();
 
     friend class property::AFU420DeviceBackend;
@@ -459,7 +463,9 @@ protected:
     tcam_image_size m_offset = { 0, 0 };
     bool m_offset_auto = true;
 
-    tcam_image_size calculate_auto_offset(uint32_t fourcc, tcam_image_size size) const;
+    tcam_image_size calculate_auto_offset(uint32_t fourcc,
+                                          const tcam_image_size& size,
+                                          const tcam_image_size& binning) const;
 
 private:
     int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex = 0);

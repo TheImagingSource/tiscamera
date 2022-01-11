@@ -48,12 +48,14 @@ std::vector<double> create_steps_for_range(double min, double max);
  * @name calculate_auto_center
  * @param sensor - size of the sensor on which image shall be centered
  * @param step - step size the sensor permits
- * @param image  - image size of the image that shall be auto centered
+ * @param image - image size of the image that shall be auto centered
+ * @param scale - scaling configuration that is used
  * @return coordinates that shall be used for offsets
  */
 tcam_image_size calculate_auto_center(const tcam_image_size& sensor,
                                       const tcam_image_size& step,
-                                      const tcam_image_size& image);
+                                      const tcam_image_size& image,
+                                      const image_scaling& scale);
 
 
 bool compare_double(double val1, double val2);
