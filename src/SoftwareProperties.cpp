@@ -718,8 +718,7 @@ void tcam::property::SoftwareProperties::generate_exposure_auto()
         sp::ExposureAutoUpperLimit, &prop_lst::ExposureAutoUpperLimit, prop_range_upper_limit);
     add_prop_entry(sp::ExposureAutoUpperLimitAuto,
                    &prop_lst::ExposureAutoUpperLimitAuto,
-                   emulated::to_range(prop_lst::enum_entries_off_auto),
-                   1);
+                   true);
     add_prop_entry(
         sp::ExposureAutoHighlightReduction, &prop_lst::ExposureAutoHighlightReduction, false);
 }

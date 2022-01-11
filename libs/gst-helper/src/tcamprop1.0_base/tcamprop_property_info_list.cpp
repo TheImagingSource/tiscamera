@@ -58,7 +58,7 @@ const prop_static_info_float lst::ExposureAutoUpperLimit = make_Float(
     "Upper limit of the ExposureAuto function.",
     "µs", FloatRepresentation_t::Logarithmic, Visibility_t::Guru
 );
-const prop_static_info_enumeration lst::ExposureAutoUpperLimitAuto = make_Enumeration(
+const prop_static_info_boolean lst::ExposureAutoUpperLimitAuto = make_Boolean(
     "ExposureAutoUpperLimitAuto",
     "Exposure", "Exposure Auto Upper Limit Auto",
     "Automatically sets the upper limit to match the Acquisition Frame Rate.", Visibility_t::Expert

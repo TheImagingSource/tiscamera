@@ -280,7 +280,7 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x199e251, &prop_lst::ReverseY },                                                // usb23 usb33 "Flip Horizontal",
     { 0x199e252, &prop_lst::ReverseX },                                                // usb23 usb33 "Flip Vertical"
     { 0x199e253, &prop_lst::ExposureAutoHighlightReduction },                          // usb23 usb33 "Highlight Reduction"
-    { 0x199e254, &prop_lst::ExposureAutoUpperLimitAuto, fetch_menu_entries_off_on },   // usb23 usb33
+    { 0x199e254, &prop_lst::ExposureAutoUpperLimitAuto },                              // usb23 usb33
     { 0x199e255, &prop_lst::ExposureAutoLowerLimit },                                  // usb23 usb33 "Exposure Auto Lower Limit (us)"
     { 0x199e256, &prop_lst::ExposureAutoUpperLimit },                                  // usb23 usb33 "Exposure Auto Upper Limit (us)"
     { 0x199e257, mapping_type::internal },                                             // usb23 usb33 "Override Scanning Mode" integer

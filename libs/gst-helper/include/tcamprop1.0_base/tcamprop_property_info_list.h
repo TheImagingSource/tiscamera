@@ -38,7 +38,7 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_integer ExposureAutoReference;
     extern const prop_static_info_float ExposureAutoLowerLimit;
     extern const prop_static_info_float ExposureAutoUpperLimit;
-    extern const prop_static_info_enumeration ExposureAutoUpperLimitAuto;
+    extern const prop_static_info_boolean ExposureAutoUpperLimitAuto;
     extern const prop_static_info_boolean ExposureAutoHighlightReduction;
 
     extern const prop_static_info_enumeration BalanceWhiteAuto;
