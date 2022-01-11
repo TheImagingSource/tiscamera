@@ -99,7 +99,7 @@ gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
 
         if (caps_string == nullptr)
         {
-            SPDLOG_WARN("Format has empty caps string. Ignoring {}",
+            SPDLOG_INFO("Format has empty caps string. Ignoring {}",
                         img::fcc_to_string(desc.get_fourcc()));
             continue;
         }
