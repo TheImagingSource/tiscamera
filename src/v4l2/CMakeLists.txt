@@ -34,13 +34,22 @@ find_package(UDev REQUIRED QUIET)
 
 add_library(tcam-backend-v4l2 STATIC
   V4l2Device.cpp
+  V4l2Device.h
   V4L2PropertyBackend.cpp
+  V4L2PropertyBackend.h
   V4L2DeviceProperties.cpp
   v4l2_property_impl.cpp
+  v4l2_property_impl.h
   v4l2_genicam_mapping.cpp
+  v4l2_genicam_mapping.h
   v4l2_genicam_conversion.cpp
+  v4l2_genicam_conversion.h
   v4l2_utils.cpp
+  v4l2_utils.h
   v4l2_api.cpp
+  v4l2_api.h
+
+  sensor_id_33u.h
   )
 
 target_link_libraries(tcam-backend-v4l2

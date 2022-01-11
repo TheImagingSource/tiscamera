@@ -16,6 +16,7 @@
 
 #include "v4l2_genicam_mapping.h"
 
+#include "sensor_id_33u.h"
 #include "v4l2_property_impl.h"
 
 #include <cmath>
@@ -146,7 +147,7 @@ static const converter_scale saturation_converter = {
     [](double v) -> int64_t { return std::lround(v / 100. * 64.); },
     [](int64_t v) -> double { return v / 64. * 100.; },
 };
-static const converter_scale gain_converter = {
+static const converter_scale gain_db100_converter = {
     [](double v) -> int64_t { return std::lround(v * 100.); },
     [](int64_t v) -> double { return v / 100.; },
 };
@@ -196,7 +197,7 @@ menu_entry_list fetch_menu_entries_TriggerOperation()
 }
 
 // clang-format off
-static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
+static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x00980900 /*V4L2_CID_BRIGHTNESS*/,       &prop_lst::BlackLevel },
     { 0x00980901 /*V4L2_CID_CONTRAST*/,         &prop_lst::Contrast },
     { 0x00980902 /*V4L2_CID_SATURATION*/,       &prop_lst::Saturation, saturation_converter },
@@ -221,7 +222,7 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     { 0x199e202, &prop_lst::ExposureAuto, fetch_menu_entries_off_continuous },     // usb23 usb33 "Auto Shutter"
     { 0x199e203, &prop_lst::ExposureAutoReference },                               // usb23 usb33 
 #if defined ENABLE_23U_SUPPORT
-    { 0x199e204, &prop_lst::Gain, gain_converter },                                // usb23 "Gain (dB/100)"
+    { 0x199e204, &prop_lst::Gain, gain_db100_converter },                           // usb23 "Gain (dB/100)"
 #endif
     { 0x199e205, &prop_lst::GainAuto, fetch_menu_entries_off_continuous },         // usb23 usb33
     { V4L2_CID_TIS_WHITEBALANCE_ONE_PUSH, mapping_type::internal },                // usb23 usb33 "White Balance One Push"
@@ -407,16 +408,17 @@ static const v4l2_genicam_mapping    dxk22_conv_dict[] =
     { 0x00980913 /*V4L2_CID_GAIN*/, &prop_lst::Gain, dxk22_gain_mul_dB_converter },
 };
 
+namespace quirk_33u
+{
 
-static const converter_scale dxk33u_trigger_denoise_quirk = {
+static const converter_scale TriggerDenoise = {
     nullptr,
     nullptr,
     {},
     { 100'000. } // we override TriggerDenoise.Maximum, It is reported as 1e6, but should be 1e5
 };
 
-
-static const converter_scale dxk33u_ExposureTime_default_quirk = {
+static const converter_scale ExposureTime_default = {
     nullptr,
     nullptr,
     {},
@@ -425,24 +427,136 @@ static const converter_scale dxk33u_ExposureTime_default_quirk = {
     { 33'333.0 },   // We fix the default value to 33'333 us
 };
 
+static const converter_scale gain_to_db_factor_0_1 = {
+    [](double v) -> int64_t { return std::lround(v / 0.1); },
+    [](int64_t v) -> double { return v * 0.1; },
+};
+
+static const converter_scale gain_to_db_factor_0_3 = {
+    [](double v) -> int64_t { return std::lround(v / 0.3); },
+    [](int64_t v) -> double { return v * 0.3; },
+};
+
+static const converter_scale gain_to_db_factor_AR0521 = {
+    [](double v) -> int64_t { return std::lround(v / 0.1875); },
+    [](int64_t v) -> double { return v * 0.1875; },
+};
+
+static const converter_scale gain_to_db_factor_IMX183 = {
+    [](double v) -> int64_t { return std::lround( 2048. - (std::pow( 10., (v / (-20.))) * 2048.) ); },
+    [](int64_t v) -> double { return std::abs( (-20.) * std::log10((2048. - v) / 2048.) ); },
+    {},
+    {},
+    { 0.0135 },
+};
+
+// Min=144,Max=301,=> [0.0;3.2], step ~= 0.0204
+// This is the same for P2000 and P5000
+static const converter_scale gain_to_db_factor_P2000 = {
+    [](double v) -> int64_t { return std::lround( std::pow( 10., v / 10.) * 144. ); },
+    [](int64_t v) -> double { return 10. * std::log10(v / 144.); },
+    { 0.0 },
+    { 3.2 },    // we need to hardcode the maximum because old firmware versions had a wrong range (raw max == 1200)
+    { 0.020 },
+    { 0. },
+};
+
+// Min=144,Max=1200
+static const converter_scale gain_to_db_factor_P1300 = {
+    [](double v) -> int64_t { return std::lround( std::pow( 10., v / 10.) * 144. ); },
+    [](int64_t v) -> double { return 10. * std::log10(v / 144.); },
+    {},
+    {},
+    {},
+    { 0. }
+};
+
+// Min=100,Max=383,=> [0.0;5.83], step ~= 0.0206
+static const converter_scale gain_to_db_factor_J003 = {
+    [](double v) -> int64_t { return std::lround( std::pow( 10., v / 10.) * 100. ); },
+    [](int64_t v) -> double { return 10. * std::log10(v / 100.); },
+    {},
+    {},
+    { 0.020 },
+    { 0. }
+};
+
+// Min=13,Max=63 => [0.0;6.85]
+static const converter_scale gain_to_db_factor_AR0234 = {
+    [](double v) -> int64_t { return std::lround( std::pow( 10., v / 10.) * 13. ); },
+    [](int64_t v) -> double { return 10. * std::log10(v / 13.); },
+    {},
+    {},
+    { 0.13 },
+    { 0. }
+};
+
+} // quirk_33u
+
 static const v4l2_genicam_mapping    dxk33u_conv_dict[] =
 {
-    { 0x199e201, &prop_lst::ExposureTime, dxk33u_ExposureTime_default_quirk },      // "Exposure Time (us)"
+    { 0x199e201, &prop_lst::ExposureTime, quirk_33u::ExposureTime_default },
 
-    { 0x199e240, &prop_lst::TriggerDenoise, dxk33u_trigger_denoise_quirk }, // "Trigger Noise Suppression Time"
+    { 0x199e240, &prop_lst::TriggerDenoise, quirk_33u::TriggerDenoise },
 
-    { 0x199e256, &prop_lst::ExposureAutoUpperLimit, dxk33u_ExposureTime_default_quirk },    // usb23 usb33 "Exposure Auto Upper Limit (us)"
+    { 0x199e256, &prop_lst::ExposureAutoUpperLimit, quirk_33u::ExposureTime_default },
 };
 
-static const v4l2_genicam_mapping    dxk37u_conv_dict[] =
+static const v4l2_genicam_mapping    dxk33u_GainDB_factor_0_1[] =
 {
-    { 0x199e201, &prop_lst::ExposureTime, dxk33u_ExposureTime_default_quirk },      // "Exposure Time (us)"
-
-    { 0x199e240, &prop_lst::TriggerDenoise, dxk33u_trigger_denoise_quirk },  //"Trigger Noise Suppression Time"
-
-    { 0x199e256, &prop_lst::ExposureAutoUpperLimit, dxk33u_ExposureTime_default_quirk },    // usb23 usb33 "Exposure Auto Upper Limit (us)"
+    { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_0_1 },
+    { 0x199e259, &prop_lst::GainAutoLowerLimit, quirk_33u::gain_to_db_factor_0_1 },
+    { 0x199e260, &prop_lst::GainAutoUpperLimit, quirk_33u::gain_to_db_factor_0_1 },
 };
 
+static const v4l2_genicam_mapping    dxk33u_GainDB_factor_0_3[] =
+{
+    { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_0_3 },
+    { 0x199e259, &prop_lst::GainAutoLowerLimit, quirk_33u::gain_to_db_factor_0_3 },
+    { 0x199e260, &prop_lst::GainAutoUpperLimit, quirk_33u::gain_to_db_factor_0_3 },
+};
+
+static const v4l2_genicam_mapping    dxk33u_GainDB_factor_AR0521[] =
+{
+    { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_AR0521 },
+    { 0x199e259, &prop_lst::GainAutoLowerLimit, quirk_33u::gain_to_db_factor_AR0521 },
+    { 0x199e260, &prop_lst::GainAutoUpperLimit, quirk_33u::gain_to_db_factor_AR0521 },
+};
+
+static const v4l2_genicam_mapping    dxk33u_GainDB_factor_IMX183[] =
+{
+    { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_IMX183 },
+    { 0x199e259, &prop_lst::GainAutoLowerLimit, quirk_33u::gain_to_db_factor_IMX183 },
+    { 0x199e260, &prop_lst::GainAutoUpperLimit, quirk_33u::gain_to_db_factor_IMX183 },
+};
+
+static const v4l2_genicam_mapping    dxk33u_GainDB_factor_P2000[] =
+{
+    { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_P2000 },
+    { 0x199e259, &prop_lst::GainAutoLowerLimit, quirk_33u::gain_to_db_factor_P2000 },
+    { 0x199e260, &prop_lst::GainAutoUpperLimit, quirk_33u::gain_to_db_factor_P2000 },
+};
+
+static const v4l2_genicam_mapping    dxk33u_GainDB_factor_P1300[] =
+{
+    { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_P1300 },
+    { 0x199e259, &prop_lst::GainAutoLowerLimit, quirk_33u::gain_to_db_factor_P1300 },
+    { 0x199e260, &prop_lst::GainAutoUpperLimit, quirk_33u::gain_to_db_factor_P1300 },
+};
+
+static const v4l2_genicam_mapping    dxk33u_GainDB_factor_J003[] =
+{
+    { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_J003 },
+    { 0x199e259, &prop_lst::GainAutoLowerLimit, quirk_33u::gain_to_db_factor_J003 },
+    { 0x199e260, &prop_lst::GainAutoUpperLimit, quirk_33u::gain_to_db_factor_J003 },
+};
+
+static const v4l2_genicam_mapping    dxk33u_GainDB_factor_AR0234[] =
+{
+    { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_AR0234 },
+    { 0x199e259, &prop_lst::GainAutoLowerLimit, quirk_33u::gain_to_db_factor_AR0234 },
+    { 0x199e260, &prop_lst::GainAutoUpperLimit, quirk_33u::gain_to_db_factor_AR0234 },
+};
 // clang-format on
 
 
@@ -460,48 +574,110 @@ static const tcam::v4l2::v4l2_genicam_mapping* find_mapping_(const v4l2_genicam_
     return nullptr;
 }
 
-} // namespace
-
-
-tcam::v4l2::v4l2_genicam_mapping_info tcam::v4l2::find_mapping_info(v4l2_device_type dev_type,
-                                                                    uint32_t /*product_id*/,
-                                                                    uint32_t v4l2_id)
+const tcam::v4l2::v4l2_genicam_mapping* find_mapping_info_33u_gain(uint32_t product_id,
+                                                                   uint32_t v4l2_id)
 {
-    const tcam::v4l2::v4l2_genicam_mapping* ptr = nullptr;
+    switch (product_id & PRODUCT_ID_SENSOR_MASK)
+    {
+        case PRODUCT_ID_SENSOR_AR0234:
+            return find_mapping_(dxk33u_GainDB_factor_AR0234, v4l2_id);
+
+        case PRODUCT_ID_SENSOR_P1300:
+            return find_mapping_(dxk33u_GainDB_factor_P1300, v4l2_id);
+
+        case PRODUCT_ID_SENSOR_P2000:
+        case PRODUCT_ID_SENSOR_P5000:
+            return find_mapping_(dxk33u_GainDB_factor_P2000, v4l2_id);
+        case PRODUCT_ID_SENSOR_MT9J003:
+            return find_mapping_(dxk33u_GainDB_factor_J003, v4l2_id);
+
+        case PRODUCT_ID_SENSOR_IMX174:
+        case PRODUCT_ID_SENSOR_IMX178:
+        case PRODUCT_ID_SENSOR_IMX226:
+        case PRODUCT_ID_SENSOR_IMX249:
+        case PRODUCT_ID_SENSOR_IMX250:
+        case PRODUCT_ID_SENSOR_IMX252:
+        case PRODUCT_ID_SENSOR_IMX253:
+        case PRODUCT_ID_SENSOR_IMX255:
+        case PRODUCT_ID_SENSOR_IMX264:
+        case PRODUCT_ID_SENSOR_IMX265:
+        case PRODUCT_ID_SENSOR_IMX267:
+        case PRODUCT_ID_SENSOR_IMX273:
+        case PRODUCT_ID_SENSOR_IMX287:
+        case PRODUCT_ID_SENSOR_IMX304:
+        case PRODUCT_ID_SENSOR_IMX542:
+        case PRODUCT_ID_SENSOR_IMX541:
+        case PRODUCT_ID_SENSOR_IMX540:
+        case PRODUCT_ID_SENSOR_IMX545:
+        case PRODUCT_ID_SENSOR_IMX546:
+        case PRODUCT_ID_SENSOR_IMX547:
+            return find_mapping_(dxk33u_GainDB_factor_0_1, v4l2_id);
+
+        case PRODUCT_ID_SENSOR_IMX290:
+        case PRODUCT_ID_SENSOR_IMX462:
+            return find_mapping_(dxk33u_GainDB_factor_0_3, v4l2_id);
+
+        case PRODUCT_ID_SENSOR_AR0521:
+            return find_mapping_(dxk33u_GainDB_factor_AR0521, v4l2_id);
+
+
+        case PRODUCT_ID_SENSOR_IMX183:
+            return find_mapping_(dxk33u_GainDB_factor_IMX183, v4l2_id);
+
+        // stuff
+        case PRODUCT_ID_SENSOR_:
+        case PRODUCT_ID_SENSOR_HDMI:
+            return nullptr;
+    }
+    return nullptr;
+}
+
+const tcam::v4l2::v4l2_genicam_mapping* find_mapping_info_specific(v4l2_device_type dev_type,
+                                                                   uint32_t product_id,
+                                                                   uint32_t v4l2_id)
+{
     switch (dev_type)
     {
         case tcam::v4l2::v4l2_device_type::dxk72: // MT9P031
-        {
-            ptr = find_mapping_(dxk72_conv_dict, v4l2_id);
-            break;
-        }
+            return find_mapping_(dxk72_conv_dict, v4l2_id);
         case tcam::v4l2::v4l2_device_type::dxk42: // MT9M021
-        {
-            ptr = find_mapping_(dxk42_conv_dict, v4l2_id);
-            break;
-        }
+            return find_mapping_(dxk42_conv_dict, v4l2_id);
         case tcam::v4l2::v4l2_device_type::dxk22: // MT9V023
-        {
-            ptr = find_mapping_(dxk22_conv_dict, v4l2_id);
-            break;
-        }
+            return find_mapping_(dxk22_conv_dict, v4l2_id);
         case tcam::v4l2::v4l2_device_type::dxk33u:
-        {
-            ptr = find_mapping_(dxk33u_conv_dict, v4l2_id);
-            break;
-        }
         case tcam::v4l2::v4l2_device_type::dxk37u:
+        case tcam::v4l2::v4l2_device_type::dxk38u:
+        case tcam::v4l2::v4l2_device_type::dxk_hdmi:
         {
-            ptr = find_mapping_(dxk37u_conv_dict, v4l2_id);
+            if (auto ptr = find_mapping_info_33u_gain(product_id, v4l2_id); ptr != nullptr)
+            {
+                return ptr;
+            }
+            if (auto ptr = find_mapping_(dxk33u_conv_dict, v4l2_id); ptr != nullptr)
+            {
+                return ptr;
+            }
             break;
         }
         case tcam::v4l2::v4l2_device_type::unknown:
         default:
             break;
     }
+    return nullptr;
+}
+
+} // namespace
+
+
+tcam::v4l2::v4l2_genicam_mapping_info tcam::v4l2::find_mapping_info(v4l2_device_type dev_type,
+                                                                    uint32_t product_id,
+                                                                    uint32_t v4l2_id)
+{
+    const tcam::v4l2::v4l2_genicam_mapping* ptr =
+        find_mapping_info_specific(dev_type, product_id, v4l2_id);
     if (ptr == nullptr)
     {
-        ptr = find_mapping_(v4l2_conv_dict, v4l2_id);
+        ptr = find_mapping_(generic_v4l2_conv_table, v4l2_id);
     }
     if (!ptr)
     {

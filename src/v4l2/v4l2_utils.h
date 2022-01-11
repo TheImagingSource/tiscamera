@@ -36,6 +36,8 @@ enum class v4l2_device_type
     dxk22,
     dxk33u,
     dxk37u,
+    dxk38u,
+    dxk_hdmi,
 };
 
 v4l2_device_type get_device_type(const DeviceInfo&);

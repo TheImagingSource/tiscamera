@@ -213,11 +213,11 @@ tcam::v4l2::v4l2_device_type tcam::v4l2::get_device_type(const DeviceInfo& info)
     }
     if ((product_id & 0xFF00) == 0x9800)
     {
-        return v4l2_device_type::dxk33u;
+        return v4l2_device_type::dxk38u;
     }
     if ((product_id & 0xFF00) == 0x9C00)
     {
-        return v4l2_device_type::dxk33u;
+        return v4l2_device_type::dxk_hdmi;
     }
 
     return v4l2_device_type::unknown;
