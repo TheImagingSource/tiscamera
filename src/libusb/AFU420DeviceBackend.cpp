@@ -37,14 +37,6 @@ outcome::result<int64_t> AFU420DeviceBackend::get_int(tcam::afu420::AFU420Proper
 {
     switch (id)
     {
-        case tcam::afu420::AFU420Property::ExposureTime:
-        {
-            return p_device->get_exposure();
-        }
-        case tcam::afu420::AFU420Property::Gain:
-        {
-            return p_device->get_gain();
-        }
         case tcam::afu420::AFU420Property::Focus:
         {
             return p_device->get_focus();
@@ -52,27 +44,6 @@ outcome::result<int64_t> AFU420DeviceBackend::get_int(tcam::afu420::AFU420Proper
         case tcam::afu420::AFU420Property::HDR:
         {
             return p_device->get_hdr();
-        }
-        case tcam::afu420::AFU420Property::WB_Red:
-        {
-            double value;
-            p_device->get_color_gain_factor(AFU420Device::color_gain::ColorGainRed, value);
-
-            return camera_to_color_gain(value);
-        }
-        case tcam::afu420::AFU420Property::WB_Green:
-        {
-            double value;
-            p_device->get_color_gain_factor(AFU420Device::color_gain::ColorGainGreen1, value);
-
-            return camera_to_color_gain(value);
-        }
-        case tcam::afu420::AFU420Property::WB_Blue:
-        {
-            double value;
-            p_device->get_color_gain_factor(AFU420Device::color_gain::ColorGainBlue, value);
-
-            return camera_to_color_gain(value);
         }
         case tcam::afu420::AFU420Property::StrobeDelay:
         {
@@ -139,22 +110,6 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
 {
     switch (id)
     {
-        case tcam::afu420::AFU420Property::ExposureTime:
-        {
-            if (p_device->set_exposure(new_value))
-            {
-                return outcome::success();
-            }
-            return tcam::status::UndefinedError;
-        }
-        case tcam::afu420::AFU420Property::Gain:
-        {
-            if (p_device->set_gain(new_value))
-            {
-                return outcome::success();
-            }
-            return tcam::status::UndefinedError;
-        }
         case tcam::afu420::AFU420Property::Focus:
         {
             if (p_device->set_focus(new_value))
@@ -166,31 +121,6 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
         case tcam::afu420::AFU420Property::HDR:
         {
             if (p_device->set_hdr(new_value))
-            {
-                return outcome::success();
-            }
-            return tcam::status::UndefinedError;
-        }
-        case tcam::afu420::AFU420Property::WB_Red:
-        {
-            if (p_device->set_color_gain_factor(AFU420Device::color_gain::ColorGainRed, new_value))
-            {
-                return outcome::success();
-            }
-            return tcam::status::UndefinedError;
-        }
-        case tcam::afu420::AFU420Property::WB_Green:
-        {
-            if (p_device->set_color_gain_factor(AFU420Device::color_gain::ColorGainGreen1,
-                                                new_value))
-            {
-                return outcome::success();
-            }
-            return tcam::status::UndefinedError;
-        }
-        case tcam::afu420::AFU420Property::WB_Blue:
-        {
-            if (p_device->set_color_gain_factor(AFU420Device::color_gain::ColorGainBlue, new_value))
             {
                 return outcome::success();
             }
@@ -342,6 +272,103 @@ outcome::result<void> AFU420DeviceBackend::set_bool(tcam::afu420::AFU420Property
         }
     }
 }
+
+
+outcome::result<double> AFU420DeviceBackend::get_float(tcam::afu420::AFU420Property id)
+{
+    switch (id)
+    {
+        case tcam::afu420::AFU420Property::ExposureTime:
+        {
+            return p_device->get_exposure();
+        }
+        case tcam::afu420::AFU420Property::Gain:
+        {
+            return p_device->get_gain();
+        }
+        case tcam::afu420::AFU420Property::WB_Red:
+        {
+            double value;
+            p_device->get_color_gain_factor(AFU420Device::color_gain::ColorGainRed, value);
+            return value;
+            return camera_to_color_gain(value);
+        }
+        case tcam::afu420::AFU420Property::WB_Green:
+        {
+            double value;
+            p_device->get_color_gain_factor(AFU420Device::color_gain::ColorGainGreen1, value);
+            return value;
+
+            return camera_to_color_gain(value);
+        }
+        case tcam::afu420::AFU420Property::WB_Blue:
+        {
+            double value;
+            p_device->get_color_gain_factor(AFU420Device::color_gain::ColorGainBlue, value);
+            return value;
+
+            return camera_to_color_gain(value);
+        }
+        default:
+        {
+            return tcam::status::PropertyDoesNotExist;
+        }
+    }
+}
+
+
+outcome::result<void> AFU420DeviceBackend::set_float(tcam::afu420::AFU420Property id, double new_value)
+{
+    switch (id)
+    {
+        case tcam::afu420::AFU420Property::ExposureTime:
+        {
+            if (p_device->set_exposure(new_value))
+            {
+                return outcome::success();
+            }
+            return tcam::status::UndefinedError;
+        }
+        case tcam::afu420::AFU420Property::Gain:
+        {
+            if (p_device->set_gain(new_value))
+            {
+                return outcome::success();
+            }
+            return tcam::status::UndefinedError;
+        }
+        case tcam::afu420::AFU420Property::WB_Red:
+        {
+            if (p_device->set_color_gain_factor(AFU420Device::color_gain::ColorGainRed, new_value))
+            {
+                return outcome::success();
+            }
+            return tcam::status::UndefinedError;
+        }
+        case tcam::afu420::AFU420Property::WB_Green:
+        {
+            if (p_device->set_color_gain_factor(AFU420Device::color_gain::ColorGainGreen1,
+                                                new_value))
+            {
+                return outcome::success();
+            }
+            return tcam::status::UndefinedError;
+        }
+        case tcam::afu420::AFU420Property::WB_Blue:
+        {
+            if (p_device->set_color_gain_factor(AFU420Device::color_gain::ColorGainBlue, new_value))
+            {
+                return outcome::success();
+            }
+            return tcam::status::UndefinedError;
+        }
+        default:
+        {
+            return tcam::status::PropertyDoesNotExist;
+        }
+    }
+}
+
 
 
 } // namespace tcam::property

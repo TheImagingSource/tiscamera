@@ -144,9 +144,6 @@ bool AFU420Device::create_color_gain()
       gain works in a weird way.
       the values lie between 0 and (4.0 - (1.0 / 256.0))
 
-      we map this to the more traditional 0 - 255
-
-      this allows direct adjustments from the tcamwhitebalance gst module
      */
 
     tcam_value_double ir = {};
@@ -158,7 +155,7 @@ bool AFU420Device::create_color_gain()
     get_color_gain_factor(color_gain::ColorGainRed, value);
 
     ir.value = value;
-        //camera_to_color_gain(value);
+
     ir.default_value = 1.0;
 
     m_properties.push_back(std::make_shared<AFU420PropertyDoubleImpl>(
@@ -175,7 +172,6 @@ bool AFU420Device::create_color_gain()
     value = 0;
     get_color_gain_factor(color_gain::ColorGainGreen1, value);
 
-    //ig.value = camera_to_color_gain(value);
     ig.value = value;
 
     ig.default_value = 1.0;
@@ -193,13 +189,12 @@ bool AFU420Device::create_color_gain()
     value = 0;
     get_color_gain_factor(color_gain::ColorGainBlue, value);
 
-    //ib.value = camera_to_color_gain(value);
     ib.value = value;
 
     ib.default_value = 1.0;
 
     m_properties.push_back(std::make_shared<AFU420PropertyDoubleImpl>(
-        "BalanceWhiteBlue", ib, tcam::afu420::AFU420Property::WB_Green, m_backend));
+        "BalanceWhiteBlue", ib, tcam::afu420::AFU420Property::WB_Blue, m_backend));
 
     return true;
 }
@@ -637,8 +632,13 @@ bool AFU420Device::set_color_gain_factor(color_gain eColor, double value)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not read color gain value. Libsub returned {}", ret);
+        SPDLOG_ERROR("Could not set color gain value. Libsub returned {}", ret);
         return false;
+    }
+
+    if (ushColor == 0)
+    {
+        int ret = control_write(ADVANCED_PC_TO_USB_COLOR_GAIN, ushValue, 3);
     }
 
     return true;

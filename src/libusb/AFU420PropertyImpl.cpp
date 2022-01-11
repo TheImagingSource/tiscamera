@@ -158,7 +158,7 @@ outcome::result<double> AFU420PropertyDoubleImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
     {
-        auto ret = ptr->get_int(m_id);
+        auto ret = ptr->get_float(m_id);
 
         if (ret)
         {
@@ -177,7 +177,7 @@ outcome::result<void> AFU420PropertyDoubleImpl::set_value(double new_value)
 {
     if (auto ptr = m_cam.lock())
     {
-        OUTCOME_TRY(ptr->set_int(m_id, new_value));
+        OUTCOME_TRY(ptr->set_float(m_id, new_value));
         return outcome::success();
     }
     else

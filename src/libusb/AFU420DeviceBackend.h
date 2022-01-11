@@ -35,6 +35,8 @@ public:
     outcome::result<void> set_int(tcam::afu420::AFU420Property id, int64_t new_value);
     outcome::result<bool> get_bool(tcam::afu420::AFU420Property id);
     outcome::result<void> set_bool(tcam::afu420::AFU420Property id, bool new_value);
+    outcome::result<double> get_float(tcam::afu420::AFU420Property id);
+    outcome::result<void> set_float(tcam::afu420::AFU420Property id, double new_value);
 
 private:
     AFU420Device* p_device;
