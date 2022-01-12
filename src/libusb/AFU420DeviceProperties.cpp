@@ -348,7 +348,9 @@ void AFU420Device::create_properties()
 {
     create_exposure();
     create_gain();
-    create_hdr();
+    // currently not active
+    // leave in as someone might want this in the future
+    //create_hdr();
 
     if (has_ois_unit())
     {
