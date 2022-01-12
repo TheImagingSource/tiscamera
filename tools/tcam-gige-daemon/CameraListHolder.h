@@ -39,8 +39,6 @@ public:
 
     void set_interface_list(std::vector<std::string>&);
 
-    void run();
-
     void stop();
 
 private:

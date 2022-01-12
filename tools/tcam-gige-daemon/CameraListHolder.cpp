@@ -30,6 +30,7 @@
 #include <sys/sem.h> /* semaphore functions and structs.     */
 #include <sys/shm.h>
 #include <sys/types.h> /* various type definitions.            */
+#include <stdexcept>
 
 using namespace tis;
 
@@ -50,7 +51,7 @@ CameraListHolder::CameraListHolder() : continue_loop(true)
 
     if (shmkey == -1)
     {
-        throw;
+        throw std::runtime_error("Unable to generate shmkey");
     }
 
     /* the daemon should work as a system daemon,
@@ -60,14 +61,14 @@ CameraListHolder::CameraListHolder() : continue_loop(true)
 
     if (shmid == -1)
     {
-        throw;
+        throw std::runtime_error("Unable to allocate shared memory segment");
     }
 
     semaphore_key = ftok(LOCK_FILE, 'S');
 
     if (semaphore_key == -1)
     {
-        throw;
+        throw std::runtime_error("Unable to generate semaphore key");
     }
 
     semaphore_id = tcam::semaphore::create(semaphore_key);
@@ -126,9 +127,6 @@ void CameraListHolder::set_interface_list(std::vector<std::string>& interfaces)
     std::lock_guard<std::mutex> mutex_lock(mtx);
     interface_list = interfaces;
 }
-
-
-void CameraListHolder::run() {}
 
 
 void CameraListHolder::stop()

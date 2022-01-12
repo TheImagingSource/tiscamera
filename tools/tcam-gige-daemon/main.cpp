@@ -186,8 +186,15 @@ int main(int argc, char* argv[])
             sigaddset(&sigset, SIGTERM);
             pthread_sigmask(SIG_BLOCK, &sigset, nullptr);
 
-            CameraListHolder::get_instance().set_interface_list(interfaces);
-            CameraListHolder::get_instance().run();
+            try
+            {
+                CameraListHolder::get_instance().set_interface_list(interfaces);
+            }
+            catch (std::runtime_error& e)
+            {
+                std::cerr << "Unable to start indexing: " << e.what() << std::endl;
+                return 1;
+            }
 
             int signum = 0;
             // wait until a signal is delivered:
