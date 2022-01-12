@@ -132,54 +132,6 @@ private:
     const tcamprop1::prop_static_info_float* p_static_info;
 };
 
-class AFU420PropertyBoolImpl : public IPropertyBool
-{
-public:
-    AFU420PropertyBoolImpl(const std::string& name,
-                           bool default_value,
-                           tcam::afu420::AFU420Property id,
-                           std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
-
-    virtual tcamprop1::prop_static_info get_static_info() const final
-    {
-        if (p_static_info)
-        {
-            return *p_static_info;
-        }
-        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
-    }
-
-    virtual PropertyFlags get_flags() const final
-    {
-        return m_flags;
-    };
-    virtual void set_flags(PropertyFlags flags) final
-    {
-        m_flags = flags;
-    };
-
-    virtual bool get_default() const final
-    {
-        return m_default;
-    };
-
-    virtual outcome::result<bool> get_value() const final;
-
-    virtual outcome::result<void> set_value(bool new_value) final;
-
-private:
-    std::string m_name;
-    std::weak_ptr<tcam::property::AFU420DeviceBackend> m_cam;
-
-    tcam::property::PropertyFlags m_flags;
-    bool m_default;
-    // needed only for write only properties
-    bool m_value;
-    tcam::afu420::AFU420Property m_id;
-    const tcamprop1::prop_static_info_boolean* p_static_info;
-};
-
-
 class AFU420PropertyEnumImpl : public IPropertyEnum
 {
 public:

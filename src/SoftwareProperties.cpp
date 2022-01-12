@@ -174,7 +174,32 @@ void tcam::property::SoftwareProperties::generate_public_properties(bool has_bay
     auto has_iris_auto = find_property(m_device_properties, "IrisAuto") != nullptr;
     if (has_iris && !has_iris_auto)
     {
-        generate_iris_auto();
+        // cameras can has Iris behavior that prohibits IrisAuto
+        // example would be the AFU420
+        // the iris on that camera is either open or closed
+        // check for that before adding IrisAuto
+        auto valid_iris_range = [=] ()
+        {
+            m_dev_iris = tcam::property::find_property<IPropertyInteger>(m_device_properties, "Iris");
+            if (!m_dev_iris)
+            {
+                return false;
+            }
+
+            auto min = m_dev_iris->get_range().min;
+            auto max = m_dev_iris->get_range().max;
+
+            if (min == 0 && max == 1)
+            {
+                return false;
+            }
+            return true;
+        };
+
+        if (valid_iris_range())
+        {
+            generate_iris_auto();
+        }
     }
 
     auto has_foucs = find_property(m_device_properties, "Focus") != nullptr;

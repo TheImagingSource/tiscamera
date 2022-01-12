@@ -88,7 +88,7 @@ enum class AFU420Property
 {
     ExposureTime,
     Gain,
-    Shutter,
+    Iris,
     Focus,
     HDR,
     WB_Red,

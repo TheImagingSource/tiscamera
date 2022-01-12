@@ -406,7 +406,7 @@ private:
     bool create_gain();
     bool create_focus();
     bool create_hdr();
-    bool create_shutter();
+    bool create_iris();
     bool create_color_gain();
     bool create_strobe();
 
@@ -433,13 +433,13 @@ protected:
     bool set_focus(int64_t focus);
 
     // can not be read from device
-    bool m_shutter = true;
+    bool m_iris = true;
 
-    bool get_shutter()
+    bool get_iris()
     {
-        return m_shutter;
+        return m_iris;
     };
-    bool set_shutter(bool open);
+    bool set_iris(bool open);
 
     int64_t get_hdr();
     bool set_hdr(int64_t);

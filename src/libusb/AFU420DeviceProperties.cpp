@@ -93,11 +93,20 @@ bool AFU420Device::create_focus()
 }
 
 
-bool AFU420Device::create_shutter()
+bool AFU420Device::create_iris()
 {
-    set_shutter(m_shutter);
-    m_properties.push_back(std::make_shared<AFU420PropertyBoolImpl>(
-        "Shutter", m_shutter, tcam::afu420::AFU420Property::Shutter, m_backend));
+    set_iris(m_iris);
+
+    tcam_value_int i = {};
+
+    i.min = 0;
+    i.max = 1;
+    i.step = 1;
+    i.value = 0;
+    i.default_value = 0;
+
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+                           "Iris", i, tcam::afu420::AFU420Property::Iris, m_backend));
 
     return true;
 }
@@ -121,18 +130,6 @@ bool AFU420Device::create_hdr()
         "HDR", i, tcam::afu420::AFU420Property::HDR, m_backend));
 
     return true;
-}
-
-
-double color_gain_to_camera(double value)
-{
-    return map_value_ranges(0, 255, 0, (4.0 - (1.0 / 256.0)), value);
-}
-
-
-int camera_to_color_gain(double value)
-{
-    return map_value_ranges(0, (4.0 - (1.0 / 256.0)), 0, 255, value);
 }
 
 #define COLOR_MAX (4.0-(1.0/256.0))
@@ -355,7 +352,7 @@ void AFU420Device::create_properties()
     if (has_ois_unit())
     {
         create_focus();
-        create_shutter();
+        create_iris();
 
         //create_ois();
     }
@@ -459,41 +456,18 @@ bool AFU420Device::set_focus(int64_t focus)
 }
 
 
-bool AFU420Device::set_shutter(bool open)
+bool AFU420Device::set_iris(bool open)
 {
     unsigned short ushValue = open ? 0xFFFF : 0x0;
     int ret = control_write(BASIC_PC_TO_USB_SHUTTER, ushValue);
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not write Shutter flag.");
+        SPDLOG_ERROR("Could not write Iris flag.");
         return false;
     }
     return true;
 }
-
-
-// bool AFU420Device::get_shutter()
-// {
-//     unsigned short ushValue = 0x0;
-//     int ret = control_read(ushValue, BASIC_PC_TO_USB_SHUTTER);
-
-//     if (ret < 0)
-//     {
-//         SPDLOG_WARN("Could not read Shutter flag.");
-//         return false;
-//     }
-
-
-//     if (ushValue == 0xFFFF)
-//     {
-//         return true;
-//     }
-//     else
-//     {
-//         return false;
-//     }
-// }
 
 
 int64_t AFU420Device::get_hdr()

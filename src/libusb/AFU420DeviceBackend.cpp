@@ -37,6 +37,10 @@ outcome::result<int64_t> AFU420DeviceBackend::get_int(tcam::afu420::AFU420Proper
 {
     switch (id)
     {
+        case tcam::afu420::AFU420Property::Iris:
+        {
+            return p_device->get_iris();
+        }
         case tcam::afu420::AFU420Property::Focus:
         {
             return p_device->get_focus();
@@ -110,6 +114,14 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
 {
     switch (id)
     {
+        case tcam::afu420::AFU420Property::Iris:
+        {
+            if (p_device->set_iris(new_value))
+            {
+                return outcome::success();
+            }
+            return tcam::status::UndefinedError;
+        }
         case tcam::afu420::AFU420Property::Focus:
         {
             if (p_device->set_focus(new_value))
@@ -238,42 +250,6 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
 }
 
 
-outcome::result<bool> AFU420DeviceBackend::get_bool(tcam::afu420::AFU420Property id)
-{
-    switch (id)
-    {
-        case tcam::afu420::AFU420Property::Shutter:
-        {
-            return p_device->get_shutter();
-        }
-        default:
-        {
-            return tcam::status::PropertyDoesNotExist;
-        }
-    }
-}
-
-
-outcome::result<void> AFU420DeviceBackend::set_bool(tcam::afu420::AFU420Property id, bool new_value)
-{
-    switch (id)
-    {
-        case tcam::afu420::AFU420Property::Shutter:
-        {
-            if (p_device->set_shutter(new_value))
-            {
-                return outcome::success();
-            }
-            return tcam::status::UndefinedError;
-        }
-        default:
-        {
-            return tcam::status::PropertyDoesNotExist;
-        }
-    }
-}
-
-
 outcome::result<double> AFU420DeviceBackend::get_float(tcam::afu420::AFU420Property id)
 {
     switch (id)
@@ -291,23 +267,18 @@ outcome::result<double> AFU420DeviceBackend::get_float(tcam::afu420::AFU420Prope
             double value;
             p_device->get_color_gain_factor(AFU420Device::color_gain::ColorGainRed, value);
             return value;
-            return camera_to_color_gain(value);
         }
         case tcam::afu420::AFU420Property::WB_Green:
         {
             double value;
             p_device->get_color_gain_factor(AFU420Device::color_gain::ColorGainGreen1, value);
             return value;
-
-            return camera_to_color_gain(value);
         }
         case tcam::afu420::AFU420Property::WB_Blue:
         {
             double value;
             p_device->get_color_gain_factor(AFU420Device::color_gain::ColorGainBlue, value);
             return value;
-
-            return camera_to_color_gain(value);
         }
         default:
         {
