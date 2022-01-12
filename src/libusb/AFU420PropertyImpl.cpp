@@ -7,12 +7,50 @@
 namespace tcam::property
 {
 
+
+tcam::property::AFU420PropertyLockImpl::AFU420PropertyLockImpl(std::string_view name)
+{
+    dependency_info_ = tcam::property::find_dependency_entry(name);
+}
+
+std::vector<std::string_view> tcam::property::AFU420PropertyLockImpl::get_dependent_names() const
+{
+    if (dependency_info_)
+    {
+        return dependency_info_->dependent_property_names;
+    }
+    return {};
+}
+
+void tcam::property::AFU420PropertyLockImpl::update_dependent_lock_state()
+{
+    if (dependent_controls_.empty())
+        return;
+
+    bool new_locked_state = should_set_dependent_locked();
+    for (auto& dep : dependent_controls_)
+    {
+        if (auto d = dep.lock())
+        {
+            d->set_locked(new_locked_state);
+        }
+    }
+}
+
+void tcam::property::AFU420PropertyLockImpl::set_dependent_properties(
+    std::vector<std::weak_ptr<PropertyLock>>&& controls)
+{
+    dependent_controls_ = std::move(controls);
+
+    update_dependent_lock_state();
+}
+
 AFU420PropertyIntegerImpl::AFU420PropertyIntegerImpl(
     const std::string& name,
     tcam_value_int i,
     tcam::afu420::AFU420Property id,
     std::shared_ptr<tcam::property::AFU420DeviceBackend> cam)
-    : m_cam(cam), m_name(name), m_id(id)
+    : AFU420PropertyLockImpl(name), m_cam(cam), m_name(name), m_id(id)
 {
 
     m_default = i.default_value;
@@ -203,7 +241,7 @@ AFU420PropertyEnumImpl::AFU420PropertyEnumImpl(const std::string& name,
                                                tcam::afu420::AFU420Property id,
                                                std::map<int, std::string> entries,
                                                std::shared_ptr<AFU420DeviceBackend> backend)
-    : m_entries(entries), m_cam(backend), m_name(name), m_id(id)
+    : AFU420PropertyLockImpl(name), m_entries(entries), m_cam(backend), m_name(name), m_id(id)
 {
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 
@@ -259,7 +297,12 @@ outcome::result<void> AFU420PropertyEnumImpl::set_value(int64_t new_value)
 
     if (auto ptr = m_cam.lock())
     {
-        return ptr->set_int(m_id, new_value);
+        auto ret = ptr->set_int(m_id, new_value);
+        if (ret.has_error())
+        {
+            return ret.error();
+        }
+        update_dependent_lock_state();
     }
     else
     {
@@ -315,5 +358,22 @@ bool AFU420PropertyEnumImpl::valid_value(int value)
     return true;
 }
 
+
+bool AFU420PropertyEnumImpl::should_set_dependent_locked() const
+{
+    auto dep_entry = get_dependency_entry();
+    if (!dep_entry)
+    {
+        return false;
+    }
+
+    auto res = get_value();
+    if (res.has_error())
+    {
+        return false;
+    }
+
+    return res.value() == dep_entry->prop_enum_state_for_locked;
+}
 
 } // namespace tcam::property

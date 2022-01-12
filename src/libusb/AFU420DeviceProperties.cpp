@@ -276,8 +276,10 @@ bool AFU420Device::create_offsets()
     i_ox.max = 7463; //m_uPixelMaxX - m_uPixelMinX;
     i_ox.step = 12;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
-        "OffsetX", i_ox, tcam::afu420::AFU420Property::OffsetX, m_backend));
+    auto offset_x = std::make_shared<AFU420PropertyIntegerImpl>(
+        "OffsetX", i_ox, tcam::afu420::AFU420Property::OffsetX, m_backend);
+
+    m_properties.push_back(offset_x);
 
     tcam_value_int i_oy = {};
 
@@ -285,12 +287,24 @@ bool AFU420Device::create_offsets()
     i_oy.max = 5115; //m_uPixelMaxY - m_uPixelMinY;
     i_oy.step = 4;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
-        "OffsetY", i_oy, tcam::afu420::AFU420Property::OffsetY, m_backend));
+    auto offset_y = std::make_shared<AFU420PropertyIntegerImpl>(
+        "OffsetY", i_oy, tcam::afu420::AFU420Property::OffsetY, m_backend);
+
+    m_properties.push_back(offset_y);
 
     std::map<int, std::string> offset_entries = { { { 0, "Off" }, { 1, "On" } } };
-    m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>(
-        "OffsetAutoCenter", tcam::afu420::AFU420Property::OffsetAuto, offset_entries, m_backend));
+
+    auto offset_auto = std::make_shared<AFU420PropertyEnumImpl>(
+        "OffsetAutoCenter", tcam::afu420::AFU420Property::OffsetAuto, offset_entries, m_backend);
+
+    m_properties.push_back(offset_auto);
+
+    std::vector<std::weak_ptr<tcam::property::PropertyLock>> can_be_locked;
+
+    can_be_locked.push_back(std::dynamic_pointer_cast<tcam::property::PropertyLock>(offset_x));
+    can_be_locked.push_back(std::dynamic_pointer_cast<tcam::property::PropertyLock>(offset_y));
+
+    std::dynamic_pointer_cast<tcam::property::PropertyLock>(offset_auto)->set_dependent_properties(std::move(can_be_locked));
 
     return true;
 }

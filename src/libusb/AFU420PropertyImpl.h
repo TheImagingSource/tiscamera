@@ -5,6 +5,8 @@
 #include "../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h"
 #include "../PropertyInterfaces.h"
 #include "../compiler_defines.h"
+#include "../property_dependencies.h"
+
 #include "ep_defines_rx.h"
 
 #include <map>
@@ -17,7 +19,36 @@ namespace tcam::property
 
 class AFU420DeviceBackend;
 
-class AFU420PropertyIntegerImpl : public IPropertyInteger
+class AFU420PropertyLockImpl : public PropertyLock
+{
+protected:
+    AFU420PropertyLockImpl(std::string_view name);
+
+    /**
+     * Function called when this property wants to know if dependent properties should be locked.
+     */
+    virtual bool should_set_dependent_locked() const
+    {
+        return false;
+    }
+    void set_dependent_properties(std::vector<std::weak_ptr<PropertyLock>>&& controls) override;
+    auto get_dependent_names() const -> std::vector<std::string_view> override;
+
+protected:
+    void update_dependent_lock_state();
+
+    auto get_dependency_entry() const noexcept
+    {
+        return dependency_info_;
+    }
+
+private:
+    std::vector<std::weak_ptr<PropertyLock>> dependent_controls_;
+
+    const tcam::property::dependency_entry* dependency_info_ = nullptr;
+};
+
+class AFU420PropertyIntegerImpl : public IPropertyInteger, public AFU420PropertyLockImpl
 {
 public:
     AFU420PropertyIntegerImpl(const std::string& name,
@@ -52,6 +83,11 @@ public:
     {
         return m_default;
     };
+
+    void set_locked(bool new_locked_state) override
+    {
+        lock(m_flags, new_locked_state);
+    }
 
     virtual outcome::result<int64_t> get_value() const final;
 
@@ -132,7 +168,7 @@ private:
     const tcamprop1::prop_static_info_float* p_static_info;
 };
 
-class AFU420PropertyEnumImpl : public IPropertyEnum
+class AFU420PropertyEnumImpl : public IPropertyEnum, public AFU420PropertyLockImpl
 {
 public:
     AFU420PropertyEnumImpl(const std::string& name,
@@ -159,6 +195,11 @@ public:
         m_flags = flags;
     };
 
+    void set_locked(bool new_locked_state) override
+    {
+        lock(m_flags, new_locked_state);
+    }
+
     virtual outcome::result<void> set_value_str(const std::string_view& new_value) final;
     virtual outcome::result<void> set_value(int64_t new_value) final;
 
@@ -171,6 +212,7 @@ public:
     };
 
     virtual std::vector<std::string> get_entries() const final;
+    bool should_set_dependent_locked() const final;
 
 private:
     bool valid_value(int value);
