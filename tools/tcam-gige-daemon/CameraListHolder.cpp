@@ -37,9 +37,21 @@ using namespace tis;
 CameraListHolder::CameraListHolder() : continue_loop(true)
 {
     // to understand shared memory use this guide:
-    // http://beej.us/guide/bgipc/output/html/multipage/shm.html
+    // https://beej.us/guide/bgipc/html/single/bgipc.html#semaphores
+    // https://beej.us/guide/bgipc/html/single/bgipc.html#mqftok
 
-    shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
+    errno=0;
+
+    // use LOCK_FILE as ftok key and nothing else
+    // LOCK_FILE is created and deleted by this process
+    // it is thus guaranteed to be a unique file that is not
+    // used by anything else
+    shmkey = ftok(LOCK_FILE, 'G');
+
+    if (shmkey == -1)
+    {
+        throw;
+    }
 
     /* the daemon should work as a system daemon,
        thus we require the same rights for all users to prevent 'permission denied'
@@ -51,7 +63,13 @@ CameraListHolder::CameraListHolder() : continue_loop(true)
         throw;
     }
 
-    semaphore_key = ftok("/tmp/tcam-gige-semaphore", 'S');
+    semaphore_key = ftok(LOCK_FILE, 'S');
+
+    if (semaphore_key == -1)
+    {
+        throw;
+    }
+
     semaphore_id = tcam::semaphore::create(semaphore_key);
 
     work_thread = std::thread(&CameraListHolder::index_loop, this);
@@ -105,7 +123,6 @@ std::vector<std::string> CameraListHolder::get_interface_list() const
 
 void CameraListHolder::set_interface_list(std::vector<std::string>& interfaces)
 {
-    // std::mutex cam_lock;
     std::lock_guard<std::mutex> mutex_lock(mtx);
     interface_list = interfaces;
 }

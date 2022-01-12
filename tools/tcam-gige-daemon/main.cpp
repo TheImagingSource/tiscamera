@@ -28,9 +28,6 @@
 #include <sys/shm.h>
 #include <unistd.h>
 
-static const std::string RUNNING_DIR = "/";
-static const std::string LOCK_FILE = "/var/lock/tcam-gige-daemon.lock";
-static const std::string LOG_FILE = "tcam-gige-daemon.log";
 
 DaemonClass daemon_instance(LOCK_FILE);
 
@@ -38,8 +35,8 @@ DaemonClass daemon_instance(LOCK_FILE);
 std::vector<struct tcam_device_info> get_camera_list()
 {
 
-    key_t shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
-    key_t sem_key = ftok("/tmp/tcam-gige-semaphore", 'S');
+    key_t shmkey = ftok(LOCK_FILE, 'G');
+    key_t sem_key = ftok(LOCK_FILE, 'S');
 
     int sem_id = tcam::semaphore_create(sem_key);
 
