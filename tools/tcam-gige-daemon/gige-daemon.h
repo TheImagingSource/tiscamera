@@ -17,7 +17,6 @@
 #ifndef TCAM_GIGE_DAEMON_H
 #define TCAM_GIGE_DAEMON_H
 
-#include <sys/msg.h>
 #include "../../src/base_types.h"
 
 static const size_t TCAM_DEVICE_LIST_MAX = 50;

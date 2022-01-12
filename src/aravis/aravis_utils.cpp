@@ -19,9 +19,10 @@
 #include "../internal.h"
 #include "../logging.h"
 
-#include <algorithm>
+#include <algorithm> // std::find
+#include <arv.h>
 #include <dutils_img/image_fourcc.h>
-#include <vector>
+#include <optional>
 
 // gige-daemon communication
 
@@ -40,7 +41,6 @@ struct aravis_fourcc
     uint32_t fourcc;
     uint32_t aravis;
 };
-
 
 static const aravis_fourcc arv_fourcc_conversion_table[] = {
     { FOURCC_Y800, ARV_PIXEL_FORMAT_MONO_8 },
@@ -116,110 +116,130 @@ uint32_t tcam::fourcc2aravis(uint32_t fourcc)
     return 0;
 }
 
-// TODO: move lock file name to cmake
-static const std::string gige_daemon_lock_file = "/var/lock/tcam-gige-daemon.lock";
+static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
+{
+    try
+    {
+        key_t shmkey = ftok(LOCK_FILE, 'G');
+        if (shmkey == -1)
+        {
+            SPDLOG_INFO("Failed to create shmkey. Not using gige-daemon to enumerate devices.");
+            //SPDLOG_INFO("Failed to create shmkey. Using internal", errno);
+            return std::nullopt;
+        }
+        key_t shm_semaphore_key = ftok(LOCK_FILE, 'S');
+        if (shm_semaphore_key == -1)
+        {
+            SPDLOG_INFO("Failed to create shmkey. errno={}.", errno);
+            return std::nullopt;
+        }
 
+        int shm_mem_id = shmget(shmkey, sizeof(tcam_gige_device_list), 0644);
+        if (shm_mem_id < 0)
+        {
+            SPDLOG_INFO("Unable to connect to gige-daemon. Using internal methods");
+            return std::nullopt;
+        }
+
+        semaphore semaphore_instance = semaphore::create(shm_semaphore_key);
+        std::lock_guard<semaphore> lck(semaphore_instance);
+
+        auto ptr = shmat(shm_mem_id, NULL, 0);
+        if (ptr == ((void*)-1))
+        {
+            SPDLOG_ERROR("shmat failed to map memory. errno={}", errno);
+            return std::nullopt;
+        }
+        const tcam_gige_device_list* shared_mem_list =
+            static_cast<const tcam_gige_device_list*>(ptr);
+        if (shared_mem_list == nullptr)
+        {
+            SPDLOG_ERROR("shmat returned nullptr.");
+            return std::nullopt;
+        }
+
+        std::vector<DeviceInfo> ret;
+
+        ret.reserve(shared_mem_list->device_count);
+
+        for (unsigned int i = 0; i < shared_mem_list->device_count; ++i)
+        {
+            ret.push_back(DeviceInfo(shared_mem_list->devices[i]));
+        }
+
+        shmdt(shared_mem_list);
+
+        return ret;
+    }
+    catch (const std::exception& ex)
+    {
+        SPDLOG_INFO("Failed to fetch devices from gige-daemon, due to exception={}.", ex.what());
+    }
+    return std::nullopt;
+}
 
 std::vector<DeviceInfo> tcam::get_gige_device_list()
 {
-    bool is_running = is_process_running(get_pid_from_lockfile(gige_daemon_lock_file));
-
-    if (!is_running)
+    auto dev_list = fetch_gige_daemon_device_list();
+    if (dev_list)
     {
-        SPDLOG_INFO("Could not find gige-daemon. Using internal methods");
-        return get_aravis_device_list();
+        return dev_list.value();
     }
 
-    key_t shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
-    key_t sem_key = ftok("/tmp/tcam-gige-semaphore", 'S');
-
-    int shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644);
-    if (shmid < 0)
-    {
-        SPDLOG_INFO("Unable to connect to gige-daemon. Using internal methods");
-        auto vec = get_aravis_device_list();
-        SPDLOG_DEBUG("Aravis gave us {}", vec.size());
-        return vec;
-    }
-
-    semaphore sem_id = semaphore::create(sem_key);
-    std::lock_guard<semaphore> lck(sem_id);
-
-    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
-
-    if (d == nullptr)
-    {
-        shmdt(d);
-        return std::vector<DeviceInfo>();
-    }
-
-    std::vector<DeviceInfo> ret;
-
-    ret.reserve(d->device_count);
-
-    for (unsigned int i = 0; i < d->device_count; ++i) { ret.push_back(DeviceInfo(d->devices[i])); }
-
-    shmdt(d);
-
-    return ret;
+    return get_aravis_device_list();
 }
-
 
 unsigned int tcam::get_gige_device_count()
 {
     return get_gige_device_list().size();
 }
 
-unsigned int tcam::get_aravis_device_count()
-{
-    arv_update_device_list();
-
-    return arv_get_n_devices();
-}
-
-
 std::vector<DeviceInfo> tcam::get_aravis_device_list()
 {
-    std::vector<DeviceInfo> device_list;
-
     arv_update_device_list();
 
     unsigned int number_devices = arv_get_n_devices();
-
     if (number_devices == 0)
     {
-        return device_list;
+        return {};
     }
 
+    std::vector<DeviceInfo> device_list;
     for (unsigned int i = 0; i < number_devices; ++i)
     {
-        tcam_device_info info = { TCAM_DEVICE_TYPE_ARAVIS, "", "", "", "" };
-        std::string name = arv_get_device_id(i);
-        memcpy(info.identifier, name.c_str(), name.size());
-
-        const char* n = arv_get_device_model(i);
-
-        if (n != NULL)
+        const char* device_id = arv_get_device_id(i);
+        if (device_id == nullptr)
         {
-            strncpy(info.name, n, sizeof(info.name) - 1);
+            SPDLOG_WARN("Failed to fetch device_id for aravis device index #{}.", i);
+            continue;
+        }
+
+        tcam_device_info info = { TCAM_DEVICE_TYPE_ARAVIS, "", "", "", "" };
+        strncpy(info.identifier, device_id, sizeof(info.identifier) - 1);
+
+        if (const auto device_model = arv_get_device_model(i); device_model != nullptr)
+        {
+            strncpy(info.name, device_model, sizeof(info.name) - 1);
         }
         else
         {
-            SPDLOG_WARN("Unable to determine model name.");
+            SPDLOG_WARN("Unable to determine model name for device='{}'.", device_id);
         }
 
-        strncpy(info.serial_number, arv_get_device_serial_nbr(i), sizeof(info.serial_number) - 1);
+        if (auto serial = arv_get_device_serial_nbr(i); serial)
+        {
+            strncpy(info.serial_number, serial, sizeof(info.serial_number) - 1);
+        }
 
         device_list.push_back(DeviceInfo(info));
     }
-
     return device_list;
 }
 
-bool tcam::is_private_setting(const std::string& name)
+bool tcam::is_private_setting(std::string_view name)
 {
-
-    static std::vector<std::string> private_settings = { "TLParamsLocked",
+    static const std::string_view private_settings[] = {
+        "TLParamsLocked",
         "GevSCPSDoNotFragment",
         "GevTimestampTickFrequency",
         "GevTimeSCPD",
@@ -302,11 +322,8 @@ bool tcam::is_private_setting(const std::string& name)
         "DecimationVertical",
     };
 
-
-    if (std::find(private_settings.begin(),
-                  private_settings.end(),
-                  name)
-        != private_settings.end())
+    if (std::find(std::begin(private_settings), std::end(private_settings), name)
+        != std::end(private_settings))
     {
         return true;
     }

@@ -2,11 +2,11 @@
 #ifndef TCAM_SEMAPHORES_H
 #define TCAM_SEMAPHORES_H
 
-
-#include <algorithm>
+#include <stdexcept>
 #include <sys/ipc.h> /* general SysV IPC structures          */
 #include <sys/sem.h>
 #include <sys/types.h> /* various type definitions.            */
+#include <utility>
 
 namespace tcam
 {
@@ -34,7 +34,7 @@ inline int semaphore_create(const key_t sem_id)
         ushort* array;
     } sem_val;
 
-    /* intialize the first (and single) semaphore in our set to '1'. */
+    /* initialize the first (and single) semaphore in our set to '1'. */
     sem_val.val = 1;
     int rc = semctl(sem_set_id, 0, SETVAL, sem_val);
     if (rc == -1)
@@ -123,12 +123,13 @@ public:
         semaphore_unlock(sem_id_);
     }
 
+    // Note: Throws on failure
     static semaphore create(const key_t key)
     {
         auto id = semaphore_create(key);
         if (id == -1)
         {
-            // do something
+            throw std::runtime_error("Failed to create semaphore");
         }
         return semaphore(id);
     }
