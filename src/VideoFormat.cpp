@@ -105,8 +105,10 @@ std::string VideoFormat::to_string() const
     s += ",";
     s += "width=" + std::to_string(format.width) + ",";
     s += "height=" + std::to_string(format.height) + ",";
-    s += "binning=" + std::to_string(format.scaling.binning_h) + "x" + std::to_string(format.scaling.binning_v) + ",";
-    s += "skipping=" + std::to_string(format.scaling.skipping_h) + "x" + std::to_string(format.scaling.skipping_v) + ",";
+    s += "binning=" + std::to_string(format.scaling.binning_h) + "x"
+         + std::to_string(format.scaling.binning_v) + ",";
+    s += "skipping=" + std::to_string(format.scaling.skipping_h) + "x"
+         + std::to_string(format.scaling.skipping_v) + ",";
     s += "framerate=" + std::to_string(format.framerate);
 
     return s;

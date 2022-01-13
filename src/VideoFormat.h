@@ -88,6 +88,11 @@ public:
      */
     uint32_t get_pitch_size() const;
 
+    bool is_empty() const noexcept
+    {
+        return format.fourcc == 0;
+    }
+
 private:
     tcam_video_format format = {};
 };

@@ -17,6 +17,7 @@
 #include "v4l2_property_impl.h"
 
 #include "../logging.h"
+#include "../utils.h"
 #include "V4L2PropertyBackend.h"
 
 #include <tcamprop1.0_base/tcamprop_property_info_list.h>
@@ -527,4 +528,95 @@ outcome::result<void> tcam::v4l2::prop_impl_33U_balance_white_auto::set_value_st
         return backend_.set_backend_value(V4L2_CID_TIS_WHITEBALANCE_ONE_PUSH, 1);
     }
     return V4L2PropertyEnumImpl::set_value_str(new_value);
+}
+
+
+tcam::v4l2::prop_impl_offset_auto_center::prop_impl_offset_auto_center(
+    const std::shared_ptr<IPropertyInteger>& offset_x,
+    const std::shared_ptr<IPropertyInteger>& offset_y,
+    tcam_image_size dim)
+    : V4L2PropertyLockImpl(tcamprop1::prop_list::OffsetAutoCenter.name), sensor_dim_(dim),
+      prop_offset_x_(offset_x), prop_offset_y_(offset_y)
+{
+}
+
+auto tcam::v4l2::prop_impl_offset_auto_center::create_if_needed(
+    const std::vector<std::shared_ptr<IPropertyBase>>& properties,
+    tcam_image_size sensor_dim) -> std::shared_ptr<prop_impl_offset_auto_center>
+{
+    using namespace tcamprop1::prop_list;
+
+    auto offset_auto = tcam::property::find_property(properties, OffsetAutoCenter.name);
+    if (offset_auto)
+        return {};
+
+    auto offset_x = tcam::property::find_property<IPropertyInteger>(properties, OffsetX.name);
+    auto offset_y = tcam::property::find_property<IPropertyInteger>(properties, OffsetY.name);
+    if (offset_x == nullptr && offset_y == nullptr)
+        return {};
+
+    return std::make_shared<prop_impl_offset_auto_center>(offset_x, offset_y, sensor_dim);
+}
+
+tcamprop1::prop_static_info tcam::v4l2::prop_impl_offset_auto_center::get_static_info() const
+{
+    return tcamprop1::prop_list::OffsetAutoCenter;
+}
+
+void tcam::v4l2::prop_impl_offset_auto_center::set_format(const tcam::VideoFormat& current_fmt)
+{
+    current_format_ = current_fmt;
+    update_offsets();
+}
+
+outcome::result<void> tcam::v4l2::prop_impl_offset_auto_center::set_value_str(
+    const std::string_view& new_value)
+{
+    if (new_value == "Off")
+    {
+        enabled_ = false;
+
+        update_dependent_lock_state();
+
+        return outcome::success();
+    }
+    else if (new_value == "On")
+    {
+        enabled_ = true;
+
+        update_offsets();
+        update_dependent_lock_state();
+
+        return outcome::success();
+    }
+    return tcam::status::PropertyOutOfBounds;
+}
+
+void tcam::v4l2::prop_impl_offset_auto_center::update_offsets()
+{
+    if (!enabled_)
+        return;
+
+    if( current_format_.is_empty() )
+        return;
+
+    tcam_image_size step = { 8, 4 };
+    if (auto v = prop_offset_x_->get_range().stp; v > 1)
+        step.width = v;
+    if (auto v = prop_offset_y_->get_range().stp; v > 1)
+        step.height = v;
+
+    auto new_offset = tcam::calculate_auto_center(
+        sensor_dim_, step, current_format_.get_size(), current_format_.get_scaling());
+
+    if (auto res = prop_offset_x_->set_value(new_offset.width); res.has_error())
+    {
+        SPDLOG_DEBUG("Failed to set offset_x due to err={}.", res.error().message());
+        return;
+    }
+    if (auto res = prop_offset_y_->set_value(new_offset.height); res.has_error())
+    {
+        SPDLOG_DEBUG("Failed to set offset_y due to err={}.", res.error().message());
+        return;
+    }
 }

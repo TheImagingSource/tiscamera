@@ -17,6 +17,7 @@
 #pragma once
 
 #include "../PropertyInterfaces.h"
+#include "../VideoFormat.h"
 #include "../error.h"
 #include "../property_dependencies.h"
 #include "v4l2_genicam_conversion.h"
@@ -335,6 +336,69 @@ private:
     const tcamprop1::prop_static_info_integer* static_info_ = nullptr;
 
     int64_t value_ = 0;
+};
+
+
+class prop_impl_offset_auto_center : public IPropertyEnum, public V4L2PropertyLockImpl
+{
+public:
+    prop_impl_offset_auto_center(const std::shared_ptr<IPropertyInteger>& offset_x,
+                                 const std::shared_ptr<IPropertyInteger>& offset_y,
+                                 tcam_image_size dim);
+
+    static auto create_if_needed(const std::vector<std::shared_ptr<IPropertyBase>>& properties,
+                                 tcam_image_size sensor_dim)
+        -> std::shared_ptr<prop_impl_offset_auto_center>;
+
+    tcamprop1::prop_static_info get_static_info() const final;
+
+    PropertyFlags get_flags() const final
+    {
+        return PropertyFlags::Implemented | PropertyFlags::Available;
+    }
+    outcome::result<void> set_value_str(const std::string_view& new_value) final;
+
+    outcome::result<std::string_view> get_value() const final
+    {
+        return enabled_ ? "On" : "Off";
+    }
+
+    std::string get_default() const final
+    {
+        return "On";
+    }
+
+    std::vector<std::string> get_entries() const final
+    {
+        return { "Off", "On" };
+    }
+
+    bool should_set_dependent_locked() const final
+    {
+        return enabled_;
+    }
+
+    void set_locked(bool /*new_locked_state*/) final
+    {
+        // we don't really need to do anything here
+    }
+
+
+    void set_format(const tcam::VideoFormat& current_fmt);
+
+private:
+    const tcamprop1::prop_static_info_integer* static_info_ = nullptr;
+
+    bool enabled_ = true;
+
+    tcam_image_size sensor_dim_ = {};
+
+    std::shared_ptr<IPropertyInteger> prop_offset_x_;
+    std::shared_ptr<IPropertyInteger> prop_offset_y_;
+
+    tcam::VideoFormat current_format_;
+
+    void update_offsets();
 };
 
 } // namespace tcam::v4l2

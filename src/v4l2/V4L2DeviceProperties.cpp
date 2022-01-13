@@ -22,9 +22,8 @@
 #include "v4l2_genicam_mapping.h"
 #include "v4l2_property_impl.h"
 
-#include <algorithm>
 #include <linux/videodev2.h>
-#include <unistd.h> // pipe, usleep
+#include <tcamprop1.0_base/tcamprop_property_info_list.h>
 
 
 using namespace tcam::v4l2;
@@ -108,8 +107,6 @@ void tcam::V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qc
             }
         }
     }
-
-    update_dependency_information();
 }
 
 void tcam::V4l2Device::update_dependency_information()
@@ -208,4 +205,35 @@ void tcam::V4l2Device::create_properties()
     }
 
     generate_properties(qctrl_av);
+}
+
+void tcam::V4l2Device::create_videoformat_dependent_properties()
+{
+    auto dim = get_sensor_size();
+    if( find_property( m_properties, tcamprop1::prop_list::SensorWidth.name ) == nullptr )
+    {
+        auto prop_dim_width = std::make_shared<tcam::v4l2::prop_impl_sensor_dim>(
+            &tcamprop1::prop_list::SensorWidth, dim.width );
+        auto prop_dim_height = std::make_shared<tcam::v4l2::prop_impl_sensor_dim>(
+            &tcamprop1::prop_list::SensorHeight, dim.height );
+
+        m_properties.push_back( prop_dim_width );
+        m_properties.push_back( prop_dim_height );
+    }
+
+    if( auto auto_center = tcam::v4l2::prop_impl_offset_auto_center::create_if_needed( m_properties, dim ); auto_center )
+    {
+        m_properties.push_back( auto_center );
+        software_auto_center_ = auto_center;
+    }
+
+    update_dependency_information();
+}
+
+void    tcam::V4l2Device::update_properties( const VideoFormat& current_fmt )
+{
+    if( software_auto_center_ )
+    {
+        software_auto_center_->set_format( current_fmt );
+    }
 }

@@ -33,6 +33,11 @@ VISIBILITY_INTERNAL
 
 namespace tcam
 {
+namespace v4l2
+{
+class prop_impl_offset_auto_center;
+}
+
 
 class V4l2Device : public DeviceInterface
 {
@@ -134,6 +139,8 @@ private:
     bool set_scaling(const image_scaling& scale);
     image_scaling get_current_scaling();
 
+    void    update_properties( const VideoFormat& current_fmt );
+
     /**
      * @brief iterate over all v4l2 format descriptions and convert them
      *        into the internal representation
@@ -161,7 +168,7 @@ private:
     // filter those messages until we receive one valid image
     bool m_already_received_valid_image = false;
 
-    struct tcam_stream_statistics m_statistics = {};
+    tcam_stream_statistics m_statistics = {};
 
     struct buffer_info
     {
@@ -174,6 +181,8 @@ private:
     std::vector<buffer_info> m_buffers;
 
     std::weak_ptr<SinkInterface> m_listener;
+
+    std::shared_ptr<tcam::v4l2::prop_impl_offset_auto_center>   software_auto_center_;
 
     void stream();
 

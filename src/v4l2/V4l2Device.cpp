@@ -57,6 +57,7 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
 
     determine_active_video_format();
 
+    create_videoformat_dependent_properties();
 }
 
 
@@ -160,6 +161,8 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
 
     determine_active_video_format();
     SPDLOG_DEBUG("Active format is: '{}'", m_active_video_format.to_string().c_str());
+
+    update_properties(new_format);
 
     return true;
 }
@@ -1362,13 +1365,10 @@ tcam_image_size V4l2Device::get_sensor_size() const
     {
         for (const auto& r : f.get_resolutions())
         {
-            if (r.max_size.width > size.width || r.max_size.height > size.height)
-            {
-                size = r.max_size;
-            }
+            size.width = std::max( r.max_size.width, size.width );
+            size.height = std::max( r.max_size.height, size.height );
         }
     }
-
     return size;
 }
 
