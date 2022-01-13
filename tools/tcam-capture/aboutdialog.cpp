@@ -42,6 +42,9 @@ public:
         : QWidget(parent)
     {
         setLayout(new QFormLayout());
+
+        // Add default string, so that user always knows what is going on
+        dynamic_cast<QFormLayout*>(layout())->addRow("No GstMeta available.", new QLabel());
     };
 
     ~MetaWidget()
@@ -49,6 +52,13 @@ public:
 
     void update(GstStructure& struc)
     {
+        // GstMeta will always have more than 1 entry
+        // this is a reliable identifier for us receiving the
+        // first update and having to remove the default string
+        if (dynamic_cast<QFormLayout*>(layout())->rowCount() == 1)
+        {
+            dynamic_cast<QFormLayout*>(layout())->removeRow(0);
+        }
 
         auto meta_cb = [] (GQuark field_id,
                            const GValue* value,

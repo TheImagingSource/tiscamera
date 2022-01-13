@@ -720,7 +720,12 @@ void MainWindow::fps_tick(double new_fps)
         }
         else
         {
-            qWarning("No meta data available");
+            static bool sample_warning_issued;
+            if (!sample_warning_issued)
+            {
+                qWarning("No meta data available. This warning will only be issued once.");
+                sample_warning_issued = true;
+            }
         }
 
         gst_sample_unref(sample);
