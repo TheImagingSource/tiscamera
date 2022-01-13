@@ -20,6 +20,7 @@
 #include "SinkInterface.h"
 #include "base_types.h"
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -32,14 +33,13 @@
 namespace tcam
 {
 
-typedef void (*shared_callback)(std::shared_ptr<tcam::ImageBuffer>, void*);
-typedef void (*sink_callback)(tcam::ImageBuffer*, void*);
-typedef void (*c_callback)(const struct tcam_image_buffer*, void*);
-
 class ImageSink : public SinkInterface
 {
 public:
-    ImageSink();
+    using image_buffer_cb = std::function<void(const std::shared_ptr<tcam::ImageBuffer>& buffer)>;
+
+public:
+    explicit ImageSink(const image_buffer_cb& cb, const tcam::VideoFormat& format);
 
     bool set_status(TCAM_PIPELINE_STATUS) override;
     TCAM_PIPELINE_STATUS get_status() const override;
@@ -47,10 +47,6 @@ public:
     bool setVideoFormat(const VideoFormat&) override;
 
     VideoFormat getVideoFormat() const override;
-
-    bool registerCallback(shared_callback, void*);
-    bool registerCallback(sink_callback, void*);
-    bool registerCallback(c_callback, void*);
 
     void push_image(std::shared_ptr<ImageBuffer>) override;
 
@@ -79,19 +75,14 @@ private:
 
     std::weak_ptr<SinkInterface> source_;
 
-    TCAM_PIPELINE_STATUS status;
-    VideoFormat format;
+    TCAM_PIPELINE_STATUS status = TCAM_PIPELINE_UNDEFINED;
+    VideoFormat format_;
 
-    shared_callback sh_callback;
-    sink_callback callback;
-    c_callback c_back;
-    void* user_data;
+    image_buffer_cb sh_callback_;
 
-    struct tcam_image_buffer last_image_buffer;
+    bool external_buffer = false;
 
-    bool external_buffer;
-
-    size_t buffer_number;
+    size_t buffer_number = 10;
     std::vector<std::shared_ptr<ImageBuffer>> buffers;
 };
 

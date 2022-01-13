@@ -26,10 +26,10 @@
 #include <string>
 #include <vector>
 
-using namespace tcam;
-// {
+namespace tcam
+{
 
-enum FILTER_TYPE
+enum class FILTER_TYPE
 {
     FILTER_TYPE_UNKNOWN = 0,
     FILTER_TYPE_CONVERSION, /* used for static transformations (e.g. colorspace conversions) */
@@ -40,7 +40,7 @@ enum FILTER_TYPE
 struct FilterDescription
 {
     std::string name;
-    enum FILTER_TYPE type;
+    FILTER_TYPE type;
 
     // 0 == all types
     std::vector<uint32_t> output_fourcc;
@@ -69,28 +69,6 @@ public:
     virtual std::vector<std::shared_ptr<tcam::property::IPropertyBase>> getProperties() = 0;
 };
 
-extern "C"
-{
-    // the types of the class factories
-    typedef FilterBase* create_filter();
-    typedef void destroy_filter(FilterBase*);
-
-    /* opaque object that represents the camera */
-    struct FB;
-    typedef struct FB FB;
-    // These two functions serve as entry points to the filter
-    // They are used for construction/descruction of your filter
-    // The rest can be deduced at runtime
-
-    // FilterBase* create ();
-
-    // void destroy (FilterBase*);
-
-    FB* create();
-
-    void destroy(FB*);
-}
-
-// } /* namespace tcam */
+} /* namespace tcam */
 
 #endif /* TCAM_FILTERBASE_H */

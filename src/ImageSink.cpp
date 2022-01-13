@@ -21,12 +21,10 @@
 using namespace tcam;
 
 
-ImageSink::ImageSink()
-    : status(TCAM_PIPELINE_UNDEFINED), callback(nullptr), c_back(nullptr), user_data(nullptr),
-      last_image_buffer(), external_buffer(false), buffer_number(10), buffers()
+ImageSink::ImageSink(const image_buffer_cb& cb, const tcam::VideoFormat& format)
+    : format_(format), sh_callback_( cb )
 {
 }
-
 
 bool ImageSink::set_status(TCAM_PIPELINE_STATUS s)
 {
@@ -70,7 +68,7 @@ bool ImageSink::setVideoFormat(const VideoFormat& new_format)
         return false;
     }
 
-    format = new_format;
+    format_ = new_format;
 
     return true;
 }
@@ -78,51 +76,14 @@ bool ImageSink::setVideoFormat(const VideoFormat& new_format)
 
 VideoFormat ImageSink::getVideoFormat() const
 {
-    return format;
+    return format_;
 }
-
-
-bool ImageSink::registerCallback(shared_callback sc, void* ud)
-{
-    this->sh_callback = sc;
-    this->user_data = ud;
-
-    return true;
-}
-
-
-bool ImageSink::registerCallback(sink_callback sc, void* ud)
-{
-    this->callback = sc;
-    this->user_data = ud;
-
-    return true;
-}
-
-
-bool ImageSink::registerCallback(c_callback cc, void* ud)
-{
-    this->c_back = cc;
-    this->user_data = ud;
-
-    return true;
-}
-
 
 void ImageSink::push_image(std::shared_ptr<ImageBuffer> buffer)
 {
-    last_image_buffer = buffer->getImageBuffer();
-    if (sh_callback)
+    if (sh_callback_)
     {
-        this->sh_callback(buffer, user_data);
-    }
-    if (callback != nullptr)
-    {
-        this->callback(&*buffer, user_data);
-    }
-    else if (c_back != nullptr)
-    {
-        this->c_back(&last_image_buffer, user_data);
+        this->sh_callback_(buffer);
     }
 }
 
@@ -214,7 +175,7 @@ bool ImageSink::initialize_internal_buffer()
 
     for (unsigned int i = 0; i < this->buffer_number; ++i)
     {
-        auto ptr = std::make_shared<ImageBuffer>(format, true);
+        auto ptr = std::make_shared<ImageBuffer>(format_, true);
         this->buffers.push_back(ptr);
     }
     return true;

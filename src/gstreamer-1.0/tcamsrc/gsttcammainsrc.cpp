@@ -333,10 +333,13 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
         return FALSE;
     }
 
-    self->device->sink = std::make_shared<tcam::ImageSink>();
+    auto cb_func = [self](const std::shared_ptr<tcam::ImageBuffer>& cb)
+    {
+        gst_tcam_mainsrc_sh_callback(cb, self);
+    };
+
+    self->device->sink = std::make_shared<tcam::ImageSink>(cb_func, tcam::VideoFormat(format));
     self->device->sink->set_buffer_number(state.imagesink_buffers_);
-    self->device->sink->registerCallback(gst_tcam_mainsrc_sh_callback, self);
-    self->device->sink->setVideoFormat(tcam::VideoFormat(format));
 
     self->device->device_->start_stream(self->device->sink);
     self->device->sink->drop_incomplete_frames(state.drop_incomplete_frames_);

@@ -312,7 +312,7 @@ bool PipelineManager::create_conversion_pipeline()
     {
         std::string s = f->getDescription().name;
 
-        if (f->getDescription().type == FILTER_TYPE_CONVERSION)
+        if (f->getDescription().type == tcam::FILTER_TYPE::FILTER_TYPE_CONVERSION)
         {
 
             if (isFilterApplicable(output_format.get_fourcc(), f->getDescription().output_fourcc))
@@ -367,7 +367,7 @@ bool PipelineManager::add_interpretation_filter()
 
     for (auto& f : available_filter)
     {
-        if (f->getDescription().type == FILTER_TYPE_INTERPRET)
+        if (f->getDescription().type == tcam::FILTER_TYPE::FILTER_TYPE_INTERPRET)
         {
             std::string s = f->getDescription().name;
             // applicable to sink

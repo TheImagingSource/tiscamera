@@ -25,7 +25,7 @@ struct tcam_gige_device_list
 {
     unsigned int device_count;
 
-    struct tcam_device_info devices[TCAM_DEVICE_LIST_MAX];
+    tcam::tcam_device_info devices[TCAM_DEVICE_LIST_MAX];
 };
 
 constexpr const char* LOCK_FILE = "/var/lock/tcam-gige-daemon.lock";
