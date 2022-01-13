@@ -50,6 +50,7 @@ struct tcambin_data
     gst_helper::gst_ptr<GstElement> src_element;
     GstElement* pipeline_caps = nullptr;
     GstElement* jpegdec = nullptr;
+    GstElement* videoconvert = nullptr;
     GstElement* tcam_converter = nullptr;
 
     tcambin_conversion conversion_info = {};

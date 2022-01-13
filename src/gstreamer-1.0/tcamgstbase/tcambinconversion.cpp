@@ -52,6 +52,12 @@ GstCaps* filter_by_caps_properties(const GstCaps* input, const GstCaps* filter)
 
     GstStructure* filter_struc = gst_caps_get_structure(filter, 0);
 
+    GstStructure* input_struc = gst_caps_get_structure(input, 0);
+    if (g_strcmp0(gst_structure_get_name(input_struc), "image/jpeg") == 0)
+    {
+        return gst_caps_copy(input);
+    }
+
     GstCaps* internal_filter = gst_caps_new_empty();
 
     for (guint i = 0; i < gst_caps_get_size(input); ++i)

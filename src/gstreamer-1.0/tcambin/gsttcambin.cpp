@@ -247,6 +247,12 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
     {
         remove_element(data.jpegdec);
         data.jpegdec = nullptr;
+
+        if (data.videoconvert)
+        {
+            remove_element(data.videoconvert);
+            data.videoconvert = nullptr;
+        }
     }
 
     data.elements_created = false;
@@ -332,15 +338,29 @@ static bool tcambin_create_elements(GstTcamBin* self)
         std::string bin_name = "tcambin-jpegdec";
         if (!link_elements(data.pipeline_caps, data.jpegdec, pipeline_string, bin_name))
         {
-            GST_ELEMENT_ERROR(self,
-                              CORE,
-                              NEGOTIATION,
-                              ("Could not link element '%s'.", "jpegdec"),
-                              (NULL));
+            GST_ELEMENT_ERROR(
+                self, CORE, NEGOTIATION, ("Could not link element '%s'.", "jpegdec"), (NULL));
             return false;
         }
 
-        data.target_pad = gst_helper::get_static_pad(*self->data->jpegdec, "src");
+        // always add videoconvert
+        // this is necessaryto ensure output BGRx as output works
+        if (!create_and_add_element(
+                &data.videoconvert, "videoconvert", "tcambin-videoconvert", GST_BIN(self)))
+        {
+            GST_ELEMENT_ERROR(
+                self, CORE, MISSING_PLUGIN, ("Could not create element 'videoconvert'."), (NULL));
+            return false;
+        }
+
+        if (!link_elements(data.jpegdec, data.videoconvert, pipeline_string, "tcambin-videoconvert"))
+        {
+            GST_ELEMENT_ERROR(
+                self, CORE, NEGOTIATION, ("Could not link element '%s'.", "videoconvert"), (NULL));
+            return false;
+        }
+
+        data.target_pad = gst_helper::get_static_pad(*self->data->videoconvert, "src");
     }
     else
     {
@@ -358,8 +378,10 @@ static bool tcambin_create_elements(GstTcamBin* self)
         }
         else if (data.conversion_info.selected_conversion == TCAM_BIN_CONVERSION_CUDA)
         {
-            if (!create_and_add_element(
-                    &data.tcam_converter, "tcamdutils-cuda", "tcambin-tcamdutils-cuda", GST_BIN(self)))
+            if (!create_and_add_element(&data.tcam_converter,
+                                        "tcamdutils-cuda",
+                                        "tcambin-tcamdutils-cuda",
+                                        GST_BIN(self)))
             {
                 GST_ELEMENT_ERROR(self,
                                   CORE,
