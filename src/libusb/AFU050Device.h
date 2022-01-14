@@ -136,10 +136,10 @@ private:
 
     std::shared_ptr<AFU050FormatHandler> format_handler;
 
-    unsigned char lost_countdown;
-    bool stop_all;
+    unsigned char lost_countdown = 0;
+    bool stop_all = false;
     bool device_is_lost = false;
-    bool abort_all;
+    bool abort_all = false;
 
     std::thread udev_monitor;
 
@@ -150,6 +150,8 @@ private:
     void determine_active_video_format();
 
     void create_formats();
+
+    void add_dependency_tracking();
 
     void create_properties();
 
@@ -163,13 +165,13 @@ private:
 
     std::vector<buffer_info> buffers;
 
-    bool is_stream_on;
-    struct tcam_stream_statistics m_statistics;
+    bool is_stream_on = false;
+    struct tcam_stream_statistics m_statistics = {};
 
-    size_t current_buffer;
-    size_t jpegsize;
-    int jpegptr;
-    unsigned char* jpegbuf;
+    size_t current_buffer = 0;
+    size_t jpegsize = 0;
+    int jpegptr = 0;
+    unsigned char* jpegbuf = nullptr;
 
     std::weak_ptr<SinkInterface> listener;
 

@@ -67,8 +67,6 @@ tcam::AFU050Device::~AFU050Device()
 
 void tcam::AFU050Device::lost_device()
 {
-    device_is_lost = true;
-
     if (device_is_lost)
     {
         return;
@@ -77,6 +75,8 @@ void tcam::AFU050Device::lost_device()
     stop_stream();
 
     notify_device_lost();
+
+    device_is_lost = true;
 }
 
 
@@ -127,16 +127,54 @@ void AFU050Device::create_formats()
 }
 
 
+void AFU050Device::add_dependency_tracking()
+{
+    for (auto& p : m_properties)
+    {
+        auto ptr = std::dynamic_pointer_cast<tcam::property::PropertyLock>(p);
+        //auto ptr = dynamic_pointer_cast<tcam::property::PropertyLock>
+
+        auto dep_names = ptr->get_dependent_names();
+
+        if (dep_names.empty())
+        {
+            continue;
+        }
+
+        std::vector<std::weak_ptr<tcam::property::PropertyLock>> can_be_locked;
+
+
+        for (auto& possible_dependency : m_properties)
+        {
+            if (std::find(dep_names.begin(),
+                          dep_names.end(),
+                          possible_dependency->get_name())
+                != dep_names.end())
+            {
+                SPDLOG_ERROR("Adding {} as dependency for {}", possible_dependency->get_name(), p->get_name());
+                can_be_locked.push_back(std::dynamic_pointer_cast<tcam::property::PropertyLock>(possible_dependency));
+            }
+        }
+
+        if (!can_be_locked.empty())
+        {
+            SPDLOG_ERROR("setting deps for {}", p->get_name());
+            ptr->set_dependent_properties(std::move(can_be_locked));
+        }
+    }
+}
+
+
 void AFU050Device::create_properties()
 {
     add_double("ExposureTime", VC_UNIT_INPUT_TERMINAL, CT_EXPOSURE_TIME_ABSOLUTE_CONTROL);
     add_enum("ExposureAuto",
              VC_UNIT_EXTENSION_UNIT,
              XU_AUTO_EXPOSURE,
-             { { { 0, "Off" }, { 1, "On" } } });
+             { { { 0, "Off" }, { 1, "Continuous" } } });
 
     add_double("Gain", VC_UNIT_PROCESSING_UNIT, PU_GAIN_CONTROL);
-    add_enum("GainAuto", VC_UNIT_EXTENSION_UNIT, XU_AUTO_GAIN, { { { 0, "Off" }, { 1, "On" } } });
+    add_enum("GainAuto", VC_UNIT_EXTENSION_UNIT, XU_AUTO_GAIN, { { { 0, "Off" }, { 1, "Continuous" } } });
 
     add_enum("FocusAuto",
              VC_UNIT_EXTENSION_UNIT,
@@ -159,6 +197,8 @@ void AFU050Device::create_properties()
 
     // add_int(TCAM_PROPERTY_FOCUS_X, VC_UNIT_EXTENSION_UNIT, PU_);
     // add_int(TCAM_PROPERTY_FOCUS_Y, VC_UNIT_EXTENSION_UNIT, PU_);
+
+    add_dependency_tracking();
 }
 
 
@@ -501,10 +541,6 @@ bool tcam::AFU050Device::stop_stream()
 {
     stop_all = true;
     is_stream_on = false;
-
-    //sleep(1);
-    // if (work_thread.joinable())
-    //     work_thread.join();
 
     release_buffers();
     return true;

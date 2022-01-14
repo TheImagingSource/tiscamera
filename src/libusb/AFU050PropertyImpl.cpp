@@ -7,11 +7,50 @@
 namespace tcam::property
 {
 
+
+tcam::property::AFU050PropertyLockImpl::AFU050PropertyLockImpl(std::string_view name)
+{
+    dependency_info_ = tcam::property::find_dependency_entry(name);
+}
+
+std::vector<std::string_view> tcam::property::AFU050PropertyLockImpl::get_dependent_names() const
+{
+    if (dependency_info_)
+    {
+        return dependency_info_->dependent_property_names;
+    }
+    return {};
+}
+
+    void tcam::property::AFU050PropertyLockImpl::update_dependent_lock_state()
+    {
+        if (dependent_controls_.empty())
+            return;
+
+        bool new_locked_state = should_set_dependent_locked();
+        for (auto& dep : dependent_controls_)
+        {
+            if (auto d = dep.lock())
+            {
+                d->set_locked(new_locked_state);
+            }
+        }
+    }
+
+void tcam::property::AFU050PropertyLockImpl::set_dependent_properties(
+    std::vector<std::weak_ptr<PropertyLock>>&& controls)
+{
+    dependent_controls_ = std::move(controls);
+
+    update_dependent_lock_state();
+}
+
+
 AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(
     const std::string& name,
     control_definition ctrl,
     std::shared_ptr<tcam::property::AFU050DeviceBackend> cam)
-    : m_cam(cam), m_name(name), m_ctrl(ctrl)
+    : AFU050PropertyLockImpl(name), m_cam(cam), m_name(name), m_ctrl(ctrl)
 {
     if (auto ptr = m_cam.lock())
     {
@@ -98,7 +137,16 @@ outcome::result<void> AFU050PropertyIntegerImpl::set_value(int64_t new_value)
 {
     if (auto ptr = m_cam.lock())
     {
-        return ptr->set_int(m_ctrl, new_value);
+
+         auto ret = ptr->set_int(m_ctrl, new_value);
+         if (ret.has_error())
+         {
+             return ret.as_failure();
+         }
+         //update_dependent_lock_state();
+
+         return tcam::status::Success;
+
     }
     else
     {
@@ -107,12 +155,31 @@ outcome::result<void> AFU050PropertyIntegerImpl::set_value(int64_t new_value)
     }
 }
 
+
+// bool AFU050PropertyIntegerImpl::should_set_dependent_locked() const
+// {
+//     auto dep_entry = get_dependency_entry();
+//     if (!dep_entry)
+//     {
+//         return false;
+//     }
+
+//     auto res = get_value();
+//     if (res.has_error())
+//     {
+//         return false;
+//     }
+
+//     return res.value() == dep_entry->prop_enum_state_for_locked;
+// }
+
+
 AFU050PropertyDoubleImpl::AFU050PropertyDoubleImpl(
     const std::string& name,
     control_definition ctrl,
     std::shared_ptr<tcam::property::AFU050DeviceBackend> cam,
     double modifier)
-    : m_cam(cam), m_name(name), m_modifier(modifier), m_ctrl(ctrl)
+    : AFU050PropertyLockImpl(name), m_cam(cam), m_name(name), m_modifier(modifier), m_ctrl(ctrl)
 {
     if (auto ptr = m_cam.lock())
     {
@@ -207,7 +274,16 @@ outcome::result<void> AFU050PropertyDoubleImpl::set_value(double new_value)
 {
     if (auto ptr = m_cam.lock())
     {
-        return ptr->set_int(m_ctrl, new_value * m_modifier);
+        auto ret = ptr->set_int(m_ctrl, new_value * m_modifier);
+
+        if (ret.has_error())
+        {
+            return ret.as_failure();
+        }
+
+        //update_dependent_lock_state();
+
+        return tcam::status::Success;
     }
     else
     {
@@ -228,11 +304,29 @@ outcome::result<void> AFU050PropertyDoubleImpl::valid_value(double value)
 }
 
 
+// bool AFU050PropertyDoubleImpl::should_set_dependent_locked() const
+// {
+//     auto dep_entry = get_dependency_entry();
+//     if (!dep_entry)
+//     {
+//         return false;
+//     }
+
+//     auto res = get_value();
+//     if (res.has_error())
+//     {
+//         return false;
+//     }
+
+//     return res.value() == dep_entry->prop_enum_state_for_locked;
+// }
+
+
 AFU050PropertyEnumImpl::AFU050PropertyEnumImpl(const std::string& name,
                                                control_definition ctrl,
                                                std::map<int, std::string> entries,
                                                std::shared_ptr<AFU050DeviceBackend> backend)
-    : m_entries(entries), m_cam(backend), m_name(name), m_ctrl(ctrl)
+    : AFU050PropertyLockImpl(name), m_entries(entries), m_cam(backend), m_name(name), m_ctrl(ctrl)
 {
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 
@@ -294,6 +388,7 @@ outcome::result<void> AFU050PropertyEnumImpl::set_value(int64_t new_value)
             SPDLOG_ERROR("Something went wrong while writing {}", m_name);
             return tcam::status::ResourceNotLockable;
         }
+        update_dependent_lock_state();
     }
     else
     {
@@ -347,6 +442,24 @@ bool AFU050PropertyEnumImpl::valid_value(int value)
     }
 
     return true;
+}
+
+
+bool AFU050PropertyEnumImpl::should_set_dependent_locked() const
+{
+    auto dep_entry = get_dependency_entry();
+    if (!dep_entry)
+    {
+        return false;
+    }
+
+    auto res = get_value();
+    if (res.has_error())
+    {
+        return false;
+    }
+
+    return res.value() == dep_entry->prop_enum_state_for_locked;
 }
 
 

@@ -5,6 +5,9 @@
 #include "../PropertyInterfaces.h"
 #include "afu050_definitions.h"
 #include <tcamprop1.0_base/tcamprop_property_info.h>
+
+#include "../property_dependencies.h"
+
 #include <map>
 #include <memory>
 
@@ -13,7 +16,37 @@ namespace tcam::property
 
 class AFU050DeviceBackend;
 
-class AFU050PropertyIntegerImpl : public IPropertyInteger
+class AFU050PropertyLockImpl : public PropertyLock
+{
+protected:
+    AFU050PropertyLockImpl(std::string_view name);
+
+    /**
+     * Function called when this property wants to know if dependent properties should be locked.
+     */
+    virtual bool should_set_dependent_locked() const
+    {
+        return false;
+    }
+    void set_dependent_properties(std::vector<std::weak_ptr<PropertyLock>>&& controls) override;
+    auto get_dependent_names() const -> std::vector<std::string_view> override;
+
+protected:
+    void update_dependent_lock_state();
+
+    auto get_dependency_entry() const noexcept
+    {
+        return dependency_info_;
+    }
+
+private:
+    std::vector<std::weak_ptr<PropertyLock>> dependent_controls_;
+
+    const tcam::property::dependency_entry* dependency_info_ = nullptr;
+};
+
+
+class AFU050PropertyIntegerImpl : public IPropertyInteger, public AFU050PropertyLockImpl
 {
 public:
     AFU050PropertyIntegerImpl(const std::string& name,
@@ -40,6 +73,12 @@ public:
     {
         m_flags = flags;
     }
+
+    void set_locked(bool new_locked_state) override
+    {
+        lock(m_flags, new_locked_state);
+    }
+
     virtual tcamprop1::prop_range_integer get_range() const final
     {
         return { m_min, m_max, m_step };
@@ -52,6 +91,7 @@ public:
     virtual outcome::result<int64_t> get_value() const final;
 
     virtual outcome::result<void> set_value(int64_t new_value) final;
+    //bool should_set_dependent_locked() const final;
 
 private:
     std::weak_ptr<tcam::property::AFU050DeviceBackend> m_cam;
@@ -69,7 +109,7 @@ private:
 };
 
 
-class AFU050PropertyDoubleImpl : public IPropertyFloat
+class AFU050PropertyDoubleImpl : public IPropertyFloat, public AFU050PropertyLockImpl
 {
 public:
     AFU050PropertyDoubleImpl(const std::string& name,
@@ -96,6 +136,12 @@ public:
     {
         m_flags = flags;
     }
+
+    void set_locked(bool new_locked_state) override
+    {
+        lock(m_flags, new_locked_state);
+    }
+
     virtual tcamprop1::prop_range_float get_range() const final
     {
         return { m_min, m_max, m_step };
@@ -109,6 +155,7 @@ public:
     virtual outcome::result<double> get_value() const final;
 
     virtual outcome::result<void> set_value(double new_value) final;
+    //bool should_set_dependent_locked() const final;
 
 private:
     outcome::result<void> valid_value(double val);
@@ -133,7 +180,7 @@ private:
 };
 
 
-class AFU050PropertyEnumImpl : public IPropertyEnum
+class AFU050PropertyEnumImpl : public IPropertyEnum, public AFU050PropertyLockImpl
 {
 public:
     AFU050PropertyEnumImpl(const std::string& name,
@@ -159,6 +206,11 @@ public:
         m_flags = flags;
     }
 
+    void set_locked(bool new_locked_state) override
+    {
+        lock(m_flags, new_locked_state);
+    }
+
     virtual outcome::result<void> set_value_str(const std::string_view& new_value) final;
     virtual outcome::result<void> set_value(int64_t new_value) final;
 
@@ -171,6 +223,7 @@ public:
     }
 
     virtual std::vector<std::string> get_entries() const final;
+    bool should_set_dependent_locked() const final;
 
 private:
     bool valid_value(int value);
