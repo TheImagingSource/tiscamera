@@ -134,8 +134,6 @@ PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}      # For version.h, version.cpp is generated an build in ${CMAKE_CURRENT_BINARY_DIR}, so we have to bend includes to that directory
 )
 
-target_compile_definitions(tcam PRIVATE TCAM_LOG_ENV_NAME="TCAM_LOG")
-
 # set_target_properties(tcam
 #   PROPERTIES
 #   CXX_VISIBILITY_PRESET hidden

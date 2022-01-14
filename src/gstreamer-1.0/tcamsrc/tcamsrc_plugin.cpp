@@ -17,18 +17,8 @@ static void init_libtcam_spdlog_binding()
     auto logger = libtcam::get_spdlog_logger();
     logger->sinks().push_back(default_sink);
 
-    if (auto env_lvl = libtcam::get_env_log_level(); env_lvl)
-    {
-        gst_debug_category_set_threshold(
-            libtcam_category,
-            static_cast<GstDebugLevel>(
-                tcam::gst::log::convert_spdlog_level_to_gst(env_lvl.value())));
-    }
-    else
-    {
-        // synchronize gst_debug_level and spdlog
-        spdlog::default_logger()->set_level(tcam::gst::log::level_from_gst_debug_min());
-    }
+    // synchronize gst_debug_level and spdlog
+    spdlog::default_logger()->set_level(tcam::gst::log::level_from_gst_debug_min());
 
     spdlog::set_default_logger(logger);
 

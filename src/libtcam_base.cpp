@@ -6,60 +6,10 @@
 #include <cstdlib>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-#ifndef TCAM_LOG_ENV_NAME
-#define TCAM_LOG_ENV_NAME "TCAM_LOG"
-#endif
-
 namespace
 {
-static constexpr const char* tcam_log_env_name = TCAM_LOG_ENV_NAME;
 static constexpr auto tcam_default_loglevel_release = spdlog::level::err;
 static constexpr auto tcam_default_loglevel_debug = spdlog::level::info;
-
-
-auto string2loglevel(std::string_view level) noexcept -> spdlog::level::level_enum
-{
-    if ("OFF" == level)
-    {
-        return spdlog::level::off;
-    }
-    else if ("TRACE" == level)
-    {
-        return spdlog::level::trace;
-    }
-    else if ("DEBUG" == level)
-    {
-        return spdlog::level::debug;
-    }
-    else if ("INFO" == level)
-    {
-        return spdlog::level::info;
-    }
-    else if ("WARNING" == level)
-    {
-        return spdlog::level::warn;
-    }
-    else if ("ERROR" == level)
-    {
-        return spdlog::level::err;
-    }
-    else if ("CRITICAL" == level)
-    {
-        return spdlog::level::critical;
-    }
-    return spdlog::level::err;
-}
-
-auto fetch_log_env_setting() noexcept -> std::optional<spdlog::level::level_enum>
-{
-    char* log_def = getenv(tcam_log_env_name);
-    if (log_def != nullptr)
-    {
-        return string2loglevel(log_def);
-    }
-    return {};
-}
-
 
 auto fetch_default_log_level() noexcept
 {
@@ -68,7 +18,7 @@ auto fetch_default_log_level() noexcept
 #else
     auto lvl = tcam_default_loglevel_release;
 #endif
-    return fetch_log_env_setting().value_or(lvl);
+    return lvl;
 }
 
 
@@ -128,11 +78,6 @@ void libtcam::setup_default_logger(bool add_stdout_logger)
     {
         log.add_stdout_logger_sink();
     }
-}
-
-std::optional<spdlog::level::level_enum> libtcam::get_env_log_level() noexcept
-{
-    return fetch_log_env_setting();
 }
 
 auto libtcam::get_spdlog_logger() -> std::shared_ptr<spdlog::logger>

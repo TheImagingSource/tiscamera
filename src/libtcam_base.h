@@ -18,15 +18,13 @@
 
 #include "logging.h"
 
-#include <optional>
+#include <memory>
 
 VISIBILITY_DEFAULT
 
 namespace libtcam
 {
 void setup_default_logger(bool add_stdout_logger = false);
-
-std::optional<spdlog::level::level_enum>    get_env_log_level() noexcept;
 
 auto get_spdlog_logger() -> std::shared_ptr<spdlog::logger>;
 

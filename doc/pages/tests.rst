@@ -98,10 +98,10 @@ For most tests, the following configuration is assumed:
 
 - [ ] evironment
 
-  - [ ] TCAM_LOG
+  - [ ] GST_DEBUG output
 
-    - [ ] Setting TCAM_LOG=DEBUG enables debug output.
-    - [ ] Setting TCAM_LOG=OFF disables any output log.
+    - [ ] Setting GST_DEBUG=tcam*:5 enables debug output.
+    - [ ] Setting GST_DEBUG=0 disables any output log.
 
   - [ ] TCAM_GIGE_PACKET_SIZE works
 

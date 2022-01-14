@@ -113,7 +113,7 @@ A Property consists out of the fields 'name' and 'value'.
 - value contains the actual value. The interpretation of this field
   is done automatically.
 
-In the case of an error a message will the written to TCAM_LOG.
+In the case of an error a message will the written to the GStreamer log.
 The property will be ignored.
 
 Properties of the type 'button' are not added to a state description.
