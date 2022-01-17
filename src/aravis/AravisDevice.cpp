@@ -185,6 +185,7 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc) : stream(NULL)
     if (arv_camera_is_gv_device(this->arv_camera))
     {
         auto_set_packet_size();
+        auto_set_control_lifetime();
     }
 
     format_handler = std::make_shared<AravisFormatHandler>(this);
@@ -372,6 +373,36 @@ bool AravisDevice::set_sink(std::shared_ptr<SinkInterface> s)
     return true;
 }
 
+
+void AravisDevice::auto_set_control_lifetime()
+{
+    std::string env_packet_size = tcam::get_environment_variable("TCAM_GIGE_HEARTBEAT_MS", "0");
+
+    int hearbeat_ms = 0;
+
+    try
+    {
+        hearbeat_ms = std::stoi(env_packet_size);
+    }
+    catch (...)
+    {
+        SPDLOG_WARN("Unable to interpret the value for TCAM_GIGE_HEARTBEAT_MS. Falling back to "
+                    "default values.");
+    }
+
+    if (hearbeat_ms != 0)
+    {
+        arv_camera_set_integer(arv_camera, "GevHeartbeatTimeout", hearbeat_ms, NULL);
+        SPDLOG_DEBUG("Setting heartbeat timeout to {} ms.", hearbeat_ms);
+    }
+    else
+    {
+        static const int default_heartbeat_ms = 3000;
+        arv_camera_set_integer(arv_camera, "GevHeartbeatTimeout", default_heartbeat_ms, NULL);
+
+        SPDLOG_DEBUG("Setting heartbeat timeout to default {} ms.", default_heartbeat_ms);
+    }
+}
 
 
 void AravisDevice::auto_set_packet_size()

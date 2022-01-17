@@ -81,6 +81,10 @@ public:
 
 private:
 
+    // helper function to set lifetime of control channel
+    // depending on env and auto negotiation
+    void auto_set_control_lifetime();
+
     // helper function to set packet size
     // depending on env and auto negotiation
     void auto_set_packet_size();
