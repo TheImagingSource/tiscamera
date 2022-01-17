@@ -52,13 +52,21 @@ struct v4l2_genicam_mapping
     {
     }
 
-    template<class Tprop_static_info>
     constexpr v4l2_genicam_mapping(uint32_t id,
-                                   const Tprop_static_info* info_type,
-                                   converter_scale converter,
+                                   const tcamprop1::prop_static_info_float* info_type,
+                                   converter_scale_init_float converter,
                                    uint32_t preferred_id = 0)
         : v4l2_id(id), preferred_id_(preferred_id), info_(info_type),
-          info_property_type_(Tprop_static_info::property_type), converter_ { converter }
+          info_property_type_(tcamprop1::prop_type::Float), converter_float_ { converter }
+    {
+    }
+
+    constexpr v4l2_genicam_mapping(uint32_t id,
+                                   const tcamprop1::prop_static_info_integer* info_type,
+                                   converter_scale_init_integer converter,
+                                   uint32_t preferred_id = 0)
+        : v4l2_id(id), preferred_id_(preferred_id), info_(info_type),
+          info_property_type_(tcamprop1::prop_type::Integer), converter_integer_ { converter }
     {
     }
 
@@ -78,10 +86,12 @@ struct v4l2_genicam_mapping
     tcamprop1::prop_static_info const* info_ = nullptr;
     tcamprop1::prop_type info_property_type_ = tcamprop1::prop_type::Boolean;
 
-    tcam::v4l2::converter_scale
-        converter_ = {}; // only valid for tcamprop1::prop_type::Integer and tcamprop1::prop_type::Float
-    fetch_menu_entries_func fetch_menu_entries_ =
-        nullptr; // only valid for tcamprop1::prop_type::Enumeration
+    // only valid for tcamprop1::prop_type::Integer and tcamprop1::prop_type::Float
+    tcam::v4l2::converter_scale_init_float converter_float_;
+    tcam::v4l2::converter_scale_init_integer converter_integer_;
+
+    // only valid for tcamprop1::prop_type::Enumeration
+    fetch_menu_entries_func fetch_menu_entries_ = nullptr;
 
     mapping_type mapping_type_ = mapping_type::normal;
 };
@@ -92,19 +102,9 @@ namespace
 namespace prop_lst = tcamprop1::prop_list;
 using namespace tcam::v4l2;
 
-double gamma_from_dev_to_std(int64_t value)
-{
-    return value / 100.0;
-}
-
-int64_t gamma_from_std_to_dev(double value)
-{
-    return std::llround(value * 100.0);
-}
-
-static const converter_scale gamma_converter = {
-    gamma_from_std_to_dev,
-    gamma_from_dev_to_std,
+static const converter_scale_init_float gamma_converter = {
+    [](double value) -> int64_t { return std::llround(value * 100.0); },
+    [](int64_t value) -> double { return value / 100.0; },
 };
 
 int64_t exposure_absolute_from_std_to_dev(double value)
@@ -117,7 +117,7 @@ double exposure_absolute_from_dev_to_std(int64_t value)
     return value * 100.;
 }
 
-static const converter_scale exposure_absolute_converter = {
+static const converter_scale_init_float exposure_absolute_converter = {
     exposure_absolute_from_std_to_dev,
     exposure_absolute_from_dev_to_std,
 };
@@ -138,20 +138,20 @@ double wb_256_channel_from_dev_to_std(int64_t value)
     return value * std_max / dev_max;
 }
 
-static const converter_scale wb_256_channel_converter = {
+static const converter_scale_init_float wb_256_channel_converter = {
     wb_256_channel_from_std_to_dev,
     wb_256_channel_from_dev_to_std,
 };
 
-static const converter_scale saturation_converter = {
+static const converter_scale_init_float saturation_converter = {
     [](double v) -> int64_t { return std::lround(v / 100. * 64.); },
     [](int64_t v) -> double { return v / 64. * 100.; },
 };
-static const converter_scale gain_db100_converter = {
+static const converter_scale_init_float gain_db100_converter = {
     [](double v) -> int64_t { return std::lround(v * 100.); },
     [](int64_t v) -> double { return v / 100.; },
 };
-static const converter_scale trigger_delay_100ns_converter = {
+static const converter_scale_init_float trigger_delay_100ns_converter = {
     [](double v) -> int64_t { return std::lround(v * 10.); },
     [](int64_t v) -> double { return v / 10.; },
 };
@@ -319,7 +319,7 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x199e92a, &prop_lst::TriggerOperation, fetch_menu_entries_TriggerOperation },   // usb2 "Trigger Global Reset Shutter" boolean
 };
 
-static const converter_scale dxk72_gain_mul_dB_converter =
+static const converter_scale_init_float dxk72_gain_mul_dB_converter =
 { // actual range of sensor register seems to be [8;63], but firmware says its [4;63] so we just assume the firmware is right
     [](double v) -> int64_t
     { // 10 ^ (v / 20), this is voltage gain
@@ -335,7 +335,7 @@ static const converter_scale dxk72_gain_mul_dB_converter =
     { 0. }      // default gain in the camera is bad!!
 };
 
-static const converter_scale dxk42_gain_mul_dB_converter =
+static const converter_scale_init_float dxk42_gain_mul_dB_converter =
 { // value range is factor = register_value / 32, register_value e [0;255]?, 32 == multiplication factor of 1
     [](double v) -> int64_t
     { // 10 ^ (v / 20), this is voltage gain
@@ -352,7 +352,7 @@ static const converter_scale dxk42_gain_mul_dB_converter =
     { 0. }      // def
 };
 
-static const converter_scale dxk22_gain_mul_dB_converter =
+static const converter_scale_init_float dxk22_gain_mul_dB_converter =
 { // value range is factor = register_value / 16, register_value e [16;64]
     [](double v) -> int64_t
     { // 10 ^ (v / 20), this is voltage gain
@@ -388,7 +388,7 @@ double wb_for_DFK72_from_dev_to_std( int64_t value )
     return value * std_max / dev_max;
 }
 
-static const converter_scale wb_for_DFK72_channel_converter = { wb_for_DFK72_channel_from_std_to_dev,
+static const converter_scale_init_float wb_for_DFK72_channel_converter = { wb_for_DFK72_channel_from_std_to_dev,
                                                                 wb_for_DFK72_from_dev_to_std };
 #endif
 
@@ -416,14 +416,14 @@ static const v4l2_genicam_mapping    dxk22_conv_dict[] =
 namespace quirk_33u
 {
 
-static const converter_scale TriggerDenoise = {
+static const converter_scale_init_float TriggerDenoise = {
     nullptr,
     nullptr,
     {},
     { 100'000. } // we override TriggerDenoise.Maximum, It is reported as 1e6, but should be 1e5
 };
 
-static const converter_scale ExposureTime_default = {
+static const converter_scale_init_float ExposureTime_default = {
     nullptr,
     nullptr,
     {},
@@ -432,22 +432,22 @@ static const converter_scale ExposureTime_default = {
     { 33'333.0 },   // We fix the default value to 33'333 us
 };
 
-static const converter_scale gain_to_db_factor_0_1 = {
+static const converter_scale_init_float gain_to_db_factor_0_1 = {
     [](double v) -> int64_t { return std::lround(v / 0.1); },
     [](int64_t v) -> double { return v * 0.1; },
 };
 
-static const converter_scale gain_to_db_factor_0_3 = {
+static const converter_scale_init_float gain_to_db_factor_0_3 = {
     [](double v) -> int64_t { return std::lround(v / 0.3); },
     [](int64_t v) -> double { return v * 0.3; },
 };
 
-static const converter_scale gain_to_db_factor_AR0521 = {
+static const converter_scale_init_float gain_to_db_factor_AR0521 = {
     [](double v) -> int64_t { return std::lround(v / 0.1875); },
     [](int64_t v) -> double { return v * 0.1875; },
 };
 
-static const converter_scale gain_to_db_factor_IMX183 = {
+static const converter_scale_init_float gain_to_db_factor_IMX183 = {
     [](double v) -> int64_t { return std::lround( 2048. - (std::pow( 10., (v / (-20.))) * 2048.) ); },
     [](int64_t v) -> double { return std::abs( (-20.) * std::log10((2048. - v) / 2048.) ); },
     {},
@@ -457,7 +457,7 @@ static const converter_scale gain_to_db_factor_IMX183 = {
 
 // Min=144,Max=301,=> [0.0;3.2], step ~= 0.0204
 // This is the same for P2000 and P5000
-static const converter_scale gain_to_db_factor_P2000 = {
+static const converter_scale_init_float gain_to_db_factor_P2000 = {
     [](double v) -> int64_t { return std::lround( std::pow( 10., v / 10.) * 144. ); },
     [](int64_t v) -> double { return 10. * std::log10(v / 144.); },
     { 0.0 },
@@ -467,7 +467,7 @@ static const converter_scale gain_to_db_factor_P2000 = {
 };
 
 // Min=144,Max=1200
-static const converter_scale gain_to_db_factor_P1300 = {
+static const converter_scale_init_float gain_to_db_factor_P1300 = {
     [](double v) -> int64_t { return std::lround( std::pow( 10., v / 10.) * 144. ); },
     [](int64_t v) -> double { return 10. * std::log10(v / 144.); },
     {},
@@ -477,7 +477,7 @@ static const converter_scale gain_to_db_factor_P1300 = {
 };
 
 // Min=100,Max=383,=> [0.0;5.83], step ~= 0.0206
-static const converter_scale gain_to_db_factor_J003 = {
+static const converter_scale_init_float gain_to_db_factor_J003 = {
     [](double v) -> int64_t { return std::lround( std::pow( 10., v / 10.) * 100. ); },
     [](int64_t v) -> double { return 10. * std::log10(v / 100.); },
     {},
@@ -487,13 +487,33 @@ static const converter_scale gain_to_db_factor_J003 = {
 };
 
 // Min=13,Max=63 => [0.0;6.85]
-static const converter_scale gain_to_db_factor_AR0234 = {
+static const converter_scale_init_float gain_to_db_factor_AR0234 = {
     [](double v) -> int64_t { return std::lround( std::pow( 10., v / 10.) * 13. ); },
     [](int64_t v) -> double { return 10. * std::log10(v / 13.); },
     {},
     {},
     { 0.13 },
     { 0. }
+};
+
+static const converter_scale_init_integer fix_auto_functions_wh_default = {
+    nullptr,
+    nullptr,
+    {},
+    {},
+    {},
+    {},
+    []( prop_range_integer_default r ) { return prop_range_integer_default{ r.range, r.range.max }; },
+};
+
+static const converter_scale_init_float ExposureAutoLowerLimit_default = {
+    nullptr,
+    nullptr,
+    {},
+    {},
+    {},
+    {},
+    []( prop_range_float_default r ) { return prop_range_float_default{ r.range, r.range.min }; },
 };
 
 } // quirk_33u
@@ -504,7 +524,11 @@ static const v4l2_genicam_mapping    dxk33u_conv_dict[] =
 
     { 0x199e240, &prop_lst::TriggerDenoise, quirk_33u::TriggerDenoise },
 
+    { 0x199e255, &prop_lst::ExposureAutoLowerLimit, quirk_33u::ExposureAutoLowerLimit_default },
     { 0x199e256, &prop_lst::ExposureAutoUpperLimit, quirk_33u::ExposureTime_default },
+
+    { 0x199e244, &prop_lst::AutoFunctionsROIWidth, quirk_33u::fix_auto_functions_wh_default },
+    { 0x199e245, &prop_lst::AutoFunctionsROIHeight, quirk_33u::fix_auto_functions_wh_default },
 };
 
 static const v4l2_genicam_mapping    dxk33u_GainDB_factor_0_1[] =
@@ -733,7 +757,7 @@ auto tcam::v4l2::create_mapped_prop(
                 current_prop_qctrl,
                 p_property_backend,
                 static_cast<const tcamprop1::prop_static_info_integer*>(mapping.info_),
-                mapping.converter_);
+                mapping.converter_integer_);
         }
         case tcamprop1::prop_type::Float:
         {
@@ -741,7 +765,7 @@ auto tcam::v4l2::create_mapped_prop(
                 current_prop_qctrl,
                 p_property_backend,
                 static_cast<const tcamprop1::prop_static_info_float*>(mapping.info_),
-                mapping.converter_);
+                mapping.converter_float_);
         }
         case tcamprop1::prop_type::Command:
         {

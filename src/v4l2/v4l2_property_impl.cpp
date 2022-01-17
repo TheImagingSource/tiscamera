@@ -150,31 +150,25 @@ tcam::v4l2::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend,
     const tcamprop1::prop_static_info_integer* static_info,
-    tcam::v4l2::converter_scale scale)
+    const tcam::v4l2::converter_scale_init_integer& scale)
     : V4L2PropertyImplBase(queryctrl, static_info, backend), m_converter(scale),
       p_static_info(static_info)
 {
-    range_ = tcamprop1::prop_range_integer {
-        static_cast<int64_t>(m_converter.from_device(queryctrl.minimum)),
-        static_cast<int64_t>(m_converter.from_device(queryctrl.maximum)),
-        static_cast<int64_t>(m_converter.from_device(queryctrl.step))
+    auto device_range = prop_range_integer_default {
+        {
+            static_cast<int64_t>(queryctrl.minimum),
+            static_cast<int64_t>(queryctrl.maximum),
+            static_cast<int64_t>(queryctrl.step),
+        },
+        static_cast<int64_t>(queryctrl.default_value)
     };
 
-    if (scale.overwrite_min_.has_value())
-        range_.min = static_cast<int64_t>(scale.overwrite_min_.value());
+    auto [range, def] = scale.to_range(device_range);
 
-    if (scale.overwrite_max_.has_value())
-        range_.max = static_cast<int64_t>(scale.overwrite_max_.value());
+    range_ = range;
+    default_ = def;
 
-    if (scale.overwrite_stp_.has_value())
-        range_.stp = static_cast<int64_t>(scale.overwrite_stp_.value());
-
-    if (scale.overwrite_def_.has_value())
-        m_default = static_cast<int64_t>(scale.overwrite_def_.value());
-    else
-        m_default = static_cast<int64_t>(m_converter.from_device(queryctrl.default_value));
-
-    check_and_fixup_range(get_internal_name(), range_, m_default);
+    check_and_fixup_range(get_internal_name(), range_, default_);
 }
 
 tcam::v4l2::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
@@ -183,9 +177,9 @@ tcam::v4l2::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
     : V4L2PropertyImplBase(queryctrl, backend)
 {
     range_ = { queryctrl.minimum, queryctrl.maximum, queryctrl.step };
-    m_default = m_converter.from_device(queryctrl.default_value);
+    default_ = m_converter.from_device(queryctrl.default_value);
 
-    check_and_fixup_range(get_internal_name(), range_, m_default);
+    check_and_fixup_range(get_internal_name(), range_, default_);
 }
 
 std::string_view tcam::v4l2::V4L2PropertyIntegerImpl::get_unit() const
@@ -245,29 +239,25 @@ tcam::v4l2::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend,
     const tcamprop1::prop_static_info_float* static_info,
-    tcam::v4l2::converter_scale scale)
-    : V4L2PropertyImplBase(queryctrl, static_info, backend), m_converter(scale),
+    const tcam::v4l2::converter_scale_init_float& scale)
+    : V4L2PropertyImplBase(queryctrl, static_info, backend), converter_(scale),
       p_static_info(static_info)
 {
-    range_ = tcamprop1::prop_range_float { m_converter.from_device(queryctrl.minimum),
-                                           m_converter.from_device(queryctrl.maximum),
-                                           m_converter.from_device(queryctrl.step) };
+    auto device_range = prop_range_integer_default {
+        {
+            static_cast<int64_t>(queryctrl.minimum),
+            static_cast<int64_t>(queryctrl.maximum),
+            static_cast<int64_t>(queryctrl.step),
+        },
+        static_cast<int64_t>(queryctrl.default_value),
+    };
 
-    if (scale.overwrite_min_.has_value())
-        range_.min = scale.overwrite_min_.value();
+    auto [range, def] = scale.to_range(device_range);
 
-    if (scale.overwrite_max_.has_value())
-        range_.max = scale.overwrite_max_.value();
+    range_ = range;
+    default_ = def;
 
-    if (scale.overwrite_stp_.has_value())
-        range_.stp = scale.overwrite_stp_.value();
-
-    if (scale.overwrite_def_.has_value())
-        m_default = scale.overwrite_def_.value();
-    else
-        m_default = m_converter.from_device(queryctrl.default_value);
-
-    check_and_fixup_range(get_internal_name(), range_, m_default);
+    check_and_fixup_range(get_internal_name(), range_, default_);
 }
 
 tcam::v4l2::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
@@ -278,9 +268,9 @@ tcam::v4l2::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
     range_ = { static_cast<double>(queryctrl.minimum),
                static_cast<double>(queryctrl.maximum),
                static_cast<double>(queryctrl.step) };
-    m_default = static_cast<double>(queryctrl.default_value);
+    default_ = static_cast<double>(queryctrl.default_value);
 
-    check_and_fixup_range(get_internal_name(), range_, m_default);
+    check_and_fixup_range(get_internal_name(), range_, default_);
 }
 
 std::string_view tcam::v4l2::V4L2PropertyDoubleImpl::get_unit() const
@@ -306,7 +296,7 @@ outcome::result<double> tcam::v4l2::V4L2PropertyDoubleImpl::get_value() const
     auto ret = backend_.get_backend_value();
     if (ret)
     {
-        return m_converter.from_device(ret.value());
+        return converter_.from_device(ret.value());
     }
     return ret.error();
 }
@@ -334,7 +324,7 @@ outcome::result<void> tcam::v4l2::V4L2PropertyDoubleImpl::set_value(double new_v
         }
     }
 
-    return backend_.set_backend_value(m_converter.to_device(new_value));
+    return backend_.set_backend_value(converter_.to_device(new_value));
 }
 
 tcam::v4l2::V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(

@@ -155,7 +155,7 @@ public:
     V4L2PropertyIntegerImpl(const v4l2_queryctrl& queryctrl,
                             const std::shared_ptr<V4L2PropertyBackend>& backend,
                             const tcamprop1::prop_static_info_integer* static_info,
-                            tcam::v4l2::converter_scale scale);
+                            const tcam::v4l2::converter_scale_init_integer& scale);
 
     std::string_view get_unit() const final;
     tcamprop1::IntRepresentation_t get_representation() const final;
@@ -166,15 +166,14 @@ public:
     }
     int64_t get_default() const final
     {
-        return m_default;
+        return default_;
     }
 
     outcome::result<int64_t> get_value() const final;
     outcome::result<void> set_value(int64_t new_value) final;
-
 private:
     tcamprop1::prop_range_integer range_;
-    int64_t m_default = 0;
+    int64_t default_ = 0;
 
     tcam::v4l2::converter_scale m_converter;
     const tcamprop1::prop_static_info_integer* p_static_info = nullptr;
@@ -188,7 +187,7 @@ public:
     V4L2PropertyDoubleImpl(const v4l2_queryctrl& queryctrl,
                            const std::shared_ptr<V4L2PropertyBackend>& backend,
                            const tcamprop1::prop_static_info_float* static_info,
-                           tcam::v4l2::converter_scale scale);
+                           const tcam::v4l2::converter_scale_init_float& scale);
 
     std::string_view get_unit() const final;
     tcamprop1::FloatRepresentation_t get_representation() const final;
@@ -200,17 +199,17 @@ public:
 
     double get_default() const final
     {
-        return m_default;
+        return default_;
     }
     outcome::result<double> get_value() const override;
     outcome::result<void> set_value(double new_value) override;
 
 private:
-    tcam::v4l2::converter_scale m_converter;
+    tcam::v4l2::converter_scale converter_;
 
     tcamprop1::prop_range_float range_;
 
-    double m_default = 0.;
+    double default_ = 0.;
 
     const tcamprop1::prop_static_info_float* p_static_info = nullptr;
 };

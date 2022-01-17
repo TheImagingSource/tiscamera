@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <tcamprop1.0_base/tcamprop_base.h>
 
 namespace tcam::v4l2
 {
@@ -28,6 +29,18 @@ using v4l2_queryctrl_list = std::vector<v4l2_queryctrl>;
 
 bool is_id_present(const v4l2_queryctrl_list& qctrl_list, uint32_t id_to_look_for) noexcept;
 
+struct prop_range_integer_default 
+{
+    tcamprop1::prop_range_integer range;
+    int64_t def;
+};
+
+struct prop_range_float_default
+{
+    tcamprop1::prop_range_float range;
+    double def;
+};
+
 struct converter_scale
 {
     using func_type_to_device = int64_t (*)(double);
@@ -35,11 +48,7 @@ struct converter_scale
 
     func_type_to_device to_device_ = nullptr;
     func_type_from from_device_ = nullptr;
-
-    std::optional<double> overwrite_min_ = std::nullopt;
-    std::optional<double> overwrite_max_ = std::nullopt;
-    std::optional<double> overwrite_stp_ = std::nullopt;
-    std::optional<double> overwrite_def_ = std::nullopt;
+    
     int64_t to_device(double val) const
     {
         return to_device_ ? to_device_(val) : val;
@@ -48,6 +57,38 @@ struct converter_scale
     {
         return from_device_ ? from_device_(val) : val;
     }
+};
+
+struct converter_scale_init_integer : converter_scale
+{
+    auto to_range(prop_range_integer_default device_range) const noexcept
+        -> prop_range_integer_default;
+
+    std::optional<int64_t> overwrite_min_ = std::nullopt;
+    std::optional<int64_t> overwrite_max_ = std::nullopt;
+    std::optional<int64_t> overwrite_stp_ = std::nullopt;
+    std::optional<int64_t> overwrite_def_ = std::nullopt;
+
+    using func_type_transform_integer_range =
+        prop_range_integer_default (*)(prop_range_integer_default range);
+
+    func_type_transform_integer_range transform_integer_range_ = nullptr;
+};
+
+struct converter_scale_init_float : converter_scale
+{
+    auto to_range(prop_range_integer_default device_range) const noexcept
+        -> prop_range_float_default;
+
+    std::optional<double> overwrite_min_ = std::nullopt;
+    std::optional<double> overwrite_max_ = std::nullopt;
+    std::optional<double> overwrite_stp_ = std::nullopt;
+    std::optional<double> overwrite_def_ = std::nullopt;
+
+    using func_type_transform_float_range =
+        prop_range_float_default (*)(prop_range_float_default range);
+
+    func_type_transform_float_range transform_float_range_ = nullptr;
 };
 
 struct menu_entry
