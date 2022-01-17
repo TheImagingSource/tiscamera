@@ -17,6 +17,18 @@ The value is in bytes.
 
    export TCAM_GIGE_PACKET_SIZE=9000
 
+TCAM_GIGE_HEARTBEAT_MS
+++++++++++++++++++++++
+
+`TCAM_GIGE_HEARTBEAT_MS` allows manual overwrite of the periodic lifetime checks for GigE cameras.
+The default is 3 seconds. Is should only be set for debugging purposes.
+The value is in milliseconds.
+
+.. code-block:: sh
+
+   # Set timeout to 10 seconds
+   export TCAM_GIGE_HEARTBEAT_MS=10000
+   
 TCAM_ARV_STREAM_OPTIONS
 +++++++++++++++++++++++
 `TCAM_ARV_STREAM_OPTIONS` allows setting all options for the arvstream object.

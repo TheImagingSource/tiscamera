@@ -11,7 +11,7 @@ For a complete overview see `supported devices <https://www.theimagingsource.com
 ## Compilation
 
 tiscamera-1.0 uses a more up to date version of aravis.
-This aravis version requires meson >= ????? for compilation.
+This aravis version requires meson >= 0.53. for compilation.
 
 Ubuntu LTS 18.04 is not capable of compiling this out of the box.
 
@@ -66,7 +66,8 @@ For a human readable name call `tcam_property_base_get_display_name()`;
 
 Property Flags are now actively used to communicate information to the user.
 
-If you would like a complete overview over our flags, please take a look at our documentation: TODO: Add ???? link
+If you would like a complete overview over our flags, please take a look at our documentation:
+https://www.theimagingsource.com/documentation/tiscamera/api.html
 
 - Locked
   Locked properties will refuse any set_value call as another property has control over it.
@@ -118,8 +119,9 @@ All properties are now represented as objects.
 
 Please look at the corresponding examples on how to use them.
 
-TODO: documentation link
-TODO sample references
+For a complete overview of the API, see https://www.theimagingsource.com/documentation/tiscamera/api.html .
+
+For sample implementations, see https://www.theimagingsource.com/documentation/tiscamera/examples.html .
 
 ## GstCaps
 

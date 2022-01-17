@@ -65,7 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - camera-ip-conf
   Use tcam-gigetool instead
 - tcambin property `use-dutils`
-- TCAM_ARV_PACKET_REQUEST_RATIO, replaced with TCAM_ARV_STREAM_OPTIONS
+- environment variable TCAM_ARV_PACKET_REQUEST_RATIO, replaced with TCAM_ARV_STREAM_OPTIONS
+- environment variable TCAM_LOG, replaced with gstreamer logging category `tcam-libtcam`
 - unmaintained unit tests
 
 ## [0.14.0] - 2021.07.05
