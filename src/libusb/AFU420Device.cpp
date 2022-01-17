@@ -461,10 +461,15 @@ DeviceInfo tcam::AFU420Device::get_device_description() const
 void AFU420Device::create_formats()
 {
     std::vector<stream_fmt_data> fmt_list {
-        stream_fmt_data {
-            0, 8, FOURCC_GBRG8, min_sensor_dim_, max_sensor_dim_, step, 2.0, 30.0 },
-        stream_fmt_data {
-            2, 12, FOURCC_GBRG12_MIPI_PACKED, min_sensor_dim_, max_sensor_dim_by12, step, 2.0, 30.0 },
+        stream_fmt_data { 0, 8, FOURCC_GBRG8, min_sensor_dim_, max_sensor_dim_, step, 2.0, 30.0 },
+        stream_fmt_data { 2,
+                          12,
+                          FOURCC_GBRG12_MIPI_PACKED,
+                          min_sensor_dim_,
+                          max_sensor_dim_by12,
+                          step,
+                          2.0,
+                          30.0 },
     };
 
     // assign to member for frame rate checks
@@ -479,7 +484,9 @@ void AFU420Device::create_formats()
 
         std::vector<struct framerate_mapping> rf;
 
-        auto add_res = [&rf, this](stream_fmt_data& _fmt, tcam_image_size& size, const image_scaling& scale) {
+        auto add_res =
+            [&rf, this](stream_fmt_data& _fmt, tcam_image_size& size, const image_scaling& scale)
+        {
             struct tcam_resolution_description res = {};
             res.type = TCAM_RESOLUTION_TYPE_FIXED;
             res.min_size.width = size.width;
@@ -501,7 +508,7 @@ void AFU420Device::create_formats()
         };
 
         // max resolution only with binning 1x1
-        add_res(fmt, fmt.dim_max, {1, 1, 1, 1});
+        add_res(fmt, fmt.dim_max, { 1, 1, 1, 1 });
 
         for (auto& f : get_standard_resolutions(fmt.dim_min, fmt.dim_max))
         {
@@ -520,10 +527,7 @@ void AFU420Device::create_formats()
         }
 
         // smallest resolution works with all scalings
-        for (const auto& s : m_available_scaling)
-        {
-            add_res(fmt, fmt.dim_min, s);
-        }
+        for (const auto& s : m_available_scaling) { add_res(fmt, fmt.dim_min, s); }
 
         VideoFormatDescription format(nullptr, desc, rf);
         available_videoformats.push_back(format);
@@ -549,7 +553,11 @@ tcam_image_size tcam::AFU420Device::calculate_auto_offset(uint32_t fourcc,
         max = max_sensor_dim_by12;
     }
 
-    return calculate_auto_center(max, step, size, {binning.width, binning.height, 1, 1});
+    return calculate_auto_center(
+        max,
+        step,
+        size,
+        { static_cast<int>(binning.width), static_cast<int>(binning.height), 1, 1 });
 }
 
 
@@ -557,10 +565,8 @@ AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf
     const VideoFormat& format)
 {
 
-    tcam_image_size binning = {
-        format.get_scaling().binning_h,
-        format.get_scaling().binning_v
-    };
+    tcam_image_size binning = { static_cast<unsigned int>(format.get_scaling().binning_h),
+                                static_cast<unsigned int>(format.get_scaling().binning_v) };
 
     tcam_image_size offset = { 0, 0 };
 
@@ -765,7 +771,8 @@ struct AFU420Device::header_res AFU420Device::check_and_eat_img_header(unsigned 
     }
 
     const int bpp = get_stream_bitdepth();
-    auto get_hdr_field_at = [bpp, data](int offset) {
+    auto get_hdr_field_at = [bpp, data](int offset)
+    {
         return data[offset * bpp / 8];
     };
 
@@ -821,7 +828,8 @@ void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
         return;
     }
 
-    auto submit_transfer = [](struct libusb_transfer* _xfr) {
+    auto submit_transfer = [](struct libusb_transfer* _xfr)
+    {
         if (libusb_submit_transfer(_xfr) < 0)
         {
             SPDLOG_ERROR("error re-submitting URB\n");

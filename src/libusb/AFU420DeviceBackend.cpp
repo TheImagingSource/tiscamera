@@ -26,13 +26,6 @@ namespace tcam::property
 
 AFU420DeviceBackend::AFU420DeviceBackend(AFU420Device* dev) : p_device(dev) {}
 
-
-static int camera_to_color_gain(double value)
-{
-    return map_value_ranges(0, (4.0 - (1.0 / 256.0)), 0, 255, value);
-}
-
-
 outcome::result<int64_t> AFU420DeviceBackend::get_int(tcam::afu420::AFU420Property id)
 {
     switch (id)
