@@ -123,10 +123,10 @@ def callback(appsink, user_data):
 
 def main():
 
-    Gst.init(sys.argv)  # init gstreamer
+    Gst.init(sys.argv)
     serial = None
 
-    pipeline = Gst.parse_launch("tcamsrc name=source"
+    pipeline = Gst.parse_launch("tcambin name=source"
                                 " ! appsink name=sink")
 
     # test for error

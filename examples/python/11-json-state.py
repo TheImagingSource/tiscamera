@@ -61,7 +61,7 @@ def main():
     # Set this to a serial string for a specific camera
     serial = None
 
-    camera = Gst.ElementFactory.make("tcambin")
+    camera = pipeline.get_by_name("source")
 
     if serial:
         # This is gstreamer set_property
@@ -85,7 +85,7 @@ def main():
     camera.set_property("tcam-properties-json", state)
 
     # Print properties for a before/after comparison
-    state = camera.get_property("state")
+    state = camera.get_property("tcam-properties-json")
     print(f"State of device is:\n{state}")
 
     # cleanup, reset state

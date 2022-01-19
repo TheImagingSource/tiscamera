@@ -77,11 +77,11 @@ def main():
     # when debugging your application
     # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
     # for further details
-    Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
+    #Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
 
     serial = None
 
-    pipeline = Gst.parse_launch("tcambin name=source ! videoconvert ! ximagesink")
+    pipeline = Gst.parse_launch("tcambin name=source ! videoconvert ! ximagesink sync=false")
 
     if not pipeline:
         print("Could not create pipeline")
@@ -93,9 +93,11 @@ def main():
         src = None
 
     bus = pipeline.get_bus()
-    bus.add_signal_watch()
-    bus.enable_sync_message_emission()
+    # bus.add_signal_watch()
+    # bus.enable_sync_message_emission()
     bus.connect('message', bus_callback, None)
+
+    # bus.add_watch(bus_callback, None)
 
     pipeline.set_state(Gst.State.PLAYING)
 

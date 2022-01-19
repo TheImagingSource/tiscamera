@@ -49,9 +49,9 @@ def print_formats(source):
         try:
             fmt = structure.get_value("format")
 
-            if isinstance(fmt) is str:
+            if isinstance(fmt, str):
                 print(f"{name} {fmt}", end="")
-            elif isinstance(fmt) is Gst.ValueList:
+            elif isinstance(fmt, Gst.ValueList):
 
                 print(f"{name} {{ ", end="")
 
@@ -69,6 +69,7 @@ def print_formats(source):
             # have the same width/height/framerate settings
 
             begin = structure.to_string().find("format=(string){")
+            print(begin)
             substr = structure.to_string()[begin:]
             values = substr[substr.find("{")+1:substr.find("}")]
 
@@ -155,15 +156,24 @@ def print_formats(source):
             # we are done here
             continue
 
-        if isinstance(framerates) is Gst.ValueList:
+        if isinstance(framerates, Gst.ValueList):
 
-            for y in range(Gst.ValueList.get_size(framerates)):
+            # Gst.ValueList.get_size may cause a warning:
+            # DeprecationWarning: an integer is required (got type float).
+            # Implicit conversion to integers using __int__ is deprecated,
+            # and may be removed in a future version of Python.
+            #
+            # this is part of the GStreamer python wrapper
+            # and not tiscamera
+            size = Gst.ValueList.get_size(framerates)
+
+            for y in range(size):
 
                 val = Gst.ValueList.get_value(framerates, y)
 
                 print("{} ".format(val), end="")
 
-        elif isinstance(framerates) is Gst.FractionRange:
+        elif isinstance(framerates, Gst.FractionRange):
 
             min_val = Gst.value_get_fraction_range_min(framerates)
             max_val = Gst.value_get_fraction_range_max(framerates)

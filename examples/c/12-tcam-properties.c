@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-/* This example will show you how to get/set the JSON property description for a certain camera */
+/* This example will show you how to get/set the properties through a description string */
 
 #include <gst/gst.h>
 #include <stdio.h> /* printf and putchar */
 
 
-gboolean block_until_state_change_done(GstElement* pipeline)
+gboolean block_until_state_change_done (GstElement* pipeline)
 {
     while (TRUE)
     {
@@ -46,7 +46,8 @@ gboolean block_until_state_change_done(GstElement* pipeline)
     }
 }
 
-static void    print_current_properties( GstElement* source )
+
+static void print_current_properties (GstElement* source)
 {
     // Initialize the GValue
     GValue current_properties = G_VALUE_INIT;
@@ -56,19 +57,19 @@ static void    print_current_properties( GstElement* source )
     g_object_get_property(G_OBJECT(source), "tcam-properties", &current_properties);
 
     // get a string to print the current property state
-    char* string = gst_structure_to_string( gst_value_get_structure(&current_properties) );
+    char* string = gst_structure_to_string(gst_value_get_structure(&current_properties));
     printf("Current properties:\n%s\n", string );
-    g_free( string ); // free the string
+    g_free(string); // free the string
 
-    g_value_unset( &current_properties );  // free the Gststurcture in the GValue
+    g_value_unset( &current_properties );  // free the GstStructure in the GValue
 }
 
 
-int main(int argc, char* argv[])
+int main (int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
-       gstreamer logging can contain verry useful information
+       gstreamer logging can contain very useful information
        when debugging your application
        # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
        for further details
@@ -116,26 +117,26 @@ int main(int argc, char* argv[])
     print_current_properties( source );
 
     // Create a new structure
-    GstStructure* new_property_struct = gst_structure_new_empty( "tcam" );
+    GstStructure* new_property_struct = gst_structure_new_empty("tcam");
 
     // Change 2 properties so that we can see a 'difference'
-    gst_structure_set( new_property_struct, 
-                        "ExposureAuto", G_TYPE_STRING, "Off", 
-                        "ExposureTime", G_TYPE_DOUBLE, 35000., 
-                        NULL );
+    gst_structure_set(new_property_struct,
+                      "ExposureAuto", G_TYPE_STRING, "Off",
+                      "ExposureTime", G_TYPE_DOUBLE, 35000.0,
+                      NULL );
 
     GValue new_state = G_VALUE_INIT;
-    g_value_init( &new_state, GST_TYPE_STRUCTURE );
-    gst_value_set_structure( &new_state, new_property_struct );
+    g_value_init(&new_state, GST_TYPE_STRUCTURE);
+    gst_value_set_structure( &new_state, new_property_struct);
 
     // Set the new property settings
     g_object_set_property(G_OBJECT(source), "tcam-properties", &new_state);
 
-    g_value_unset( &new_state );
-    gst_structure_free( new_property_struct );
+    g_value_unset(&new_state);
+    gst_structure_free(new_property_struct);
 
     // Print the property settings after the change above
-    print_current_properties( source );
+    print_current_properties(source);
 
     // cleanup, reset state
     gst_element_set_state(source, GST_STATE_NULL);

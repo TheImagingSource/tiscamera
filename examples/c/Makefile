@@ -19,14 +19,34 @@ LIBS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-video-1.0 
 LIBS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gobject-introspection-1.0 --libs)
 LIBS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config tcam --libs)
 
+# to build within the source tree
+# enable the following lines
+# and source build directory ./env.sh
+# LIBS+=-L./../../build/libs
+
 CFLAGS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-1.0 --cflags)
 CFLAGS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-video-1.0 --cflags)
 CFLAGS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gobject-introspection-1.0 --cflags)
 CFLAGS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config tcam --cflags)
 
+# CFLAGS+=-I../../libs/tcam-property/src
+# CFLAGS+=-I../../src/gstreamer-1.0/tcamsrc
+
 .PHONY: all clean
 
-EXECS = 00-list-devices  02-set-properties 03-live-stream 04-list-formats 05-set-format 06-softwaretrigger 07-appsink 08-save-stream 09-device-lost 10-metadata 11-device-state 12-tcam-properties
+EXECS = 00-list-devices \
+	01-list-properties \
+	02-set-properties \
+	03-live-stream \
+	04-list-formats \
+	05-set-format \
+	06-softwaretrigger \
+	07-appsink \
+	08-save-stream \
+	09-device-lost \
+	10-metadata \
+	11-json-state \
+	12-tcam-properties
 
 
 all: $(EXECS)

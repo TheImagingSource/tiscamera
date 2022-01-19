@@ -24,7 +24,10 @@
 #include <gst/video/video.h>
 
 _Pragma("GCC visibility push (default)")
+
+#if __cplusplus
 extern "C" {
+#endif
 
 G_BEGIN_DECLS
 
@@ -56,7 +59,10 @@ gboolean tcam_statistics_get_structure(TcamStatisticsMeta*, char* out_buffer, si
 
 G_END_DECLS
 
+#if __cplusplus
 } // extern "C"
+#endif
+
 _Pragma("GCC visibility pop")
 
 #endif /* GST_META_TCAM_STATISTICS_H */

@@ -26,7 +26,7 @@
 void print_flags(TcamPropertyBase* prop)
 {
     printf("Available: ");
-    GError* err;
+    GError* err = NULL;
     gboolean av = tcam_property_base_is_available(prop, &err);
     if (av)
     {
