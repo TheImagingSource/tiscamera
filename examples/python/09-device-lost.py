@@ -46,18 +46,14 @@ def bus_callback(bus, message, user_data):
         err, debug = message.parse_error()
         print(err, debug)
 
-        # if you use tcamsrc directly this will be the name you give to the element
-        # if (strcmp(source_name, "tcamsrc0") == 0)
-        if message.src.get_name() == "tcambin-source":
+        if err.message.startswith("Device lost ("):
 
-            if err.message.startswith("Device lost ("):
+            m = re.search('Device lost \((.*)\)', err.message)
+            print("Device lost came from device with serial = {}".format(m.group(1)))
 
-                m = re.search('Device lost \((.*)\)', err.message)
-                print("Device lost came from device with serial = {}".format(m.group(1)))
-
-                # device lost handling should be initiated here
-                # this example simply stops playback
-                loop.quit()
+            # device lost handling should be initiated here
+            # this example simply stops playback
+            loop.quit()
 
     elif mtype == Gst.MessageType.WARNING:
         # Handle warnings
@@ -93,7 +89,7 @@ def main():
         src = None
 
     bus = pipeline.get_bus()
-    # bus.add_signal_watch()
+    bus.add_signal_watch()
     # bus.enable_sync_message_emission()
     bus.connect('message', bus_callback, None)
 

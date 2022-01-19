@@ -21,7 +21,6 @@
 #include <unistd.h> /* usleep */
 
 
-static gboolean stop_program = FALSE;
 static GMainLoop* loop;
 
 
@@ -49,25 +48,20 @@ static gboolean bus_callback(GstBus* bus __attribute__((unused)), GstMessage* me
             gst_message_parse_error(message, &err, &debug);
             g_print("Error: %s \n", err->message);
 
-            const char* source_name = gst_object_get_name(message->src);
-
-            // if you use tcamsrc directly this will be the name you give to the element
-            // if (strcmp(source_name, "tcamsrc0") == 0)
-            if (strcmp(source_name, "tcambin-source") == 0)
+            if (starts_with(err->message, "Device lost ("))
             {
-                if (starts_with(err->message, "Device lost ("))
-                {
-                    char* s_str = strstr(err->message, "(");
-                    const char* serial = strtok(s_str, "()");
-                    printf("Device lost came from device with serial = %s\n", serial);
-                }
+                char* s_str = strstr(err->message, "(");
+                const char* serial = strtok(s_str, "()");
+                printf("Device lost came from device with serial = %s\n", serial);
+
+                // device lost handling should be initiated here
+                // this example simply stops playback
+                g_main_loop_quit(loop);
             }
 
             g_error_free(err);
             g_free(debug);
-            // device lost handling should be initiated here
-            // this example simply stops plaback
-            g_main_loop_quit(loop);
+
             break;
         }
         case GST_MESSAGE_INFO:
@@ -130,10 +124,9 @@ int main(int argc, char* argv[])
 
     GstBus* bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
 
-    gst_bus_add_signal_watch(bus);
-    //int bus_watch_id = gst_bus_add_watch(bus, bus_callback, NULL);
+    [[maybe_unused]]int bus_watch_id = gst_bus_add_watch(bus, bus_callback, NULL);
 
-    //gst_object_unref(bus);
+    gst_object_unref(bus);
 
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
