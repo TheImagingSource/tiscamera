@@ -196,8 +196,8 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
             QString s = err->message;
             if (s.startsWith("Device lost ("))
             {
-                QString serial = s.mid(13, s.length() - 2);
-
+                int start = s.indexOf("(")+1;
+                QString serial = s.mid(start, s.indexOf(")")-start);
                 ((MainWindow*)user_data)->device_lost(serial);
             }
 
@@ -757,6 +757,8 @@ void MainWindow::device_lost(const QString& message)
     close_pipeline();
 
     free_property_dialog(true);
+
+    m_selected_device = {};
 
     auto error_dialog = new QMessageBox(this);
     error_dialog->setCheckBox(nullptr);
