@@ -364,23 +364,15 @@ static void gst_tcam_mainsrc_device_lost_callback(const tcam::tcam_device_info* 
 
     auto serial = self->device->get_device_serial();
 
-    GST_ERROR_OBJECT(self, "Device lost (%s)", serial.c_str());
-
-#if GST_VERSION_MAJOR >= 1 && GST_VERSION_MINOR >= 10
-
+    // set serial as args entry and in actual message
+    // that way users have multiple ways of accessing the serial
     GST_ELEMENT_ERROR_WITH_DETAILS(GST_ELEMENT(self),
                                    RESOURCE,
                                    NOT_FOUND,
-                                   ("Device lost"),
+                                   ("Device lost (%s)", serial.c_str()),
                                    ((nullptr)),
-                                   ("serial", G_TYPE_STRING, serial.c_str(), nullptr));
-
-#else
-
-    GST_ELEMENT_ERROR(
-        GST_ELEMENT(self), RESOURCE, NOT_FOUND, ("Device lost (%s)", serial.c_str()), (NULL));
-
-#endif
+                                   ("serial", G_TYPE_STRING, serial.c_str(), nullptr)
+        );
 
     self->device->is_streaming_ = false;
 
@@ -400,6 +392,7 @@ static void gst_tcam_mainsrc_device_lost_callback(const tcam::tcam_device_info* 
     // do not call stop
     // some users experience segfaults
     // let EOS handle this. gstreamer will call stop for us
+
     // gst_tcam_mainsrc_stop(GST_BASE_SRC(self));
 }
 
