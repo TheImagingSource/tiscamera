@@ -264,20 +264,6 @@ double V4l2Device::get_framerate()
            / (double)parm.parm.capture.timeperframe.numerator;
 }
 
-
-bool V4l2Device::set_sink(std::shared_ptr<SinkInterface> sink)
-{
-    if (m_is_stream_on)
-    {
-        return false;
-    }
-
-    this->m_listener = sink;
-
-    return true;
-}
-
-
 bool V4l2Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> b)
 {
     if (m_is_stream_on)
@@ -312,7 +298,7 @@ bool V4l2Device::release_buffers()
 }
 
 
-void V4l2Device::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
+void V4l2Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
 {
     for (unsigned int i = 0; i < m_buffers.size(); ++i)
     {
@@ -364,7 +350,7 @@ void V4l2Device::update_stream_timeout()
 }
 
 
-bool V4l2Device::start_stream()
+bool V4l2Device::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 {
     init_userptr_buffers();
 
@@ -376,6 +362,8 @@ bool V4l2Device::start_stream()
     }
 
     m_statistics = {};
+
+    m_listener = sink;
 
     m_is_stream_on = true;
 
@@ -389,7 +377,7 @@ bool V4l2Device::start_stream()
 }
 
 
-bool V4l2Device::stop_stream()
+void V4l2Device::stop_stream()
 {
     SPDLOG_DEBUG("Stopping stream");
     int ret = 0;
@@ -412,14 +400,9 @@ bool V4l2Device::stop_stream()
         m_work_thread.join();
     }
 
+    m_listener.reset();
+
     SPDLOG_DEBUG("Stopped stream");
-
-    if (ret < 0)
-    {
-        return false;
-    }
-
-    return true;
 }
 
 

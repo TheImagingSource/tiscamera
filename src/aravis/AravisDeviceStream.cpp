@@ -62,7 +62,7 @@ bool AravisDevice::release_buffers()
 }
 
 
-void AravisDevice::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
+void AravisDevice::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
 {
     for (auto& b : buffers)
     {
@@ -246,7 +246,7 @@ bool set_stream_options(ArvStream* stream)
 }
 
 
-bool AravisDevice::start_stream()
+bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 {
     if (arv_camera == nullptr)
     {
@@ -325,11 +325,13 @@ bool AravisDevice::start_stream()
         return false;
     }
 
-    // a work thread is not required as aravis already pushes the images asynchroniously
+    // a work thread is not required as aravis already pushes the images asynchronously
 
     g_signal_connect(stream, "new-buffer", G_CALLBACK(callback), this);
 
     SPDLOG_INFO("Starting actual stream...");
+
+    external_sink = sink;
 
     arv_camera_start_acquisition(this->arv_camera, &err);
 
@@ -337,6 +339,9 @@ bool AravisDevice::start_stream()
     {
         SPDLOG_ERROR("Unable to start stream: {}", err->message);
         g_clear_error(&err);
+
+        external_sink.reset();
+
         return false;
     }
 
@@ -346,11 +351,11 @@ bool AravisDevice::start_stream()
 }
 
 
-bool AravisDevice::stop_stream()
+void AravisDevice::stop_stream()
 {
     if (arv_camera == NULL)
     {
-        return false;
+        return;
     }
     GError* err = nullptr;
 
@@ -360,7 +365,7 @@ bool AravisDevice::stop_stream()
     {
         SPDLOG_ERROR("Unable to stop stream: {}", err->message);
         g_clear_error(&err);
-        return false;
+        return;
     }
 
     if (this->stream != nullptr)
@@ -369,8 +374,6 @@ bool AravisDevice::stop_stream()
         g_object_unref(this->stream);
         this->stream = NULL;
     }
-
-    return true;
 }
 
 
@@ -453,7 +456,7 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
                     if (auto ptr = self->external_sink.lock())
                     {
 
-                        if (ptr->should_incomplete_frames_be_dropped())
+                        if (self->drop_incomplete_frames_)
                         {
                             break;
                         }

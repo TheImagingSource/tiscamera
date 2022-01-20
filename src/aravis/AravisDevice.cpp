@@ -365,15 +365,6 @@ std::vector<VideoFormatDescription> AravisDevice::get_available_video_formats()
     return available_videoformats;
 }
 
-
-bool AravisDevice::set_sink(std::shared_ptr<SinkInterface> s)
-{
-    this->external_sink = s;
-
-    return true;
-}
-
-
 void AravisDevice::auto_set_control_lifetime()
 {
     std::string env_packet_size = tcam::get_environment_variable("TCAM_GIGE_HEARTBEAT_MS", "0");

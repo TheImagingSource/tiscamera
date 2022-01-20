@@ -281,13 +281,6 @@ double tcam::AFU050Device::get_framerate()
 }
 
 
-bool tcam::AFU050Device::set_sink(std::shared_ptr<SinkInterface> s)
-{
-    listener = s;
-    return true;
-}
-
-
 bool tcam::AFU050Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> buffs)
 {
     SPDLOG_INFO("Received {} buffer from external allocator.", buffs.size());
@@ -327,7 +320,7 @@ bool tcam::AFU050Device::release_buffers()
 }
 
 
-void tcam::AFU050Device::requeue_buffer(std::shared_ptr<ImageBuffer> buf)
+void tcam::AFU050Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buf)
 {
     for (auto& b : buffers)
     {
@@ -482,7 +475,7 @@ void LIBUSB_CALL tcam::AFU050Device::libusb_bulk_callback(struct libusb_transfer
 }
 
 
-bool tcam::AFU050Device::start_stream()
+bool tcam::AFU050Device::start_stream(const std::shared_ptr<IImageBufferSink>& sink )
 {
 #define USB_ENDPOINT_IN (LIBUSB_ENDPOINT_IN | 2)
 
@@ -500,6 +493,8 @@ bool tcam::AFU050Device::start_stream()
     jpegbuf = nullptr;
     jpegsize = 0;
     jpegptr = 0;
+
+    listener = sink;
 
     m_statistics = {};
 
@@ -537,13 +532,14 @@ bool tcam::AFU050Device::start_stream()
 }
 
 
-bool tcam::AFU050Device::stop_stream()
+void tcam::AFU050Device::stop_stream()
 {
     stop_all = true;
     is_stream_on = false;
 
+    listener.reset();
+
     release_buffers();
-    return true;
 }
 
 

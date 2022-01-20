@@ -23,17 +23,11 @@
 
 using namespace tcam;
 
-
-CaptureDevice::CaptureDevice() : impl(new CaptureDeviceImpl()) {}
-
-
-CaptureDevice::CaptureDevice(const DeviceInfo& info) : impl(new CaptureDeviceImpl())
+CaptureDevice::CaptureDevice(const DeviceInfo& info) : impl(std::make_shared<CaptureDeviceImpl>(info))
 {
-    impl->open_device(info);
 }
 
-
-CaptureDevice::~CaptureDevice() {}
+CaptureDevice::~CaptureDevice() = default;
 
 
 bool CaptureDevice::is_device_open() const
@@ -63,7 +57,14 @@ std::vector<std::shared_ptr<tcam::property::IPropertyBase>> CaptureDevice::get_p
 
 std::shared_ptr<tcam::property::IPropertyBase> CaptureDevice::get_property(const std::string& name)
 {
-    return impl->get_property(name);
+    for (auto& p : get_properties())
+    {
+        if (p->get_name() == name)
+        {
+            return p;
+        }
+    }
+    return nullptr;
 }
 
 
@@ -85,7 +86,7 @@ VideoFormat CaptureDevice::get_active_video_format() const
 }
 
 
-bool CaptureDevice::start_stream(std::shared_ptr<SinkInterface> sink)
+bool CaptureDevice::start_stream(std::shared_ptr<ImageSink> sink)
 {
     return impl->start_stream(sink);
 }
@@ -93,9 +94,14 @@ bool CaptureDevice::start_stream(std::shared_ptr<SinkInterface> sink)
 
 bool CaptureDevice::stop_stream()
 {
-    return impl->stop_stream();
+    impl->stop_stream();
+    return true;
 }
 
+void CaptureDevice::set_drop_incomplete_frames(bool b)
+{
+    impl->set_drop_incomplete_frames(b);
+}
 
 std::shared_ptr<CaptureDevice> tcam::open_device(const std::string& serial, TCAM_DEVICE_TYPE type)
 {

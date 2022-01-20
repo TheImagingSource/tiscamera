@@ -65,17 +65,15 @@ public:
 
     double get_framerate();
 
-    bool set_sink(std::shared_ptr<SinkInterface>) override;
-
     bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) override;
 
     bool release_buffers() override;
 
-    void requeue_buffer(std::shared_ptr<ImageBuffer>) override;
+    void requeue_buffer(const std::shared_ptr<ImageBuffer>&) final;
 
-    bool start_stream() override;
+    bool start_stream(const std::shared_ptr<IImageBufferSink>&) final;
 
-    bool stop_stream() override;
+    void stop_stream() final;
 
 private:
     std::atomic<bool> m_is_stream_on { false };
@@ -180,7 +178,7 @@ private:
 
     std::vector<buffer_info> m_buffers;
 
-    std::weak_ptr<SinkInterface> m_listener;
+    std::weak_ptr<IImageBufferSink> m_listener;
 
     std::shared_ptr<tcam::v4l2::prop_impl_offset_auto_center>   software_auto_center_;
 

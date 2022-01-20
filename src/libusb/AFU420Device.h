@@ -89,17 +89,15 @@ public:
 
     double get_framerate();
 
-    bool set_sink(std::shared_ptr<SinkInterface>);
-
-    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>);
+    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) final;
 
     bool release_buffers();
 
-    void requeue_buffer(std::shared_ptr<ImageBuffer>);
+    void requeue_buffer(const std::shared_ptr<ImageBuffer>&) final;
 
-    bool start_stream();
+    bool start_stream(const std::shared_ptr<IImageBufferSink>&) final;
 
-    bool stop_stream();
+    void stop_stream() final;
 
 
 #pragma pack(push, 1)
@@ -289,7 +287,7 @@ private:
     std::shared_ptr<ImageBuffer> current_buffer_;
     bool have_header;
 
-    std::weak_ptr<SinkInterface> listener;
+    std::weak_ptr<IImageBufferSink> listener;
 
     static void LIBUSB_CALL libusb_bulk_callback(struct libusb_transfer* trans);
     void transfer_callback(struct libusb_transfer* transfer);

@@ -32,58 +32,74 @@
 
 namespace tcam
 {
+   
+class ImageSinkBufferPool
+{
+public:
+    explicit ImageSinkBufferPool(const tcam::VideoFormat& format, size_t count)
+        : format_(format), buffer_count_to_allocate_(count)
+    {
+    }
 
-class ImageSink : public SinkInterface
+    void set_buffer_collection(std::vector<std::shared_ptr<ImageBuffer>> new_buffers)
+    {
+        use_external_buffers_ = true;
+        buffer_list_ = new_buffers;
+    }
+
+    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection()
+    {
+        return buffer_list_;
+    }
+    void clear()
+    {
+        use_external_buffers_ = false;
+        buffer_list_.clear();
+    }
+    void create()
+    {
+        if (buffer_list_.empty() && !use_external_buffers_)
+        {
+            initialize_internal_buffer();
+        }
+    }
+private:
+    void initialize_internal_buffer();
+
+    VideoFormat format_;
+
+    bool use_external_buffers_ = false;
+    size_t buffer_count_to_allocate_ = 10;
+
+    std::vector<std::shared_ptr<ImageBuffer>> buffer_list_;
+};
+
+
+class ImageSink : public IImageBufferSink
 {
 public:
     using image_buffer_cb = std::function<void(const std::shared_ptr<tcam::ImageBuffer>& buffer)>;
 
 public:
-    explicit ImageSink(const image_buffer_cb& cb, const tcam::VideoFormat& format);
+    explicit ImageSink(const image_buffer_cb& cb, const tcam::VideoFormat& format, size_t count);
 
-    bool set_status(TCAM_PIPELINE_STATUS) override;
-    TCAM_PIPELINE_STATUS get_status() const override;
+    bool start_stream(std::weak_ptr<IImageBufferPool> requeue_target);
+    void stop_stream();
 
-    bool setVideoFormat(const VideoFormat&) override;
+    void push_image(const std::shared_ptr<ImageBuffer>&) final;
 
-    VideoFormat getVideoFormat() const override;
+    void requeue_buffer(const std::shared_ptr<ImageBuffer>&);
 
-    void push_image(std::shared_ptr<ImageBuffer>) override;
-
-    void requeue_buffer(std::shared_ptr<ImageBuffer>) override;
-
-    bool set_buffer_number(size_t);
-
-    bool set_buffer_collection(std::vector<std::shared_ptr<ImageBuffer>> new_buffers);
-
-    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection() override;
-
-    bool delete_buffer_collection();
-
-    /**
-     * used to set the pipelinemanager instance that is called
-     * for things like requeue_buffer
-     */
-    void set_source(std::weak_ptr<SinkInterface>) override;
-
-    void drop_incomplete_frames(bool drop_them) override;
-    bool should_incomplete_frames_be_dropped() const override;
-
+    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection();
 
 private:
-    bool initialize_internal_buffer();
+    void initialize_internal_buffer();
 
-    std::weak_ptr<SinkInterface> source_;
-
-    TCAM_PIPELINE_STATUS status = TCAM_PIPELINE_UNDEFINED;
-    VideoFormat format_;
+    std::weak_ptr<IImageBufferPool> requeue_pool_;
 
     image_buffer_cb sh_callback_;
 
-    bool external_buffer = false;
-
-    size_t buffer_number = 10;
-    std::vector<std::shared_ptr<ImageBuffer>> buffers;
+    ImageSinkBufferPool buffer_list_;
 };
 
 } /* namespace tcam */

@@ -19,7 +19,6 @@
 #include "../../../libs/gst-helper/include/tcamprop1.0_gobject/tcam_property_serialize.h"
 #include "../../../libs/tcam-property/src/tcam-property-1.0.h"
 #include "../../logging.h"
-#include "../../tcam.h"
 #include "../tcamgstbase/tcamgstbase.h"
 #include "../tcamgstbase/tcamgststrings.h"
 #include "gstmetatcamstatistics.h"
@@ -333,16 +332,20 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
         return FALSE;
     }
 
+    self->device->device_->set_drop_incomplete_frames(state.drop_incomplete_frames_);
+
     auto cb_func = [self](const std::shared_ptr<tcam::ImageBuffer>& cb)
     {
         gst_tcam_mainsrc_sh_callback(cb, self);
     };
 
-    self->device->sink = std::make_shared<tcam::ImageSink>(cb_func, tcam::VideoFormat(format));
-    self->device->sink->set_buffer_number(state.imagesink_buffers_);
+    self->device->sink = std::make_shared<tcam::ImageSink>(cb_func, tcam::VideoFormat(format), state.imagesink_buffers_);
 
-    self->device->device_->start_stream(self->device->sink);
-    self->device->sink->drop_incomplete_frames(state.drop_incomplete_frames_);
+    auto res = self->device->device_->start_stream(self->device->sink);
+    if (!res) {
+        GST_ERROR_OBJECT(self, "Failed to start stream.");
+        return FALSE;
+    }
 
     self->device->is_streaming_ = true;
     GST_INFO_OBJECT(self, "Successfully set caps to: %s", gst_helper::to_string(*caps).c_str());
@@ -589,8 +592,11 @@ static GstFlowReturn gst_tcam_mainsrc_create(GstPushSrc* push_src, GstBuffer** b
 
         while (true)
         {
-            // wait until new buffer arrives or stop waiting when we have to shut down
-            self->device->stream_cv_.wait(lck);
+            if (self->device->queue.empty() && self->device->is_streaming_)
+            {
+                // wait until new buffer arrives or stop waiting when we have to shut down
+                self->device->stream_cv_.wait(lck);
+            }
             if (!self->device->is_streaming_)
             {
                 return GST_FLOW_EOS;
@@ -1007,9 +1013,9 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
         case PROP_DROP_INCOMPLETE_BUFFER:
         {
             state.drop_incomplete_frames_ = g_value_get_boolean(value) != FALSE;
-            if (self->device->sink)
+            if (self->device->device_)
             {
-                self->device->sink->drop_incomplete_frames(state.drop_incomplete_frames_);
+                self->device->device_->set_drop_incomplete_frames(state.drop_incomplete_frames_);
             }
             break;
         }

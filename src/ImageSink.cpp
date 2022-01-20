@@ -16,81 +16,38 @@
 
 #include "ImageSink.h"
 
-#include "internal.h"
+#include "logging.h"
+
+#include <cassert>
 
 using namespace tcam;
 
-
-ImageSink::ImageSink(const image_buffer_cb& cb, const tcam::VideoFormat& format)
-    : format_(format), sh_callback_( cb )
+ImageSink::ImageSink(const image_buffer_cb& cb, const tcam::VideoFormat& format, size_t count)
+    : sh_callback_(cb), buffer_list_(format, count)
 {
+    assert(cb != nullptr);
 }
 
-bool ImageSink::set_status(TCAM_PIPELINE_STATUS s)
+bool ImageSink::start_stream(std::weak_ptr<IImageBufferPool> requeue_target)
 {
-    if (status == s)
-    {
-        return true;
-    }
-
-    status = s;
-
-    if (status == TCAM_PIPELINE_PLAYING)
-    {
-        if (!external_buffer && buffers.empty())
-        {
-            if (!initialize_internal_buffer())
-            {
-                return false;
-            }
-        }
-        SPDLOG_INFO("Pipeline started playing");
-    }
-    else if (status == TCAM_PIPELINE_STOPPED)
-    {
-        SPDLOG_INFO("Pipeline stopped playing");
-    }
-
+    buffer_list_.create();
+    requeue_pool_ = requeue_target;
     return true;
 }
 
-
-TCAM_PIPELINE_STATUS ImageSink::get_status() const
+void ImageSink::stop_stream()
 {
-    return status;
+    requeue_pool_.reset();
 }
 
-
-bool ImageSink::setVideoFormat(const VideoFormat& new_format)
+void ImageSink::push_image(const std::shared_ptr<ImageBuffer>& buffer)
 {
-    if (status == TCAM_PIPELINE_PLAYING)
-    {
-        return false;
-    }
-
-    format_ = new_format;
-
-    return true;
+    sh_callback_(buffer);
 }
 
-
-VideoFormat ImageSink::getVideoFormat() const
+void ImageSink::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
 {
-    return format_;
-}
-
-void ImageSink::push_image(std::shared_ptr<ImageBuffer> buffer)
-{
-    if (sh_callback_)
-    {
-        this->sh_callback_(buffer);
-    }
-}
-
-
-void ImageSink::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
-{
-    if (auto ptr = source_.lock())
+    if (auto ptr = requeue_pool_.lock())
     {
         ptr->requeue_buffer(buffer);
     }
@@ -100,110 +57,18 @@ void ImageSink::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
     }
 }
 
-
-bool ImageSink::set_buffer_number(size_t new_number)
-{
-    if (status == TCAM_PIPELINE_PLAYING)
-    {
-        return false;
-    }
-
-    if (external_buffer)
-    {
-        return false;
-    }
-
-    buffer_number = new_number;
-
-    return true;
-}
-
-
-bool ImageSink::set_buffer_collection(std::vector<std::shared_ptr<ImageBuffer>> new_buffers)
-{
-    if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
-    {
-        return false;
-    }
-
-    buffers = new_buffers;
-    buffer_number = buffers.size();
-    external_buffer = true;
-
-    return false;
-}
-
-
 std::vector<std::shared_ptr<ImageBuffer>> ImageSink::get_buffer_collection()
 {
-    if (buffers.empty())
-    {
-        initialize_internal_buffer();
-    }
-
-    return buffers;
+    return buffer_list_.get_buffer_collection();
 }
 
-
-bool ImageSink::delete_buffer_collection()
+void ImageSinkBufferPool::initialize_internal_buffer()
 {
-    if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
-    {
-        return false;
-    }
+    buffer_list_.clear();
 
-    external_buffer = false;
-
-    return false;
-}
-
-
-void ImageSink::set_source(std::weak_ptr<SinkInterface> source)
-{
-    if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
-    {
-        return;
-    }
-
-    source_ = source;
-}
-
-
-bool ImageSink::initialize_internal_buffer()
-{
-    buffers.clear();
-
-    for (unsigned int i = 0; i < this->buffer_number; ++i)
+    for (size_t i = 0; i < this->buffer_count_to_allocate_; ++i)
     {
         auto ptr = std::make_shared<ImageBuffer>(format_, true);
-        this->buffers.push_back(ptr);
-    }
-    return true;
-}
-
-
-void ImageSink::drop_incomplete_frames(bool drop_them)
-{
-    if (auto source = source_.lock())
-    {
-        source->drop_incomplete_frames(drop_them);
-    }
-    else
-    {
-        SPDLOG_INFO("Unable to get source object to tell it if imcomplete frames should be locked");
-    }
-}
-
-
-bool ImageSink::should_incomplete_frames_be_dropped() const
-{
-    if (auto source = source_.lock())
-    {
-        return source->should_incomplete_frames_be_dropped();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to get source object to query if imcomplete frames should be locked");
-        return true;
+        this->buffer_list_.push_back(ptr);
     }
 }

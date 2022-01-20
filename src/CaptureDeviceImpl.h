@@ -20,12 +20,14 @@
 #include "DeviceIndex.h"
 #include "DeviceInfo.h"
 #include "DeviceInterface.h"
-#include "PipelineManager.h"
+#include "ImageSink.h"
 #include "VideoFormat.h"
+#include "PropertyFilter.h"
 
 #include <memory>
 #include <string>
 #include <vector>
+#include <chrono>
 
 VISIBILITY_INTERNAL
 
@@ -35,24 +37,19 @@ namespace tcam
 class PipelineManager;
 class DeviceInterface;
 
-class CaptureDeviceImpl
+class CaptureDeviceImpl :
+    public IImageBufferSink,
+    public std::enable_shared_from_this<CaptureDeviceImpl>
 {
 
 public:
-    explicit CaptureDeviceImpl();
+    CaptureDeviceImpl() = delete;
 
-    explicit CaptureDeviceImpl(const DeviceInfo& device);
+    explicit CaptureDeviceImpl(const DeviceInfo& device) noexcept(false);
 
     ~CaptureDeviceImpl();
 
     // device related:
-    /**
-     * Open the described device for interaction
-     * @param device - DeviceInfo description of the device that shall be opened
-     * @return true on success; on error Error will be set
-     */
-    bool open_device(const DeviceInfo& device);
-
 
     /**
      * Check if device is currently open
@@ -70,26 +67,15 @@ public:
 
     bool register_device_lost_callback(tcam_device_lost_callback callback, void* user_data);
 
-
-    /**
-     * Closes the open device. All streams will be stopped.
-     * @return true on success; on error Error will be set
-     */
-    bool close_device();
-
     // property related:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties();
     std::shared_ptr<tcam::property::IPropertyBase> get_property(const std::string& name);
 
-    // videoformat related:
-
-
     /**
      * @return vector containing all available video format settings
      */
     std::vector<VideoFormatDescription> get_available_video_formats() const;
-
 
     /**
      * Description for set_video_format.
@@ -111,35 +97,39 @@ public:
      * @param sink - SinkInterface that shall be called for new images
      * @return true if stream could successfully be initialized
      */
-    bool start_stream(std::shared_ptr<SinkInterface> sink);
-
+    bool start_stream(const std::shared_ptr<ImageSink>& sink);
 
     /**
      * @brief Stop currently running stream
-     * @return true if stream could successfully be stopped
      */
-    bool stop_stream();
+    void stop_stream();
+
+    void set_drop_incomplete_frames(bool b);
 
 private:
+    void push_image(const std::shared_ptr<ImageBuffer>& buffer) final;
+
     static void deviceindex_lost_cb(const DeviceInfo&, void* user_data);
 
     struct device_lost_cb_data
     {
-        tcam_device_lost_callback callback;
-        void* user_data;
+        tcam_device_lost_callback callback = nullptr;
+        void* user_data = nullptr;
     };
 
-    std::vector<device_lost_cb_data> device_lost_callback_data_;
-    // both need to be shared_ptr and not unique_ptr
-    // the pipeline is used for callbacks of ImageSource instances
-    std::shared_ptr<PipelineManager> pipeline;
+    device_lost_cb_data device_lost_callback_data_ = {};
 
-    DeviceInfo open_device_info;
-    VideoFormat active_format;
-
-    std::shared_ptr<DeviceInterface> device;
+    std::shared_ptr<DeviceInterface> device_;
 
     tcam::DeviceIndex index_;
+
+    std::vector<VideoFormatDescription> available_output_formats_;
+
+    std::chrono::time_point<std::chrono::steady_clock> stream_start_;
+
+    std::shared_ptr<IImageBufferSink> sink_;
+
+    tcam::stream::filter::SoftwarePropertyWrapper property_filter_;
 
 }; /* class CaptureDeviceImpl */
 

@@ -88,17 +88,15 @@ public:
 
     double get_framerate();
 
-    bool set_sink(std::shared_ptr<SinkInterface>);
-
     bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>);
 
     bool release_buffers();
 
-    void requeue_buffer(std::shared_ptr<ImageBuffer>);
+    void requeue_buffer(const std::shared_ptr<ImageBuffer>&) final;
 
-    bool start_stream();
+    bool start_stream(const std::shared_ptr<IImageBufferSink>&) final;
 
-    bool stop_stream();
+    void stop_stream() final;
 
     bool set_control(int unit, int ctrl, int len, unsigned char* value);
 
@@ -173,7 +171,7 @@ private:
     int jpegptr = 0;
     unsigned char* jpegbuf = nullptr;
 
-    std::weak_ptr<SinkInterface> listener;
+    std::weak_ptr<IImageBufferSink> listener;
 
     std::vector<struct libusb_transfer*> transfers;
 

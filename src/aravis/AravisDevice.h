@@ -68,16 +68,14 @@ public:
 
     std::vector<VideoFormatDescription> get_available_video_formats() override;
 
-    bool set_sink(std::shared_ptr<SinkInterface>) override;
+    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) final;
+    bool release_buffers() final;
 
-    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) override;
-    bool release_buffers() override;
+    void requeue_buffer(const std::shared_ptr<ImageBuffer>&) final;
 
-    void requeue_buffer(std::shared_ptr<ImageBuffer>) override;
+    bool start_stream(const std::shared_ptr<IImageBufferSink>&) final;
 
-    bool start_stream() override;
-
-    bool stop_stream() override;
+    void stop_stream() final;
 
 private:
 
@@ -97,7 +95,7 @@ private:
 
     ArvCamera* arv_camera;
 
-    std::weak_ptr<SinkInterface> external_sink;
+    std::weak_ptr<IImageBufferSink> external_sink;
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_internal_properties;

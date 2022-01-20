@@ -31,218 +31,156 @@ struct bad_device : std::exception
     }
 };
 
-
-CaptureDeviceImpl::CaptureDeviceImpl() {}
-
-
-CaptureDeviceImpl::CaptureDeviceImpl(const DeviceInfo& _device)
-    : pipeline(nullptr), device(nullptr), index_()
+CaptureDeviceImpl::CaptureDeviceImpl(const DeviceInfo& device_desc)
 {
-    if (!open_device(_device))
+    device_ = openDeviceInterface(device_desc);
+    if (device_ == nullptr)
     {
-        SPDLOG_ERROR("Unable to open device");
         throw bad_device();
     }
-}
 
+    available_output_formats_ = device_->get_available_video_formats();
+    if (available_output_formats_.empty())
+    {
+        SPDLOG_ERROR("Device '{}-{}-{}' has no video formats",
+                     device_desc.get_name(),
+                     device_desc.get_serial(),
+                     device_desc.get_device_type_as_string());
+        throw bad_device();
+    }
+
+    property_filter_.setup(device_->get_properties(), available_output_formats_);
+
+    const auto serial = device_->get_device_description().get_serial();
+    index_.register_device_lost(deviceindex_lost_cb, this, serial);
+}
 
 CaptureDeviceImpl::~CaptureDeviceImpl()
 {
-    close_device();
+    stop_stream();
+
+    available_output_formats_.clear();
+
+    device_.reset();
 }
-
-
-bool CaptureDeviceImpl::open_device(const DeviceInfo& device_desc)
-{
-    if (is_device_open())
-    {
-        bool ret = close_device();
-        if (ret == false)
-        {
-            SPDLOG_ERROR("Unable to close previous device.");
-            // setError(Error("A device is already open", EPERM));
-            return false;
-        }
-    }
-
-    open_device_info = device_desc;
-
-    device = openDeviceInterface(open_device_info);
-
-    if (device == nullptr)
-    {
-        return false;
-    }
-
-    pipeline = std::make_shared<PipelineManager>();
-    pipeline->setSource(device);
-
-    auto props = device->get_properties();
-
-    const auto serial = open_device_info.get_serial();
-    index_.register_device_lost(deviceindex_lost_cb, this, serial);
-
-    return true;
-}
-
 
 bool CaptureDeviceImpl::is_device_open() const
 {
-    if (device != nullptr)
-    {
-        return true;
-    }
-
-    return false;
+    return device_ != nullptr;
 }
-
 
 DeviceInfo CaptureDeviceImpl::get_device() const
 {
-    return this->open_device_info;
+    return device_->get_device_description();
 }
-
 
 bool CaptureDeviceImpl::register_device_lost_callback(tcam_device_lost_callback callback,
                                                       void* user_data)
 {
-    if (!is_device_open())
-    {
-        return false;
-    }
+    device_lost_callback_data_ = { callback, user_data };
 
-    struct device_lost_cb_data data;
-    data.callback = callback;
-    data.user_data = user_data;
-
-    device_lost_callback_data_.push_back(data);
-
-    return device->register_device_lost_callback(callback, user_data);
+    return device_->register_device_lost_callback(callback, user_data);
 }
-
 
 void CaptureDeviceImpl::deviceindex_lost_cb(const DeviceInfo& info, void* user_data)
 {
     auto self = (CaptureDeviceImpl*)user_data;
 
-    const auto i = info.get_info();
-
-    SPDLOG_INFO("Received lost from index");
-
-    for (const auto& data : self->device_lost_callback_data_)
+    auto data = self->device_lost_callback_data_;
+    if (data.callback)
     {
+        const auto i = info.get_info();
+
         (*data.callback)(&i, data.user_data);
     }
 }
 
-
-bool CaptureDeviceImpl::close_device()
-{
-    if (!is_device_open())
-    {
-        return true;
-    }
-
-    std::string name = open_device_info.get_name();
-
-    pipeline->destroyPipeline();
-
-    pipeline = nullptr;
-
-    open_device_info = DeviceInfo();
-    device.reset();
-
-    SPDLOG_INFO("Closed device {}.", name.c_str());
-
-    return true;
-}
-
-
 std::vector<std::shared_ptr<tcam::property::IPropertyBase>> CaptureDeviceImpl::get_properties()
 {
-    if (!is_device_open())
-    {
-        return {};
-    }
-    return pipeline->get_properties();
+    return property_filter_.getProperties();
 }
-
-
-std::shared_ptr<tcam::property::IPropertyBase> CaptureDeviceImpl::get_property(
-    const std::string& name)
-{
-    auto props = pipeline->get_properties();
-
-    for (auto& p : props)
-    {
-        if (p->get_name() == name)
-        {
-            return p;
-        }
-    }
-
-    return nullptr;
-}
-
 
 std::vector<VideoFormatDescription> CaptureDeviceImpl::get_available_video_formats() const
 {
-    if (!is_device_open())
-    {
-        return std::vector<VideoFormatDescription>();
-    }
-
-    return pipeline->getAvailableVideoFormats();
+    return available_output_formats_;
 }
-
 
 bool CaptureDeviceImpl::set_video_format(const VideoFormat& new_format)
 {
-    if (!is_device_open())
-    {
-        return false;
-    }
-
-    pipeline->setVideoFormat(new_format);
-
-    return this->device->set_video_format(new_format);
+    return device_->set_video_format(new_format);
 }
-
 
 VideoFormat CaptureDeviceImpl::get_active_video_format() const
 {
-    if (!is_device_open())
-    {
-        return {};
-    }
-
-    return device->get_active_video_format();
+    return device_->get_active_video_format();
 }
 
-
-bool CaptureDeviceImpl::start_stream(std::shared_ptr<SinkInterface> sink)
+bool CaptureDeviceImpl::start_stream(const std::shared_ptr<ImageSink>& sink)
 {
-    if (!is_device_open())
+    if (sink == nullptr)
     {
-        SPDLOG_ERROR("Device is not open");
+        SPDLOG_ERROR("No viable sink passed.");
         return false;
     }
 
-    if (!pipeline->setSink(sink))
+    if (!sink->start_stream(device_))
     {
         return false;
     }
 
-    return pipeline->set_status(TCAM_PIPELINE_PLAYING);
+    auto buffer_list = sink->get_buffer_collection();
+    if (buffer_list.empty())
+    {
+        SPDLOG_ERROR("CaptureDeviceImpl has no image buffers!");
+        return false;
+    }
+
+    property_filter_.setVideoFormat(device_->get_active_video_format());
+
+    device_->initialize_buffers(buffer_list);
+
+    stream_start_ = std::chrono::steady_clock::now();
+
+    sink_ = sink;
+
+    if (!device_->start_stream(shared_from_this()))
+    {
+        SPDLOG_ERROR("Unable to start stream from device.");
+
+        stop_stream();
+
+        return false;
+    }
+    return true;
 }
 
-
-bool CaptureDeviceImpl::stop_stream()
+void CaptureDeviceImpl::stop_stream()
 {
-    if (!is_device_open())
-    {
-        return false;
-    }
+    device_->stop_stream();
+    device_->release_buffers();
+    sink_.reset();
+}
 
-    return pipeline->set_status(TCAM_PIPELINE_STOPPED);
+void CaptureDeviceImpl::set_drop_incomplete_frames(bool b)
+{
+    device_->set_drop_incomplete_frames(b);
+}
+
+void CaptureDeviceImpl::push_image(const std::shared_ptr<ImageBuffer>& buffer)
+{
+    property_filter_.apply(*buffer);
+
+    auto stats = buffer->get_statistics();
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = end - stream_start_;
+
+    if (stats.frame_count > 0 && std::chrono::duration_cast<std::chrono::seconds>(elapsed).count())
+    {
+        stats.framerate =
+            (double)stats.frame_count
+            / (double)std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
+    }
+    buffer->set_statistics(stats);
+
+    sink_->push_image(buffer);
 }

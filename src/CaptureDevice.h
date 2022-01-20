@@ -24,6 +24,8 @@
 #include "VideoFormatDescription.h"
 #include "compiler_defines.h"
 
+#include "ImageSink.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -39,7 +41,7 @@ class CaptureDevice
 {
 
 public:
-    CaptureDevice();
+    CaptureDevice() = delete;
     explicit CaptureDevice(const DeviceInfo&);
 
     CaptureDevice(const CaptureDevice&) = delete;
@@ -101,7 +103,7 @@ public:
      * @param sink - SinkInterface that shall be called for new images
      * @return true if stream could successfully be initialized
      */
-    bool start_stream(std::shared_ptr<SinkInterface> sink);
+    bool start_stream(std::shared_ptr<ImageSink> sink);
 
 
     /**
@@ -110,8 +112,10 @@ public:
      */
     bool stop_stream();
 
+    void set_drop_incomplete_frames(bool b);
+
 private:
-    std::unique_ptr<CaptureDeviceImpl> impl;
+    std::shared_ptr<CaptureDeviceImpl> impl;
 
 }; /* class CaptureDevice */
 

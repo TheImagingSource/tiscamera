@@ -74,9 +74,9 @@ set( srcs
   DeviceInterface.cpp
   CaptureDevice.cpp
   CaptureDeviceImpl.cpp
-  PipelineManager.cpp
+  
   PropertyFilter.cpp
-  ImageSource.cpp
+  
   public_utils.cpp
 
   libtcam_base.h
@@ -85,9 +85,6 @@ set( srcs
 
 
 set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
-
-set(PUBLIC_HEADER tcam.h)
-
 
 set(TCAM_VERSION_FILE ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 

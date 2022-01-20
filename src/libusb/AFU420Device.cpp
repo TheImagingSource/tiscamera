@@ -674,13 +674,6 @@ double tcam::AFU420Device::get_framerate()
 }
 
 
-bool tcam::AFU420Device::set_sink(std::shared_ptr<SinkInterface> s)
-{
-    listener = s;
-    return true;
-}
-
-
 bool tcam::AFU420Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> buffs)
 {
     SPDLOG_TRACE("Received {} buffer from external allocator.", buffs.size());
@@ -699,7 +692,7 @@ bool tcam::AFU420Device::release_buffers()
 }
 
 
-void AFU420Device::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
+void AFU420Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
 {
     for (auto& b : buffers)
     {
@@ -957,8 +950,7 @@ void LIBUSB_CALL tcam::AFU420Device::libusb_bulk_callback(struct libusb_transfer
     self->transfer_callback(trans);
 }
 
-
-bool tcam::AFU420Device::start_stream()
+bool tcam::AFU420Device::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 {
     const int USB2_STACKUP_SIZE = 512;
     const int USB3_STACKUP_SIZE = 32;
@@ -1007,12 +999,18 @@ bool tcam::AFU420Device::start_stream()
 
         libusb_submit_transfer(xfr);
     }
+
+    listener = sink;
+
     unsigned char val = 0;
     int ret = control_write(BASIC_PC_TO_USB_START_STREAM, val);
 
     if (ret < 0)
     {
         SPDLOG_ERROR("Stream could not be started. Aborting");
+
+        listener.reset();
+
         return false;
     }
 
@@ -1026,7 +1024,7 @@ bool tcam::AFU420Device::start_stream()
 }
 
 
-bool tcam::AFU420Device::stop_stream()
+void tcam::AFU420Device::stop_stream()
 {
     SPDLOG_INFO("stop_stream called");
     stop_all = true;
@@ -1036,9 +1034,9 @@ bool tcam::AFU420Device::stop_stream()
 
     usb_device_->halt_endpoint(USB_EP_BULK_VIDEO);
 
-    release_buffers();
+    listener.reset();
 
-    return true;
+    release_buffers();
 }
 
 

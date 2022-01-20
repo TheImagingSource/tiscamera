@@ -27,8 +27,6 @@
 #define TCAM_INTERNAL_H
 
 #include "DeviceInterface.h"
-#include "FilterBase.h"
-#include "PipelineManager.h"
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
 #include "base_types.h"

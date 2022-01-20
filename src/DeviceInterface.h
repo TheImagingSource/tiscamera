@@ -36,11 +36,11 @@ namespace tcam
 // forward declaration
 class BackendLoader;
 
-class DeviceInterface
+class DeviceInterface : public IImageBufferPool
 {
 
 public:
-    virtual ~DeviceInterface() {};
+    virtual ~DeviceInterface() = default;
 
     /**
      * @return the DeviceInfo describing the device
@@ -67,13 +67,6 @@ public:
     virtual std::vector<VideoFormatDescription> get_available_video_formats() = 0;
 
     /**
-     * Set the ImageSource to which new images shall be delivered
-     * This overwrites previously defined Sinks
-     * @return true on successful registration; else false
-     */
-    virtual bool set_sink(std::shared_ptr<SinkInterface>) = 0;
-
-    /**
      * @return true on successfull allocation/registration; else false
      */
     virtual bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) = 0;
@@ -83,22 +76,22 @@ public:
      */
     virtual bool release_buffers() = 0;
 
-    virtual void requeue_buffer(std::shared_ptr<ImageBuffer>) = 0;
+    //virtual void requeue_buffer(const std::shared_ptr<ImageBuffer>&) = 0;
 
     /**
      * Start image retrieval and wait for new images
      * A SinkInterface has to be given via @set_sink
      * @return true on success; else false
      */
-    virtual bool start_stream() = 0;
+    virtual bool start_stream(const std::shared_ptr<IImageBufferSink>&) = 0;
 
     /**
      * Stop image retrieval
      * @return true on success; else false
      */
-    virtual bool stop_stream() = 0;
+    virtual void stop_stream() = 0;
 
-    virtual bool register_device_lost_callback(tcam_device_lost_callback callback, void* user_data)
+    bool register_device_lost_callback(tcam_device_lost_callback callback, void* user_data)
     {
         struct callback_container cc = { callback, user_data };
 
@@ -107,11 +100,15 @@ public:
         return true;
     }
 
-    virtual void set_backend_loader(std::shared_ptr<BackendLoader> ptr)
+    void set_backend_loader(std::shared_ptr<BackendLoader> ptr)
     {
         backend_loader_ = ptr;
     }
 
+    void set_drop_incomplete_frames(bool b)
+    {
+        drop_incomplete_frames_ = b;
+    }
 
 protected:
     DeviceInfo device;
@@ -119,6 +116,16 @@ protected:
     // reference to keep the backend open until all devices/indexer are closed
     std::shared_ptr<BackendLoader> backend_loader_;
 
+    void notify_device_lost()
+    {
+        auto dev = device.get_info();
+
+        for (const auto& cc : lost_callbacks) { cc.callback(&dev, cc.user_data); }
+    }
+
+    bool drop_incomplete_frames_ = true;
+
+private:
     struct callback_container
     {
         tcam_device_lost_callback callback;
@@ -126,14 +133,6 @@ protected:
     };
 
     std::vector<callback_container> lost_callbacks;
-
-    virtual void notify_device_lost()
-    {
-        auto dev = device.get_info();
-
-        for (const auto& cc : lost_callbacks) { cc.callback(&dev, cc.user_data); }
-    }
-
 }; /* class Camera_Interface */
 
 
