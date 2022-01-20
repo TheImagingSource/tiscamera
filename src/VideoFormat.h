@@ -21,6 +21,11 @@
 
 #include <string>
 
+namespace img
+{
+struct img_type;
+}
+
 namespace tcam
 {
 
@@ -34,45 +39,42 @@ class VideoFormat
 public:
     VideoFormat() = default;
 
-    explicit VideoFormat(const struct tcam_video_format&);
+    explicit VideoFormat(const tcam_video_format&) noexcept;
 
     VideoFormat(const VideoFormat&) = default;
-
     VideoFormat& operator=(const VideoFormat&) = default;
 
-    bool operator==(const VideoFormat&) const;
-
-    bool operator!=(const VideoFormat& other) const;
-
+    bool operator==(const VideoFormat&) const noexcept;
+    bool operator!=(const VideoFormat& other) const noexcept;
 
     /**
      * Returns a struct representation of the format
      * @return tcam_video_format
      */
-    struct tcam_video_format get_struct() const;
+    struct tcam_video_format get_struct() const noexcept;
 
-    image_scaling get_scaling() const;
-    void set_scaling(const image_scaling& new_scale);
+    image_scaling get_scaling() const noexcept;
+    void set_scaling(const image_scaling& new_scale) noexcept;
 
     /**
      * Returns the used pixel format
      * @return uint32 containing the fourcc
      */
-    uint32_t get_fourcc() const;
+    uint32_t get_fourcc() const noexcept;
     std::string get_fourcc_string() const;
 
-    void set_fourcc(uint32_t);
+    void set_fourcc(uint32_t) noexcept;
 
     /**
      * @return framerate in frames/second
      */
-    double get_framerate() const;
+    double get_framerate() const noexcept;
 
-    void set_framerate(double);
+    void set_framerate(double) noexcept;
 
-    tcam_image_size get_size() const;
+    tcam_image_size get_size() const noexcept;
 
-    void set_size(unsigned int width, unsigned int height);
+    void set_size(unsigned int width, unsigned int height) noexcept;
 
     std::string to_string() const;
 
@@ -80,19 +82,19 @@ public:
      * Description for getRequiredBufferSize.
      * @return size in bytes an image with this format will have
      */
-    uint64_t get_required_buffer_size() const;
+    uint64_t get_required_buffer_size() const noexcept;
 
     /**
      * Description for getPitchSize.
      * @return the size og an image line
      */
-    uint32_t get_pitch_size() const;
+    uint32_t get_pitch_size() const noexcept;
 
     bool is_empty() const noexcept
     {
         return format.fourcc == 0;
     }
-
+    img::img_type get_img_type() const noexcept;
 private:
     tcam_video_format format = {};
 };
