@@ -5,8 +5,7 @@
 Error Handling
 ##############
 
-tiscamera
-
+This is a small overview as to how error handling might be handled.
 
 GStreamer
 #########
@@ -103,50 +102,41 @@ All possible error types are defined in the enum TcamError
 
          if (err) // an error occurred
          {
+             if (err->domain != tcam_error_quark())
+             {
+                 // Not an error caused by tiscamera
+                 // handling is outside of the scope of this example
+                 return;
+             }
+         
              // err->message contains a human readable error description
              switch (err->code) // err->code contains the TcamError value
              {
-             case TCAM_ERROR_UNKNOWN:
-             {
-                 break;
+                 case TCAM_ERROR_UNKNOWN:
+                 {
+                     break;
+                 }
+                 case TCAM_ERROR_PROPERTY_NOT_WRITEABLE:
+                 {
+                     break;
+                 }
+                 case TCAM_ERROR_NO_DEVICE_OPEN:
+                 {
+                     //
+                     break;
+                 }
+                 case TCAM_ERROR_DEVICE_LOST:
+                 {
+                     printf("error: Device lost %s\n", err->message);
+                     // stop playback and other things
+                     break;
+                 }
+                 default:
+                 {
+                     printf("error: %s\n", err->message);
+                     break;
+                 }
              }
-             case TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED:
-             {
-                 break;
-             }
-             case TCAM_ERROR_PROPERTY_NOT_AVAILABLE:
-             {
-                 break;
-             }
-             case TCAM_ERROR_PROPERTY_NOT_WRITEABLE:
-             {
-                 break;
-             }
-             case TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE:
-             {
-                 break;
-             }
-             case TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE:
-             {
-                 break;
-             }
-             case TCAM_ERROR_NO_DEVICE_OPEN:
-             {
-             break;
-             }
-             case TCAM_ERROR_DEVICE_LOST:
-             {
-             break;
-             }
-             case TCAM_ERROR_PARAMETER_NULL:
-             {
-             break;
-             }
-             case TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE:
-             {
-             break;
-             }
-         }
          }
 
    .. group-tab:: python
@@ -159,21 +149,8 @@ All possible error types are defined in the enum TcamError
 
          except GLib.Error as err:
 
-             err.code
-             print("Error for {}: {}".format(name, err.message))
+             if err.code == Tcam.Error.DEVICE_LOST:
+                 # stop playback and other things
+                 
+             print("Error: {}".format(err.message))
 
-
-         
-typedef enum {
-TCAM_ERROR_SUCCESS                      = 0,
-TCAM_ERROR_UNKNOWN                      = 1,
-TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED     = 2,
-TCAM_ERROR_PROPERTY_NOT_AVAILABLE       = 3,
-TCAM_ERROR_PROPERTY_NOT_WRITEABLE       = 4,
-TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE   = 5,
-TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE  = 6,
-TCAM_ERROR_NO_DEVICE_OPEN               = 7,
-TCAM_ERROR_DEVICE_LOST                  = 8,
-TCAM_ERROR_PARAMETER_NULL               = 9,
-TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE = 10,
-} TcamError;

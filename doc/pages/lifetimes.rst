@@ -75,22 +75,19 @@ No properties will be available.
 GST_STATE_NULL -> GST_STATE_READY
 #################################
 
-Upon entering this state a device will be opened.
+Upon entering this state a device will be opened by the tcamsrc.
 If the requested device cannot be found or opened a `GST_STATE_CHANGE_FAILURE` will be returned.
 
-tcamconvert/tcamdutils/tcamdutils-cuda will be initialized.
+termagant/tcamdutils/tcamdutils-cuda will be initialized.
 
 All properties will be available.
 
 GST_STATE_READY -> GST_STATE_PAUSED
 ###################################
 
-tcambin
--------
-
-- device-caps will be fixed and set for internal tcamsrc.
-- if no device-caps are set, auto negotiation will determine caps and set them.
-- if `tcam-properties-json` is set, the properties will be applied.
+- tcambin `device-caps` will be fixed and set for the internal tcamsrc.
+  - if no device-caps are set, auto negotiation will determine caps and set them.
+- if tcambin `tcam-properties-json` is set, the properties will be applied.
 
 GST_STATE_PAUSED -> GST_STATE_PLAYING
 #####################################
@@ -108,20 +105,12 @@ GST_STATE_PAUSED -> GST_STATE_READY
 GST_STATE_READY -> GST_STATE_NULL
 #################################
 
-All property object are invalid and should be discarded.
-Using property functions will return `TCAM_ERROR_NO_DEVICE_OPEN`.
-
-tcambin
--------
-
-- All internal elements will be discarded
-- The source element will be discarded
+- All property objects are invalid and should be discarded.
+  Using property functions will return `TCAM_ERROR_NO_DEVICE_OPEN`.
+- All tcambin internal elements will be discarded
+- The tcambin source element will be discarded
   This closes the camera.
-
-tcamsrc
--------
-
-- The hardware device will be closed
+- The tcamsrc will close the hardware device
 
 
   

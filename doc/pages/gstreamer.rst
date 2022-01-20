@@ -346,4 +346,4 @@ For further info, see :ref:`logging`.
 Environment
 ***********
 
-For environment variables that change gstreamer behavior, see :any:`environment`.
+For environment variables that change gstreamer behavior, see :ref:`environment`.
