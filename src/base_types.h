@@ -30,20 +30,6 @@ namespace tcam
 {
 
 /**
-* @name TCAM_PIPELINE_STATUS
-* @brief overview over possible pipeline states
-*/
-enum TCAM_PIPELINE_STATUS
-{
-    TCAM_PIPELINE_UNDEFINED = 0,
-    TCAM_PIPELINE_STOPPED,
-    TCAM_PIPELINE_PAUSED,
-    TCAM_PIPELINE_PLAYING,
-    TCAM_PIPELINE_ERROR,
-};
-
-
-/**
  * Supported camera types
  */
 enum TCAM_DEVICE_TYPE
@@ -321,39 +307,6 @@ enum TCAM_PROPERTY_TYPE
                                             be triggered. */
 };
 
-
-struct tcam_value_int
-{
-    int64_t min;
-    int64_t max;
-    int64_t step; /* 0 if steps not possible */
-    int64_t default_value;
-    int64_t value;
-};
-
-
-struct tcam_value_double
-{
-    double min;
-    double max;
-    double step; /* 0.0 if steps not possible */
-    double default_value;
-    double value;
-};
-
-
-struct tcam_value_string
-{
-    char value[64];
-    char default_value[64];
-};
-
-
-struct tcam_value_bool
-{
-    bool value;
-    bool default_value;
-};
 
 }
 
