@@ -43,7 +43,7 @@ bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> 
 
     for (unsigned int i = 0; i < b.size(); ++i)
     {
-        ArvBuffer* ab = arv_buffer_new_full(payload, b.at(i)->get_data(), b.at(i).get(), nullptr);
+        ArvBuffer* ab = arv_buffer_new_full(payload, b.at(i)->get_image_buffer_ptr(), b.at(i).get(), nullptr);
         buffer_info info = {};
         info.buffer = b.at(i);
         info.arv_buffer = ab;
@@ -420,9 +420,7 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
                 if (auto ptr = self->external_sink.lock())
                 {
                     b.is_queued = false;
-                    auto desc = b.buffer->getImageBuffer();
-                    desc.length = image_size;
-                    b.buffer->set_image_buffer(desc);
+                    b.buffer->set_valid_data_length(image_size);
                     ptr->push_image(b.buffer);
                 }
                 else
@@ -481,9 +479,7 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
 
                             b.buffer->set_statistics(self->statistics);
                             b.is_queued = false;
-                            auto desc = b.buffer->getImageBuffer();
-                            desc.length = image_size;
-                            b.buffer->set_image_buffer(desc);
+                            b.buffer->set_valid_data_length(image_size);
                             ptr->push_image(b.buffer);
                         }
                     }

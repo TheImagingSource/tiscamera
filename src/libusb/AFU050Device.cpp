@@ -299,16 +299,13 @@ void tcam::AFU050Device::init_buffers()
     buffers.clear();
     buffers.reserve(num_buffers);
 
-    struct tcam_image_buffer b = {};
+    const auto fmt = get_active_video_format();
 
-    b.format = active_video_format.get_struct();
+    size_t max_size = AFU050Device::JPEGBUF_SIZE;
 
     for (unsigned int i = 0; i < num_buffers; ++i)
     {
-        b.pData = (unsigned char*)malloc(JPEGBUF_SIZE);
-        b.size = JPEGBUF_SIZE;
-
-        buffers.push_back({ std::make_shared<ImageBuffer>(b, true), false });
+        buffers.push_back({ std::make_shared<ImageBuffer>(fmt, max_size), false });
     }
 }
 
@@ -324,7 +321,7 @@ void tcam::AFU050Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buf)
 {
     for (auto& b : buffers)
     {
-        if (b.buffer->get_data() == buf->get_data())
+        if (b.buffer->get_image_buffer_ptr() == buf->get_image_buffer_ptr())
         {
             b.is_queued = true;
         }
@@ -420,16 +417,13 @@ void tcam::AFU050Device::transfer_callback(struct libusb_transfer* transfer)
                     current_buffer = 0;
                 }
 
-                auto b = buffer->getImageBuffer();
-                memcpy(b.pData, jpegbuf, jpegsize);
-                b.length = jpegsize;
-                b.size = jpegsize;
+                memcpy( buffer->get_image_buffer_ptr(), jpegbuf, jpegsize);
                 m_statistics.frame_count++;
 
                 auto since_epoch = std::chrono::system_clock::now().time_since_epoch();
 
                 m_statistics.capture_time_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(since_epoch).count();
-                buffer->set_image_buffer(b);
+                buffer->set_valid_data_length(jpegsize);
                 buffer->set_statistics(m_statistics);
 
                 jpegptr = 0;

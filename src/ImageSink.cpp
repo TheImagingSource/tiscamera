@@ -68,7 +68,7 @@ void ImageSinkBufferPool::initialize_internal_buffer()
 
     for (size_t i = 0; i < this->buffer_count_to_allocate_; ++i)
     {
-        auto ptr = std::make_shared<ImageBuffer>(format_, true);
+        auto ptr = std::make_shared<ImageBuffer>(format_);
         this->buffer_list_.push_back(ptr);
     }
 }

@@ -264,25 +264,6 @@ struct tcam_stream_statistics
 };
 
 /**
- * @name tcam_image_buffer
- * @brief container for image transfer
- */
-struct tcam_image_buffer
-{
-    unsigned char* pData; /**< pointer to actual image buffer */
-    unsigned int length; /**< size of image in bytes */
-    unsigned int size; /**< size of image buffer in bytes */
-    struct tcam_video_format format; /**< tcam_video_format the image buffer has */
-    unsigned int pitch; /**< length of single image line in bytes */
-    struct tcam_stream_statistics statistics;
-
-    uint32_t lock_count;
-
-    void* user_data;
-};
-
-
-/**
  * @enum TCAM_PROPERTY_TYPE
  * Available property types
 */

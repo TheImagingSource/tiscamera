@@ -16,152 +16,71 @@
 
 #include "ImageBuffer.h"
 
-#include "internal.h"
-
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
+#include <dutils_img/image_transform_base.h>
 
 using namespace tcam;
 
-
-ImageBuffer::ImageBuffer(const struct tcam_image_buffer& buf, bool owns_memory)
-    : is_own_memory(owns_memory), buffer(buf)
+ImageBuffer::ImageBuffer(const VideoFormat& format)
+    : ImageBuffer(format, format.get_required_buffer_size())
 {
 }
 
-
-ImageBuffer::ImageBuffer(const VideoFormat& format, bool owns_memory)
-    : is_own_memory(owns_memory), buffer()
+ImageBuffer::ImageBuffer(const VideoFormat& format, size_t buffer_size_to_allocate)
+    : format_(format), buffer_size_(buffer_size_to_allocate), is_own_memory_(true)
 {
-    buffer.size = format.get_required_buffer_size();
-    if (is_own_memory)
+    assert(buffer_size_to_allocate >= format.get_required_buffer_size());
+    buffer_ptr_ = malloc(buffer_size_);
+    if (buffer_ptr_ == nullptr)
     {
-        SPDLOG_TRACE("allocating data buffer");
-        buffer.pData = (unsigned char*)malloc(buffer.size);
+        throw std::bad_alloc();
     }
-    else
-    {
-        buffer.pData = nullptr;
-    }
-    buffer.format = format.get_struct();
-    buffer.pitch = format.get_pitch_size();
 }
 
+ImageBuffer::ImageBuffer(const VideoFormat& format, void* buffer_ptr, size_t buffer_size) noexcept
+    : format_(format), buffer_size_(buffer_size), buffer_ptr_(buffer_ptr),
+      is_own_memory_(false)
+{
+    assert(buffer_size >= format.get_required_buffer_size());
+}
 
 ImageBuffer::~ImageBuffer()
 {
-    if (is_own_memory)
+    if (is_own_memory_)
     {
-        if (buffer.pData != nullptr)
-        {
-            free(buffer.pData);
-        }
+        free(buffer_ptr_);
     }
 }
 
-
-tcam_image_buffer ImageBuffer::getImageBuffer()
+bool ImageBuffer::copy_block(const void* data, size_t size, unsigned int offset) noexcept
 {
-    return buffer;
-}
-
-void ImageBuffer::set_image_buffer(tcam_image_buffer buf)
-{
-    this->buffer = buf;
-}
-
-
-unsigned char* ImageBuffer::get_data()
-{
-    return buffer.pData;
-}
-
-
-size_t ImageBuffer::get_buffer_size() const
-{
-    return buffer.size;
-}
-
-
-size_t ImageBuffer::get_image_size() const
-{
-    return buffer.length;
-}
-
-
-struct tcam_stream_statistics ImageBuffer::get_statistics() const
-{
-    return buffer.statistics;
-}
-
-
-bool ImageBuffer::set_statistics(const struct tcam_stream_statistics& stats)
-{
-    buffer.statistics = stats;
-    return true;
-}
-
-bool ImageBuffer::set_data(const unsigned char* data, size_t size, unsigned int offset)
-{
-    if (size + offset > buffer.size)
+    if (size + offset > buffer_size_)
     {
         return false;
     }
 
-    memcpy(buffer.pData + offset, data, size);
+    memcpy(static_cast<char*>(buffer_ptr_) + offset, data, size);
 
     if (offset == 0)
     {
-        buffer.length = size;
+        valid_data_length_ = size;
     }
     else
     {
-        buffer.length = buffer.length + size;
-    }
-
-    return true;
-}
-
-
-bool ImageBuffer::lock()
-{
-    buffer.lock_count++;
-    return true;
-}
-
-
-bool ImageBuffer::unlock()
-{
-    if (buffer.lock_count >= 1)
-    {
-        buffer.lock_count--;
+        valid_data_length_ += size;
     }
     return true;
 }
 
-
-bool ImageBuffer::is_locked() const
+std::shared_ptr<tcam::ImageBuffer> tcam::ImageBuffer::make_alloc_buffer(const VideoFormat& fmt,
+                                                                        size_t actual_buffer_size)
 {
-    if (buffer.lock_count == 0)
-    {
-        return false;
-    }
-    return true;
+    return std::make_shared<ImageBuffer>(fmt, actual_buffer_size);
 }
 
-void ImageBuffer::set_user_data(void* data)
+img::img_descriptor ImageBuffer::get_img_descriptor() const noexcept
 {
-    buffer.user_data = data;
-}
-
-
-void* ImageBuffer::get_user_data()
-{
-    return buffer.user_data;
-}
-
-
-void ImageBuffer::clear()
-{
-    memset(buffer.pData, 0, buffer.length);
+    return img::make_img_desc_from_linear_memory(format_.get_img_type(), get_image_buffer_ptr());
 }

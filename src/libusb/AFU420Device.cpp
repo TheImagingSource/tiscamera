@@ -712,7 +712,8 @@ void AFU420Device::push_buffer()
         return;
     }
 
-    if (usbbulk_image_size_ - current_buffer_->get_image_size() != 0)
+    auto cur_buf = current_buffer_;
+    if (drop_incomplete_frames_ && (usbbulk_image_size_ - cur_buf->get_valid_data_length() != 0))
     {
         SPDLOG_WARN("Image buffer does not contain enough data. Dropping frame...");
 
@@ -871,7 +872,7 @@ void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
                 return;
             }
 
-            current_buffer_->clear();
+            current_buffer_->set_valid_data_length(0);
             transfered_size_ = 0;
             offset_ = 0;
             have_header = false;
@@ -905,7 +906,7 @@ void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
 
     int bytes_to_copy = std::min(bytes_available, int(header.size));
 
-    current_buffer_->set_data(header.buffer, bytes_to_copy, offset_);
+    current_buffer_->copy_block(header.buffer, bytes_to_copy, offset_);
 
     offset_ += bytes_to_copy;
 

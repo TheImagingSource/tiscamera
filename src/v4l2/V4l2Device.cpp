@@ -311,8 +311,8 @@ void V4l2Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
             buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             buf.memory = V4L2_MEMORY_USERPTR;
             buf.index = i;
-            buf.m.userptr = (unsigned long)b.buffer->get_data();
-            buf.length = b.buffer->get_buffer_size();
+            buf.m.userptr = (unsigned long)b.buffer->get_image_buffer_ptr();
+            buf.length = b.buffer->get_image_buffer_size();
 
             // requeue buffer
             int ret = tcam_xioctl(m_fd, VIDIOC_QBUF, &buf);
@@ -1236,7 +1236,9 @@ bool V4l2Device::get_frame()
         return false;
     }
 
-    m_buffers.at(buf.index).is_queued = false;
+    auto& image_buffer = m_buffers.at(buf.index);
+
+    image_buffer.is_queued = false;
 
     // buf.bytesused
     /* The number of bytes occupied by the data in the buffer. It depends on
@@ -1259,7 +1261,7 @@ bool V4l2Device::get_frame()
                              buf.bytesused,
                              this->m_active_video_format.get_required_buffer_size());
             }
-            requeue_buffer(m_buffers.at(buf.index).buffer);
+            requeue_buffer(image_buffer.buffer);
             return true;
         }
     }
@@ -1269,17 +1271,14 @@ bool V4l2Device::get_frame()
     m_statistics.capture_time_ns =
         ((long long)buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
     m_statistics.frame_count++;
-    m_buffers.at(buf.index).buffer->set_statistics(m_statistics);
-
-    auto desc = m_buffers.at(buf.index).buffer->getImageBuffer();
-    desc.length = buf.bytesused;
-    m_buffers.at(buf.index).buffer->set_image_buffer(desc);
+    image_buffer.buffer->set_statistics(m_statistics);
+    image_buffer.buffer->set_valid_data_length(buf.bytesused);
 
     SPDLOG_TRACE("pushing new buffer");
 
     if (auto ptr = m_listener.lock())
     {
-        ptr->push_image(m_buffers.at(buf.index).buffer);
+        ptr->push_image(image_buffer.buffer);
     }
     else
     {
@@ -1321,11 +1320,12 @@ void V4l2Device::init_userptr_buffers()
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_USERPTR;
         buf.index = i;
-        buf.m.userptr = (unsigned long)m_buffers.at(i).buffer->get_data();
-        buf.length = m_buffers.at(i).buffer->get_buffer_size();
+        buf.m.userptr = (unsigned long)m_buffers.at(i).buffer->get_image_buffer_ptr();
+        buf.length = m_buffers.at(i).buffer->get_image_buffer_size();
 
-        SPDLOG_TRACE(
-            "Queueing buffer({:x}) with length {}", m_buffers.at(i).buffer->get_data(), buf.length);
+        SPDLOG_TRACE("Queueing buffer({:x}) with length {}",
+                     m_buffers.at(i).buffer->get_image_buffer_ptr(),
+                     buf.length);
 
         if (-1 == tcam_xioctl(m_fd, VIDIOC_QBUF, &buf))
         {

@@ -37,15 +37,7 @@ void SoftwarePropertyWrapper::setup(
 
 void SoftwarePropertyWrapper::apply(ImageBuffer& buffer)
 {
-    auto bs = buffer.getImageBuffer();
-
-    img::dim dim = { (int)bs.format.width, (int)bs.format.height };
-
-    // TODO: generate from VideoFormat
-    img::img_type src_type = { bs.format.fourcc, dim, (int)bs.length };
-
-    img::img_descriptor src =
-        img::make_img_desc_raw(src_type, img::img_plane { buffer.get_data(), (int)bs.pitch });
+    img::img_descriptor src = buffer.get_img_descriptor();
 
     m_impl->auto_pass(src);
 }

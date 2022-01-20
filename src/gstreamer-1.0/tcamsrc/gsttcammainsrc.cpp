@@ -611,8 +611,6 @@ static GstFlowReturn gst_tcam_mainsrc_create(GstPushSrc* push_src, GstBuffer** b
         }
     }
 
-    ptr->set_user_data(self);
-
     /* TODO: check why aravis throws an incomplete buffer error
        but the received images are still valid */
     // if (!tcam::is_image_buffer_complete(self->ptr))
@@ -627,10 +625,10 @@ static GstFlowReturn gst_tcam_mainsrc_create(GstPushSrc* push_src, GstBuffer** b
     trans->ptr = ptr;
 
     *buffer = gst_buffer_new_wrapped_full(static_cast<GstMemoryFlags>(0),
-                                          ptr->get_data(),
-                                          ptr->get_buffer_size(),
+                                          ptr->get_image_buffer_ptr(),
+                                          ptr->get_image_buffer_size(),
                                           0,
-                                          ptr->get_image_size(),
+                                          ptr->get_valid_data_length(),
                                           trans,
                                           buffer_destroy_callback);
 

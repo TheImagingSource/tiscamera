@@ -20,6 +20,14 @@
 #include "VideoFormat.h"
 #include "base_types.h"
 
+#include <memory>
+
+
+namespace img
+{
+struct img_descriptor;
+}
+
 /**
  * @addtogroup API
  * @{
@@ -32,69 +40,93 @@ namespace tcam
 /// @brief Transport class for memory, format and statistics representing an actual image
 class ImageBuffer
 {
-
 public:
-    // will not take ownership of memory given in tcam_image_buffer
-    explicit ImageBuffer(const struct tcam_image_buffer&, bool owns_memory = false);
-
-    // will allocate buffer memory
-    explicit ImageBuffer(const VideoFormat&, bool owns_memory = false);
+    /**
+     * Creates a ImageBuffer which allocates its own memory according to the VideoFormat passed in.
+     * Throws std::bad_alloc when memory could not be allocated.
+     */
+    explicit ImageBuffer(const VideoFormat& format) noexcept(false);
+    /**
+     * Creates a ImageBuffer which allocates its own memory according to the VideoFormat passed in.
+     * Throws std::bad_alloc when memory could not be allocated.
+     * @buffer_size_to_allocate The actual size to allocate. This must be >= format.get_required_buffer_size()
+     */
+    ImageBuffer(const VideoFormat& format, size_t buffer_size_to_allocate) noexcept(false);
+    /**
+     * Initializes a ImageBuffer with external memory. Marks the buffer as unowned.
+     * @buffer_size The actual size of the buffer pointed to by buffer_ptr. This must be >= format.get_required_buffer_size()
+     */
+    ImageBuffer(const VideoFormat& format, void* buffer_ptr, size_t buffer_size) noexcept;
 
     ImageBuffer() = delete;
+    ImageBuffer(const ImageBuffer&) = delete;
+    ImageBuffer(ImageBuffer&&) = delete;
+    ImageBuffer& operator=(const ImageBuffer&) = delete;
+    ImageBuffer& operator=(ImageBuffer&&) = delete;
 
     ~ImageBuffer();
 
-    /**
-     *
-     */
-    tcam_image_buffer getImageBuffer();
+    static std::shared_ptr<ImageBuffer> make_alloc_buffer(const VideoFormat& fmt,
+                                                          size_t actual_buffer_size);
 
-    void set_image_buffer(tcam_image_buffer);
+    img::img_descriptor get_img_descriptor() const noexcept;
 
     /**
      * @return Pointer to actual image data
      */
-    unsigned char* get_data();
+    void* get_image_buffer_ptr() const noexcept
+    {
+        return buffer_ptr_;
+    }
 
-    /// @name get_buffer_size
+    /// @name get_image_buffer_size
     /// @brief Get the size of the internal memory
     /// @return size_t - size of the internal memory
-    size_t get_buffer_size() const;
+    size_t get_image_buffer_size() const noexcept
+    {
+        return buffer_size_;
+    }
 
     /// @name get_image_size
     /// @brief Get size of the image in bytes
     /// @return size of the image in bytes
-    size_t get_image_size() const;
+    size_t get_valid_data_length() const noexcept
+    {
+        return valid_data_length_;
+    }
 
+    void set_valid_data_length(size_t new_len) noexcept
+    {
+        valid_data_length_ = new_len;
+    }
 
-    struct tcam_stream_statistics get_statistics() const;
+    tcam_stream_statistics get_statistics() const noexcept
+    {
+        return statistics_;
+    }
 
-    bool set_statistics(const struct tcam_stream_statistics&);
+    void set_statistics(const tcam_stream_statistics& stats) noexcept
+    {
+        statistics_ = stats;
+    }
 
-    /// @name set_data
+    /// @name copy_block
     /// @brief write data to the internal buffer
     /// @param data - pointer to the data that shall be written
     /// @param size - number of bytes that shall be read from data
     /// @param offset - number of bytes at the beginning of the internal buffer that shall be ignored before writing. Default: 0
     /// @return true when data could be written
-    bool set_data(const unsigned char* data, size_t size, unsigned int offset = 0);
-
-    bool lock();
-
-    bool unlock();
-
-    bool is_locked() const;
-
-    void set_user_data(void* data);
-
-    void* get_user_data();
-
-    /// @brief Fills MemoryBuffer with 0
-    void clear();
+    bool copy_block(const void* data, size_t size, unsigned int offset) noexcept;
 
 private:
-    const bool is_own_memory;
-    tcam_image_buffer buffer;
+    VideoFormat format_;
+    tcam_stream_statistics statistics_ = {};
+
+    size_t valid_data_length_ = 0;
+    size_t buffer_size_ = 0;
+    void* buffer_ptr_ = nullptr;
+
+    const bool is_own_memory_ = false;
 };
 
 
