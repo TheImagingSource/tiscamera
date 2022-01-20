@@ -16,7 +16,6 @@
 
 #include "aravis_utils.h"
 
-#include "../internal.h"
 #include "../logging.h"
 
 #include <algorithm> // std::find
@@ -116,6 +115,9 @@ uint32_t tcam::fourcc2aravis(uint32_t fourcc)
     return 0;
 }
 
+static bool not_using_gige_deamon_message_reported = false;
+
+
 static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
 {
     try
@@ -123,10 +125,16 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
         key_t shmkey = ftok(LOCK_FILE, 'G');
         if (shmkey == -1)
         {
-            SPDLOG_INFO("Failed to create shmkey. Not using gige-daemon to enumerate devices.");
-            //SPDLOG_INFO("Failed to create shmkey. Using internal", errno);
+            if (!not_using_gige_deamon_message_reported)    // print this message only once and not every time we are queried
+            {
+                SPDLOG_INFO("Failed to create shmkey. Not using gige-daemon to enumerate devices.");
+                not_using_gige_deamon_message_reported = true;
+            }
             return std::nullopt;
         }
+
+        not_using_gige_deamon_message_reported = false; // reset message when fetching the lock worked
+
         key_t shm_semaphore_key = ftok(LOCK_FILE, 'S');
         if (shm_semaphore_key == -1)
         {
