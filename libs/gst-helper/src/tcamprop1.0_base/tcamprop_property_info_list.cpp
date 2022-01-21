@@ -78,7 +78,7 @@ const prop_static_info_enumeration lst::BalanceWhiteAuto = make_Enumeration(
 const prop_static_info_enumeration lst::BalanceWhiteMode = make_Enumeration(
     "BalanceWhiteMode",
     "Color", "Balance White Mode",
-    "Controls the WhiteBalance mode selected"
+    "Controls the WhiteBalance mode selected."
 );
 const prop_static_info_enumeration lst::BalanceWhiteAutoPreset = make_Enumeration(
     "BalanceWhiteAutoPreset",
@@ -510,7 +510,7 @@ const prop_static_info_float lst::TriggerDebouncer = make_Float(
 const prop_static_info_boolean lst::IMXLowLatencyTriggerMode = make_Boolean(
     "IMXLowLatencyTriggerMode",
     "Special", "IMX Low-Latency Mode",
-    "controls whether the sensor operates in low-latency trigger mode"
+    "Controls whether the sensor operates in low-latency trigger mode."
 );
 
 const prop_static_info_integer lst::GPIn = make_Integer(
