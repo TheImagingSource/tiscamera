@@ -524,3 +524,158 @@ const prop_static_info_integer lst::GPOut = make_Integer(
     "DigitalIO", "General Purpose Output",
     "Status of the digital output pin."
 );
+
+const prop_static_info_integer lst::GPIO = make_Integer(
+    "GPIO",
+    "DigitalIO", "General Purpose Input/Output",
+    "Status of the digital input/output."
+    );
+
+const prop_static_info_integer lst::AcquisitionBurstFrameCount = make_Integer(
+    "AcquisitionBurstFrameCount",
+    "Special", "Acquisition Burst Frame Count",
+    "Number of frames to acquire for each trigger."
+);
+
+const prop_static_info_integer lst::ActionQueueSize = make_Integer(
+    "ActionQueueSize",
+    "Action Control", "Action Queue Size",
+    "Indicates the size of the scheduled action commands queue. This number represents the maximum number of "
+    "scheduled action commands that can be pending at a given point in time.",
+    "", IntRepresentation_t::Linear, Visibility_t::Expert
+);
+
+const prop_static_info_command lst::ActionSchedulerCancel = make_Command(
+    "ActionSchedulerCancel",
+    "Action Scheduler", "Action Scheduler Cancel",
+    "Cancel all scheduled actions of the type specified by Action Selector."
+);
+
+const prop_static_info_command lst::ActionSchedulerCommit = make_Command(
+    "ActionSchedulerCommit",
+    "Action Scheduler", "Action Scheduler Commit",
+    "Schedule the action specified by Action Selector to be performed at a specified time in the future."
+);
+
+const prop_static_info_integer lst::ActionSchedulerInterval = make_Integer(
+    "ActionSchedulerInterval",
+    "Action Scheduler", "Action Scheduler Interval",
+    "Allows instructing the action scheduler to repeat the scheduled action in a fixed interval, indefinitely."
+    "µs"
+);
+
+const prop_static_info_enumeration lst::ActionSchedulerStatus = make_Enumeration(
+    "ActionSchedulerStatus",
+    "Action Scheduler", "Action Scheduler Interval",
+    "Indicates whether there are actions scheduled."
+);
+
+const prop_static_info_integer lst::ActionSchedulerTime = make_Integer(
+    "ActionSchedulerTime",
+    "Action Scheduler", "Action Scheduler Time",
+    "the time for when an action is scheduled, specified as a PTP timestamp in nanosecond units.",
+    "ns"
+);
+
+const prop_static_info_boolean lst::LUTEnable = make_Boolean(
+    "LUTEnable",
+    "LUT Control", "LUT Enable",
+    "Enable the lookup table.",
+    Visibility_t::Expert
+);
+
+const prop_static_info_integer lst::LUTIndex = make_Integer(
+    "LUTIndex",
+    "LUT Control", "LUT Index",
+    "Control the index (offset) of the coefficient to access in the LUT.",
+    "", IntRepresentation_t::Linear, Visibility_t::Expert
+);
+
+const prop_static_info_integer lst::LUTSelector = make_Integer(
+    "LUTSelector",
+    "LUT Control", "LUT Selector",
+    "",
+    "", IntRepresentation_t::Linear, Visibility_t::Expert
+);
+
+const prop_static_info_integer lst::LUTValue = make_Integer(
+    "LUTValue",
+    "LUT Control", "LUT Value",
+    "Returns or sets the Value at entry LUTIndex of the LUT.",
+    "",
+    IntRepresentation_t::Linear, Visibility_t::Expert
+);
+
+const prop_static_info_boolean lst::MultiFrameSetOutputModeCustomGain = make_Boolean(
+    "MultiFrameSetOutputModeCustomGain",
+    "Multi-Frame Output Mode", "Customize Gain Values",
+    "Cycle through the gain values specified by MultiFrameSetOutputModeGain*"
+);
+
+const prop_static_info_boolean lst::MultiFrameSetOutputModeEnable = make_Boolean(
+    "MultiFrameSetOutputModeEnable",
+    "Multi-Frame Output Mode", "Multi Frame Output Mode Enable",
+    ""
+);
+
+const prop_static_info_float lst::MultiFrameSetOutputModeExposureTime0  = make_Float(
+    "MultiFrameSetOutputModeExposureTime0",
+    "Multi-Frame Output Mode", "Exposure 0",
+    "Exposure Time for first Multi-Frame Output frame.",
+    "µs"
+);
+
+const prop_static_info_float lst::MultiFrameSetOutputModeExposureTime1 = make_Float(
+    "MultiFrameSetOutputModeExposureTime1",
+    "Multi-Frame Output Mode", "Exposure 1",
+    "Exposure Time for second Multi-Frame Output frame.",
+    "µs"
+);
+
+const prop_static_info_float lst::MultiFrameSetOutputModeExposureTime2 = make_Float(
+    "MultiFrameSetOutputModeExposureTime2",
+    "Multi-Frame Output Mode", "Exposure 2",
+    "Exposure Time for third Multi-Frame Output frame.",
+    "µs"
+);
+
+const prop_static_info_float lst::MultiFrameSetOutputModeExposureTime3 = make_Float(
+    "MultiFrameSetOutputModeExposureTime3",
+    "Multi-Frame Output Mode", "Exposure 3",
+    "Exposure Time for fourth Multi-Frame Output frame.",
+    "µs"
+);
+
+const prop_static_info_enumeration lst::MultiFrameSetOutputModeFrameCount = make_Enumeration(
+    "MultiFrameSetOutputModeFrameCount",
+    "Multi-Frame Output Mode", "Frame Count",
+    ""
+);
+
+const prop_static_info_float lst::MultiFrameSetOutputModeGain0 = make_Float(
+    "MultiFrameSetOutputModeGain0",
+    "Multi-Frame Output Mode", "Gain 0",
+    "Gain value for first Multi-Frame Output frame.",
+    "dB"
+);
+
+const prop_static_info_float lst::MultiFrameSetOutputModeGain1 = make_Float(
+    "MultiFrameSetOutputModeGain1",
+    "Multi-Frame Output Mode", "Gain 1",
+    "Gain value for second Multi-Frame Output frame.",
+    "dB"
+);
+
+const prop_static_info_float lst::MultiFrameSetOutputModeGain2 = make_Float(
+    "MultiFrameSetOutputModeGain2",
+    "Multi-Frame Output Mode", "Gain 2",
+    "Gain value for third Multi-Frame Output frame.",
+    "dB"
+);
+
+const prop_static_info_float lst::MultiFrameSetOutputModeGain3 = make_Float(
+    "MultiFrameSetOutputModeGain3",
+    "Multi-Frame Output Mode", "Gain 3",
+    "Gain value for fourth Multi-Frame Output frame.",
+    "dB"
+);

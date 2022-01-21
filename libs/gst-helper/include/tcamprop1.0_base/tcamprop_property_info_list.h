@@ -153,9 +153,34 @@ namespace tcamprop1::prop_list
 
     extern const prop_static_info_boolean IMXLowLatencyTriggerMode;
 
-    // GPIO??
     extern const prop_static_info_integer GPIn;
     extern const prop_static_info_integer GPOut;
+    extern const prop_static_info_integer GPIO;
+
+    extern const prop_static_info_integer AcquisitionBurstFrameCount;
+    extern const prop_static_info_integer ActionQueueSize;
+    extern const prop_static_info_command ActionSchedulerCancel;
+    extern const prop_static_info_command ActionSchedulerCommit;
+    extern const prop_static_info_integer ActionSchedulerInterval;
+    extern const prop_static_info_enumeration ActionSchedulerStatus;
+    extern const prop_static_info_integer ActionSchedulerTime;
+
+    extern const prop_static_info_boolean LUTEnable;
+    extern const prop_static_info_integer LUTIndex;
+    extern const prop_static_info_integer LUTSelector;
+    extern const prop_static_info_integer LUTValue;
+
+    extern const prop_static_info_boolean MultiFrameSetOutputModeCustomGain;
+    extern const prop_static_info_boolean MultiFrameSetOutputModeEnable;
+    extern const prop_static_info_float MultiFrameSetOutputModeExposureTime0;
+    extern const prop_static_info_float MultiFrameSetOutputModeExposureTime1;
+    extern const prop_static_info_float MultiFrameSetOutputModeExposureTime2;
+    extern const prop_static_info_float MultiFrameSetOutputModeExposureTime3;
+    extern const prop_static_info_enumeration MultiFrameSetOutputModeFrameCount;
+    extern const prop_static_info_float MultiFrameSetOutputModeGain0;
+    extern const prop_static_info_float MultiFrameSetOutputModeGain1;
+    extern const prop_static_info_float MultiFrameSetOutputModeGain2;
+    extern const prop_static_info_float MultiFrameSetOutputModeGain3;
 
     /* Missing here but present in Tims list
         String          DeviceUserID
@@ -170,12 +195,9 @@ namespace tcamprop1::prop_list
         Integer         DecimationHorizontal
         Integer         DecimationVertical
 
-        Boolean         LUTEnable
-        Integer         LUTIndex, LutValue, LutValueAll?
-        
-        MultiFrameSet* stuff
+        Integer         LutValueAll?
+
         Boolean         IMXLowLatencyTriggerMode
-        Integer         AcquisitionBurstFrameCount
         Integer         AcquisitionBurstInterval
     * */
 
