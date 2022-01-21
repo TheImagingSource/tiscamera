@@ -18,7 +18,7 @@
 
 #include "../PropertyInterfaces.h"
 #include "../compiler_defines.h"
-#include "../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h"
+#include <tcamprop1.0_base/tcamprop_property_info.h>
 
 #include <arv.h>
 
@@ -38,7 +38,7 @@ public:
                               ArvGcNode* node,
                               std::shared_ptr<AravisPropertyBackend>);
 
-    virtual tcamprop1::prop_static_info get_static_info() const final
+    tcamprop1::prop_static_info get_static_info() const final
     {
         if (p_static_info)
         {
@@ -46,22 +46,22 @@ public:
         }
         return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
     }
-    virtual std::string_view get_unit() const final;
-    virtual tcamprop1::IntRepresentation_t get_representation() const final;
+    std::string_view get_unit() const final;
+    tcamprop1::IntRepresentation_t get_representation() const final;
 
-    virtual PropertyFlags get_flags() const final;
+    PropertyFlags get_flags() const final;
 
-    virtual tcamprop1::prop_range_integer get_range() const final
+    tcamprop1::prop_range_integer get_range() const final
     {
         return { m_min, m_max, m_step };
     }
-    virtual int64_t get_default() const final
+    int64_t get_default() const final
     {
         return m_default;
-    };
-    virtual outcome::result<int64_t> get_value() const final;
+    }
+    outcome::result<int64_t> get_value() const final;
 
-    virtual outcome::result<void> set_value(int64_t new_value) final;
+    outcome::result<void> set_value(int64_t new_value) final;
 
 private:
     std::weak_ptr<AravisPropertyBackend> m_cam;
@@ -92,7 +92,7 @@ public:
                              ArvGcNode* node,
                              std::shared_ptr<AravisPropertyBackend>);
 
-    virtual tcamprop1::prop_static_info get_static_info() const final
+    tcamprop1::prop_static_info get_static_info() const final
     {
         if (p_static_info)
         {
@@ -100,21 +100,21 @@ public:
         }
         return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
     }
-    virtual std::string_view get_unit() const final;
-    virtual tcamprop1::FloatRepresentation_t get_representation() const final;
+    std::string_view get_unit() const final;
+    tcamprop1::FloatRepresentation_t get_representation() const final;
 
-    virtual PropertyFlags get_flags() const final;
-    virtual tcamprop1::prop_range_float get_range() const final
+    PropertyFlags get_flags() const final;
+    tcamprop1::prop_range_float get_range() const final
     {
         return { m_min, m_max, m_step };
     }
-    virtual double get_default() const final
+    double get_default() const final
     {
         return m_default;
-    };
-    virtual outcome::result<double> get_value() const final;
+    }
+    outcome::result<double> get_value() const final;
 
-    virtual outcome::result<void> set_value(double new_value) final;
+    outcome::result<void> set_value(double new_value) final;
 
 private:
     outcome::result<void> valid_value(double val) const;
@@ -146,7 +146,7 @@ public:
                            ArvGcNode* node,
                            std::shared_ptr<AravisPropertyBackend> backend);
 
-    virtual tcamprop1::prop_static_info get_static_info() const final
+    tcamprop1::prop_static_info get_static_info() const final
     {
         if (p_static_info)
         {
@@ -155,15 +155,15 @@ public:
         return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
     }
 
-    virtual PropertyFlags get_flags() const final;
+    PropertyFlags get_flags() const final;
 
-    virtual bool get_default() const final
+    bool get_default() const final
     {
         return m_default;
-    };
-    virtual outcome::result<bool> get_value() const final;
+    }
+    outcome::result<bool> get_value() const final;
 
-    virtual outcome::result<void> set_value(bool new_value) final;
+    outcome::result<void> set_value(bool new_value) final;
 
 private:
     std::weak_ptr<AravisPropertyBackend> m_cam;
@@ -188,7 +188,7 @@ public:
                               ArvGcNode* node,
                               std::shared_ptr<AravisPropertyBackend> backend);
 
-    virtual tcamprop1::prop_static_info get_static_info() const final
+    tcamprop1::prop_static_info get_static_info() const final
     {
         if (p_static_info)
         {
@@ -197,9 +197,9 @@ public:
         return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
     }
 
-    virtual PropertyFlags get_flags() const final;
+    PropertyFlags get_flags() const final;
 
-    virtual outcome::result<void> execute() final;
+    outcome::result<void> execute() final;
 
 private:
     std::weak_ptr<AravisPropertyBackend> m_cam;
@@ -224,7 +224,7 @@ public:
                            ArvGcNode* node,
                            std::shared_ptr<AravisPropertyBackend> backend);
 
-    virtual tcamprop1::prop_static_info get_static_info() const final
+    tcamprop1::prop_static_info get_static_info() const final
     {
         if (p_static_info)
         {
@@ -233,20 +233,17 @@ public:
         return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
     }
 
-    virtual PropertyFlags get_flags() const final;
+    PropertyFlags get_flags() const final;
 
-    virtual outcome::result<void> set_value_str(const std::string_view& new_value) final;
-    virtual outcome::result<void> set_value(int64_t new_value) final;
+    outcome::result<void> set_value_str(const std::string_view& new_value) final;
+    outcome::result<std::string_view> get_value() const final;
 
-    virtual outcome::result<std::string_view> get_value() const final;
-    virtual outcome::result<int64_t> get_value_int() const final;
-
-    virtual std::string get_default() const final
+    std::string get_default() const final
     {
         return m_default;
-    };
+    }
 
-    virtual std::vector<std::string> get_entries() const final;
+    std::vector<std::string> get_entries() const final;
 
 private:
     // outcome::result<void> valid_value(int value);

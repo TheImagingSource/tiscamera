@@ -556,13 +556,6 @@ outcome::result<void> AravisPropertyEnumImpl::set_value_str(const std::string_vi
     }
 }
 
-
-outcome::result<void> AravisPropertyEnumImpl::set_value(int64_t /*new_value*/)
-{
-    return tcam::status::NotImplemented;
-}
-
-
 outcome::result<std::string_view> AravisPropertyEnumImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
@@ -574,12 +567,6 @@ outcome::result<std::string_view> AravisPropertyEnumImpl::get_value() const
         SPDLOG_ERROR("Unable to lock aravis backend. Cannot get value command property {}", m_name);
         return tcam::status::ResourceNotLockable;
     }
-}
-
-
-outcome::result<int64_t> AravisPropertyEnumImpl::get_value_int() const
-{
-    return tcam::status::NotImplemented;
 }
 
 std::vector<std::string> AravisPropertyEnumImpl::get_entries() const
