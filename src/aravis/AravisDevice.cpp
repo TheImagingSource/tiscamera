@@ -100,6 +100,14 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
         int x1, x2, y1, y2;
         arv_camera_get_region(this->device->arv_camera, &x1, &y1, &x2, &y2, &error);
 
+        if (error)
+        {
+            SPDLOG_ERROR("get_region caused error: {}", error->message);
+            g_error_free(error);
+            error = nullptr;
+        }
+
+
         unsigned int height = y2 - y1;
         unsigned int width = x2 - x1;
 
@@ -332,6 +340,7 @@ void AravisDevice::determine_active_video_format()
     {
         SPDLOG_ERROR("Unable to retrieve frame rate: {}", err->message);
         g_clear_error(&err);
+        err = nullptr;
     }
 
     active_video_format.set_fourcc(
@@ -340,6 +349,8 @@ void AravisDevice::determine_active_video_format()
     {
         SPDLOG_ERROR("Unable to retrieve pixel format: {}", err->message);
         g_clear_error(&err);
+        err = nullptr;
+
     }
 
     int x1, x2, y1, y2;
@@ -349,6 +360,8 @@ void AravisDevice::determine_active_video_format()
     {
         SPDLOG_ERROR("Unable to retrieve region: {}", err->message);
         g_clear_error(&err);
+        err = nullptr;
+
         return;
     }
 
@@ -565,6 +578,13 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
                           arv_device_get_integer_feature_value(dev, "SensorHeight", &err),
                           &err);
 
+    if (err)
+    {
+        SPDLOG_ERROR("set_region caused error: {}", err->message);
+        g_clear_error(&err);
+        err = nullptr;
+    }
+
     // work your way from bottom to top
     // start with frame rates and use everthing until all format descriptions are complete
 
@@ -608,6 +628,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
         {
             SPDLOG_ERROR("Unable to retrieve available pixel formats: {}", err->message);
             g_clear_error(&err);
+            err = nullptr;
         }
 
         unsigned n2_formats;
@@ -618,6 +639,8 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
         {
             SPDLOG_ERROR("Unable to retrieve pixel format description strings: {}", err->message);
             g_clear_error(&err);
+            err = nullptr;
+
         }
 
         if (n_formats != n2_formats)
@@ -660,6 +683,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
             {
                 SPDLOG_ERROR("Unable to retrieve width bounds: {}", err->message);
                 g_clear_error(&err);
+                err = nullptr;
             }
 
             arv_camera_get_height_bounds(this->arv_camera, &height_min, &height_max, &err);
@@ -668,6 +692,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
             {
                 SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
                 g_clear_error(&err);
+                err = nullptr;
             }
 
             width_step = arv_camera_get_width_increment(this->arv_camera, &err);
@@ -675,6 +700,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
             {
                 SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
                 g_clear_error(&err);
+                err = nullptr;
             }
 
             height_step = arv_camera_get_height_increment(this->arv_camera, &err);
@@ -682,6 +708,8 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
             {
                 SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
                 g_clear_error(&err);
+                err = nullptr;
+
             }
 
             tcam_image_size min = { (unsigned int)width_min, (unsigned int)height_min };
