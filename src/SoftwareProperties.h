@@ -60,6 +60,13 @@ private:
     outcome::result<double> get_device_wb(emulated::software_prop prop_id);
     outcome::result<void> set_device_wb(emulated::software_prop prop_id, double new_value);
 
+    void generate_color_transformation();
+
+    outcome::result<double> get_device_color_transform(emulated::software_prop prop_id);
+
+    outcome::result<void> set_device_color_transform(emulated::software_prop prop_id,
+                                                     double new_value_tmp);
+
     // properties the actual camera has
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_device_properties;
 
@@ -115,6 +122,14 @@ private:
         }
     };
     wb_setter m_wb;
+
+    // color transforms stuff
+
+    std::shared_ptr<tcam::property::IPropertyBool> m_dev_color_transform_enable = nullptr;
+    std::shared_ptr<tcam::property::IPropertyFloat> m_dev_color_transform_value = nullptr;
+    std::shared_ptr<tcam::property::IPropertyEnum> m_dev_color_transform_value_selector = nullptr;
+
+    // general stuff
 
     auto_alg::auto_pass_params m_auto_params;
     auto_alg::state_ptr p_state;

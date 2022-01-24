@@ -229,6 +229,20 @@ void tcam::property::SoftwareProperties::generate_public_properties(bool has_bay
             }
         }
     }
+
+    { // ColorTransformation stuff
+        auto enable = tcam::property::find_property(m_device_properties, "ColorTransformationEnable");
+
+        auto selector = tcam::property::find_property(m_device_properties, "ColorTransformationSelector");
+        auto value = tcam::property::find_property(m_device_properties, "ColorTransformationValue");
+        auto value_selector = tcam::property::find_property(m_device_properties, "ColorTransformationValueSelector");
+
+        if (enable && value && value_selector)
+        {
+            generate_color_transformation();
+        }
+    }
+
     // as a final step compare generated properties to device properties
     // pass along everything we do not need to intercept
     // some may not be intercepted but replaced with a different interface
@@ -247,10 +261,12 @@ void tcam::property::SoftwareProperties::generate_public_properties(bool has_bay
             props.begin(), props.end(), [&](auto name) { return name == elem->get_name(); });
     };
 
-    std::array<std::string_view, 3> prop_black_list = {
+    std::array<std::string_view, 5> prop_black_list = {
         "BalanceRatioRaw",
         "BalanceRatioSelector",
         "BalanceRatio",
+        "ColorTransformationValue",
+        "ColorTransformationValueSelector",
     };
 
     for (auto& p : m_device_properties)
@@ -279,6 +295,16 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
         case emulated::software_prop::BalanceWhiteRed:
         case emulated::software_prop::BalanceWhiteGreen:
         case emulated::software_prop::BalanceWhiteBlue:
+        case emulated::software_prop::ColorTransformRedToRed:
+        case emulated::software_prop::ColorTransformGreenToRed:
+        case emulated::software_prop::ColorTransformBlueToRed:
+        case emulated::software_prop::ColorTransformRedToGreen:
+        case emulated::software_prop::ColorTransformGreenToGreen:
+        case emulated::software_prop::ColorTransformBlueToGreen:
+        case emulated::software_prop::ColorTransformRedToBlue:
+        case emulated::software_prop::ColorTransformGreenToBlue:
+        case emulated::software_prop::ColorTransformBlueToBlue:
+
             return tcam::status::NotImplemented;
 
         case emulated::software_prop::ExposureAuto:
@@ -315,6 +341,15 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
         }
         case emulated::software_prop::ClaimBalanceWhiteSoftware:
             return m_wb_is_claimed;
+        case emulated::software_prop::ColorTransformEnable:
+        {
+            auto res = m_dev_color_transform_enable->get_value();
+            if (res.has_failure())
+            {
+                return res.as_failure();
+            }
+            return res.value();
+        }
     }
     SPDLOG_WARN("Not implemented. ID: {}", prop_id);
     return tcam::status::NotImplemented;
@@ -336,6 +371,15 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         case emulated::software_prop::BalanceWhiteRed:
         case emulated::software_prop::BalanceWhiteGreen:
         case emulated::software_prop::BalanceWhiteBlue:
+        case emulated::software_prop::ColorTransformRedToRed:
+        case emulated::software_prop::ColorTransformGreenToRed:
+        case emulated::software_prop::ColorTransformBlueToRed:
+        case emulated::software_prop::ColorTransformRedToGreen:
+        case emulated::software_prop::ColorTransformGreenToGreen:
+        case emulated::software_prop::ColorTransformBlueToGreen:
+        case emulated::software_prop::ColorTransformRedToBlue:
+        case emulated::software_prop::ColorTransformGreenToBlue:
+        case emulated::software_prop::ColorTransformBlueToBlue:
             return tcam::status::NotImplemented;
 
         case emulated::software_prop::ExposureAuto:
@@ -415,6 +459,11 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
             m_wb_is_claimed = new_val;
             return outcome::success();
         }
+        case emulated::software_prop::ColorTransformEnable:
+        {
+            return m_dev_color_transform_enable->set_value(new_val);
+
+        }
     }
     SPDLOG_WARN("Not implemented. ID: {} value: {}", prop_id, new_val);
     return tcam::status::NotImplemented;
@@ -439,6 +488,7 @@ outcome::result<double> tcam::property::SoftwareProperties::get_double(
         case emulated::software_prop::FocusAuto:
         case emulated::software_prop::BalanceWhiteAuto:
         case emulated::software_prop::ClaimBalanceWhiteSoftware:
+        case emulated::software_prop::ColorTransformEnable:
             return tcam::status::NotImplemented;
 
         case emulated::software_prop::ExposureTime:
@@ -497,6 +547,16 @@ outcome::result<double> tcam::property::SoftwareProperties::get_double(
             }
             return m_auto_params.wb.channels.b;
         }
+        case emulated::software_prop::ColorTransformRedToRed:
+        case emulated::software_prop::ColorTransformGreenToRed:
+        case emulated::software_prop::ColorTransformBlueToRed:
+        case emulated::software_prop::ColorTransformRedToGreen:
+        case emulated::software_prop::ColorTransformGreenToGreen:
+        case emulated::software_prop::ColorTransformBlueToGreen:
+        case emulated::software_prop::ColorTransformRedToBlue:
+        case emulated::software_prop::ColorTransformGreenToBlue:
+        case emulated::software_prop::ColorTransformBlueToBlue:
+            return get_device_color_transform(prop_id);
     }
 
     SPDLOG_WARN("not implemented {}", prop_id);
@@ -523,6 +583,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
         case emulated::software_prop::FocusAuto:
         case emulated::software_prop::BalanceWhiteAuto:
         case emulated::software_prop::ClaimBalanceWhiteSoftware:
+        case emulated::software_prop::ColorTransformEnable:
             return tcam::status::NotImplemented;
 
         case emulated::software_prop::ExposureTime:
@@ -593,6 +654,18 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
                 return set_device_wb(prop_id, new_val);
             }
             return outcome::success();
+        }
+        case emulated::software_prop::ColorTransformRedToRed:
+        case emulated::software_prop::ColorTransformGreenToRed:
+        case emulated::software_prop::ColorTransformBlueToRed:
+        case emulated::software_prop::ColorTransformRedToGreen:
+        case emulated::software_prop::ColorTransformGreenToGreen:
+        case emulated::software_prop::ColorTransformBlueToGreen:
+        case emulated::software_prop::ColorTransformRedToBlue:
+        case emulated::software_prop::ColorTransformGreenToBlue:
+        case emulated::software_prop::ColorTransformBlueToBlue:
+        {
+            return set_device_color_transform(prop_id, new_val);
         }
     }
     SPDLOG_WARN("not implemented {}", prop_id);
@@ -673,6 +746,25 @@ tcam::property::PropertyFlags SoftwareProperties::get_flags(emulated::software_p
         }
         case emulated::software_prop::ClaimBalanceWhiteSoftware:
             return default_flags | PropertyFlags::Hidden;
+        case emulated::software_prop::ColorTransformRedToRed:
+        case emulated::software_prop::ColorTransformGreenToRed:
+        case emulated::software_prop::ColorTransformBlueToRed:
+        case emulated::software_prop::ColorTransformRedToGreen:
+        case emulated::software_prop::ColorTransformGreenToGreen:
+        case emulated::software_prop::ColorTransformBlueToGreen:
+        case emulated::software_prop::ColorTransformRedToBlue:
+        case emulated::software_prop::ColorTransformGreenToBlue:
+        case emulated::software_prop::ColorTransformBlueToBlue:
+        {
+            auto res = m_dev_color_transform_enable->get_value();
+            if (!res)
+            {
+                return add_locked(true);
+            }
+            return add_locked(!res.value());
+        }
+        case emulated::software_prop::ColorTransformEnable:
+            return default_flags;
     }
     return PropertyFlags::None;
 }
@@ -1073,6 +1165,128 @@ outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop 
     SPDLOG_ERROR("Not a whitebalance property");
     return tcam::status::NotSupported;
 }
+
+static std::string_view to_transform_name(emulated::software_prop prop)
+{
+    if (prop == emulated::software_prop::ColorTransformRedToRed)
+    {
+        return "Gain00";
+    }
+    if (prop == emulated::software_prop::ColorTransformGreenToRed)
+    {
+        return "Gain01";
+    }
+    if (prop == emulated::software_prop::ColorTransformBlueToRed)
+    {
+        return "Gain02";
+    }
+    if (prop == emulated::software_prop::ColorTransformRedToGreen)
+    {
+        return "Gain10";
+    }
+    if (prop == emulated::software_prop::ColorTransformGreenToGreen)
+    {
+        return "Gain11";
+    }
+    if (prop == emulated::software_prop::ColorTransformBlueToGreen)
+    {
+        return "Gain12";
+    }
+    if (prop == emulated::software_prop::ColorTransformRedToBlue)
+    {
+        return "Gain20";
+    }
+    if (prop == emulated::software_prop::ColorTransformGreenToBlue)
+    {
+        return "Gain21";
+    }
+    if (prop == emulated::software_prop::ColorTransformBlueToBlue)
+    {
+        return "Gain22";
+    }
+    return {};
+}
+
+outcome::result<double> SoftwareProperties::get_device_color_transform (emulated::software_prop prop_id)
+{
+    auto channel = to_transform_name(prop_id);
+
+    auto res = m_dev_color_transform_value_selector->set_value_str(channel);
+
+    if (!res)
+    {
+        return res.as_failure();
+    }
+
+    return m_dev_color_transform_value->get_value();
+}
+
+
+outcome::result<void> SoftwareProperties::set_device_color_transform (emulated::software_prop prop_id,
+                                                                      double new_value_tmp)
+{
+    auto channel = to_transform_name(prop_id);
+
+    auto res = m_dev_color_transform_value_selector->set_value_str(channel);
+
+    if (!res)
+    {
+        return res.as_failure();
+    }
+
+    return m_dev_color_transform_value->set_value(new_value_tmp);
+}
+
+
+void SoftwareProperties::generate_color_transformation()
+{
+    m_dev_color_transform_enable = tcam::property::find_property<IPropertyBool>(m_device_properties, "ColorTransformationEnable");
+
+    auto selector = tcam::property::find_property(m_device_properties, "ColorTransformationSelector");
+    m_dev_color_transform_value = tcam::property::find_property<IPropertyFloat>(m_device_properties, "ColorTransformationValue");
+    m_dev_color_transform_value_selector = tcam::property::find_property<IPropertyEnum>(m_device_properties, "ColorTransformationValueSelector");
+
+    add_prop_entry(sp::ColorTransformEnable,
+                   &prop_lst::ColorTransformationEnable,
+                   false);
+
+    add_prop_entry(sp::ColorTransformRedToRed,
+                   &prop_lst::ColorTransformation_Value_Gain00,
+                   emulated::to_range(*m_dev_color_transform_value));
+
+    add_prop_entry(sp::ColorTransformBlueToRed,
+                   &prop_lst::ColorTransformation_Value_Gain01,
+                   emulated::to_range(*m_dev_color_transform_value));
+
+    add_prop_entry(sp::ColorTransformGreenToRed,
+                   &prop_lst::ColorTransformation_Value_Gain02,
+                   emulated::to_range(*m_dev_color_transform_value));
+
+    add_prop_entry(sp::ColorTransformRedToGreen,
+                   &prop_lst::ColorTransformation_Value_Gain10,
+                   emulated::to_range(*m_dev_color_transform_value));
+
+    add_prop_entry(sp::ColorTransformGreenToGreen,
+                   &prop_lst::ColorTransformation_Value_Gain11,
+                   emulated::to_range(*m_dev_color_transform_value));
+
+    add_prop_entry(sp::ColorTransformBlueToGreen,
+                   &prop_lst::ColorTransformation_Value_Gain12,
+                   emulated::to_range(*m_dev_color_transform_value));
+
+    add_prop_entry(sp::ColorTransformRedToBlue,
+                   &prop_lst::ColorTransformation_Value_Gain20,
+                   emulated::to_range(*m_dev_color_transform_value));
+
+    add_prop_entry(sp::ColorTransformGreenToBlue,
+                   &prop_lst::ColorTransformation_Value_Gain21,
+                   emulated::to_range(*m_dev_color_transform_value));
+
+    add_prop_entry(sp::ColorTransformBlueToBlue,
+                   &prop_lst::ColorTransformation_Value_Gain22,
+                   emulated::to_range(*m_dev_color_transform_value));
+}
+
 
 template<class Tprop_info_type, typename... Tparams>
 void tcam::property::SoftwareProperties::add_prop_entry(emulated::software_prop id,

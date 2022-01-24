@@ -33,6 +33,18 @@ enum class software_prop
     BalanceWhiteGreen,
     BalanceWhiteBlue,
     ClaimBalanceWhiteSoftware,
+
+    ColorTransformEnable,
+    ColorTransformRedToRed,
+    ColorTransformGreenToRed,
+    ColorTransformBlueToRed,
+    ColorTransformRedToGreen,
+    ColorTransformGreenToGreen,
+    ColorTransformBlueToGreen,
+    ColorTransformRedToBlue,
+    ColorTransformGreenToBlue,
+    ColorTransformBlueToBlue,
+
 };
 
 struct prop_range_integer_def

@@ -564,6 +564,8 @@ void AravisDevice::iterate_genicam(const char* feature)
             "ChunkIMX174FrameId",
             "SensorPixelHeight",
             "SensorPixelWidth",
+            "ColorTransformationSelector",
+
         };
 
 
