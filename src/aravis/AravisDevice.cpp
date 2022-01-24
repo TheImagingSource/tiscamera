@@ -498,77 +498,6 @@ void AravisDevice::iterate_genicam(const char* feature)
             return;
         }
 
-        // TODO: how to handle private settings
-        static std::vector<std::string> private_settings = {
-            "TLParamsLocked",
-            "GevSCPSDoNotFragment",
-            "GevTimestampTickFrequency",
-            "GevTimeSCPD",
-            "GevSCPD",
-            "PayloadSize",
-            "PayloadPerFrame",
-            "PayloadPerPacket",
-            "TotalPacketSize",
-            "PacketsPerFrame",
-            "PacketTimeUS",
-            "GevSCPSPacketSize",
-            "GevSCPSFireTestPacket",
-            "DeviceVendorName",
-            "DeviceType",
-            "DeviceModelType",
-            "DeviceVersion",
-            "DeviceSerialNumber",
-            "DeviceUserID",
-            "DeviceSFNCVersionMajor",
-            "DeviceSFNCVersionMinor",
-            "DeviceTLType",
-            "DeviceTLTypeMajor",
-            "DeviceTLTypeMinor",
-            "DeviceTLTypeSubMinor",
-            "DeviceLinkSelector",
-            "WidthMax",
-            "HeightMax",
-            "ChunkModeActive",
-            "ChunkImage",
-            "ChunkBlockId",
-            "ActionDeviceKey",
-            "ActionSelector",
-            "ActionGroupMask",
-            "ActionGroupKey",
-            "UserSetSelector",
-            "UserSetLoad",
-            "UserSetSave",
-            "UserSetDefault",
-            "DeviceScanType",
-            "StringReg",
-            "DeviceModelName",
-            "DeviceSFNCVersionSubMinor",
-            "MaskedIntReg",
-            "DeviceTLVersionMajor",
-            "MaskedIntReg",
-            "DeviceTLVersionMinor",
-            "DeviceTLVersionSubMinor",
-            "DeviceLinkHeartbeatTimeout",
-            "DeviceStreamChannelCount",
-            "DeviceStreamChannelSelector",
-            "DeviceStreamChannelType",
-            "DeviceStreamChannelLink",
-            "DeviceStreamChannelEndianness",
-            "DeviceStreamChannelPacketSize",
-            "DeviceEventChannelCount",
-            "DeviceTemperatureConverter",
-            "IMX174HardwareWDRShutterMode",
-            "IMX174HardwareWDREnable",
-            "IMX174WDRShutter2",
-            "ChunkIMX174FrameSet",
-            "ChunkIMX174FrameId",
-            "SensorPixelHeight",
-            "SensorPixelWidth",
-            "ColorTransformationSelector",
-
-        };
-
-
         static std::vector<std::string> format_member = { "AcquisitionStart",
                                                           "AcquisitionStop",
                                                           "AcquisitionMode",
@@ -582,32 +511,12 @@ void AravisDevice::iterate_genicam(const char* feature)
                                                           "PixelFormat" };
 
 
-        if (std::find(private_settings.begin(), private_settings.end(), feature)
-            != private_settings.end())
-        {
-            // TODO: implement handling
-        }
         // is part of the format description
-        else if (std::find(format_member.begin(), format_member.end(), feature)
+        if (std::find(format_member.begin(), format_member.end(), feature)
                  != format_member.end())
         {
             // index_genicam_format(camera, node, frmt_mapping);
             this->format_nodes.push_back(node);
-        }
-        else
-        {
-            // property_mapping m; //
-
-            // m.arv_ident = feature;
-            // m.prop = create_property(arv_camera, node, handler);
-
-            // if (m.prop == nullptr)
-            // {
-            //     SPDLOG_ERROR("Property '{}' is null", m.arv_ident.c_str());
-            //     return;
-            // }
-
-            // handler->properties.push_back(m);
         }
     }
 }

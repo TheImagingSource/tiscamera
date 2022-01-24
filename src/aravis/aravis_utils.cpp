@@ -328,6 +328,12 @@ bool tcam::is_private_setting(std::string_view name)
         "SkippingVertical",
         "DecimationHorizontal",
         "DecimationVertical",
+        "ColorTransformationSelector",
+        "LUTSelector",
+        "LUTControl",
+        "LUTEnable",
+        "LUTIndex",
+        "LUTValue"
     };
 
     if (std::find(std::begin(private_settings), std::end(private_settings), name)
