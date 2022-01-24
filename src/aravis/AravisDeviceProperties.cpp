@@ -25,8 +25,9 @@ namespace
 
 
 static const std::pair<std::string_view, std::string_view> name_table[] = {
-    { "OffsetAutoCenter", "OffsetAuto" },
+    { "OffsetAuto", "OffsetAutoCenter" },
     { "IRCutFilterEnableElement", "IRCutFilterEnable" },
+    { "ExposureAutoHighlighReduction", "ExposureAutoHighlightReduction" },
 };
 
 outcome::result<std::string> find_conversion_name(const std::string& name)
