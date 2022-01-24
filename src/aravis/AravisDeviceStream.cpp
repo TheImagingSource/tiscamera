@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+#include "../ImageBuffer.h"
+#include "../logging.h"
+#include "../utils.h"
 #include "AravisDevice.h"
 
-#include "ImageBuffer.h"
-#include "logging.h"
-#include "utils.h"
-
-#include <vector>
 #include <memory>
+#include <vector>
 
 using namespace tcam;
 
@@ -29,10 +28,10 @@ bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> 
 {
     GError* err = nullptr;
 
-    this->buffers.clear();
+    this->buffer_list_.clear();
 
-    this->buffers.reserve(b.size());
-    int payload = arv_camera_get_payload(this->arv_camera, &err);
+    this->buffer_list_.reserve(b.size());
+    int payload = arv_camera_get_payload(this->arv_camera_, &err);
 
     if (err)
     {
@@ -43,12 +42,13 @@ bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> 
 
     for (unsigned int i = 0; i < b.size(); ++i)
     {
-        ArvBuffer* ab = arv_buffer_new_full(payload, b.at(i)->get_image_buffer_ptr(), b.at(i).get(), nullptr);
+        ArvBuffer* ab =
+            arv_buffer_new_full(payload, b.at(i)->get_image_buffer_ptr(), b.at(i).get(), nullptr);
         buffer_info info = {};
         info.buffer = b.at(i);
         info.arv_buffer = ab;
         info.is_queued = false;
-        this->buffers.push_back(info);
+        this->buffer_list_.push_back(info);
     }
     return true;
 }
@@ -56,7 +56,7 @@ bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> 
 
 bool AravisDevice::release_buffers()
 {
-    buffers.clear();
+    buffer_list_.clear();
 
     return true;
 }
@@ -64,17 +64,16 @@ bool AravisDevice::release_buffers()
 
 void AravisDevice::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
 {
-    for (auto& b : buffers)
+    for (auto& b : buffer_list_)
     {
         if (b.buffer == buffer)
         {
             //SPDLOG_DEBUG("Returning buffer to aravis.");
-            arv_stream_push_buffer(this->stream, b.arv_buffer);
+            arv_stream_push_buffer(this->stream_, b.arv_buffer);
             b.is_queued = true;
         }
     }
 }
-
 
 
 bool set_stream_options(ArvStream* stream)
@@ -85,7 +84,7 @@ bool set_stream_options(ArvStream* stream)
     // if a conversion fails we return false and
     // the stream object will not be touched
 
-    auto set_int = [&stream] (const std::string& name, const std::string& value)
+    auto set_int = [&stream](const std::string& name, const std::string& value)
     {
         try
         {
@@ -98,10 +97,7 @@ bool set_stream_options(ArvStream* stream)
             }
 
             auto res = std::stoi(value);
-            g_object_set(stream,
-                         name.c_str(),
-                         res,
-                         nullptr);
+            g_object_set(stream, name.c_str(), res, nullptr);
 
             int test;
             g_object_get(stream, name.c_str(), &test, nullptr);
@@ -119,17 +115,14 @@ bool set_stream_options(ArvStream* stream)
         return true;
     };
 
-    auto set_double = [&stream] (const std::string& name, const std::string& value)
+    auto set_double = [&stream](const std::string& name, const std::string& value)
     {
         try
         {
             // there are no values that want more than two decimal position
             // ceilf seems to produce more reliable values than ceil
             double res = (double)ceilf(std::stof(value) * 100.0L) / 100.0L;
-            g_object_set(stream,
-                         name.c_str(),
-                         res,
-                         nullptr);
+            g_object_set(stream, name.c_str(), res, nullptr);
 
             double test;
             g_object_get(stream, name.c_str(), &test, nullptr);
@@ -147,7 +140,7 @@ bool set_stream_options(ArvStream* stream)
         return true;
     };
 
-    auto set_enum = [&stream] (const std::string& name, const std::string& value)
+    auto set_enum = [&stream](const std::string& name, const std::string& value)
     {
         GObjectClass* klass = G_OBJECT_GET_CLASS(stream);
 
@@ -170,14 +163,12 @@ bool set_stream_options(ArvStream* stream)
         {
             if (strcmp(props[i]->name, name.c_str()) == 0)
             {
-                auto entry = g_enum_get_value_by_name((GEnumClass*)g_type_class_peek(props[i]->value_type), value.c_str());
+                auto entry = g_enum_get_value_by_name(
+                    (GEnumClass*)g_type_class_peek(props[i]->value_type), value.c_str());
 
                 if (entry)
                 {
-                    g_object_set(stream,
-                                 name.c_str(),
-                                 entry->value,
-                                 nullptr);
+                    g_object_set(stream, name.c_str(), entry->value, nullptr);
 
                     g_free(props);
 
@@ -233,8 +224,10 @@ bool set_stream_options(ArvStream* stream)
                     {
                         if (!set_enum(single_setting.at(0), single_setting.at(1)))
                         {
-                            SPDLOG_ERROR("TCAM_ARV_STREAM_OPTIONS: value for '{}' could not be interpreted. Value is: '{}'",
-                                         single_setting.at(0), single_setting.at(1));
+                            SPDLOG_ERROR("TCAM_ARV_STREAM_OPTIONS: value for '{}' could not be "
+                                         "interpreted. Value is: '{}'",
+                                         single_setting.at(0),
+                                         single_setting.at(1));
                         }
                     }
                 }
@@ -248,25 +241,26 @@ bool set_stream_options(ArvStream* stream)
 
 bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 {
-    if (arv_camera == nullptr)
+    if (arv_camera_ == nullptr)
     {
         SPDLOG_ERROR("ArvCamera missing!");
         return false;
     }
 
-    if (buffers.size() < 2)
+    if (buffer_list_.size() < 2)
     {
         SPDLOG_ERROR("Need at least two buffers.");
         return false;
     }
 
-    if (this->stream != nullptr)
+    if (this->stream_ != nullptr)
     {
-        g_object_unref(this->stream);
+        g_object_unref(this->stream_);
     }
 
     // install callback to initialize the capture thread as real time
-    auto stream_cb = [](void* /*user_data*/, ArvStreamCallbackType type, ArvBuffer* /*buffer*/) {
+    auto stream_cb = [](void* /*user_data*/, ArvStreamCallbackType type, ArvBuffer* /*buffer*/)
+    {
         if (type == ARV_STREAM_CALLBACK_TYPE_INIT)
         {
             if (!arv_make_thread_realtime(10))
@@ -289,7 +283,7 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
     GError* err = nullptr;
 
-    this->stream = arv_camera_create_stream(this->arv_camera, stream_cb, NULL, &err);
+    this->stream_ = arv_camera_create_stream(this->arv_camera_, stream_cb, NULL, &err);
 
     if (err)
     {
@@ -298,25 +292,25 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
         return false;
     }
 
-    if (this->stream == nullptr)
+    if (this->stream_ == nullptr)
     {
         SPDLOG_ERROR("Unable to create ArvStream.");
         return false;
     }
 
-    if (ARV_IS_GV_STREAM(this->stream))
+    if (ARV_IS_GV_STREAM(this->stream_))
     {
-        set_stream_options(this->stream);
+        set_stream_options(this->stream_);
     }
 
-    for (std::size_t i = 0; i < buffers.size(); ++i)
+    for (std::size_t i = 0; i < buffer_list_.size(); ++i)
     {
-        arv_stream_push_buffer(this->stream, buffers.at(i).arv_buffer);
+        arv_stream_push_buffer(this->stream_, buffer_list_.at(i).arv_buffer);
     }
 
-    arv_stream_set_emit_signals(this->stream, TRUE);
+    arv_stream_set_emit_signals(this->stream_, TRUE);
 
-    arv_camera_set_acquisition_mode(this->arv_camera, ARV_ACQUISITION_MODE_CONTINUOUS, &err);
+    arv_camera_set_acquisition_mode(this->arv_camera_, ARV_ACQUISITION_MODE_CONTINUOUS, &err);
 
     if (err)
     {
@@ -327,25 +321,25 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
     // a work thread is not required as aravis already pushes the images asynchronously
 
-    g_signal_connect(stream, "new-buffer", G_CALLBACK(callback), this);
+    g_signal_connect(stream_, "new-buffer", G_CALLBACK(aravis_new_buffer_callback), this);
 
     SPDLOG_INFO("Starting actual stream...");
 
-    external_sink = sink;
+    sink_ = sink;
 
-    arv_camera_start_acquisition(this->arv_camera, &err);
+    arv_camera_start_acquisition(this->arv_camera_, &err);
 
     if (err)
     {
         SPDLOG_ERROR("Unable to start stream: {}", err->message);
         g_clear_error(&err);
 
-        external_sink.reset();
+        sink_.reset();
 
         return false;
     }
 
-    statistics = {};
+    statistics_ = {};
 
     return true;
 }
@@ -353,13 +347,13 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
 void AravisDevice::stop_stream()
 {
-    if (arv_camera == NULL)
+    if (arv_camera_ == NULL)
     {
         return;
     }
     GError* err = nullptr;
 
-    arv_camera_stop_acquisition(arv_camera, &err);
+    arv_camera_stop_acquisition(arv_camera_, &err);
 
     if (err)
     {
@@ -368,16 +362,16 @@ void AravisDevice::stop_stream()
         return;
     }
 
-    if (this->stream != nullptr)
+    if (this->stream_ != nullptr)
     {
-        arv_stream_set_emit_signals(this->stream, FALSE);
-        g_object_unref(this->stream);
-        this->stream = NULL;
+        arv_stream_set_emit_signals(this->stream_, FALSE);
+        g_object_unref(this->stream_);
+        this->stream_ = NULL;
     }
 }
 
 
-void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* user_data)
+void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((unused)), void* user_data)
 {
     AravisDevice* self = static_cast<AravisDevice*>(user_data);
     if (self == NULL)
@@ -385,12 +379,12 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
         SPDLOG_ERROR("Callback camera instance is NULL.");
         return;
     }
-    if (self->stream == NULL)
+    if (self->stream_ == NULL)
     {
         return;
     }
 
-    ArvBuffer* buffer = arv_stream_pop_buffer(self->stream);
+    ArvBuffer* buffer = arv_stream_pop_buffer(self->stream_);
 
     if (buffer != NULL)
     {
@@ -400,15 +394,15 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
         {
             SPDLOG_TRACE("Received new buffer.");
 
-            self->statistics.capture_time_ns = arv_buffer_get_system_timestamp(buffer);
-            self->statistics.camera_time_ns = arv_buffer_get_timestamp(buffer);
-            self->statistics.frame_count++;
-            self->statistics.is_damaged = false;
+            self->statistics_.capture_time_ns = arv_buffer_get_system_timestamp(buffer);
+            self->statistics_.camera_time_ns = arv_buffer_get_timestamp(buffer);
+            self->statistics_.frame_count++;
+            self->statistics_.is_damaged = false;
             // only way to retrieve actual image size
             size_t image_size = 0;
             arv_buffer_get_data(buffer, &image_size);
 
-            for (auto& b : self->buffers)
+            for (auto& b : self->buffer_list_)
             {
                 const void* arv_user_data = arv_buffer_get_user_data(buffer);
                 if (b.buffer.get() != arv_user_data)
@@ -416,8 +410,8 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
                     continue;
                 }
 
-                b.buffer->set_statistics(self->statistics);
-                if (auto ptr = self->external_sink.lock())
+                b.buffer->set_statistics(self->statistics_);
+                if (auto ptr = self->sink_.lock())
                 {
                     b.is_queued = false;
                     b.buffer->set_valid_data_length(image_size);
@@ -426,7 +420,7 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
                 else
                 {
                     SPDLOG_ERROR("ImageSink expired. Unable to deliver images.");
-                    arv_stream_push_buffer(self->stream, buffer);
+                    arv_stream_push_buffer(self->stream_, buffer);
                     return;
                 }
             }
@@ -451,7 +445,7 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
                 {
                     msg = "Stream has missing packets";
 
-                    if (auto ptr = self->external_sink.lock())
+                    if (auto ptr = self->sink_.lock())
                     {
 
                         if (self->drop_incomplete_frames_)
@@ -460,16 +454,16 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
                         }
                         SPDLOG_WARN(
                             "Image has missing packets. Sending incomplete buffer as requested.");
-                        self->statistics.capture_time_ns = arv_buffer_get_timestamp(buffer);
-                        self->statistics.camera_time_ns = arv_buffer_get_timestamp(buffer);
-                        self->statistics.frame_count++;
-                        self->statistics.is_damaged = true;
+                        self->statistics_.capture_time_ns = arv_buffer_get_timestamp(buffer);
+                        self->statistics_.camera_time_ns = arv_buffer_get_timestamp(buffer);
+                        self->statistics_.frame_count++;
+                        self->statistics_.is_damaged = true;
 
                         // only way to retrieve actual image size
                         size_t image_size = 0;
                         arv_buffer_get_data(buffer, &image_size);
 
-                        for (auto& b : self->buffers)
+                        for (auto& b : self->buffer_list_)
                         {
                             const void* arv_user_data = arv_buffer_get_user_data(buffer);
                             if (b.buffer.get() != arv_user_data)
@@ -477,7 +471,7 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
                                 continue;
                             }
 
-                            b.buffer->set_statistics(self->statistics);
+                            b.buffer->set_statistics(self->statistics_);
                             b.is_queued = false;
                             b.buffer->set_valid_data_length(image_size);
                             ptr->push_image(b.buffer);
@@ -517,8 +511,8 @@ void AravisDevice::callback(ArvStream* stream __attribute__((unused)), void* use
                     break;
                 }
             }
-            arv_stream_push_buffer(self->stream, buffer);
-        no_back_push:
+            arv_stream_push_buffer(self->stream_, buffer);
+no_back_push:
             SPDLOG_WARN(msg.c_str());
         }
     }

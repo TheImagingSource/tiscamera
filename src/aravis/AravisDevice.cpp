@@ -16,16 +16,16 @@
 
 #include "AravisDevice.h"
 
+#include "../logging.h"
+#include "../utils.h"
 #include "AravisPropertyBackend.h"
 #include "aravis_utils.h"
-#include "../internal.h"
-#include "../utils.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstring>
-#include <stdexcept>
 #include <dutils_img/fcc_to_string.h> // img::fcc_to_string
+#include <stdexcept>
 
 
 using namespace tcam;
@@ -39,7 +39,7 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
     int pixelformat)
 {
     std::vector<double> ret;
-    auto dev = arv_camera_get_device(device->arv_camera);
+    auto dev = arv_camera_get_device(device->arv_camera_);
 
     // TODO implement better way to check for availability
     GError* error = NULL;
@@ -84,21 +84,21 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
 
     if (min == 0.0 && max == 0.0)
     {
-        if (this->device->stream)
+        if (this->device->stream_)
         {
             // this means a stream is active
             // do not touch settings
             return ret;
         }
 
-        auto active_format = arv_camera_get_pixel_format(this->device->arv_camera, &error);
+        auto active_format = arv_camera_get_pixel_format(this->device->arv_camera_, &error);
 
-        arv_camera_set_pixel_format(this->device->arv_camera, fourcc2aravis(pixelformat), &error);
+        arv_camera_set_pixel_format(this->device->arv_camera_, fourcc2aravis(pixelformat), &error);
 
         // this means TestPixelFormat, TestWidth, TestHeight are not available
         // could be an UsbVision camera
         int x1, x2, y1, y2;
-        arv_camera_get_region(this->device->arv_camera, &x1, &y1, &x2, &y2, &error);
+        arv_camera_get_region(this->device->arv_camera_, &x1, &y1, &x2, &y2, &error);
 
         if (error)
         {
@@ -111,9 +111,9 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
         unsigned int height = y2 - y1;
         unsigned int width = x2 - x1;
 
-        arv_camera_set_region(this->device->arv_camera, 0, 0, s.width, s.height, &error);
+        arv_camera_set_region(this->device->arv_camera_, 0, 0, s.width, s.height, &error);
 
-        arv_camera_get_frame_rate_bounds(this->device->arv_camera, &min, &max, &error);
+        arv_camera_get_frame_rate_bounds(this->device->arv_camera_, &min, &max, &error);
 
         if (error)
         {
@@ -121,9 +121,9 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
             error = nullptr;
         }
 
-        arv_camera_set_pixel_format(this->device->arv_camera, active_format, &error);
+        arv_camera_set_pixel_format(this->device->arv_camera_, active_format, &error);
 
-        arv_camera_set_region(this->device->arv_camera, 0, 0, width, height, &error);
+        arv_camera_set_region(this->device->arv_camera_, 0, 0, width, height, &error);
     }
 
     if (min == 0.0 && max == 0.0)
@@ -174,26 +174,26 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
 }
 
 
-AravisDevice::AravisDevice(const DeviceInfo& device_desc) : stream(NULL)
+AravisDevice::AravisDevice(const DeviceInfo& device_desc) : stream_(NULL)
 {
     device = device_desc;
     GError* err = NULL;
 
-    this->arv_camera = arv_camera_new(this->device.get_info().identifier, &err);
+    this->arv_camera_ = arv_camera_new(this->device.get_info().identifier, &err);
     if (err)
     {
         SPDLOG_ERROR("Error while creating arv_camera: {}", err->message);
         g_clear_error(&err);
     }
-    if (this->arv_camera == NULL)
+    if (this->arv_camera_ == NULL)
     {
         throw std::runtime_error("Error while creating ArvCamera");
     }
 
-    if (arv_camera_is_gv_device(this->arv_camera))
+    if (arv_camera_is_gv_device(this->arv_camera_))
     {
 
-        if (!arv_gv_device_is_controller((ArvGvDevice*)arv_camera_get_device(this->arv_camera)))
+        if (!arv_gv_device_is_controller((ArvGvDevice*)arv_camera_get_device(this->arv_camera_)))
         {
             SPDLOG_ERROR("This process does not control the device!");
             throw std::runtime_error("Device already open.");
@@ -202,27 +202,27 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc) : stream(NULL)
         auto_set_control_lifetime();
     }
 
-    format_handler = std::make_shared<AravisFormatHandler>(this);
+    format_handler_ = std::make_shared<AravisFormatHandler>(this);
 
-    m_backend =
-        std::make_shared<tcam::property::AravisPropertyBackend>(arv_camera_get_device(arv_camera));
+    backend_ =
+        std::make_shared<tcam::property::AravisPropertyBackend>(arv_camera_get_device(arv_camera_));
 
     index_genicam();
     determine_active_video_format();
 
     // make aravis notify us when the device can not be reached
     g_signal_connect(
-        arv_camera_get_device(arv_camera), "control-lost", G_CALLBACK(device_lost), this);
+        arv_camera_get_device(arv_camera_), "control-lost", G_CALLBACK(device_lost), this);
 }
 
 
 AravisDevice::~AravisDevice()
 {
-    if (arv_camera != NULL)
+    if (arv_camera_ != NULL)
     {
         SPDLOG_INFO("Destroying arvcamera");
-        g_object_unref(arv_camera);
-        arv_camera = NULL;
+        g_object_unref(arv_camera_);
+        arv_camera_ = NULL;
     }
 }
 
@@ -235,7 +235,7 @@ DeviceInfo AravisDevice::get_device_description() const
 
 bool AravisDevice::set_video_format(const VideoFormat& new_format)
 {
-    if (is_lost)
+    if (is_lost_)
     {
         return false;
     }
@@ -246,50 +246,45 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
     // // arv_camera_set_frame_rate overwrites TriggerSelector and TriggerMode
     // // set them again after changing the framerate to ensure consistent behaviour
     const char* trig_selector = arv_device_get_string_feature_value(
-        arv_camera_get_device(arv_camera), "TriggerSelector", &err);
+        arv_camera_get_device(arv_camera_), "TriggerSelector", &err);
 
     if (err)
     {
         SPDLOG_ERROR("Caught error: {}", err->message);
         g_clear_error(&err);
-
     }
 
-    const char* trig_mode =
-        arv_device_get_string_feature_value(arv_camera_get_device(arv_camera), "TriggerMode", &err);
+    const char* trig_mode = arv_device_get_string_feature_value(
+        arv_camera_get_device(arv_camera_), "TriggerMode", &err);
     if (err)
     {
         SPDLOG_ERROR("Caught error: {}", err->message);
         g_clear_error(&err);
-
     }
 
-    arv_camera_set_frame_rate(this->arv_camera, new_format.get_framerate(), &err);
+    arv_camera_set_frame_rate(this->arv_camera_, new_format.get_framerate(), &err);
 
     if (err)
     {
         SPDLOG_ERROR("Caught error: {}", err->message);
         g_clear_error(&err);
-
     }
     arv_device_set_string_feature_value(
-        arv_camera_get_device(arv_camera), "TriggerSelector", trig_selector, &err);
+        arv_camera_get_device(arv_camera_), "TriggerSelector", trig_selector, &err);
     if (err)
     {
         SPDLOG_ERROR("Caught error: {}", err->message);
         g_clear_error(&err);
-
     }
     arv_device_set_string_feature_value(
-        arv_camera_get_device(arv_camera), "TriggerMode", trig_mode, &err);
+        arv_camera_get_device(arv_camera_), "TriggerMode", trig_mode, &err);
 
     if (err)
     {
         SPDLOG_ERROR("Caught error: {}", err->message);
         g_clear_error(&err);
-
     }
-    arv_camera_set_pixel_format(this->arv_camera, fourcc2aravis(new_format.get_fourcc()), &err);
+    arv_camera_set_pixel_format(this->arv_camera_, fourcc2aravis(new_format.get_fourcc()), &err);
 
     if (err)
     {
@@ -303,7 +298,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
     unsigned int offset_x = 0;
     unsigned int offset_y = 0;
 
-    arv_camera_set_region(this->arv_camera,
+    arv_camera_set_region(this->arv_camera_,
                           offset_x,
                           offset_y,
                           new_format.get_size().width,
@@ -326,7 +321,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
 
 VideoFormat AravisDevice::get_active_video_format() const
 {
-    return active_video_format;
+    return active_video_format_;
 }
 
 
@@ -334,7 +329,7 @@ void AravisDevice::determine_active_video_format()
 {
     GError* err = nullptr;
 
-    this->active_video_format.set_framerate(arv_camera_get_frame_rate(this->arv_camera, &err));
+    this->active_video_format_.set_framerate(arv_camera_get_frame_rate(this->arv_camera_, &err));
 
     if (err)
     {
@@ -343,18 +338,17 @@ void AravisDevice::determine_active_video_format()
         err = nullptr;
     }
 
-    active_video_format.set_fourcc(
-        aravis2fourcc(arv_camera_get_pixel_format(this->arv_camera, &err)));
+    active_video_format_.set_fourcc(
+        aravis2fourcc(arv_camera_get_pixel_format(this->arv_camera_, &err)));
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve pixel format: {}", err->message);
         g_clear_error(&err);
         err = nullptr;
-
     }
 
     int x1, x2, y1, y2;
-    arv_camera_get_region(this->arv_camera, &x1, &y1, &x2, &y2, &err);
+    arv_camera_get_region(this->arv_camera_, &x1, &y1, &x2, &y2, &err);
 
     if (err)
     {
@@ -368,20 +362,20 @@ void AravisDevice::determine_active_video_format()
     unsigned int height = y2 - y1;
     unsigned int width = x2 - x1;
 
-    active_video_format.set_size(width, height);
+    active_video_format_.set_size(width, height);
 
-    active_video_format.set_scaling(get_current_scaling());
+    active_video_format_.set_scaling(get_current_scaling());
 }
 
 
 std::vector<VideoFormatDescription> AravisDevice::get_available_video_formats()
 {
-    if (this->available_videoformats.empty())
+    if (this->available_videoformats_.empty())
     {
         this->index_genicam();
     }
 
-    return available_videoformats;
+    return available_videoformats_;
 }
 
 void AravisDevice::auto_set_control_lifetime()
@@ -402,13 +396,13 @@ void AravisDevice::auto_set_control_lifetime()
 
     if (hearbeat_ms != 0)
     {
-        arv_camera_set_integer(arv_camera, "GevHeartbeatTimeout", hearbeat_ms, NULL);
+        arv_camera_set_integer(arv_camera_, "GevHeartbeatTimeout", hearbeat_ms, NULL);
         SPDLOG_DEBUG("Setting heartbeat timeout to {} ms.", hearbeat_ms);
     }
     else
     {
         static const int default_heartbeat_ms = 3000;
-        arv_camera_set_integer(arv_camera, "GevHeartbeatTimeout", default_heartbeat_ms, NULL);
+        arv_camera_set_integer(arv_camera_, "GevHeartbeatTimeout", default_heartbeat_ms, NULL);
 
         SPDLOG_DEBUG("Setting heartbeat timeout to default {} ms.", default_heartbeat_ms);
     }
@@ -435,7 +429,7 @@ void AravisDevice::auto_set_packet_size()
 
     if (eps == 0)
     {
-        guint packet_size = arv_camera_gv_auto_packet_size(this->arv_camera, &err);
+        guint packet_size = arv_camera_gv_auto_packet_size(this->arv_camera_, &err);
         if (err)
         {
             SPDLOG_ERROR("Unable to determine auto packet size: {}", err->message);
@@ -446,7 +440,7 @@ void AravisDevice::auto_set_packet_size()
     }
     else
     {
-        arv_camera_gv_set_packet_size(arv_camera, eps, &err);
+        arv_camera_gv_set_packet_size(arv_camera_, eps, &err);
         if (err)
         {
             SPDLOG_ERROR("Unable to set packet size: {}", err->message);
@@ -462,7 +456,7 @@ void AravisDevice::device_lost(ArvGvDevice* device __attribute__((unused)), void
 {
     AravisDevice* self = (AravisDevice*)user_data;
 
-    self->is_lost = true;
+    self->is_lost_ = true;
 
     self->notify_device_lost();
 }
@@ -472,17 +466,17 @@ void AravisDevice::device_lost(ArvGvDevice* device __attribute__((unused)), void
 
 void AravisDevice::index_genicam()
 {
-    if (this->arv_camera == nullptr)
+    if (this->arv_camera_ == nullptr)
     {
         return;
     }
-    genicam = arv_device_get_genicam(arv_camera_get_device(this->arv_camera));
+    genicam_ = arv_device_get_genicam(arv_camera_get_device(this->arv_camera_));
 
     iterate_genicam("Root");
     index_properties("Root");
     determine_active_video_format();
     index_genicam_format(NULL);
-    set_video_format(this->active_video_format);
+    set_video_format(this->active_video_format_);
 }
 
 
@@ -490,7 +484,7 @@ void AravisDevice::iterate_genicam(const char* feature)
 {
 
 
-    ArvGcNode* node = arv_gc_get_node(genicam, feature);
+    ArvGcNode* node = arv_gc_get_node(genicam_, feature);
 
     if (ARV_IS_GC_FEATURE_NODE(node)
         && arv_gc_feature_node_is_implemented(ARV_GC_FEATURE_NODE(node), NULL)
@@ -525,11 +519,10 @@ void AravisDevice::iterate_genicam(const char* feature)
 
 
         // is part of the format description
-        if (std::find(format_member.begin(), format_member.end(), feature)
-                 != format_member.end())
+        if (std::find(format_member.begin(), format_member.end(), feature) != format_member.end())
         {
             // index_genicam_format(camera, node, frmt_mapping);
-            this->format_nodes.push_back(node);
+            this->format_nodes_.push_back(node);
         }
     }
 }
@@ -557,21 +550,22 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
     // We search for the wanted node and save the intermediate result
     std::string node_to_use;
-    auto find_node = [&node_to_use](ArvGcNode* node) {
+    auto find_node = [&node_to_use](ArvGcNode* node)
+    {
         return (node_to_use.compare(arv_gc_feature_node_get_name((ArvGcFeatureNode*)node)) == 0);
     };
 
     // current setting that have to be restored
     determine_active_video_format();
-    auto reset_format = this->active_video_format;
+    auto reset_format = this->active_video_format_;
 
 
     // reset region to entirety of the sensor
     // depending on the camera model (z12)
     // the width/height boundaries may be skewed
     // due to internal auto offset settings
-    ArvDevice* dev = arv_camera_get_device(this->arv_camera);
-    arv_camera_set_region(arv_camera,
+    ArvDevice* dev = arv_camera_get_device(this->arv_camera_);
+    arv_camera_set_region(arv_camera_,
                           0,
                           0,
                           arv_device_get_integer_feature_value(dev, "SensorWidth", &err),
@@ -589,12 +583,12 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
     // start with frame rates and use everthing until all format descriptions are complete
 
     node_to_use = "FPS";
-    auto fps_node = std::find_if(format_nodes.begin(), format_nodes.end(), find_node);
+    auto fps_node = std::find_if(format_nodes_.begin(), format_nodes_.end(), find_node);
 
-    if (fps_node == format_nodes.end())
+    if (fps_node == format_nodes_.end())
     {
         node_to_use = "AcquisitionFrameRate";
-        fps_node = std::find_if(format_nodes.begin(), format_nodes.end(), find_node);
+        fps_node = std::find_if(format_nodes_.begin(), format_nodes_.end(), find_node);
     }
 
     std::vector<double> fps;
@@ -611,9 +605,9 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
     node_to_use = "PixelFormat";
 
-    auto pixel_node = std::find_if(format_nodes.begin(), format_nodes.end(), find_node);
+    auto pixel_node = std::find_if(format_nodes_.begin(), format_nodes_.end(), find_node);
 
-    if (pixel_node != format_nodes.end())
+    if (pixel_node != format_nodes_.end())
     {
 
         // we know there are formats
@@ -622,7 +616,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
         unsigned int n_formats;
         gint64* format_ptr =
-            arv_camera_dup_available_pixel_formats(this->arv_camera, &n_formats, &err);
+            arv_camera_dup_available_pixel_formats(this->arv_camera_, &n_formats, &err);
 
         if (err)
         {
@@ -633,14 +627,13 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
         unsigned n2_formats;
         const char** format_str =
-            arv_camera_dup_available_pixel_formats_as_strings(this->arv_camera, &n2_formats, &err);
+            arv_camera_dup_available_pixel_formats_as_strings(this->arv_camera_, &n2_formats, &err);
 
         if (err)
         {
             SPDLOG_ERROR("Unable to retrieve pixel format description strings: {}", err->message);
             g_clear_error(&err);
             err = nullptr;
-
         }
 
         if (n_formats != n2_formats)
@@ -668,7 +661,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
             desc.resolution_count = 1;
             framerate_mapping rf = {};
 
-            arv_camera_set_pixel_format(this->arv_camera, format_ptr[1], &err);
+            arv_camera_set_pixel_format(this->arv_camera_, format_ptr[1], &err);
 
             if (err)
             {
@@ -678,7 +671,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
                 continue;
             }
 
-            arv_camera_get_width_bounds(this->arv_camera, &width_min, &width_max, &err);
+            arv_camera_get_width_bounds(this->arv_camera_, &width_min, &width_max, &err);
             if (err)
             {
                 SPDLOG_ERROR("Unable to retrieve width bounds: {}", err->message);
@@ -686,7 +679,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
                 err = nullptr;
             }
 
-            arv_camera_get_height_bounds(this->arv_camera, &height_min, &height_max, &err);
+            arv_camera_get_height_bounds(this->arv_camera_, &height_min, &height_max, &err);
 
             if (err)
             {
@@ -695,7 +688,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
                 err = nullptr;
             }
 
-            width_step = arv_camera_get_width_increment(this->arv_camera, &err);
+            width_step = arv_camera_get_width_increment(this->arv_camera_, &err);
             if (err)
             {
                 SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
@@ -703,13 +696,12 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
                 err = nullptr;
             }
 
-            height_step = arv_camera_get_height_increment(this->arv_camera, &err);
+            height_step = arv_camera_get_height_increment(this->arv_camera_, &err);
             if (err)
             {
                 SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
                 g_clear_error(&err);
                 err = nullptr;
-
             }
 
             tcam_image_size min = { (unsigned int)width_min, (unsigned int)height_min };
@@ -730,7 +722,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
                 rf.resolution.height_step_size = height_step;
             }
 
-            fps = this->format_handler->get_framerates(max, desc.fourcc);
+            fps = this->format_handler_->get_framerates(max, desc.fourcc);
 
             rf.resolution.framerate_count = fps.size();
             rf.framerates = fps;
@@ -742,7 +734,7 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
             tcam_image_size sensor_size = get_sensor_size();
 
-            for (const auto& s : m_scale.scales)
+            for (const auto& s : scale_.scales)
             {
                 if (rf.resolution.type == TCAM_RESOLUTION_TYPE_FIXED)
                 {
@@ -763,8 +755,10 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
                     new_rf.resolution.max_size = s.allowed_max(sensor_size);
 
                     // ensure max is divisible by step
-                    new_rf.resolution.max_size.width -= new_rf.resolution.max_size.width % new_rf.resolution.width_step_size;
-                    new_rf.resolution.max_size.height -= new_rf.resolution.max_size.height % new_rf.resolution.height_step_size;
+                    new_rf.resolution.max_size.width -=
+                        new_rf.resolution.max_size.width % new_rf.resolution.width_step_size;
+                    new_rf.resolution.max_size.height -=
+                        new_rf.resolution.max_size.height % new_rf.resolution.height_step_size;
 
                     // SPDLOG_ERROR("{}x{} max:{}x{} =>",
                     //              new_rf.resolution.min_size.width, new_rf.resolution.min_size.height,
@@ -773,12 +767,11 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
                     new_rf.resolution.scaling = s;
 
                     res_vec.push_back(new_rf);
-
                 }
             }
 
-            this->available_videoformats.push_back(
-                VideoFormatDescription(format_handler, desc, res_vec));
+            this->available_videoformats_.push_back(
+                VideoFormatDescription(format_handler_, desc, res_vec));
         }
     }
     else
@@ -793,8 +786,8 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
 tcam_image_size AravisDevice::get_sensor_size() const
 {
-    auto pw = tcam::property::find_property(m_internal_properties, "SensorWidth");
-    auto ph = tcam::property::find_property(m_internal_properties, "SensorHeight");
+    auto pw = tcam::property::find_property(internal_properties_, "SensorWidth");
+    auto ph = tcam::property::find_property(internal_properties_, "SensorHeight");
 
     if (!pw || !ph)
     {
@@ -821,5 +814,5 @@ tcam_image_size AravisDevice::get_sensor_size() const
         return {};
     }
 
-    return {(uint32_t)res_w.value(), (uint32_t)res_h.value()};
+    return { (uint32_t)res_w.value(), (uint32_t)res_h.value() };
 }

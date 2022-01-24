@@ -45,7 +45,6 @@ if (TCAM_BUILD_ARAVIS)
     find_package(GIO     REQUIRED QUIET)
 
 
-    target_include_directories(tcam-backend-aravis PRIVATE "..")
     target_include_directories(tcam-backend-aravis PRIVATE "${GIO_INCLUDE_DIR}")
 
     target_include_directories(tcam-backend-aravis PRIVATE ${GOBJECT_INCLUDE_DIR})

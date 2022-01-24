@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
+#include "../logging.h"
 #include "AravisDevice.h"
-
-#include "logging.h"
 
 using namespace tcam;
 
 
 void AravisDevice::determine_scaling()
 {
-    m_scale.scale_type = ImageScalingType::Unknown;
+    scale_.scale_type = ImageScalingType::Unknown;
 
-    auto check_prop = [this] (const std::string& name, ImageScalingType flag)
+    auto check_prop = [this](const std::string& name, ImageScalingType flag)
     {
-        auto prop = tcam::property::find_property(m_internal_properties, name);
+        auto prop = tcam::property::find_property(internal_properties_, name);
         if (prop)
         {
-            m_scale.scale_type = flag;
-            m_scale.properties.push_back(prop);
+            scale_.scale_type = flag;
+            scale_.properties.push_back(prop);
             return true;
         }
         return false;
@@ -45,7 +44,7 @@ void AravisDevice::determine_scaling()
 
     // we already have binning
     // if something skipping related is found we have both
-    if (m_scale.scale_type == ImageScalingType::Binning)
+    if (scale_.scale_type == ImageScalingType::Binning)
     {
         to_set = ImageScalingType::BinningSkipping;
     }
@@ -54,21 +53,21 @@ void AravisDevice::determine_scaling()
     check_prop("DecimationHorizontal", to_set);
     check_prop("DecimationVertical", to_set);
 
-    if (m_scale.scale_type == ImageScalingType::Unknown)
+    if (scale_.scale_type == ImageScalingType::Unknown)
     {
-        m_scale.scale_type = ImageScalingType::None;
+        scale_.scale_type = ImageScalingType::None;
     }
 }
 
 
 void AravisDevice::generate_scales()
 {
-    if (m_scale.scale_type == ImageScalingType::Unknown)
+    if (scale_.scale_type == ImageScalingType::Unknown)
     {
         determine_scaling();
     }
 
-    auto legal_value = [] (const int i)
+    auto legal_value = [](const int i)
     {
         // only accept valid values
         if (i == 2 || i == 4 || i == 8)
@@ -78,10 +77,10 @@ void AravisDevice::generate_scales()
         return false;
     };
 
-    if (m_scale.scale_type == ImageScalingType::Binning)
+    if (scale_.scale_type == ImageScalingType::Binning)
     {
-        auto binning_h = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
-        auto binning_v = tcam::property::find_property(m_scale.properties, "BinningVertical");
+        auto binning_h = tcam::property::find_property(scale_.properties, "BinningHorizontal");
+        auto binning_v = tcam::property::find_property(scale_.properties, "BinningVertical");
 
         if (binning_h && binning_v)
         {
@@ -112,13 +111,13 @@ void AravisDevice::generate_scales()
                     // SPDLOG_INFO("New binning: {}x{}", i, i);
                     //SPDLOG_ERROR("new", bh->);
 
-                    m_scale.scales.push_back(new_scale);
+                    scale_.scales.push_back(new_scale);
                 }
             }
         }
         else
         {
-            auto binning_base = tcam::property::find_property(m_scale.properties, "Binning");
+            auto binning_base = tcam::property::find_property(scale_.properties, "Binning");
 
             if (binning_base)
             {
@@ -130,15 +129,15 @@ void AravisDevice::generate_scales()
                 {
                     if (entry == "X1")
                     {
-                        m_scale.scales.push_back({1, 1});
+                        scale_.scales.push_back({ 1, 1 });
                     }
                     else if (entry == "X2")
                     {
-                        m_scale.scales.push_back({2, 2});
+                        scale_.scales.push_back({ 2, 2 });
                     }
                     else if (entry == "X4")
                     {
-                        m_scale.scales.push_back({4, 4});
+                        scale_.scales.push_back({ 4, 4 });
                     }
                     else
                     {
@@ -163,16 +162,14 @@ void AravisDevice::generate_scales()
 
                 //     m_scale.scales.push_back(new_scale);
                 // }
-
             }
         }
-
     }
 
-    if (m_scale.scale_type == ImageScalingType::Skipping)
+    if (scale_.scale_type == ImageScalingType::Skipping)
     {
-        auto skipping_h = tcam::property::find_property(m_scale.properties, "SkippingHorizontal");
-        auto skipping_v = tcam::property::find_property(m_scale.properties, "SkippingVertical");
+        auto skipping_h = tcam::property::find_property(scale_.properties, "SkippingHorizontal");
+        auto skipping_v = tcam::property::find_property(scale_.properties, "SkippingVertical");
 
         auto bh = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_h.get());
         auto bv = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_v.get());
@@ -198,18 +195,18 @@ void AravisDevice::generate_scales()
                 new_scale.skipping_h = i;
                 new_scale.skipping_v = v;
 
-                m_scale.scales.push_back(new_scale);
+                scale_.scales.push_back(new_scale);
             }
         }
-
     }
 
-    if (m_scale.scale_type == ImageScalingType::BinningSkipping)
+    if (scale_.scale_type == ImageScalingType::BinningSkipping)
     {
-        auto get_value = [this] (const std::string& name)
+        auto get_value = [this](const std::string& name)
         {
             GError* err = nullptr;
-            auto ret = arv_device_get_integer_feature_value(arv_camera_get_device(this->arv_camera), name.c_str(), &err);
+            auto ret = arv_device_get_integer_feature_value(
+                arv_camera_get_device(this->arv_camera_), name.c_str(), &err);
 
             if (err)
             {
@@ -220,25 +217,25 @@ void AravisDevice::generate_scales()
             return ret;
         };
 
-        auto set_value = [this] (const std::string& name, int value)
+        auto set_value = [this](const std::string& name, int value)
         {
             GError* err = nullptr;
-            arv_device_set_integer_feature_value(arv_camera_get_device(this->arv_camera), name.c_str(), value, &err);
+            arv_device_set_integer_feature_value(
+                arv_camera_get_device(this->arv_camera_), name.c_str(), value, &err);
 
             if (err)
             {
                 SPDLOG_ERROR("Received error: {}", err->message);
                 g_clear_error(&err);
             }
-
         };
 
-        auto binning_h = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
-        auto binning_v = tcam::property::find_property(m_scale.properties, "BinningVertical");
+        auto binning_h = tcam::property::find_property(scale_.properties, "BinningHorizontal");
+        auto binning_v = tcam::property::find_property(scale_.properties, "BinningVertical");
         // auto skipping_h = tcam::property::find_property(m_scale.m_properties, "SkippingHorizontal");
         // auto skipping_v = tcam::property::find_property(m_scale.m_properties, "SkippingVertical");
-        auto skipping_h = tcam::property::find_property(m_scale.properties, "DecimationHorizontal");
-        auto skipping_v = tcam::property::find_property(m_scale.properties, "DecimationVertical");
+        auto skipping_h = tcam::property::find_property(scale_.properties, "DecimationHorizontal");
+        auto skipping_v = tcam::property::find_property(scale_.properties, "DecimationVertical");
 
         auto sh = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_h.get());
         auto sv = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_v.get());
@@ -246,15 +243,13 @@ void AravisDevice::generate_scales()
         auto bh = dynamic_cast<tcam::property::IPropertyInteger*>(binning_h.get());
         auto bv = dynamic_cast<tcam::property::IPropertyInteger*>(binning_v.get());
 
-        auto scale_is_known = [=] (const tcam::image_scaling& s)
+        auto scale_is_known = [=](const tcam::image_scaling& s)
         {
-            auto find = std::find_if(m_scale.scales.begin(), m_scale.scales.end(),
-                                     [s] (const tcam::image_scaling& vs)
-                                     {
-                                         return (s == vs);
-                                     });
+            auto find = std::find_if(scale_.scales.begin(),
+                                     scale_.scales.end(),
+                                     [s](const tcam::image_scaling& vs) { return (s == vs); });
 
-            if (find == m_scale.scales.end())
+            if (find == scale_.scales.end())
             {
                 return false;
             }
@@ -300,7 +295,7 @@ void AravisDevice::generate_scales()
                             continue;
                         }
 
-                        m_scale.scales.push_back(is);
+                        scale_.scales.push_back(is);
                     }
                 }
             }
@@ -311,9 +306,10 @@ void AravisDevice::generate_scales()
 
 bool AravisDevice::set_scaling(const image_scaling& scale)
 {
-    if (m_scale.scale_type == ImageScalingType::Binning || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    if (scale_.scale_type == ImageScalingType::Binning
+        || scale_.scale_type == ImageScalingType::BinningSkipping)
     {
-        auto binning_base = tcam::property::find_property(m_scale.properties, "Binning");
+        auto binning_base = tcam::property::find_property(scale_.properties, "Binning");
         if (binning_base)
         {
             SPDLOG_TRACE("Setting binning to: {}x{}", scale.binning_h, scale.binning_v);
@@ -352,8 +348,8 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
         }
         else
         {
-            auto bin_hb = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
-            auto bin_vb = tcam::property::find_property(m_scale.properties, "BinningVertical");
+            auto bin_hb = tcam::property::find_property(scale_.properties, "BinningHorizontal");
+            auto bin_vb = tcam::property::find_property(scale_.properties, "BinningVertical");
 
             auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
             auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
@@ -378,16 +374,17 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
         }
     }
 
-    if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    if (scale_.scale_type == ImageScalingType::Skipping
+        || scale_.scale_type == ImageScalingType::BinningSkipping)
     {
-        auto sk_hb = tcam::property::find_property(m_scale.properties, "DecimationHorizontal");
-        auto sk_vb = tcam::property::find_property(m_scale.properties, "DecimationVertical");
+        auto sk_hb = tcam::property::find_property(scale_.properties, "DecimationHorizontal");
+        auto sk_vb = tcam::property::find_property(scale_.properties, "DecimationVertical");
 
         auto sk_h = dynamic_cast<tcam::property::IPropertyInteger*>(sk_hb.get());
         auto sk_v = dynamic_cast<tcam::property::IPropertyInteger*>(sk_vb.get());
 
         SPDLOG_TRACE("Setting skipping to: {}x{}", scale.skipping_h, scale.skipping_v);
-        auto ret = sk_h->set_value(scale.skipping_h);\
+        auto ret = sk_h->set_value(scale.skipping_h);
 
         if (!ret)
         {
@@ -410,16 +407,17 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
 
 image_scaling AravisDevice::get_current_scaling()
 {
-    if (m_scale.scale_type == ImageScalingType::Unknown)
+    if (scale_.scale_type == ImageScalingType::Unknown)
     {
         determine_scaling();
     }
 
     image_scaling ret = {};
 
-    if (m_scale.scale_type == ImageScalingType::Binning || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    if (scale_.scale_type == ImageScalingType::Binning
+        || scale_.scale_type == ImageScalingType::BinningSkipping)
     {
-        auto binning_base = tcam::property::find_property(m_scale.properties, "Binning");
+        auto binning_base = tcam::property::find_property(scale_.properties, "Binning");
 
         if (binning_base)
         {
@@ -429,7 +427,8 @@ image_scaling AravisDevice::get_current_scaling()
 
             if (!value)
             {
-                SPDLOG_ERROR("Unable to retrieve value for Binning: {}", value.as_failure().error().message());
+                SPDLOG_ERROR("Unable to retrieve value for Binning: {}",
+                             value.as_failure().error().message());
                 return {};
             }
 
@@ -446,18 +445,18 @@ image_scaling AravisDevice::get_current_scaling()
             else if (value.value() == "X4")
             {
                 ret.binning_h = 4;
-                ret.binning_v = 4;            }
+                ret.binning_v = 4;
+            }
             else
             {
                 SPDLOG_WARN("Binning entry '{}' not implemented.", value.value());
                 return {};
             }
-
         }
         else
         {
-            auto bin_hb = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
-            auto bin_vb = tcam::property::find_property(m_scale.properties, "BinningVertical");
+            auto bin_hb = tcam::property::find_property(scale_.properties, "BinningHorizontal");
+            auto bin_vb = tcam::property::find_property(scale_.properties, "BinningVertical");
 
             auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
             auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
@@ -466,24 +465,27 @@ image_scaling AravisDevice::get_current_scaling()
 
             if (!res)
             {
-                SPDLOG_ERROR("Unable to retrieve value for BinningHorizontal: {}", res.as_failure().error().message());
+                SPDLOG_ERROR("Unable to retrieve value for BinningHorizontal: {}",
+                             res.as_failure().error().message());
                 return {};
             }
             ret.binning_h = res.value();
             res = bin_v->get_value();
             if (!res)
             {
-                SPDLOG_ERROR("Unable to retrieve value for BinningVertical: {}", res.as_failure().error().message());
+                SPDLOG_ERROR("Unable to retrieve value for BinningVertical: {}",
+                             res.as_failure().error().message());
                 return {};
             }
             ret.binning_v = res.value();
         }
     }
 
-    if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    if (scale_.scale_type == ImageScalingType::Skipping
+        || scale_.scale_type == ImageScalingType::BinningSkipping)
     {
-        auto sk_hb = tcam::property::find_property(m_scale.properties, "DecimationHorizontal");
-        auto sk_vb = tcam::property::find_property(m_scale.properties, "DecimationVertical");
+        auto sk_hb = tcam::property::find_property(scale_.properties, "DecimationHorizontal");
+        auto sk_vb = tcam::property::find_property(scale_.properties, "DecimationVertical");
 
         auto sk_h = dynamic_cast<tcam::property::IPropertyInteger*>(sk_hb.get());
         auto sk_v = dynamic_cast<tcam::property::IPropertyInteger*>(sk_vb.get());
@@ -492,14 +494,16 @@ image_scaling AravisDevice::get_current_scaling()
 
         if (!res)
         {
-            SPDLOG_ERROR("Unable to retrieve value for SkippingHorizontal: {}", res.as_failure().error().message());
+            SPDLOG_ERROR("Unable to retrieve value for SkippingHorizontal: {}",
+                         res.as_failure().error().message());
             return {};
         }
         ret.skipping_h = res.value();
         res = sk_v->get_value();
         if (!res)
         {
-            SPDLOG_ERROR("Unable to retrieve value for SkippingVertical: {}", res.as_failure().error().message());
+            SPDLOG_ERROR("Unable to retrieve value for SkippingVertical: {}",
+                         res.as_failure().error().message());
             return {};
         }
         ret.skipping_v = res.value();

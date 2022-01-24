@@ -59,8 +59,8 @@ public:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
-        return m_properties;
-    };
+        return properties_;
+    }
 
     bool set_video_format(const VideoFormat&) override;
 
@@ -78,7 +78,6 @@ public:
     void stop_stream() final;
 
 private:
-
     // helper function to set lifetime of control channel
     // depending on env and auto negotiation
     void auto_set_control_lifetime();
@@ -87,22 +86,22 @@ private:
     // depending on env and auto negotiation
     void auto_set_packet_size();
 
-    static void callback(ArvStream* stream, void* user_data);
+    static void aravis_new_buffer_callback(ArvStream* stream, void* user_data);
 
     static void device_lost(ArvGvDevice* device, void* user_data);
 
-    std::shared_ptr<AravisFormatHandler> format_handler;
+    std::shared_ptr<AravisFormatHandler> format_handler_;
 
-    ArvCamera* arv_camera;
+    ArvCamera* arv_camera_ = nullptr;
 
-    std::weak_ptr<IImageBufferSink> external_sink;
+    std::weak_ptr<IImageBufferSink> sink_;
 
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_internal_properties;
-    std::shared_ptr<tcam::property::AravisPropertyBackend> m_backend;
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> properties_;
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> internal_properties_;
+    std::shared_ptr<tcam::property::AravisPropertyBackend> backend_;
 
-    ArvStream* stream = nullptr;
-    ArvGc* genicam = nullptr;
+    ArvStream* stream_ = nullptr;
+    ArvGc* genicam_ = nullptr;
 
     struct buffer_info
     {
@@ -111,10 +110,10 @@ private:
         bool is_queued;
     };
 
-    std::vector<buffer_info> buffers;
+    std::vector<buffer_info> buffer_list_;
 
-    struct tcam_stream_statistics statistics;
-    std::atomic<bool> is_lost = false;
+    tcam_stream_statistics statistics_;
+    std::atomic<bool> is_lost_ = false;
 
     struct device_scaling
     {
@@ -125,7 +124,7 @@ private:
         ImageScalingType scale_type = ImageScalingType::Unknown;
     };
 
-    device_scaling m_scale;
+    device_scaling scale_;
 
 
     void determine_scaling();
@@ -133,13 +132,13 @@ private:
     bool set_scaling(const image_scaling& scale);
     image_scaling get_current_scaling();
 
-    VideoFormat active_video_format;
+    VideoFormat active_video_format_;
 
-    std::vector<VideoFormatDescription> available_videoformats;
+    std::vector<VideoFormatDescription> available_videoformats_;
 
 
     // found nodes that contain format information
-    std::vector<ArvGcNode*> format_nodes;
+    std::vector<ArvGcNode*> format_nodes_;
 
     void determine_active_video_format();
 
