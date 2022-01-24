@@ -24,15 +24,21 @@
 
 using namespace tcam;
 
-bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> b)
+void tcam::AravisDevice::clear_buffer_info_arb_buffer(buffer_info& info)
+{
+    std::scoped_lock lck { info.parent->buffer_list_mtx_ };
+
+    info.arv_buffer = nullptr;
+}
+
+bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> new_list)
 {
     GError* err = nullptr;
 
     this->buffer_list_.clear();
+    this->buffer_list_.reserve(new_list.size());
 
-    this->buffer_list_.reserve(b.size());
-    int payload = arv_camera_get_payload(this->arv_camera_, &err);
-
+    size_t payload = arv_camera_get_payload(this->arv_camera_, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve payload: {}", err->message);
@@ -40,43 +46,60 @@ bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> 
         return false;
     }
 
-    for (unsigned int i = 0; i < b.size(); ++i)
+    auto buffer_destroy_notfiy = [](void* buffer_info_ptr) {
+        auto& info = *static_cast<buffer_info*>(buffer_info_ptr);
+        clear_buffer_info_arb_buffer(info);
+    };
+
+    // we build the according items in a 2 step process, so we are able to pass &info to arv_buffer_new_full
+    for (auto&& buffer : new_list) { this->buffer_list_.push_back(buffer_info { this, buffer }); }
+
+    for (auto& info : buffer_list_)
     {
-        ArvBuffer* ab =
-            arv_buffer_new_full(payload, b.at(i)->get_image_buffer_ptr(), b.at(i).get(), nullptr);
-        buffer_info info = {};
-        info.buffer = b.at(i);
-        info.arv_buffer = ab;
-        info.is_queued = false;
-        this->buffer_list_.push_back(info);
+        info.arv_buffer = arv_buffer_new_full(
+            payload, info.buffer->get_image_buffer_ptr(), &info, buffer_destroy_notfiy);
     }
     return true;
 }
 
-
 bool AravisDevice::release_buffers()
 {
+    std::scoped_lock lck { buffer_list_mtx_ };
+
+    for (auto& b : buffer_list_)  // these get partially freed by the arv_stream, partially here
+    {
+        if (b.arv_buffer)
+        {
+            g_object_unref(b.arv_buffer);
+        }
+    }
+
     buffer_list_.clear();
 
     return true;
 }
 
-
 void AravisDevice::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
 {
+    std::scoped_lock lck { buffer_list_mtx_ };
     for (auto& b : buffer_list_)
     {
-        if (b.buffer == buffer)
+        if (b.buffer == buffer && b.arv_buffer != nullptr)
         {
-            //SPDLOG_DEBUG("Returning buffer to aravis.");
-            arv_stream_push_buffer(this->stream_, b.arv_buffer);
+#if !defined NDEBUG
             b.is_queued = true;
+#endif
+            arv_stream_push_buffer(this->stream_, b.arv_buffer);
+            return;
         }
     }
+
+    // we can just drop it here
+    SPDLOG_DEBUG("Buffer not requeued. Already flushed from buffer_list. ptr={}.",
+                 static_cast<void*>(buffer.get()));
 }
 
-
-bool set_stream_options(ArvStream* stream)
+static bool set_stream_options(ArvStream* stream)
 {
 
     // helper functions
@@ -247,16 +270,19 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
         return false;
     }
 
+    assert(stream_ == nullptr);
+    if (stream_)
+    {
+        SPDLOG_ERROR("Stop was not called previously");
+        return false;
+    }
+
     if (buffer_list_.size() < 2)
     {
         SPDLOG_ERROR("Need at least two buffers.");
         return false;
     }
 
-    if (this->stream_ != nullptr)
-    {
-        g_object_unref(this->stream_);
-    }
 
     // install callback to initialize the capture thread as real time
     auto stream_cb = [](void* /*user_data*/, ArvStreamCallbackType type, ArvBuffer* /*buffer*/)
@@ -303,10 +329,7 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
         set_stream_options(this->stream_);
     }
 
-    for (std::size_t i = 0; i < buffer_list_.size(); ++i)
-    {
-        arv_stream_push_buffer(this->stream_, buffer_list_.at(i).arv_buffer);
-    }
+    for (auto& buf : buffer_list_) { arv_stream_push_buffer(this->stream_, buf.arv_buffer); }
 
     arv_stream_set_emit_signals(this->stream_, TRUE);
 
@@ -325,6 +348,9 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
     SPDLOG_INFO("Starting actual stream...");
 
+    frames_delivered_ = 0;
+    frames_dropped_ = 0;
+
     sink_ = sink;
 
     arv_camera_start_acquisition(this->arv_camera_, &err);
@@ -334,12 +360,10 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
         SPDLOG_ERROR("Unable to start stream: {}", err->message);
         g_clear_error(&err);
 
-        sink_.reset();
+        stop_stream();
 
         return false;
     }
-
-    statistics_ = {};
 
     return true;
 }
@@ -368,10 +392,61 @@ void AravisDevice::stop_stream()
         g_object_unref(this->stream_);
         this->stream_ = NULL;
     }
+
+    // releasing the stream deletes all arv_buffer objects currently pending in the arv_stream, so we cannot re-use the actaul ImageBuffers here
+
+    sink_.reset();
+
+    release_buffers();
+}
+
+static auto translate_arv_buffer_status(ArvBufferStatus status) -> const char*
+{
+    switch (status)
+    {
+        case ARV_BUFFER_STATUS_SUCCESS:
+        {
+            return "the buffer is cleared";
+        }
+        case ARV_BUFFER_STATUS_TIMEOUT:
+        {
+            return "Timeout has been reached before all packets were received";
+        }
+        case ARV_BUFFER_STATUS_MISSING_PACKETS:
+        {
+            return "Stream has missing packets";
+        }
+        case ARV_BUFFER_STATUS_WRONG_PACKET_ID:
+        {
+            return "Stream has packet with wrong id";
+        }
+        case ARV_BUFFER_STATUS_SIZE_MISMATCH:
+        {
+            return "The received image did not fit in the buffer data space";
+        }
+        case ARV_BUFFER_STATUS_FILLING:
+        {
+            return "The image is currently being filled";
+        }
+        case ARV_BUFFER_STATUS_ABORTED:
+        {
+            return "The filling was aborted before completion";
+        }
+        case ARV_BUFFER_STATUS_CLEARED:
+        {
+            return "Buffer cleared";
+        }
+        case ARV_BUFFER_STATUS_UNKNOWN:
+        {
+            return "This should not happen";
+        }
+    }
+    return nullptr;
 }
 
 
-void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((unused)), void* user_data)
+void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((unused)),
+                                              void* user_data)
 {
     AravisDevice* self = static_cast<AravisDevice*>(user_data);
     if (self == NULL)
@@ -384,136 +459,98 @@ void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((u
         return;
     }
 
-    ArvBuffer* buffer = arv_stream_pop_buffer(self->stream_);
-
-    if (buffer != NULL)
+    ArvBuffer* buffer = arv_stream_pop_buffer(stream);
+    if (buffer == NULL)
     {
-        ArvBufferStatus status = arv_buffer_get_status(buffer);
+        return;
+    }
 
-        if (status == ARV_BUFFER_STATUS_SUCCESS)
+    ArvBufferStatus status = arv_buffer_get_status(buffer);
+
+    if (status == ARV_BUFFER_STATUS_SUCCESS)
+    {
+        self->complete_aravis_stream_buffer(buffer, false);
+    }
+    else if (status == ARV_BUFFER_STATUS_MISSING_PACKETS)
+    {
+        if (self->drop_incomplete_frames_)
         {
-            SPDLOG_TRACE("Received new buffer.");
+            SPDLOG_DEBUG("Image has missing packets. Dropping incomplete frame as requested.");
 
-            self->statistics_.capture_time_ns = arv_buffer_get_system_timestamp(buffer);
-            self->statistics_.camera_time_ns = arv_buffer_get_timestamp(buffer);
-            self->statistics_.frame_count++;
-            self->statistics_.is_damaged = false;
-            // only way to retrieve actual image size
-            size_t image_size = 0;
-            arv_buffer_get_data(buffer, &image_size);
+            ++self->frames_dropped_;
 
-            for (auto& b : self->buffer_list_)
-            {
-                const void* arv_user_data = arv_buffer_get_user_data(buffer);
-                if (b.buffer.get() != arv_user_data)
-                {
-                    continue;
-                }
-
-                b.buffer->set_statistics(self->statistics_);
-                if (auto ptr = self->sink_.lock())
-                {
-                    b.is_queued = false;
-                    b.buffer->set_valid_data_length(image_size);
-                    ptr->push_image(b.buffer);
-                }
-                else
-                {
-                    SPDLOG_ERROR("ImageSink expired. Unable to deliver images.");
-                    arv_stream_push_buffer(self->stream_, buffer);
-                    return;
-                }
-            }
+            arv_stream_push_buffer(stream, buffer);
         }
         else
         {
-            std::string msg;
+            SPDLOG_DEBUG("Image has missing packets. Sending incomplete buffer as requested.");
 
-            switch (status)
-            {
-                case ARV_BUFFER_STATUS_SUCCESS:
-                {
-                    msg = "the buffer is cleared";
-                    break;
-                }
-                case ARV_BUFFER_STATUS_TIMEOUT:
-                {
-                    msg = "Timeout has been reached before all packets were received";
-                    break;
-                }
-                case ARV_BUFFER_STATUS_MISSING_PACKETS:
-                {
-                    msg = "Stream has missing packets";
-
-                    if (auto ptr = self->sink_.lock())
-                    {
-
-                        if (self->drop_incomplete_frames_)
-                        {
-                            break;
-                        }
-                        SPDLOG_WARN(
-                            "Image has missing packets. Sending incomplete buffer as requested.");
-                        self->statistics_.capture_time_ns = arv_buffer_get_timestamp(buffer);
-                        self->statistics_.camera_time_ns = arv_buffer_get_timestamp(buffer);
-                        self->statistics_.frame_count++;
-                        self->statistics_.is_damaged = true;
-
-                        // only way to retrieve actual image size
-                        size_t image_size = 0;
-                        arv_buffer_get_data(buffer, &image_size);
-
-                        for (auto& b : self->buffer_list_)
-                        {
-                            const void* arv_user_data = arv_buffer_get_user_data(buffer);
-                            if (b.buffer.get() != arv_user_data)
-                            {
-                                continue;
-                            }
-
-                            b.buffer->set_statistics(self->statistics_);
-                            b.is_queued = false;
-                            b.buffer->set_valid_data_length(image_size);
-                            ptr->push_image(b.buffer);
-                        }
-                    }
-
-                    goto no_back_push;
-                }
-                case ARV_BUFFER_STATUS_WRONG_PACKET_ID:
-                {
-                    msg = "Stream has packet with wrong id";
-                    break;
-                }
-                case ARV_BUFFER_STATUS_SIZE_MISMATCH:
-                {
-                    msg = "The received image did not fit in the buffer data space";
-                    break;
-                }
-                case ARV_BUFFER_STATUS_FILLING:
-                {
-                    msg = "The image is currently being filled";
-                    break;
-                }
-                case ARV_BUFFER_STATUS_ABORTED:
-                {
-                    msg = "The filling was aborted before completion";
-                    break;
-                }
-                case ARV_BUFFER_STATUS_CLEARED:
-                {
-                    msg = "Buffer cleared";
-                    break;
-                }
-                case ARV_BUFFER_STATUS_UNKNOWN:
-                {
-                    msg = "This should not happen";
-                    break;
-                }
-            }
-            arv_stream_push_buffer(self->stream_, buffer);
-no_back_push:
-            SPDLOG_WARN(msg.c_str());
+            self->complete_aravis_stream_buffer(buffer, true);
         }
+    }
+    else
+    {
+        ++self->frames_dropped_;
+
+        arv_stream_push_buffer(self->stream_, buffer);
+        auto ptr = translate_arv_buffer_status(status);
+        if (ptr)
+        {
+            SPDLOG_WARN("arvBufferStatus: {}", ptr);
+        }
+    }
+}
+
+void AravisDevice::complete_aravis_stream_buffer(ArvBuffer* buffer, bool is_incomplete)
+{
+    // receives the actual ImageBuffer from the ArvBuffer
+    std::shared_ptr<ImageBuffer> completed_buffer;
+    {
+        //std::scoped_lock lck { buffer_list_mtx_ };
+
+        buffer_info& arv_user_data = *const_cast<buffer_info*>(
+            static_cast<const buffer_info*>(arv_buffer_get_user_data(buffer)));
+
+#if !defined NDEBUG
+        arv_user_data.is_queued = false;
+#endif
+        completed_buffer = arv_user_data.buffer;
+    }
+
+    if (completed_buffer == nullptr) // this should never happen
+    {
+        ++frames_dropped_;
+
+        SPDLOG_ERROR("Failed to find the associated ImageBuffer for the completed arv buffer.");
+        arv_stream_push_buffer(stream_, buffer);
+        return;
+    }
+
+    if (auto ptr = sink_.lock())
+    {
+        ++frames_delivered_;
+
+        // only way to retrieve actual image size
+        size_t image_size = 0;
+        arv_buffer_get_data(buffer, &image_size);
+
+        tcam_stream_statistics stats = {};
+        stats.capture_time_ns = arv_buffer_get_system_timestamp(buffer);
+        stats.camera_time_ns = arv_buffer_get_timestamp(buffer);
+        stats.frame_count = frames_delivered_;
+        stats.frames_dropped = frames_dropped_;
+        stats.is_damaged = is_incomplete;
+
+        completed_buffer->set_statistics(stats);
+        completed_buffer->set_valid_data_length(image_size);
+        ptr->push_image(completed_buffer);
+    }
+    else
+    {
+        ++frames_dropped_;
+
+        SPDLOG_ERROR("ImageSink expired. Unable to deliver images.");
+
+        requeue_buffer(completed_buffer);
     }
 }

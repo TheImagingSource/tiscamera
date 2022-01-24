@@ -22,6 +22,7 @@
 
 #include <arv.h>
 #include <atomic>
+#include <mutex>
 
 VISIBILITY_INTERNAL
 
@@ -42,7 +43,8 @@ class AravisDevice : public DeviceInterface
 
     public:
         AravisFormatHandler(AravisDevice*);
-        std::vector<double> get_framerates(const struct tcam_image_size&, int pixelformat = 0);
+        std::vector<double> get_framerates(const struct tcam_image_size&,
+                                           int pixelformat = 0) final;
 
     protected:
         AravisDevice* device;
@@ -55,18 +57,18 @@ public:
 
     ~AravisDevice();
 
-    DeviceInfo get_device_description() const override;
+    DeviceInfo get_device_description() const final;
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
         return properties_;
     }
 
-    bool set_video_format(const VideoFormat&) override;
+    bool set_video_format(const VideoFormat&) final;
 
-    VideoFormat get_active_video_format() const override;
+    VideoFormat get_active_video_format() const final;
 
-    std::vector<VideoFormatDescription> get_available_video_formats() override;
+    std::vector<VideoFormatDescription> get_available_video_formats() final;
 
     bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) final;
     bool release_buffers() final;
@@ -105,14 +107,28 @@ private:
 
     struct buffer_info
     {
+        AravisDevice* parent = nullptr;
+
+        // The reference to the actual ImageBuffer
         std::shared_ptr<ImageBuffer> buffer;
-        ArvBuffer* arv_buffer;
-        bool is_queued;
+
+        // contains the ArvBuffer used to queue/dequeue in ArbStream
+        // This will be set to nullptr when the ArvStream owns this when we stop
+        // otherwise this is != nullptr
+        ArvBuffer* arv_buffer = nullptr;
+
+#if !defined NDEBUG
+        bool is_queued = false;
+#endif
     };
 
-    std::vector<buffer_info> buffer_list_;
+    static void clear_buffer_info_arb_buffer(buffer_info& info);
 
-    tcam_stream_statistics statistics_;
+    std::vector<buffer_info> buffer_list_;
+    std::mutex buffer_list_mtx_;
+
+    long frames_delivered_ = 0;
+    long frames_dropped_ = 0;
     std::atomic<bool> is_lost_ = false;
 
     struct device_scaling
@@ -150,6 +166,8 @@ private:
     void index_properties(const char* name);
 
     tcam_image_size get_sensor_size() const;
+
+    void complete_aravis_stream_buffer(ArvBuffer* buffer, bool is_incomplete);
 
 }; /* class GigeCapture */
 
