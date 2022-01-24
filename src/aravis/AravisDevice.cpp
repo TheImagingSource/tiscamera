@@ -184,6 +184,12 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc) : stream(NULL)
 
     if (arv_camera_is_gv_device(this->arv_camera))
     {
+
+        if (!arv_gv_device_is_controller((ArvGvDevice*)arv_camera_get_device(this->arv_camera)))
+        {
+            SPDLOG_ERROR("This process does not control the device!");
+            throw std::runtime_error("Device already open.");
+        }
         auto_set_packet_size();
         auto_set_control_lifetime();
     }
