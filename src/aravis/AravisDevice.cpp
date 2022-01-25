@@ -97,21 +97,49 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
 
         // this means TestPixelFormat, TestWidth, TestHeight are not available
         // could be an UsbVision camera
-        int x1, x2, y1, y2;
-        arv_camera_get_region(this->device->arv_camera_, &x1, &y1, &x2, &y2, &error);
 
-        if (error)
+        unsigned int height = 0;
+        unsigned int width = 0;
+
+        if (this->device->has_offset_)
         {
-            SPDLOG_ERROR("get_region caused error: {}", error->message);
-            g_error_free(error);
-            error = nullptr;
+            int x1, x2, y1, y2;
+            arv_camera_get_region(this->device->arv_camera_, &x1, &y1, &x2, &y2, &error);
+
+            if (error)
+            {
+                SPDLOG_ERROR("get_region caused error: {}", error->message);
+                g_error_free(error);
+                error = nullptr;
+            }
+
+            height = y2 - y1;
+            width = x2 - x1;
+
+
+            arv_camera_set_region(this->device->arv_camera_, 0, 0, s.width, s.height, &error);
+
+            if (error)
+            {
+                g_error_free(error);
+                error = nullptr;
+            }
         }
+        else
+        {
+            width = arv_camera_get_integer(this->device->arv_camera_, "Width", &error);
+            height = arv_camera_get_integer(this->device->arv_camera_, "Height", &error);
 
+            arv_camera_set_integer(this->device->arv_camera_, "Width", s.width, &error);
+            arv_camera_set_integer(this->device->arv_camera_, "Height", s.height, &error);
 
-        unsigned int height = y2 - y1;
-        unsigned int width = x2 - x1;
+            if (error)
+            {
+                g_error_free(error);
+                error = nullptr;
+            }
 
-        arv_camera_set_region(this->device->arv_camera_, 0, 0, s.width, s.height, &error);
+        }
 
         arv_camera_get_frame_rate_bounds(this->device->arv_camera_, &min, &max, &error);
 
@@ -121,9 +149,32 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
             error = nullptr;
         }
 
+        // restore previous settings
+
         arv_camera_set_pixel_format(this->device->arv_camera_, active_format, &error);
 
-        arv_camera_set_region(this->device->arv_camera_, 0, 0, width, height, &error);
+        if (this->device->has_offset_)
+        {
+            arv_camera_set_region(this->device->arv_camera_, 0, 0, s.width, s.height, &error);
+
+            if (error)
+            {
+                g_error_free(error);
+                error = nullptr;
+            }
+        }
+        else
+        {
+            arv_camera_set_integer(this->device->arv_camera_, "Width", width, &error);
+            arv_camera_set_integer(this->device->arv_camera_, "Height", height, &error);
+
+            if (error)
+            {
+                g_error_free(error);
+                error = nullptr;
+            }
+
+        }
     }
 
     if (min == 0.0 && max == 0.0)
@@ -294,23 +345,29 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
     }
 
     // TODO: auto center
-
-    unsigned int offset_x = 0;
-    unsigned int offset_y = 0;
-
-    arv_camera_set_region(this->arv_camera_,
-                          offset_x,
-                          offset_y,
-                          new_format.get_size().width,
-                          new_format.get_size().height,
-                          &err);
-    if (err)
+    if (has_offset_)
     {
-        SPDLOG_ERROR("Unable to set region: {}", err->message);
-        g_clear_error(&err);
-        return false;
-    }
+        unsigned int offset_x = 0;
+        unsigned int offset_y = 0;
 
+        arv_camera_set_region(this->arv_camera_,
+                              offset_x,
+                              offset_y,
+                              new_format.get_size().width,
+                              new_format.get_size().height,
+                              &err);
+        if (err)
+        {
+            SPDLOG_ERROR("Unable to set region: {}", err->message);
+            g_clear_error(&err);
+            return false;
+        }
+    }
+    else
+    {
+        arv_camera_set_integer(arv_camera_, "Width", new_format.get_size().width, &err);
+        arv_camera_set_integer(arv_camera_, "Height", new_format.get_size().height, &err);
+    }
     set_scaling(new_format.get_scaling());
 
     determine_active_video_format();
@@ -347,20 +404,55 @@ void AravisDevice::determine_active_video_format()
         err = nullptr;
     }
 
-    int x1, x2, y1, y2;
-    arv_camera_get_region(this->arv_camera_, &x1, &y1, &x2, &y2, &err);
+    unsigned int height = 0;
+    unsigned int width = 0;
 
-    if (err)
+    if (std::any_of(format_nodes_.begin(), format_nodes_.end(),
+                    [](ArvGcNode* node)
+                    {
+                        if (g_strcmp0(arv_gc_feature_node_get_name((ArvGcFeatureNode*)node), "OffsetX") == 0)
+                        {
+                            return true;
+                        }
+                        return false;
+                    }))
     {
-        SPDLOG_ERROR("Unable to retrieve region: {}", err->message);
-        g_clear_error(&err);
-        err = nullptr;
+        int x1, x2, y1, y2;
+        arv_camera_get_region(arv_camera_, &x1, &y1, &x2, &y2, &err);
 
-        return;
+        if (err)
+        {
+            SPDLOG_ERROR("Unable to retrieve region: {}", err->message);
+            g_clear_error(&err);
+            err = nullptr;
+
+            return;
+        }
+
+        height = y2 - y1;
+        width = x2 - x1;
     }
+    else
+    {
+        width = arv_camera_get_integer(arv_camera_, "Width", &err);
 
-    unsigned int height = y2 - y1;
-    unsigned int width = x2 - x1;
+        if (err)
+        {
+            SPDLOG_ERROR("Error while retrieving format width: {}", width);
+            g_error_free(err);
+            err = nullptr;
+        }
+
+        height = arv_camera_get_integer(arv_camera_, "Height", &err);
+
+        if (err)
+        {
+            SPDLOG_ERROR("Error while retrieving format height: {}", height);
+            g_error_free(err);
+            err = nullptr;
+        }
+
+    }
 
     active_video_format_.set_size(width, height);
 
@@ -515,7 +607,9 @@ void AravisDevice::iterate_genicam(const char* feature)
                                                           "Height",
                                                           "FPS",
                                                           "AcquisitionFrameRate",
-                                                          "PixelFormat" };
+                                                          "PixelFormat",
+                                                          "OffsetX",
+                                                          "OffsetY"};
 
 
         // is part of the format description
@@ -530,6 +624,25 @@ void AravisDevice::iterate_genicam(const char* feature)
 
 void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 {
+    GError* eeee = nullptr;
+
+    int ww;
+    int hh;
+
+    arv_camera_get_x_offset_bounds (arv_camera_, &ww, &hh, &eeee);
+
+    if (eeee)
+    {
+        //SPDLOG_ERROR("======================================= {}", eeee->message);
+        g_error_free(eeee);
+    }
+    else
+    {
+
+        has_offset_ = true;
+    }
+
+
     // storing current setting and restoring them is done
     // by the caller.
     generate_scales();
@@ -560,6 +673,8 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
     auto reset_format = this->active_video_format_;
 
 
+    if (has_offset_)
+    {
     // reset region to entirety of the sensor
     // depending on the camera model (z12)
     // the width/height boundaries may be skewed
@@ -578,7 +693,19 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
         g_clear_error(&err);
         err = nullptr;
     }
+    }
+    else
+    {
+        int width_max;
+        int height_max;
+        arv_camera_get_width_bounds(arv_camera_, nullptr, &width_max, &err);
+        arv_camera_get_height_bounds(arv_camera_, nullptr, &height_max, &err);
 
+        arv_camera_set_integer(arv_camera_, "Width", width_max, &err);
+        arv_camera_set_integer(arv_camera_, "Height", height_max, &err);
+
+
+    }
     // work your way from bottom to top
     // start with frame rates and use everthing until all format descriptions are complete
 

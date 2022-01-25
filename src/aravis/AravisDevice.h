@@ -135,6 +135,7 @@ private:
     VideoFormat active_video_format_;
 
     std::vector<VideoFormatDescription> available_videoformats_;
+    bool has_offset_ = false;
 
 
     // found nodes that contain format information
