@@ -186,15 +186,112 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
     return std::nullopt;
 }
 
+/*
+ * the following is for tracking
+ * potential device losses
+ * and adding tolerances towards
+ * a non responce
+ */
+
+static const int lost_count_max = 10;
+
+struct dev_life_tracking
+{
+    tcam::DeviceInfo dev;
+    int lost_count;
+};
+
+static std::vector<dev_life_tracking> dev_life_tracking_list;
+
+
 std::vector<DeviceInfo> tcam::get_gige_device_list()
 {
+    std::vector<DeviceInfo> current_devices;
     auto dev_list = fetch_gige_daemon_device_list();
     if (dev_list)
     {
-        return dev_list.value();
+        current_devices = dev_list.value();
+    }
+    else
+    {
+        current_devices = get_aravis_device_list();
     }
 
-    return get_aravis_device_list();
+    // check for new devices
+    // to be added to out watch current_devices
+    // after everything else is done
+    std::vector<DeviceInfo> to_add;
+    for (auto& entry : current_devices)
+    {
+        auto known_dev = std::find_if(dev_life_tracking_list.begin(), dev_life_tracking_list.end(),
+                                      [entry] (const dev_life_tracking& d)
+                                      {
+                                          return d.dev == entry;
+                                      });
+
+        // known device
+        if (known_dev != dev_life_tracking_list.end())
+        {
+            known_dev->lost_count = 0;
+        }
+        else
+        {
+            to_add.push_back(entry);
+        }
+    }
+
+    // iterate known devices
+    // increase loss count if necessary
+    // and add to current_devices if considered still alive
+    for (auto& entry : dev_life_tracking_list)
+    {
+        if (std::any_of(current_devices.begin(), current_devices.end(),
+                        [entry] (const DeviceInfo& d)
+                        {
+                            return d == entry.dev;
+                        }))
+        {
+            auto is_gige_dev = [] (const DeviceInfo& dev)
+            {
+
+                std::string info = dev.get_info().additional_identifier;
+
+                if (info == "USB3")
+                {
+                    return false;
+                }
+                return true;
+            };
+
+            if (!is_gige_dev(entry.dev))
+            {
+                continue;
+            }
+
+            entry.lost_count++;
+
+            if (entry.lost_count < lost_count_max)
+            {
+                current_devices.push_back(entry.dev);
+            }
+        }
+
+    }
+
+    // add new entries
+    for (auto& entry : to_add)
+    {
+        dev_life_tracking_list.push_back({entry, 0});
+    }
+
+    // remove deprecated entried
+    std::remove_if(dev_life_tracking_list.begin(), dev_life_tracking_list.end(),
+                   [] (const auto& entry)
+                   {
+                       return entry.lost_count >= lost_count_max;
+                   });
+
+    return current_devices;
 }
 
 unsigned int tcam::get_gige_device_count()
@@ -239,10 +336,13 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list()
             strncpy(info.serial_number, serial, sizeof(info.serial_number) - 1);
         }
 
+        strncpy(info.additional_identifier, arv_get_device_address(i), sizeof(info.additional_identifier) - 1);
+
         device_list.push_back(DeviceInfo(info));
     }
     return device_list;
 }
+
 
 bool tcam::is_private_setting(std::string_view name)
 {
