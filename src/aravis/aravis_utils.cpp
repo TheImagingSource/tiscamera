@@ -245,7 +245,7 @@ std::vector<DeviceInfo> tcam::get_gige_device_list()
     // and add to current_devices if considered still alive
     for (auto& entry : dev_life_tracking_list)
     {
-        if (std::any_of(current_devices.begin(), current_devices.end(),
+        if (!std::any_of(current_devices.begin(), current_devices.end(),
                         [entry] (const DeviceInfo& d)
                         {
                             return d == entry.dev;
