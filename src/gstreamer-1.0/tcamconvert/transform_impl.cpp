@@ -290,8 +290,7 @@ static auto find_bayer8_to_bgra_func(const img::img_type& dst_type, const img::i
     {
         static const img_filter::transform::by_edge::options opt = { {}, false, false };
 
-        auto dst_ = img::flip_image_in_img_desc(dst);
-        func(dst_, src, opt);
+        func(dst, src, opt);
     };
 }
 
@@ -496,18 +495,25 @@ void tcamconvert::transform_context::transform(const img::img_descriptor& src,
     }
     else
     {
+        auto dst_ = dst;
+        if (dst.fourcc_type() == img::fourcc::BGRA32)
+        {
+            dst_ = img::flip_image_in_img_desc(dst);
+        }
+
         if (transform_fccXX_to_dst_func_)
         {
             img_filter::filter_params tmp = { params };
 
-            transform_fccXX_to_dst_func_(dst, src, tmp);
-
-            return;
+            transform_fccXX_to_dst_func_(dst_, src, tmp);
         }
+        else
+        {
 
-        assert(transfrom_binary_mono_func_ != nullptr);
+            assert(transfrom_binary_mono_func_ != nullptr);
 
-        transfrom_binary_mono_func_(dst, src);
+            transfrom_binary_mono_func_(dst_, src);
+        }
     }
 }
 
