@@ -28,12 +28,9 @@
 #include "struct_defines_rx.h"
 
 #include <atomic>
-#include <condition_variable> // std::condition_variable
 #include <libusb-1.0/libusb.h>
 #include <memory>
 #include <mutex> // std::mutex, std::unique_lock
-#include <thread>
-
 
 VISIBILITY_INTERNAL
 
@@ -48,19 +45,6 @@ class AFU420DeviceBackend;
 
 class AFU420Device : public DeviceInterface
 {
-
-    class AFU420FormatHandler : public FormatHandlerInterface
-    {
-        friend class AFU420Device;
-
-    public:
-        AFU420FormatHandler(AFU420Device*);
-        std::vector<double> get_framerates(const struct tcam_image_size&, int pixelformat = 0);
-
-    protected:
-        AFU420Device* device;
-    };
-
 public:
     explicit AFU420Device(const DeviceInfo&);
 
@@ -72,18 +56,18 @@ public:
 
     AFU420Device& operator=(const AFU420Device&) = delete;
 
-    DeviceInfo get_device_description() const;
+    DeviceInfo get_device_description() const final;
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
         return m_properties;
-    };
+    }
 
-    bool set_video_format(const VideoFormat&);
+    bool set_video_format(const VideoFormat&) final;
 
-    VideoFormat get_active_video_format() const;
+    VideoFormat get_active_video_format() const final;
 
-    std::vector<VideoFormatDescription> get_available_video_formats();
+    std::vector<VideoFormatDescription> get_available_video_formats() final;
 
     bool set_framerate(double framerate);
 
@@ -91,11 +75,11 @@ public:
 
     bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) final;
 
-    bool release_buffers();
+    bool release_buffers() final;
 
     void requeue_buffer(const std::shared_ptr<ImageBuffer>&) final;
 
-    bool start_stream(const std::shared_ptr<IImageBufferSink>&) final;
+    bool start_stream(const std::shared_ptr<IImageBufferSink>& sink) final;
 
     void stop_stream() final;
 
@@ -207,13 +191,6 @@ private:
         double fps_max;
     };
 
-    std::thread work_thread;
-
-    std::thread notification_thread;
-
-    std::condition_variable cv;
-    std::mutex mtx;
-
     const std::vector<image_scaling> m_available_scaling = { {1, 1, 1, 1},
                                                              {2, 2, 1, 1},
                                                              {4, 4, 1, 1},
@@ -228,14 +205,6 @@ private:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
     std::shared_ptr<tcam::property::AFU420DeviceBackend> m_backend;
-
-    std::shared_ptr<AFU420FormatHandler> format_handler;
-
-    bool stop_all;
-    bool device_is_lost;
-
-    std::thread udev_monitor;
-
 
     struct AFU420Device::sResolutionConf CreateResolutionConf(const tcam_image_size start,
                                                               const tcam_image_size stream_dim,
@@ -253,17 +222,9 @@ private:
     tcam_image_size transform_roi_start(tcam_image_size pos, tcam_image_size video_dim);
 
 
-    void notification_loop();
-
-    std::atomic_int lost_countdown;
-
-    //void lost_device ();
-
-    void determine_active_video_format();
+    std::atomic_int lost_countdown_ = 20;
 
     void create_formats();
-
-    void create_property(struct property_description);
 
     void create_properties();
 
@@ -279,13 +240,13 @@ private:
 
     std::shared_ptr<tcam::ImageBuffer> get_next_buffer();
 
-    volatile std::atomic_bool is_stream_on;
+    std::atomic_bool is_stream_on = false;
     struct tcam_stream_statistics statistics;
 
-    size_t transfered_size_;
-    unsigned int offset_;
+    size_t transfered_size_ = 0;
+    unsigned int offset_ = 0;
     std::shared_ptr<ImageBuffer> current_buffer_;
-    bool have_header;
+    bool have_header = false;
 
     std::weak_ptr<IImageBufferSink> listener;
 
@@ -302,15 +263,6 @@ private:
     };
 
     struct header_res check_and_eat_img_header(unsigned char* data, size_t data_size);
-
-    bool get_frame();
-
-    void init_buffers();
-
-    void monitor_device();
-
-    bool update_property(property_description& desc);
-
 
     std::vector<stream_fmt_data> stream_format_list_;
 
@@ -342,10 +294,8 @@ private:
 
     struct bulk_transfer_item
     {
-        //uint8_t buffer[512];
         std::vector<uint8_t> buffer;
-        //uint8_t buffer[2048];
-        void* transfer;
+        void* transfer = nullptr;
 
         ~bulk_transfer_item()
         {

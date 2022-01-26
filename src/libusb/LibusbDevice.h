@@ -17,11 +17,10 @@
 #ifndef TCAM_LIBUSBDEVICE_H
 #define TCAM_LIBUSBDEVICE_H
 
-#include "../base_types.h"
-#include "../logging.h"
 #include "UsbSession.h"
 
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace tcam
@@ -30,8 +29,8 @@ namespace tcam
 class LibusbDevice
 {
 public:
-    LibusbDevice(std::shared_ptr<tcam::UsbSession>, const std::string& serial);
-    LibusbDevice(std::shared_ptr<tcam::UsbSession>, libusb_device* dev);
+    LibusbDevice(const std::shared_ptr<tcam::UsbSession>&, const std::string& serial);
+    LibusbDevice(const std::shared_ptr<tcam::UsbSession>&, libusb_device* dev);
 
     ~LibusbDevice();
 
@@ -78,48 +77,14 @@ public:
     {
 
         return internal_control_transfer(RequestType, Request, Value, Index, data, size, timeout);
-    };
-    // template<typename T>
-    // int control_transfer (uint8_t RequestType,
-    //                       uint8_t Request,
-    //                       uint16_t Value,
-    //                       uint16_t Index,
-    //                       std::vector<T>& data,
-    //                       unsigned int size = 0,
-    //                       unsigned int timeout = 500)
-    // {
-    //     if (size != 0)
-    //     {
-    //         return internal_control_transfer(RequestType,
-    //                                          Request,
-    //                                          Value,
-    //                                          Index,
-    //                                          (unsigned char*)data.data(), size,
-    //                                          timeout);
-    //     }
-    //     else
-    //     {
-    //         return internal_control_transfer(RequestType,
-    //                                          Request,
-    //                                          Value,
-    //                                          Index,
-    //                                          (unsigned char*)data.data(), sizeof(T) * data.size(),
-    //                                          timeout);
-    //     }
-    // };
+    }
 
     void halt_endpoint(int endpoint);
 
-    /**
-     * will return nullptr for device info.
-     * it is implied that the user knows which device is handled
-     */
-    bool register_device_lost_callback(tcam_device_lost_callback callback, void* user_data);
-
 private:
     std::shared_ptr<tcam::UsbSession> session_;
-    libusb_device* device_;
-    libusb_device_handle* device_handle_;
+    libusb_device* device_ = nullptr;
+    libusb_device_handle* device_handle_ = nullptr;
 
     std::vector<int> open_interfaces_;
 
@@ -130,18 +95,6 @@ private:
                                   unsigned char* data,
                                   unsigned int size,
                                   unsigned int timeout);
-
-
-    struct callback_container
-    {
-        tcam_device_lost_callback callback;
-        void* user_data;
-    };
-
-    std::vector<callback_container> lost_callbacks;
-
-    void notify_device_lost();
-
 }; // class LibusbDevice
 
 } // namespace tcam

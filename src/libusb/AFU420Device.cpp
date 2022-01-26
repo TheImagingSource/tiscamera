@@ -33,9 +33,7 @@
 
 using namespace tcam;
 
-
 tcam::AFU420Device::AFU420Device(const DeviceInfo& info)
-    : usb_device_(nullptr), stop_all(false), lost_countdown(20), is_stream_on(false)
 {
     device = info;
 
@@ -79,46 +77,8 @@ tcam::AFU420Device::~AFU420Device()
 {
     stop_stream();
 
-    if (work_thread.joinable())
-    {
-        work_thread.join();
-    }
-
     transfer_items.clear();
-    SPDLOG_DEBUG("AFU420 destroyed");
 }
-
-
-void print_resolution_conf(AFU420Device::sResolutionConf conf)
-{
-    SPDLOG_INFO("\nxaddrstart: {}\n \
-yaddrstart: {}\n \
-xaddrstop: {}\n \
-yaddrstop: {}\n \
-xoutputsize: {}\n \
-youtputsize: {}\n \
-crop x offset: {}\n \
-crop y offset: {}\n \
-crop img width: {}\n \
-crop img height: {}\n \
-hor binning: {}\n \
-ver binning: {}\n \
-framerate: {}\n",
-                conf.x_addr_start,
-                conf.y_addr_start,
-                conf.x_addr_end,
-                conf.y_addr_end,
-                conf.x_output_size,
-                conf.y_output_size,
-                conf.digital_crop_x_offset,
-                conf.digital_crop_y_offset,
-                conf.digital_crop_image_width,
-                conf.digital_crop_image_height,
-                conf.hor_binning,
-                conf.ver_binning,
-                conf.defaultFramerate);
-}
-
 
 void AFU420Device::query_active_format()
 {
@@ -704,7 +664,6 @@ void AFU420Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
     }
 }
 
-
 void AFU420Device::push_buffer()
 {
     if (current_buffer_ == nullptr)
@@ -841,12 +800,12 @@ void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
         SPDLOG_ERROR("transfer status {}", xfr->status);
         submit_transfer(xfr);
 
-        if (lost_countdown == 0)
+        if (lost_countdown_ == 0)
         {
             notify_device_lost();
         }
 
-        lost_countdown--;
+        lost_countdown_--;
         return;
     }
 
@@ -873,6 +832,7 @@ void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
             }
 
             current_buffer_->set_valid_data_length(0);
+
             transfered_size_ = 0;
             offset_ = 0;
             have_header = false;
@@ -913,11 +873,11 @@ void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
     bool is_complete_image = offset_ >= usbbulk_image_size_;
     if (is_complete_image || is_trailer)
     {
-        SPDLOG_TRACE("image complete");
+        //SPDLOG_TRACE("image complete");
         push_buffer();
         have_header = false;
     }
-    lost_countdown = 20;
+    lost_countdown_ = 20;
     submit_transfer(xfr);
 }
 
@@ -1017,7 +977,6 @@ bool tcam::AFU420Device::start_stream(const std::shared_ptr<IImageBufferSink>& s
 
     have_header = false;
     is_stream_on = true;
-    stop_all = false;
 
     SPDLOG_INFO("Stream started");
 
@@ -1027,8 +986,7 @@ bool tcam::AFU420Device::start_stream(const std::shared_ptr<IImageBufferSink>& s
 
 void tcam::AFU420Device::stop_stream()
 {
-    SPDLOG_INFO("stop_stream called");
-    stop_all = true;
+    SPDLOG_DEBUG("stop_stream called");
     is_stream_on = false;
 
     for (auto& item : transfer_items) { libusb_cancel_transfer((libusb_transfer*)item.transfer); }

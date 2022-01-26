@@ -18,7 +18,6 @@
 #define TCAM_AFU050DEVICE_H
 
 #include "../DeviceInterface.h"
-#include "../FormatHandlerInterface.h"
 #include "../VideoFormat.h"
 #include "../VideoFormatDescription.h"
 #include "LibusbDevice.h"
@@ -43,25 +42,6 @@ class AFU050DeviceBackend;
 
 class AFU050Device : public DeviceInterface
 {
-    typedef enum
-    {
-        FMT2592x1944 = 1,
-        FMT1920x1080 = 2,
-        FMT1280x960 = 3
-    } AFU050_VIDEO_FORMAT;
-
-    class AFU050FormatHandler : public FormatHandlerInterface
-    {
-        friend class AFU050Device;
-
-    public:
-        AFU050FormatHandler(AFU050Device*);
-        std::vector<double> get_framerates(const struct tcam_image_size&, int pixelformat = 0);
-
-    protected:
-        AFU050Device* device;
-    };
-
 public:
     explicit AFU050Device(const DeviceInfo&);
 
@@ -69,28 +49,28 @@ public:
 
     ~AFU050Device();
 
-    DeviceInfo get_device_description() const;
+    DeviceInfo get_device_description() const final;
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
         return m_properties;
-    };
+    }
 
-    bool set_video_format(const VideoFormat&);
+    bool set_video_format(const VideoFormat&) final;
 
     bool validate_video_format(const VideoFormat&) const;
 
-    VideoFormat get_active_video_format() const;
+    VideoFormat get_active_video_format() const final;
 
-    std::vector<VideoFormatDescription> get_available_video_formats();
+    std::vector<VideoFormatDescription> get_available_video_formats() final;
 
     bool set_framerate(double framerate);
 
     double get_framerate();
 
-    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>);
+    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) final;
 
-    bool release_buffers();
+    bool release_buffers() final;
 
     void requeue_buffer(const std::shared_ptr<ImageBuffer>&) final;
 
@@ -115,13 +95,6 @@ private:
     static const int TRANSFER_COUNT = 32;
     static const int JPEGBUF_SIZE = 1024 * 1024 * 5;
 
-    std::thread work_thread;
-
-    std::thread notification_thread;
-
-    std::condition_variable cv;
-    std::mutex mtx;
-
     VideoFormat active_video_format;
 
     std::vector<VideoFormatDescription> available_videoformats;
@@ -132,20 +105,13 @@ private:
 
     std::shared_ptr<tcam::property::AFU050DeviceBackend> m_backend;
 
-    std::shared_ptr<AFU050FormatHandler> format_handler;
+    std::atomic_bool device_is_lost_ = false;
 
     unsigned char lost_countdown = 0;
     bool stop_all = false;
     bool device_is_lost = false;
     bool abort_all = false;
-
-    std::thread udev_monitor;
-
-    void notification_loop();
-
     void lost_device();
-
-    void determine_active_video_format();
 
     void create_formats();
 
@@ -183,8 +149,6 @@ private:
     bool get_frame();
 
     void init_buffers();
-
-    void monitor_device();
 
     void add_int(const std::string& name, const VC_UNIT unit, const unsigned char prop);
     void add_double(const std::string& name, const VC_UNIT unit, const unsigned char prop, double modifier=1.0);

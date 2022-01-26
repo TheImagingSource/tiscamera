@@ -16,18 +16,17 @@
 
 #include "LibusbDevice.h"
 
-#include "UsbHandler.h"
 #include "../logging.h"
+#include "UsbHandler.h"
 
 #include <algorithm>
 #include <stdexcept>
 
-tcam::LibusbDevice::LibusbDevice(std::shared_ptr<tcam::UsbSession> s, const std::string& serial)
+tcam::LibusbDevice::LibusbDevice(const std::shared_ptr<tcam::UsbSession>& s,
+                                 const std::string& serial)
     : session_(s)
 {
-
     device_handle_ = UsbHandler::get_instance().open_device(serial);
-
     if (!device_handle_)
     {
         SPDLOG_ERROR("Failed to open device.");
@@ -35,7 +34,7 @@ tcam::LibusbDevice::LibusbDevice(std::shared_ptr<tcam::UsbSession> s, const std:
 }
 
 
-tcam::LibusbDevice::LibusbDevice(std::shared_ptr<tcam::UsbSession> s, libusb_device* dev)
+tcam::LibusbDevice::LibusbDevice(const std::shared_ptr<tcam::UsbSession>& s, libusb_device* dev)
     : session_(s), device_(dev)
 {
     if (device_)
@@ -59,7 +58,9 @@ tcam::LibusbDevice::LibusbDevice(std::shared_ptr<tcam::UsbSession> s, libusb_dev
 
 tcam::LibusbDevice::~LibusbDevice()
 {
-    for (auto& interface : open_interfaces_) { close_interface(interface); }
+    auto open_interfaces_copy = open_interfaces_;
+
+    for (int interface : open_interfaces_copy) { close_interface(interface); }
 
     if (device_handle_)
     {
@@ -168,23 +169,4 @@ void tcam::LibusbDevice::halt_endpoint(int endpoint)
     {
         SPDLOG_ERROR("Could not halt endpoint");
     }
-}
-
-
-bool tcam::LibusbDevice::register_device_lost_callback(tcam_device_lost_callback callback,
-                                                       void* user_data)
-{
-    struct callback_container cc = { callback, user_data };
-
-    lost_callbacks.push_back(cc);
-
-    return true;
-}
-
-
-void tcam::LibusbDevice::notify_device_lost()
-{
-    // auto dev = device.get_info();
-
-    for (const auto& cc : lost_callbacks) { cc.callback(nullptr, cc.user_data); }
 }

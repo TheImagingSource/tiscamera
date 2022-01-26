@@ -22,7 +22,7 @@
 namespace tcam
 {
 
-UsbSession::UsbSession() : session(nullptr)
+UsbSession::UsbSession()
 {
     int ret = libusb_init(&this->session);
     if (ret < 0)

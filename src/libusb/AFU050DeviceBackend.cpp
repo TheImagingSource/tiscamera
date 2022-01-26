@@ -2,6 +2,7 @@
 #include "AFU050DeviceBackend.h"
 
 #include "AFU050Device.h"
+#include "../logging.h"
 
 namespace tcam::property
 {

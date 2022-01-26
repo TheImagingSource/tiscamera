@@ -31,8 +31,6 @@
 namespace tcam
 {
 
-class UsbCamera;
-
 class UsbHandler
 {
 private:
@@ -58,7 +56,7 @@ public:
     /// @param serial - string containing the serial number of the camera that shall be opened
     /// @return shared pointer to the opened usb camera; Returns nullptr on failure
     // std::shared_ptr<UsbCamera> open_camera (std::string serial);
-
+private:
     /**
      * event related stuff
      * used for async bulk transactions

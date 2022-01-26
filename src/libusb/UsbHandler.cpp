@@ -17,13 +17,10 @@
 #include "UsbHandler.h"
 
 #include "../logging.h"
-#include "LibusbDevice.h"
+#include "../utils.h"
 
 #include <cstdio>
 #include <cstring>
-//#include <iostream>
-#include "../utils.h"
-
 #include <stdexcept>
 
 namespace tcam
@@ -35,7 +32,6 @@ UsbHandler& UsbHandler::get_instance()
 
     return instance;
 }
-
 
 UsbHandler::UsbHandler() : session(std::make_shared<UsbSession>()), run_event_thread(true)
 {
@@ -288,7 +284,7 @@ void UsbHandler::handle_events()
 {
     tcam::set_thread_name("tcam_usbhand");
     struct timeval tv = {};
-    tv.tv_usec = 200;
+    tv.tv_usec = 200; // #TODO this seems to be an excessively short wake timeout
     while (run_event_thread)
     {
         libusb_handle_events_timeout_completed(this->session->get_session(), &tv, nullptr);
