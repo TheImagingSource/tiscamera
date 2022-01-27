@@ -64,7 +64,9 @@ bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> 
 
 bool AravisDevice::release_buffers()
 {
-    std::scoped_lock lck { buffer_list_mtx_ };
+    // this should not be taken here, because the g_object_unref triggers the
+    // destroy notify of the arv_buffer which in turn takes the mutex
+    //std::scoped_lock lck { buffer_list_mtx_ };
 
     for (auto& b : buffer_list_)  // these get partially freed by the arv_stream, partially here
     {
