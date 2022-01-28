@@ -253,8 +253,13 @@
             "version": ">= 3.7.0",
             "phase": "runtime",
             "modules": ["gui", "gige", "tools"]
+        },
+        {
+            "name": "graphviz",
+            "version": ">= 2.40.1",
+            "phase": "compilation",
+            "modules": ["documentation"]
         }
-
     ]
 
 }

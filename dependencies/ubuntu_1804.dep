@@ -248,6 +248,12 @@
             "version": ">= 1.14.0",
             "phase": "runtime",
             "modules": ["gui", "tools"]
+        },
+        {
+            "name": "graphviz",
+            "version": ">= 2.40.1",
+            "phase": "compilation",
+            "modules": ["documentation"]
         }
     ]
 
