@@ -147,9 +147,6 @@ void AFU050Device::add_dependency_tracking()
             if (std::find(dep_names.begin(), dep_names.end(), possible_dependency->get_name())
                 != dep_names.end())
             {
-                SPDLOG_ERROR("Adding {} as dependency for {}",
-                             possible_dependency->get_name(),
-                             p->get_name());
                 can_be_locked.push_back(
                     std::dynamic_pointer_cast<tcam::property::PropertyLock>(possible_dependency));
             }
@@ -157,7 +154,6 @@ void AFU050Device::add_dependency_tracking()
 
         if (!can_be_locked.empty())
         {
-            SPDLOG_ERROR("setting deps for {}", p->get_name());
             ptr->set_dependent_properties(std::move(can_be_locked));
         }
     }
