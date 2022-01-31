@@ -11,197 +11,6 @@ This page describes the official gobject-introspection API.
 .. contents:: Table of Contents
               :depth: 5
 
-   
-Helper Types
-############
-
-.. _tcamerror:
-
-TcamError
----------
-
-TcamError is the tcam-property enumeration that contains all potential error tcam-property implementations might produce.
-This does not mean that other error might not also occur.
-
-.. cpp:enum:: TcamError
-
-   Enumeration containing all possible error types tcam-property will return.
-            
-   .. cpp:enumerator:: TCAM_ERROR_SUCCESS
-
-      | Should not be encountered.
-      | Describes `no error` state.
-                       
-   .. cpp:enumerator:: TCAM_ERROR_UNKNOWN
-
-      | Catch all error code for things that do not fit other codes.
-                       
-   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED    
-   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_AVAILABLE
-
-      | Circumstances prevent this property from being usable.
-      | This is typically due to the selected stream format.
-      | e.g. BalanceWhite* not being usable when streaming mono.
-                       
-   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_WRITEABLE
-
-      | The property is either read only or temporarily locked.
-      | Call :ref:`tcam_property_base_is_locked` for verification.
-                     
-   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE
-
-      The property is of a different type.
-                     
-   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE
-
-      | Value is out of bounds.
-      | Check the `*_get_range` function for boundaries.
-                       
-   .. cpp:enumerator:: TCAM_ERROR_NO_DEVICE_OPEN
-      
-      | No device has been opened that can offer properties.
-      | This typically means the GstElement is not in GST_STATE_READY or higher.
-      
-   .. cpp:enumerator:: TCAM_ERROR_DEVICE_LOST
-
-      | The device has been lost.
-      | This should be considered a fatal, unrecoverable error.
-                     
-   .. cpp:enumerator:: TCAM_ERROR_PARAMETER_NULL
-
-      | One of the given arguments is NULL.
-      | Are provider/property pointer valid?
-      | Is the name a valid string?
-
-   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE
-
-      | Property offers no default value.
-
-.. _tcampropertyvisibility:
-      
-TcamPropertyVisibility
-----------------------
-                       
-.. cpp:enum:: TcamPropertyVisibility
-
-   .. cpp:enumerator:: TCAM_PROPERTY_VISIBILITY_BEGINNER
-
-      Should always be displayed.
-                       
-   .. cpp:enumerator:: TCAM_PROPERTY_VISIBILITY_EXPERT
-
-      Should only be displayed to users, who know what they are doing.
-                       
-   .. cpp:enumerator:: TCAM_PROPERTY_VISIBILITY_GURU
-
-      Should only be displayed to users, who really know what they are doing.
-                          
-   .. cpp:enumerator:: TCAM_PROPERTY_VISIBILITY_INVISIBLE
-
-      Should never be displayed.
-
-.. _tcampropertyintrepresentation:
-                       
-TcamPropertyIntRepresentation
------------------------------
-                       
-.. cpp:enum:: TcamPropertyIntRepresentation
-
-   Enumeration describing recommendations on how the property should be represented.
-
-   .. cpp:enumerator:: TCAM_PROPERTY_INTREPRESENTATION_LINEAR
-
-      Property is best displayed with a linear slider.
-                       
-   .. cpp:enumerator:: TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC
-
-      Property is best displayed with a logarithmic slider.
-                       
-   .. cpp:enumerator:: TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER
-
-      Property is best displayed with an edit box (e.g. QSpinBox, Gtk SpinButton).
-                       
-   .. cpp:enumerator:: TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER
-
-      Same as pure number but with hexadecimal values.
-
-.. _tcampropertyfloatrepresentation:
-      
-TcamPropertyFloatRepresentation
--------------------------------
-      
-.. cpp:enum:: TcamPropertyFloatRepresentation
-
-   Enumeration describing recommendations on how the property should be represented.
-
-   .. cpp:enumerator:: TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR
-
-      Property is best displayed with a linear slider.
-                       
-   .. cpp:enumerator:: TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC
-
-      Property is best displayed with a logarithmic slider.
-
-   .. cpp:enumerator:: TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER
-
-      Property is best displayed with an edit box (e.g. QSpinBox, Gtk SpinButton).
-
-.. _tcampropertytype:
-      
-TcamPropertyType
-----------------
-      
-.. cpp:enum:: TcamPropertyType
-
-   Enumeration containing all possible property types.
-            
-   .. cpp:enumerator:: TCAM_PROPERTY_TYPE_INTEGER
-   .. cpp:enumerator:: TCAM_PROPERTY_TYPE_FLOAT
-   .. cpp:enumerator:: TCAM_PROPERTY_TYPE_ENUMERATION
-   .. cpp:enumerator:: TCAM_PROPERTY_TYPE_BOOLEAN
-   .. cpp:enumerator:: TCAM_PROPERTY_TYPE_COMMAND
-
-   
-External Types
-##############
-
-All tiscamera gstreamer elements implement the :c:type:`TcamPropertyProvider` interface.
-This interface allows access to all properties that the camera and software offer.
-
-.. _gslist:
-
-GSList
-------
-
-.. c:type:: GSList
-
-    In tcamprop this is always a list with element-type utf8 which has to be deallocated via:
-
-    Example:
-
-    .. code-block:: c
-
-        GSList* list = tcam_prop_get_device_serials (self);
-        
-        // ... do sth with list
-        
-        g_slist_free_full (list, ::g_free);
-
-.. _gerror:
-        
-GError
-------
-        
-.. c:type:: GError
-
-   GObject error reporting mechanism.
-
-   A returned GError has to _always_ be freed by the user with g_error_free().
-   The GError will contain a string describing the cause of the error and an error code.
-   The message can be accessed through the member variable `message`.
-   The error code can be accessed though the member variable `code`.
-   The error code will be a :cpp:enum:`TcamError` enum entry.
-
 .. _tcampropertyprovider:
         
 TcamPropertyProvider
@@ -218,8 +27,6 @@ Properties require the GStreamer element to be at least in the state `GST_STATE_
    
 tcam_property_provider_get_tcam_property_names
 ----------------------------------------------
-
-.. c:function:: GSList* tcam_property_provider_get_tcam_property_names(TcamPropertyProvider* self, GError** err)
 
 Retrieve a list of all currently available properties. GstElement must be `GST_STATE_READY` or higher.
 
@@ -273,8 +80,11 @@ Retrieve a list of all currently available properties. GstElement must be `GST_S
 tcam_property_provider_get_tcam_property
 ----------------------------------------
 
+Retrieve a specific property instance.
 
-.. c:function:: TcamPropertyBase*   tcam_property_provider_get_tcam_property (TcamPropertyProvider* self, const gchar* name, GError** err);
+Property has to be unreferenced after usage.
+
+Instances will return a :ref:`GError` containing ref:`TCAM_ERROR_NO_DEVICE_OPEN` when the providing device is closed or lost.
                 
 :param self: a TcamPropertyProvider
 :param name: a string pointer, naming the property that shall be set.
@@ -336,7 +146,6 @@ Convenience function to set the value of a boolean.
 
 For complex applications it is recommended to use a :c:type:`TcamPropertyBoolean` instance instead.
                 
-.. c:function:: void tcam_property_provider_set_tcam_boolean (TcamPropertyProvider* self, const gchar* name, gboolean value, GError** err);
 
 :param self: a TcamPropertyProvider
 :param name: a string pointer, naming the property that shall be set.
@@ -384,7 +193,6 @@ Convenience function to set the value of an integer.
 
 For complex applications it is recommended to use a :c:type:`TcamPropertyInteger` instance instead.
 
-.. c:function:: void tcam_property_provider_set_tcam_integer (TcamPropertyProvider* self, const gchar* name, gint64 value, GError** err);
 
 :param self: a TcamPropertyProvider
 :param name: a string pointer, naming the property that shall be set.
@@ -429,8 +237,6 @@ Convenience function to set the value of a float.
 
 For complex applications it is recommended to use a :c:type:`TcamPropertyFloat` instance instead.
                
-.. c:function:: void tcam_property_provider_set_tcam_float (TcamPropertyProvider* self, const gchar* name, gdouble value, GError** err);
-
 :param self: a TcamPropertyProvider
 :param name: a string pointer, naming the property that shall be set.
 :param value: a double with the value that shall be set
@@ -477,9 +283,6 @@ Convenience function to set the value of an enum.
 For complex applications it is recommended to use a :c:type:`TcamPropertyEnumeration` instance instead.
 
 
-
-.. c:function:: void tcam_property_provider_set_tcam_enumeration (TcamPropertyProvider* self, const gchar* name, const gchar* value, GError** err);
-
 :param self: a TcamPropertyProvider
 :param name: a string pointer, naming the property that shall be set.
 :param value: a string with the value that shall be set
@@ -522,7 +325,11 @@ For complex applications it is recommended to use a :c:type:`TcamPropertyEnumera
 tcam_property_provider_set_tcam_command
 ---------------------------------------
                 
-.. c:function:: void tcam_property_provider_set_tcam_command (TcamPropertyProvider* self, const gchar* name, GError** err);
+
+Convenience function to execute a command.
+
+For complex applications it is recommended to use a :ref:`TcamPropertyCommand` instance instead.
+
 
 :param self: a TcamPropertyProvider
 :param name: a string pointer, naming the property that shall be set.
@@ -561,7 +368,10 @@ tcam_property_provider_set_tcam_command
 tcam_property_provider_get_tcam_boolean
 ---------------------------------------
                 
-.. c:function:: gboolean tcam_property_provider_get_tcam_boolean (TcamPropertyProvider* self, const gchar* name, GError** err);
+Convenience function to retrieve the value of a boolean property.
+
+For complex applications it is recommended to use a :ref:`TcamPropertyBoolean` instance instead.
+
 
 :param self: a TcamPropertyProvider
 :param name: a string pointer, naming the property that shall be queried.
@@ -601,8 +411,10 @@ tcam_property_provider_get_tcam_boolean
                 
 tcam_property_provider_get_tcam_integer
 ---------------------------------------
-                
-.. c:function:: gint64 tcam_property_provider_get_tcam_integer (TcamPropertyProvider* self, const gchar* name, GError** err);
+
+Convenience function to retrieve the value of an integer property.
+
+For complex applications it is recommended to use a :ref:`TcamPropertyInteger` instance instead.
 
 :param self: a TcamPropertyProvider
 :param name: a string pointer, naming the property that shall be queried.
@@ -642,7 +454,9 @@ tcam_property_provider_get_tcam_integer
 tcam_property_provider_get_tcam_float
 -------------------------------------
                 
-.. c:function:: gdouble tcam_property_provider_get_tcam_float (TcamPropertyProvider* self, const gchar* name, GError** err);
+Convenience function to retrieve the value of a float property.
+
+For complex applications it is recommended to use a :ref:`TcamPropertyFloat` instance instead.
                 
 :param self: Pointer to the TcamPropertyProvider instance
 :param name: String containing the name of the double that shall be queried
@@ -685,7 +499,9 @@ tcam_property_provider_get_tcam_float
 tcam_property_provider_get_tcam_enumeration
 -------------------------------------------
                 
-.. c:function:: const char* tcam_property_provider_get_tcam_enumeration (TcamPropertyProvider* self, const gchar* name, GError** err);
+Convenience function to retrieve the value of an enumeration property.
+
+For complex applications it is recommended to use a :ref:`TcamPropertyEnumeration` instance instead.
 
 :param self: Pointer to the TcamPropertyProvider instance
 :param name: String containing the name of the enumeration that shall be queried
@@ -725,18 +541,12 @@ tcam_property_provider_get_tcam_enumeration
 TcamPropertyBase
 ################
 
-            
-.. py:class:: TcamPropertyBase
+Base class for all properties. Can be cast into different derived classes.
+Check the property type via :ref:`tcam_property_base_get_property_type` to ensure the correct cast will be used.
 
-   Base class for all properties. Can be cast into different derived classes.
-   Check the property type via :c:func:`tcam_property_base_get_property_type` to ensure the correct cast will be used.
+Python users will have to do nothing.
 
-   Python users will have to do nothing.
-
-   Retrieval of properties is done by calling :c:func:`tcam_property_provider_get_tcam_property`.
-
-
-
+Retrieval of properties is done by calling :ref:`tcam_property_provider_get_tcam_property`.
 
 
 
@@ -745,15 +555,12 @@ TcamPropertyBase
 tcam_property_base_get_name
 ---------------------------
 
-
-
-.. c:function:: const gchar* tcam_property_base_get_name(TcamPropertyBase* self);
+The property owns the string. It will be freed once the property is destroyed.
 
 :param self: Pointer to the property instance
 :returns: Name of the property
 :retval: const gchar*, string containing the name
 
-The property owns the string. It will be freed once the property is destroyed.
 
 .. tabs::
 
@@ -772,22 +579,18 @@ The property owns the string. It will be freed once the property is destroyed.
          name = base_property.get_name()
          
 
-
-
-.. _m_property_base_get_display_name:
+.. _tcam_property_base_get_display_name:
    
 tcam_property_base_get_display_name
 -----------------------------------
    
-.. c:function:: const gchar* tcam_property_base_get_display_name (TcamPropertyBase* self);
+| The property owns the string. It will be freed once the property is destroyed.
+|
+| The display name is a human readable name intended for GUIs and similar interfaces.
 
 :param self: Pointer to the property instance
 :returns: Name of the property
 :retval: const gchar*, string containing the display name
-                
-| The property owns the string. It will be freed once the property is destroyed.
-|
-| The display name is a human readable name intended for GUIs and similar interfaces.
 
 .. tabs::
 
@@ -813,14 +616,13 @@ tcam_property_base_get_display_name
 tcam_property_base_get_description
 ----------------------------------
 
-.. c:function:: const gchar* tcam_property_base_get_description (TcamPropertyBase* self);
+| Description of the property purpose.
+|
+| The property owns the string. It will be freed once the property is destroyed.
 
 :param self: Pointer to the property instance
 :returns: Name of the property
 :retval: const gchar*, string containing the description
-         
-The property owns the string. It will be freed once the property is destroyed.
-
 
 .. tabs::
 
@@ -845,14 +647,13 @@ The property owns the string. It will be freed once the property is destroyed.
 tcam_property_base_get_category
 -------------------------------
 
-.. c:function:: const gchar* tcam_property_base_get_category (TcamPropertyBase* self);
+| Category string for simple property organization.
+|
+| The property owns the string. It will be freed once the property is destroyed.
 
-   :param self: Pointer to the property instance
-   :returns: Name of the property
-   :retval: const gchar*, string containing the category
-
-   The property owns the string. It will be freed once the property is destroyed.
-
+:param self: Pointer to the property instance
+:returns: Name of the property
+:retval: const gchar*, string containing the category
 
 .. tabs::
 
@@ -876,9 +677,7 @@ tcam_property_base_get_category
 tcam_property_base_get_visibility
 ---------------------------------
    
-   
-.. cpp:function:: TcamPropertyVisibility tcam_property_base_get_visibility (TcamPropertyBase* self);
-
+| A :ref:`TcamPropertyVisibility` showing the recommended visibility level for applications.
                   
 .. tabs::
 
@@ -903,14 +702,14 @@ tcam_property_base_get_visibility
 tcam_property_base_get_property_type
 ------------------------------------
 
-The property owns the string. It will be freed once the property is destroyed.
-
+| A :ref:`TcamPropertyType` describing the specific property type of the TcamPropertyBase instance.
+| Cast the TcamPropertyBase instance into a derived type to access more functions.
 
 .. tabs::
 
    .. group-tab:: c
 
-      .. cpp:function:: TcamPropertyType tcam_property_base_get_property_type (TcamPropertyBase* self);
+      .. c:function:: TcamPropertyType tcam_property_base_get_property_type (TcamPropertyBase* self);
 
          :param self: TcamPropertyBase instance that shall be queried
          :returns: the actual type of the property
@@ -944,7 +743,11 @@ The property owns the string. It will be freed once the property is destroyed.
                     
 tcam_property_base_is_available
 -------------------------------
-.. c:function:: gboolean tcam_property_base_is_available (TcamPropertyBase* self, GError** err);
+
+| Check if property is currently available.
+| If the property is not available it means that a stream
+| setting is preventing usage.
+| A typical example would be BalanceWhiteAuto being not available while streaming `video/x-raw,format=GRAY8`.
 
 
 .. tabs::
@@ -982,7 +785,10 @@ tcam_property_base_is_available
 tcam_property_base_is_locked
 ----------------------------
                 
-.. c:function:: gboolean tcam_property_base_is_locked (TcamPropertyBase* self, GError** err);
+| Check if property is currently locked.
+| If the property is locked it means that no write actions are possible,
+| due to another property is preventing such actions.
+| A typical example would be ExposureAuto locking ExposureTime.
 
 :param self:
 :param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
@@ -1020,16 +826,15 @@ tcam_property_base_is_locked
                 
 TcamPropertyBoolean
 ###################
-.. c:type:: TcamPropertyBoolean
 
-Property representing a bool value.
-An instance can be retrieved by casting a :ref:`TcamPropertyBase` pointer.
-`TCAM_PROPERTY_BOOLEAN(TcamPropertyBase*)`
+| Property representing a bool value.
+| An instance can be retrieved by casting a :ref:`TcamPropertyBase` pointer.
+| `TCAM_PROPERTY_BOOLEAN(TcamPropertyBase*)`
+|
+| Upon cleanup `g_object_unref` has to be called on the property.
 
-Upon cleanup `g_object_unref` has to be called on the property.
 
-
-Inherits from :c:type:`TcamPropertyBase`.
+Inherits from :ref:`TcamPropertyBase`.
 Can be obtained by casting a :c:type:`TcamPropertyBase` with `TCAM_PROPERTY_BOOLEAN(TcamPropertyBase*)`.
 
 .. _tcam_property_boolean_get_value:
@@ -1176,7 +981,7 @@ Upon cleanup `g_object_unref` has to be called on the property.
 tcam_property_integer_get_value
 -------------------------------
             
-.. cpp:function:: gint64 tcam_property_integer_get_value (TcamPropertyInteger* self, GError** err);
+.. c:function:: gint64 tcam_property_integer_get_value (TcamPropertyInteger* self, GError** err);
 
 :param self: property instance
 :param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
@@ -1216,7 +1021,7 @@ tcam_property_integer_get_value
 tcam_property_integer_set_value
 -------------------------------
 
-.. cpp:function:: void tcam_property_integer_set_value (TcamPropertyInteger* self, gint64 value, GError** err);
+.. c:function:: void tcam_property_integer_set_value (TcamPropertyInteger* self, gint64 value, GError** err);
 
 :param self: property instance
 :param value: int64 value that shall be set.
@@ -1256,7 +1061,7 @@ tcam_property_integer_set_value
 tcam_property_integer_get_range
 -------------------------------
 
-.. cpp:function:: void tcam_property_integer_get_range (TcamPropertyInteger* self, gint64* min_value, gint64* max_value, gint64* step_value, GError** err);
+.. c:function:: void tcam_property_integer_get_range (TcamPropertyInteger* self, gint64* min_value, gint64* max_value, gint64* step_value, GError** err);
 
 :param self: property instance
 :param min_value: out value. pointer to a int64 that will be filled with the minimal value the property can have. May be `NULL`.
@@ -1303,7 +1108,7 @@ tcam_property_integer_get_range
 tcam_property_integer_get_default
 ---------------------------------
 
-.. cpp:function:: gint64 tcam_property_integer_get_default (TcamPropertyInteger* self, GError** err);
+.. c:function:: gint64 tcam_property_integer_get_default (TcamPropertyInteger* self, GError** err);
 
 :param self: property instance
 :param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
@@ -1342,7 +1147,7 @@ tcam_property_integer_get_default
 tcam_property_integer_get_unit
 ------------------------------
 
-.. cpp:function:: const gchar* tcam_property_integer_get_unit (TcamPropertyInteger* self);
+.. c:function:: const gchar* tcam_property_integer_get_unit (TcamPropertyInteger* self);
 
 :param self: property instance
 :param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
@@ -1383,7 +1188,7 @@ tcam_property_integer_get_unit
 tcam_property_integer_get_representation
 ----------------------------------------
 
-.. cpp:function:: TcamPropertyIntRepresentation tcam_property_integer_get_representation (TcamPropertyInteger* self);
+.. c:function:: TcamPropertyIntRepresentation tcam_property_integer_get_representation (TcamPropertyInteger* self);
 
 
 :param self: property instance
@@ -1900,3 +1705,194 @@ Execute the command.
              base_property.set_command()
          except GLib.Error as err:
              # error handling
+
+
+Helper Types
+############
+
+.. _tcamerror:
+
+TcamError
+---------
+
+TcamError is the tcam-property enumeration that contains all potential error tcam-property implementations might produce.
+This does not mean that other error might not also occur.
+
+.. cpp:enum:: TcamError
+
+Enumeration containing all possible error types tcam-property will return.
+
+.. cpp:enumerator:: TCAM_ERROR_SUCCESS
+
+                    | Should not be encountered.
+                    | Describes `no error` state.
+                    
+.. cpp:enumerator:: TCAM_ERROR_UNKNOWN
+
+                    | Catch all error code for things that do not fit other codes.
+                    
+.. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED    
+.. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_AVAILABLE
+
+                    | Circumstances prevent this property from being usable.
+                    | This is typically due to the selected stream format.
+                    | e.g. BalanceWhite* not being usable when streaming mono.
+                    
+.. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_WRITEABLE
+
+                    | The property is either read only or temporarily locked.
+                    | Call :ref:`tcam_property_base_is_locked` for verification.
+                    
+.. cpp:enumerator:: TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE
+
+                    The property is of a different type.
+                    
+.. cpp:enumerator:: TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE
+
+                    | Value is out of bounds.
+                    | Check the `*_get_range` function for boundaries.
+                    
+.. cpp:enumerator:: TCAM_ERROR_NO_DEVICE_OPEN
+                    
+                    | No device has been opened that can offer properties.
+                    | This typically means the GstElement is not in GST_STATE_READY or higher.
+                    
+.. cpp:enumerator:: TCAM_ERROR_DEVICE_LOST
+
+                    | The device has been lost.
+                    | This should be considered a fatal, unrecoverable error.
+                    
+.. cpp:enumerator:: TCAM_ERROR_PARAMETER_NULL
+
+                    | One of the given arguments is NULL.
+                    | Are provider/property pointer valid?
+                    | Is the name a valid string?
+
+.. cpp:enumerator:: TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE
+
+                    | Property offers no default value.
+
+.. _tcampropertyvisibility:
+                    
+TcamPropertyVisibility
+----------------------
+                    
+.. cpp:enum:: TcamPropertyVisibility
+
+.. cpp:enumerator:: TCAM_PROPERTY_VISIBILITY_BEGINNER
+
+                    Should always be displayed.
+                    
+.. cpp:enumerator:: TCAM_PROPERTY_VISIBILITY_EXPERT
+
+                    Should only be displayed to users, who know what they are doing.
+                    
+.. cpp:enumerator:: TCAM_PROPERTY_VISIBILITY_GURU
+
+                    Should only be displayed to users, who really know what they are doing.
+                    
+.. cpp:enumerator:: TCAM_PROPERTY_VISIBILITY_INVISIBLE
+
+                    Should never be displayed.
+                    
+.. _tcampropertyintrepresentation:
+   
+TcamPropertyIntRepresentation
+-----------------------------
+                    
+.. cpp:enum:: TcamPropertyIntRepresentation
+
+Enumeration describing recommendations on how the property should be represented.
+
+.. cpp:enumerator:: TCAM_PROPERTY_INTREPRESENTATION_LINEAR
+
+                    Property is best displayed with a linear slider.
+                    
+.. cpp:enumerator:: TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC
+
+                    Property is best displayed with a logarithmic slider.
+                    
+.. cpp:enumerator:: TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER
+
+                    Property is best displayed with an edit box (e.g. QSpinBox, Gtk SpinButton).
+                    
+.. cpp:enumerator:: TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER
+
+                    Same as pure number but with hexadecimal values.
+
+.. _tcampropertyfloatrepresentation:
+
+TcamPropertyFloatRepresentation
+-------------------------------
+                    
+.. cpp:enum:: TcamPropertyFloatRepresentation
+
+Enumeration describing recommendations on how the property should be represented.
+
+.. cpp:enumerator:: TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR
+
+                    Property is best displayed with a linear slider.
+                    
+.. cpp:enumerator:: TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC
+
+                    Property is best displayed with a logarithmic slider.
+
+.. cpp:enumerator:: TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER
+
+                    Property is best displayed with an edit box (e.g. QSpinBox, Gtk SpinButton).
+
+.. _tcampropertytype:
+                    
+TcamPropertyType
+----------------
+                    
+.. cpp:enum:: TcamPropertyType
+
+Enumeration containing all possible property types.
+
+.. cpp:enumerator:: TCAM_PROPERTY_TYPE_INTEGER
+.. cpp:enumerator:: TCAM_PROPERTY_TYPE_FLOAT
+.. cpp:enumerator:: TCAM_PROPERTY_TYPE_ENUMERATION
+.. cpp:enumerator:: TCAM_PROPERTY_TYPE_BOOLEAN
+.. cpp:enumerator:: TCAM_PROPERTY_TYPE_COMMAND
+
+
+External Types
+##############
+
+All tiscamera gstreamer elements implement the :c:type:`TcamPropertyProvider` interface.
+This interface allows access to all properties that the camera and software offer.
+
+.. _gslist:
+
+GSList
+------
+
+.. c:type:: GSList
+
+   In tcamprop this is always a list with element-type utf8 which has to be deallocated via:
+
+   Example:
+   
+   .. code-block:: c
+
+      GSList* list = tcam_prop_get_device_serials (self);
+                                                
+      // ... do sth with list
+                                                
+      g_slist_free_full (list, ::g_free);
+
+.. _gerror:
+
+GError
+------
+                                                
+.. c:type:: GError
+
+GObject error reporting mechanism.
+
+A returned GError has to _always_ be freed by the user with g_error_free().
+The GError will contain a string describing the cause of the error and an error code.
+The message can be accessed through the member variable `message`.
+The error code can be accessed though the member variable `code`.
+The error code will be a :cpp:enum:`TcamError` enum entry.
