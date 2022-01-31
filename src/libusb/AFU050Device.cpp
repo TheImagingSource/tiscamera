@@ -166,7 +166,7 @@ void AFU050Device::add_dependency_tracking()
 
 void AFU050Device::create_properties()
 {
-    add_double("ExposureTime", VC_UNIT_INPUT_TERMINAL, CT_EXPOSURE_TIME_ABSOLUTE_CONTROL);
+    add_double("ExposureTime", VC_UNIT_INPUT_TERMINAL, CT_EXPOSURE_TIME_ABSOLUTE_CONTROL, 1. / 100. );
     add_enum("ExposureAuto",
              VC_UNIT_EXTENSION_UNIT,
              XU_AUTO_EXPOSURE,
@@ -193,7 +193,7 @@ void AFU050Device::create_properties()
              XU_AUTO_WHITE_BALANCE,
              { { { 0, "Off" }, { 1, "Continuous" } } });
 
-    add_double("Saturation", VC_UNIT_PROCESSING_UNIT, PU_SATURATION_CONTROL);
+    add_double("Saturation", VC_UNIT_PROCESSING_UNIT, PU_SATURATION_CONTROL, 32. / 100. );
     add_int("Contrast", VC_UNIT_PROCESSING_UNIT, PU_CONTRAST_CONTROL);
     add_int("Sharpness", VC_UNIT_PROCESSING_UNIT, PU_SHARPNESS_CONTROL);
 
@@ -433,7 +433,7 @@ void tcam::AFU050Device::transfer_callback(libusb_transfer* transfer)
                 if (buffer == nullptr)
                 {
                     ++frames_dropped_;
-                    SPDLOG_TRACE( "Failed to fetch free buffer" );
+                    SPDLOG_TRACE("Failed to fetch free buffer");
                 }
                 else
                 {
@@ -446,7 +446,8 @@ void tcam::AFU050Device::transfer_callback(libusb_transfer* transfer)
 
                     auto since_epoch = std::chrono::system_clock::now().time_since_epoch();
 
-                    stats.capture_time_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(since_epoch).count();
+                    stats.capture_time_ns =
+                        std::chrono::duration_cast<std::chrono::nanoseconds>(since_epoch).count();
 
                     buffer->set_valid_data_length(current_jpegsize_);
                     buffer->set_statistics(stats);
