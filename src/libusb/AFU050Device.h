@@ -23,12 +23,10 @@
 #include "LibusbDevice.h"
 #include "afu050_definitions.h"
 
-#include <condition_variable> // std::condition_variable
 #include <libusb-1.0/libusb.h>
 #include <map>
 #include <memory>
 #include <mutex> // std::mutex, std::unique_lock
-#include <thread>
 
 VISIBILITY_INTERNAL
 
@@ -53,7 +51,7 @@ public:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
-        return m_properties;
+        return properties_;
     }
 
     bool set_video_format(const VideoFormat&) final;
@@ -95,22 +93,18 @@ private:
     static const int TRANSFER_COUNT = 32;
     static const int JPEGBUF_SIZE = 1024 * 1024 * 5;
 
-    VideoFormat active_video_format;
+    VideoFormat active_video_format_;
 
-    std::vector<VideoFormatDescription> available_videoformats;
+    std::vector<VideoFormatDescription> available_videoformats_;
 
-    std::vector<framerate_mapping> framerate_conversions;
+    std::vector<framerate_mapping> framerate_conversions_;
 
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> properties_;
 
-    std::shared_ptr<tcam::property::AFU050DeviceBackend> m_backend;
+    std::shared_ptr<tcam::property::AFU050DeviceBackend> backend_;
 
     std::atomic_bool device_is_lost_ = false;
 
-    unsigned char lost_countdown = 0;
-    bool stop_all = false;
-    bool device_is_lost = false;
-    bool abort_all = false;
     void lost_device();
 
     void create_formats();
@@ -118,6 +112,7 @@ private:
     void add_dependency_tracking();
 
     void create_properties();
+
 
     // streaming related
 
@@ -127,31 +122,35 @@ private:
         bool is_queued;
     };
 
-    std::vector<buffer_info> buffers;
+    std::vector<buffer_info> buffer_list_;
 
-    bool is_stream_on = false;
-    struct tcam_stream_statistics m_statistics = {};
+    std::mutex buffer_list_mtx_;
 
-    size_t current_buffer = 0;
-    size_t jpegsize = 0;
-    int jpegptr = 0;
-    unsigned char* jpegbuf = nullptr;
+    std::atomic_bool is_stream_on_ = false;
+    long frames_delivered_ = 0;
+    long frames_dropped_ = 0;
 
-    std::weak_ptr<IImageBufferSink> listener;
+    size_t current_jpegsize_ = 0;
+    int current_jpegbuf_index_ = 0;
+    unsigned char* current_jpegbuf_ptr_ = nullptr;
+    std::vector<uint8_t> current_jpegbuf_data_;
 
-    std::vector<struct libusb_transfer*> transfers;
+    std::weak_ptr<IImageBufferSink> listener_;
+
+    std::vector<libusb_transfer*> transfers_;
+
+    std::shared_ptr<tcam::ImageBuffer> get_free_buffer();
 
     static void LIBUSB_CALL libusb_bulk_callback(struct libusb_transfer* trans);
-    void transfer_callback(struct libusb_transfer* transfer);
-
-    void stream();
-
-    bool get_frame();
+    void transfer_callback(libusb_transfer* transfer);
 
     void init_buffers();
 
     void add_int(const std::string& name, const VC_UNIT unit, const unsigned char prop);
-    void add_double(const std::string& name, const VC_UNIT unit, const unsigned char prop, double modifier=1.0);
+    void add_double(const std::string& name,
+                    const VC_UNIT unit,
+                    const unsigned char prop,
+                    double modifier = 1.0);
     void add_enum(const std::string& name,
                   const VC_UNIT unit,
                   const unsigned char prop,
