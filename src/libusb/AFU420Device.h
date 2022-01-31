@@ -25,6 +25,7 @@
 #include "UsbSession.h"
 #include "ep_defines_r42.h"
 #include "ep_defines_rx.h"
+#include "libusb_utils.h"
 #include "struct_defines_rx.h"
 
 #include <atomic>
@@ -191,10 +192,11 @@ private:
         double fps_max;
     };
 
-    const std::vector<image_scaling> m_available_scaling = { {1, 1, 1, 1},
-                                                             {2, 2, 1, 1},
-                                                             {4, 4, 1, 1},
-                                                             {8, 8, 1, 1},
+    const std::vector<image_scaling> m_available_scaling = {
+        { 1, 1, 1, 1 },
+        { 2, 2, 1, 1 },
+        { 4, 4, 1, 1 },
+        { 8, 8, 1, 1 },
     };
 
     VideoFormat active_video_format;
@@ -236,24 +238,27 @@ private:
         bool is_queued;
     };
 
-    std::vector<buffer_info> buffers;
+    tcam::libusb::deliver_thread deliver_thread_;
+
+    std::vector<buffer_info> buffer_list_;
+    std::mutex buffers_mutex_;
 
     std::shared_ptr<tcam::ImageBuffer> get_next_buffer();
 
-    std::atomic_bool is_stream_on = false;
-    struct tcam_stream_statistics statistics;
+    std::atomic_bool is_stream_on_ = false;
+    size_t frames_delivered_ = 0;
+    size_t frames_dropped_ = 0;
 
-    size_t transfered_size_ = 0;
-    unsigned int offset_ = 0;
-    std::shared_ptr<ImageBuffer> current_buffer_;
-    bool have_header = false;
+    int transfer_offset_ = 0;
+    bool have_header_ = false;
+    std::shared_ptr<ImageBuffer> current_buffer_;   // contains the buffer that image data is copied into
 
-    std::weak_ptr<IImageBufferSink> listener;
+    std::weak_ptr<IImageBufferSink> listener_;
 
     static void LIBUSB_CALL libusb_bulk_callback(struct libusb_transfer* trans);
     void transfer_callback(struct libusb_transfer* transfer);
 
-    void push_buffer();
+    void push_buffer(std::shared_ptr<tcam::ImageBuffer>&&);
 
     struct header_res
     {
@@ -308,12 +313,9 @@ private:
 
     std::vector<bulk_transfer_item> transfer_items;
 
-
-    int no_buffer_counter = 0;
-    static const int no_buffer_counter_max = 100;
-    unsigned int usbbulk_chunk_size_ = 0;
-    unsigned int usbbulk_image_size_ = 0;
     static const int actual_image_prefix_size_ = 4;
+    int usbbulk_chunk_size_ = 0;
+    int usbbulk_image_size_ = 0;
 
     size_t get_packet_header_size() const
     {
@@ -344,8 +346,6 @@ private:
     {
         return active_video_format.get_size();
     };
-
-    std::mutex control_transfer_mtx_;
 
     bool has_optics_;
     void check_for_optics();

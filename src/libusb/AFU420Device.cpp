@@ -554,7 +554,7 @@ AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf
 
 bool tcam::AFU420Device::set_video_format(const VideoFormat& format)
 {
-    if (is_stream_on)
+    if (is_stream_on_)
     {
         SPDLOG_ERROR("Unable to set format. Stream is running.");
         return false;
@@ -638,23 +638,28 @@ bool tcam::AFU420Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuf
 {
     SPDLOG_TRACE("Received {} buffer from external allocator.", buffs.size());
 
-    buffers.reserve(buffs.size());
+    buffer_list_.reserve(buffs.size());
 
-    for (auto& b : buffs) { buffers.push_back({ b, true }); }
+    for (auto& b : buffs) { buffer_list_.push_back({ b, true }); }
     return true;
 }
-
 
 bool tcam::AFU420Device::release_buffers()
 {
-    buffers.clear();
+    std::scoped_lock lck { buffers_mutex_ };
+
+    buffer_list_.clear();
+    current_buffer_ = nullptr;
+
     return true;
 }
 
-
 void AFU420Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
 {
-    for (auto& b : buffers)
+    buffer->set_valid_data_length(0);
+
+    std::scoped_lock lck { buffers_mutex_ };
+    for (auto& b : buffer_list_)
     {
         if (buffer == b.buffer)
         {
@@ -664,41 +669,34 @@ void AFU420Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
     }
 }
 
-void AFU420Device::push_buffer()
+void AFU420Device::push_buffer(std::shared_ptr<tcam::ImageBuffer>&& cur_buf)
 {
-    if (current_buffer_ == nullptr)
-    {
-        return;
-    }
+    assert(cur_buf != nullptr);
 
-    auto cur_buf = current_buffer_;
     if (drop_incomplete_frames_ && (usbbulk_image_size_ - cur_buf->get_valid_data_length() != 0))
     {
-        SPDLOG_WARN("Image buffer does not contain enough data. Dropping frame...");
+        SPDLOG_TRACE("Image buffer does not contain enough data. Dropping frame...");
 
-        statistics.frames_dropped++;
-        requeue_buffer(current_buffer_);
-        current_buffer_ = nullptr;
-        offset_ = 0;
+        frames_dropped_++;
+        requeue_buffer(cur_buf);
         return;
     }
 
-    if (auto ptr = listener.lock())
+    tcam_stream_statistics stats = {};
+    stats.frame_count = frames_delivered_;
+    stats.frames_dropped = frames_dropped_;
+
+    auto since_epoch = std::chrono::system_clock::now().time_since_epoch();
+    stats.capture_time_ns =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(since_epoch).count();
+
+    cur_buf->set_statistics(stats);
+
+    frames_delivered_++;
+
+    if (!deliver_thread_.push(std::move(cur_buf)))
     {
-        //SPDLOG_DEBUG("Transferred data {} - buf size {} expected size {} ", offset_,
-        //           current_buffer_->get_image_size(),
-        //           active_video_format.get_required_buffer_size());
-        statistics.frame_count++;
-        current_buffer_->set_statistics(statistics);
-        SPDLOG_TRACE("push image");
-        ptr->push_image(current_buffer_);
-        current_buffer_ = nullptr;
-        transfered_size_ = 0;
-        offset_ = 0;
-    }
-    else
-    {
-        SPDLOG_ERROR("ImageSink expired. Unable to deliver images.");
+        requeue_buffer(cur_buf);
     }
 }
 
@@ -771,8 +769,7 @@ struct AFU420Device::header_res AFU420Device::check_and_eat_img_header(unsigned 
 
 void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
 {
-
-    if (!is_stream_on)
+    if (!is_stream_on_)
     {
         // do not free transfers
         //libusb_free_transfer(xfr);
@@ -794,10 +791,9 @@ void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
     {
         if (xfr->status == LIBUSB_TRANSFER_CANCELLED)
         {
-            SPDLOG_DEBUG("transfer is cancelled");
             return;
         }
-        SPDLOG_ERROR("transfer status {}", xfr->status);
+        SPDLOG_WARN("transfer status {}", xfr->status);
         submit_transfer(xfr);
 
         if (lost_countdown_ == 0)
@@ -812,70 +808,55 @@ void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
     auto header = check_and_eat_img_header(xfr->buffer, xfr->length);
 
     bool is_header = header.frame_id >= 0;
-    bool is_trailer = (!is_header) && header.size < usbbulk_chunk_size_;
+    bool is_trailer = (!is_header) && header.size < (size_t)usbbulk_chunk_size_;
 
     if (is_header)
     {
-        push_buffer();
+        if (current_buffer_)
+        {
+            push_buffer(std::move(current_buffer_));
+        }
+
+        current_buffer_ = get_next_buffer();
 
         if (current_buffer_ == nullptr)
         {
-            current_buffer_ = get_next_buffer();
-
-            if (current_buffer_ == nullptr)
-            {
-                SPDLOG_ERROR("No buffer to work with. Dropping image");
-                statistics.frames_dropped++;
-                submit_transfer(xfr);
-                have_header = false;
-                return;
-            }
-
-            current_buffer_->set_valid_data_length(0);
-
-            transfered_size_ = 0;
-            offset_ = 0;
-            have_header = false;
-        }
-        have_header = true;
-    }
-
-    if (current_buffer_ == nullptr)
-    {
-        if (!have_header)
-        {
-            // lost_image; wait until next one begins
+            SPDLOG_ERROR("No buffer to work with. Dropping image"); // Buffer starvation
+            frames_dropped_++;
             submit_transfer(xfr);
             return;
         }
 
-        SPDLOG_ERROR("Can not get buffer to fill with image data. Aborting libusb callback.");
-        no_buffer_counter++;
-        if (no_buffer_counter >= no_buffer_counter_max)
-        {
-            notify_device_lost();
-        }
-        usleep(200);
-        submit_transfer(xfr);
+        have_header_ = true;
+        transfer_offset_ = 0;
+    }
+
+    if (current_buffer_ == nullptr)
+    {
+        submit_transfer(xfr); // just requeue und wait for the next header to arrive
         return;
     }
 
-    no_buffer_counter = 0;
-
-    int bytes_available = usbbulk_image_size_ - offset_;
+    int bytes_available = usbbulk_image_size_ - transfer_offset_;
 
     int bytes_to_copy = std::min(bytes_available, int(header.size));
 
-    current_buffer_->copy_block(header.buffer, bytes_to_copy, offset_);
+    current_buffer_->copy_block(header.buffer, bytes_to_copy, transfer_offset_);
 
-    offset_ += bytes_to_copy;
+    transfer_offset_ += bytes_to_copy;
 
-    bool is_complete_image = offset_ >= usbbulk_image_size_;
+    current_buffer_->set_valid_data_length(transfer_offset_);
+
+    bool is_complete_image = transfer_offset_ >= usbbulk_image_size_;
     if (is_complete_image || is_trailer)
     {
-        //SPDLOG_TRACE("image complete");
-        push_buffer();
-        have_header = false;
+        if (current_buffer_)
+        {
+            push_buffer(std::move(current_buffer_));
+            current_buffer_.reset();
+        }
+        have_header_ = false;
+        transfer_offset_ = 0;
     }
     lost_countdown_ = 20;
     submit_transfer(xfr);
@@ -884,13 +865,13 @@ void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
 
 std::shared_ptr<tcam::ImageBuffer> tcam::AFU420Device::get_next_buffer()
 {
-    if (buffers.empty())
+    if (buffer_list_.empty())
     {
         SPDLOG_ERROR("No buffers to work with.");
         return nullptr;
     }
 
-    for (auto& b : buffers)
+    for (auto& b : buffer_list_)
     {
         if (b.is_queued)
         {
@@ -900,7 +881,7 @@ std::shared_ptr<tcam::ImageBuffer> tcam::AFU420Device::get_next_buffer()
         }
     }
 
-    SPDLOG_ERROR("No free buffers available! {}", buffers.size());
+    SPDLOG_ERROR("No free buffers available! {}", buffer_list_.size());
     return nullptr;
 }
 
@@ -918,7 +899,10 @@ bool tcam::AFU420Device::start_stream(const std::shared_ptr<IImageBufferSink>& s
 
 
     // reset statistics
-    statistics = {};
+    frames_delivered_ = 0;
+    frames_dropped_ = 0;
+    transfer_offset_ = 0;
+    have_header_ = false;
 
     static const int num_transfers = 12;
     int chunk_size = 0;
@@ -961,7 +945,9 @@ bool tcam::AFU420Device::start_stream(const std::shared_ptr<IImageBufferSink>& s
         libusb_submit_transfer(xfr);
     }
 
-    listener = sink;
+    listener_ = sink;
+
+    deliver_thread_.start(sink);
 
     unsigned char val = 0;
     int ret = control_write(BASIC_PC_TO_USB_START_STREAM, val);
@@ -970,13 +956,13 @@ bool tcam::AFU420Device::start_stream(const std::shared_ptr<IImageBufferSink>& s
     {
         SPDLOG_ERROR("Stream could not be started. Aborting");
 
-        listener.reset();
+        listener_.reset();
 
         return false;
     }
 
-    have_header = false;
-    is_stream_on = true;
+    have_header_ = false;
+    is_stream_on_ = true;
 
     SPDLOG_INFO("Stream started");
 
@@ -987,13 +973,16 @@ bool tcam::AFU420Device::start_stream(const std::shared_ptr<IImageBufferSink>& s
 void tcam::AFU420Device::stop_stream()
 {
     SPDLOG_DEBUG("stop_stream called");
-    is_stream_on = false;
+
+    is_stream_on_ = false;
+
+    deliver_thread_.stop();
 
     for (auto& item : transfer_items) { libusb_cancel_transfer((libusb_transfer*)item.transfer); }
 
     usb_device_->halt_endpoint(USB_EP_BULK_VIDEO);
 
-    listener.reset();
+    listener_.reset();
 
     release_buffers();
 }

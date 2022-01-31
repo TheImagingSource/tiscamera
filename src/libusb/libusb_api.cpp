@@ -46,7 +46,7 @@ DeviceInterface* open_libusb_device(const struct tcam_device_info* device)
 
 size_t get_libusb_device_list_size()
 {
-    auto vec = get_libusb_device_list();
+    auto vec = tcam::libusb::get_libusb_device_list();
     return vec.size();
 }
 
@@ -56,7 +56,7 @@ size_t get_libusb_device_list_size()
  */
 size_t get_libusb_device_list(struct tcam_device_info* array, size_t array_size)
 {
-    auto vec = get_libusb_device_list();
+    auto vec = tcam::libusb::get_libusb_device_list();
 
     if (vec.size() > array_size)
     {
