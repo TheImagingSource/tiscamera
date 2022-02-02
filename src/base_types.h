@@ -192,11 +192,9 @@ struct tcam_resolution_description
 
     image_scaling scaling;
 
-    uint32_t framerate_count; /**< number of framerates this resolution supports */
-
     bool operator==(const struct tcam_resolution_description& other) const
     {
-        if (type == other.type && framerate_count == other.framerate_count
+        if (type == other.type
             && max_size == other.max_size && min_size == other.min_size
             && scaling == other.scaling)
         {
@@ -217,12 +215,9 @@ struct tcam_video_format_description
     uint32_t fourcc; /**< pixel format that is used e.g. RGB32 or Y800 */
     char description[256];
 
-    uint32_t resolution_count; /**< number of resolutions this format supports */
-
     bool operator==(const struct tcam_video_format_description& other) const
     {
         if (fourcc == other.fourcc
-            && resolution_count == other.resolution_count
             && strcmp(description, other.description) == 0)
         {
             return true;

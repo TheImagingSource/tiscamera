@@ -785,7 +785,6 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
             strncpy(desc.description, format_str[i], sizeof(desc.description) - 1);
 
-            desc.resolution_count = 1;
             framerate_mapping rf = {};
 
             arv_camera_set_pixel_format(this->arv_camera_, format_ptr[1], &err);
@@ -851,7 +850,6 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
             fps = this->format_handler_->get_framerates(max, desc.fourcc);
 
-            rf.resolution.framerate_count = fps.size();
             rf.framerates = fps;
 
             std::vector<struct framerate_mapping> res_vec;

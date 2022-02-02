@@ -204,8 +204,8 @@ bool V4l2Device::set_framerate(double framerate)
 
     framerate = *iter_low;
 
-    auto f = [&framerate](const framerate_conv& _f) {
-        return compare_double(framerate, _f.fps);
+    auto f = [framerate](const framerate_conv& _f) {
+        return framerate == _f.fps;
     };
 
     auto fps = std::find_if(framerate_conversions.begin(), framerate_conversions.end(), f);
@@ -943,7 +943,6 @@ void V4l2Device::index_formats()
 
                 std::vector<double> f = index_framerates(frms);
 
-                res.framerate_count = f.size();
                 res.type = TCAM_RESOLUTION_TYPE_FIXED;
 
                 framerate_mapping r = { res, f };
@@ -968,8 +967,6 @@ void V4l2Device::index_formats()
                 SPDLOG_ERROR("Encountered unknown V4L2_FRMSIZE_TYPE");
             }
         }
-
-        desc.resolution_count = rf.size();
 
         // algorithms, etc. use Y800 as an identifier.
         // declare format as such.
