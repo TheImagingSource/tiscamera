@@ -214,6 +214,31 @@ bool tcam::gst::tcam_gst_raw_only_has_mono(const GstCaps* caps)
 }
 
 
+static bool tcam_gst_is_mono10_fourcc(const uint32_t fourcc)
+{
+    if (fourcc == FOURCC_MONO10
+        || fourcc == FOURCC_MONO10_MIPI_PACKED
+        || fourcc == FOURCC_MONO10_SPACKED)
+    {
+        return true;
+    }
+    return false;
+}
+
+
+static bool tcam_gst_is_mono12_fourcc(const uint32_t fourcc)
+{
+    if (fourcc == FOURCC_MONO12
+        || fourcc == FOURCC_MONO12_MIPI_PACKED
+        || fourcc == FOURCC_MONO12_PACKED
+        || fourcc == FOURCC_MONO12_SPACKED)
+    {
+        return true;
+    }
+    return false;
+}
+
+
 static bool tcam_gst_is_fourcc_bayer(const uint32_t fourcc)
 {
     if (fourcc == FOURCC_GBRG8 || fourcc == FOURCC_GRBG8 || fourcc == FOURCC_RGGB8
@@ -670,6 +695,14 @@ static uint32_t find_preferred_format(const std::vector<uint32_t>& vec)
         {
             map[40] = fourcc;
         }
+        else if (tcam_gst_is_mono10_fourcc(fourcc))
+        {
+            map[43] = fourcc;
+        }
+        else if (tcam_gst_is_mono12_fourcc(fourcc))
+        {
+            map[47] = fourcc;
+        }
         else if (fourcc == FOURCC_Y16)
         {
             map[50] = fourcc;
@@ -700,7 +733,7 @@ static uint32_t find_preferred_format(const std::vector<uint32_t>& vec)
         }
         else
         {
-            SPDLOG_ERROR("Could not associate rank with fourcc {:x} {}",
+            SPDLOG_ERROR("Could not associate rank with fourcc 0x{:x} {}",
                          fourcc,
                          img::fcc_to_string(fourcc).c_str());
         }
