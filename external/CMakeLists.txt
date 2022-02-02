@@ -117,9 +117,9 @@ if (TCAM_BUILD_ARAVIS)
 
     set(ARAVIS_GIT_COMMIT_HASH "external" PARENT_SCOPE)
     set(ARAVIS_VERSION "unknown" PARENT_SCOPE)
-    find_package(Aravis_0_8 REQUIRED QUIET)
-    set(aravis_INCLUDE_DIR "${aravis_0_8_INCLUDE_DIR}" CACHE PATH "" )
-    set(aravis_LIBRARIES "${aravis_0_8_LIBRARY}" CACHE FILEPATH "")
+    find_package(Aravis REQUIRED QUIET)
+    set(aravis_INCLUDE_DIR "${aravis_INCLUDE_DIR}" CACHE PATH "" )
+    set(aravis_LIBRARIES "${aravis_LIBRARIES}" CACHE FILEPATH "")
 
   endif (TCAM_INTERNAL_ARAVIS)
 
