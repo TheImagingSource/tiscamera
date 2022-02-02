@@ -36,7 +36,7 @@ AravisDevice::AravisFormatHandler::AravisFormatHandler(AravisDevice* dev) : devi
 
 std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
     const struct tcam_image_size& s,
-    int pixelformat)
+    uint32_t pixelformat)
 {
     std::vector<double> ret;
     auto dev = arv_camera_get_device(device->arv_camera_);

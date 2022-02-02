@@ -30,10 +30,10 @@ namespace tcam
 class FormatHandlerInterface
 {
 public:
-    virtual ~FormatHandlerInterface() {};
+    virtual ~FormatHandlerInterface() = default;
 
-    virtual std::vector<double> get_framerates(const struct tcam_image_size&,
-                                               int pixelformat = 0) = 0;
+    virtual std::vector<double> get_framerates(const tcam_image_size&,
+                                               uint32_t pixelformat) = 0;
 };
 
 } /* namespace tcam */
