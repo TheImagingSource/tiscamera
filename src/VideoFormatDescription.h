@@ -31,7 +31,7 @@ class FormatHandlerInterface;
 
 struct framerate_mapping
 {
-    struct tcam_resolution_description resolution;
+    tcam_resolution_description resolution;
 
     std::vector<double> framerates;
 };
@@ -43,47 +43,33 @@ public:
     VideoFormatDescription() = delete;
 
     VideoFormatDescription(std::shared_ptr<FormatHandlerInterface> handler,
-                           const struct tcam_video_format_description&,
+                           const tcam_video_format_description&,
                            const std::vector<framerate_mapping>&);
 
-    VideoFormatDescription(const VideoFormatDescription&);
-
-
-    explicit VideoFormatDescription(const struct tcam_video_format_description&);
-
-
-    VideoFormatDescription& operator=(const VideoFormatDescription&);
+    VideoFormatDescription(const VideoFormatDescription&) = default;
+    VideoFormatDescription& operator=(const VideoFormatDescription&) = default;
 
     bool operator==(const VideoFormatDescription& other) const;
     bool operator!=(const VideoFormatDescription& other) const;
-
-    bool operator==(const struct tcam_video_format_description& other) const;
-    bool operator!=(const struct tcam_video_format_description& other) const;
 
     /**
      * Returns a struct representation of the format description
      * @return tcam_video_format_description
      */
-    struct tcam_video_format_description get_struct() const;
+    std::string get_video_format_description_string() const;
 
     /**
      * Returns the pixel format used
-     * @return uint32 containging the fourcc
+     * @return uint32 containing the fourcc
      */
     uint32_t get_fourcc() const;
 
-    std::vector<struct tcam_resolution_description> get_resolutions() const;
+    std::vector<tcam_resolution_description> get_resolutions() const;
 
+    // #TODO Christopher: I am not totally sure why there is a difference in this. It seems that these could be merged
     std::vector<double> get_frame_rates(const tcam_resolution_description& size) const;
 
     std::vector<double> get_framerates(const tcam_image_size& s) const;
-
-
-    VideoFormat create_video_format(unsigned int width,
-                                    unsigned int height,
-                                    double framerate) const;
-
-    bool is_valid_video_format(const VideoFormat&) const;
 
 private:
     tcam_video_format_description format;
