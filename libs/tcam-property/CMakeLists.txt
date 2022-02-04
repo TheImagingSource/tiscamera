@@ -12,20 +12,67 @@ else()
 endif()
 
 if( ${tcamproperty-standalone} )
-    set(default_build_type "Release")
+  set(default_build_type "Release")
 
-    if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-      set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
-        STRING "Choose the type of build." FORCE)
+  if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
+      STRING "Choose the type of build." FORCE)
 
-      # Set the possible values of build type for cmake-gui
-      set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-        "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-    endif()
+    # Set the possible values of build type for cmake-gui
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+      "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+  endif()
 
-    IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-      SET(CMAKE_INSTALL_PREFIX "/usr/" CACHE PATH "Common prefix for all installed files." FORCE)
-    ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "/usr/" CACHE PATH "Common prefix for all installed files." FORCE)
+  endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+endif()
+
+if (NOT TCAM_PROPERTY_INSTALL_LIB)
+  set(TCAM_PROPERTY_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "library installation path")
+endif()
+
+if (NOT TCAM_PROPERTY_INSTALL_INCLUDE)
+  set(TCAM_PROPERTY_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "header installation path")
+endif()
+
+# helper funcion to receive the value of an arbitrary variable
+function(pkg_check_variable _pkg _name)
+  string(TOUPPER ${_pkg} _pkg_upper)
+  string(TOUPPER ${_name} _name_upper)
+  string(REPLACE "-" "_" _pkg_upper ${_pkg_upper})
+  string(REPLACE "-" "_" _name_upper ${_name_upper})
+  set(_output_name "${_pkg_upper}_${_name_upper}")
+
+  execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} --variable=${_name} ${_pkg}
+    OUTPUT_VARIABLE _pkg_result
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  set("${_output_name}" "${_pkg_result}" CACHE STRING "pkg-config variable ${_name} of ${_pkg}")
+endfunction()
+
+# check for better suited install directories
+
+if (NOT TCAM_PROPERTY_INSTALL_GIR)
+
+  pkg_check_variable(gobject-introspection-1.0 girdir)
+  if (GOBJECT_INTROSPECTION_1.0_GIRDIR)
+    set(TCAM_PROPERTY_INSTALL_GIR ${GOBJECT_INTROSPECTION_1.0_GIRDIR} CACHE PATH "gobject introspection installation path")
+  else()
+    set(TCAM_PROPERTY_INSTALL_GIR "${CMAKE_INSTALL_PREFIX}/share/gir-1.0/" CACHE PATH "gobject introspection installation path")
+  endif()
+endif()
+
+
+if (NOT TCAM_PROPERTY_INSTALL_TYPELIB)
+
+  pkg_check_variable(gobject-introspection-1.0 typelibdir)
+  if (GOBJECT_INTROSPECTION_1.0_TYPELIBDIR)
+    set(TCAM_PROPERTY_INSTALL_TYPELIB ${GOBJECT_INTROSPECTION_1.0_TYPELIBDIR} CACHE PATH "gobject introspection typelib installation path")
+  else()
+    set(TCAM_PROPERTY_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE PATH "gobject introspection typelib installation path")
+  endif()
 endif()
 
 
@@ -35,9 +82,6 @@ set(TCAM_PROPERTY_VERSION_PATCH 0)
 
 set(TCAM_PROPERTY_VERSION "${TCAM_PROPERTY_VERSION_MAJOR}.${TCAM_PROPERTY_VERSION_MINOR}.${TCAM_PROPERTY_VERSION_PATCH}" CACHE STRING "Version number")
 
-
-set(TCAM_PROPERTY_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "library installation path")
-set(TCAM_PROPERTY_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "header installation path")
 
 add_subdirectory(src)
 

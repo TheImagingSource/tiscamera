@@ -82,38 +82,6 @@ add_custom_target(create_gobject ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Tcam-${
 install(TARGETS tcam-property LIBRARY
   DESTINATION ${TCAM_PROPERTY_INSTALL_LIB}
   COMPONENT tcam-introspection)
-
-# helper funcion to receive the value of an arbitrary variable
-function(pkg_check_variable _pkg _name)
-  string(TOUPPER ${_pkg} _pkg_upper)
-  string(TOUPPER ${_name} _name_upper)
-  string(REPLACE "-" "_" _pkg_upper ${_pkg_upper})
-  string(REPLACE "-" "_" _name_upper ${_name_upper})
-  set(_output_name "${_pkg_upper}_${_name_upper}")
-
-  execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} --variable=${_name} ${_pkg}
-    OUTPUT_VARIABLE _pkg_result
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  set("${_output_name}" "${_pkg_result}" CACHE STRING "pkg-config variable ${_name} of ${_pkg}")
-endfunction()
-
-# check for better suited install directories
-pkg_check_variable(gobject-introspection-1.0 girdir)
-pkg_check_variable(gobject-introspection-1.0 typelibdir)
-
-if (GOBJECT_INTROSPECTION_1.0_GIRDIR)
-  set(TCAM_PROPERTY_INSTALL_GIR ${GOBJECT_INTROSPECTION_1.0_GIRDIR} CACHE PATH "gobject introspection installation path")
-else()
-  set(TCAM_PROPERTY_INSTALL_GIR "${CMAKE_INSTALL_PREFIX}/share/gir-1.0/" CACHE PATH "gobject introspection installation path")
-endif()
-
-if (GOBJECT_INTROSPECTION_1.0_TYPELIBDIR)
-  set(TCAM_PROPERTY_INSTALL_TYPELIB ${GOBJECT_INTROSPECTION_1.0_TYPELIBDIR} CACHE PATH "gobject introspection typelib installation path")
-else()
-  set(TCAM_PROPERTY_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE PATH "gobject introspection typelib installation path")
-endif()
-
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Tcam-${TCAM_PROPERTY_GI_API_VERSION}.gir
   DESTINATION ${TCAM_PROPERTY_INSTALL_GIR}
   COMPONENT tcam-introspection)
