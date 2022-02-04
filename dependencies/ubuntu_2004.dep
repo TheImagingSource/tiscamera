@@ -61,14 +61,7 @@
             "phase": "compilation",
             "modules": ["base"]
         },
-        {
-            "name": "python3-setuptools",
-            "version": ">= 20.7.0-1",
-            "phase": "compilation",
-            "modules": ["tools-aravis"]
-        },
-
-        {
+          {
             "name": "libzip5",
             "version": ">= 1.0.1",
             "phase": "runtime",
@@ -164,44 +157,14 @@
             "modules": ["aravis"]
         },
         {
-            "name": "libtool",
-            "version": ">= 2.4.6",
-            "phase": "compilation",
-            "modules": ["aravis"]
-        },
-        {
-            "name": "intltool",
-            "version": ">= 0.51.0",
-            "phase": "compilation",
-            "modules": ["aravis"]
-        },
-        {
             "name": "meson",
             "version": ">= 0.53.0",
             "phase": "compilation",
             "modules": ["aravis"]
         },
         {
-            "name": "gtk-doc-tools",
-            "version": ">= 1.25",
-            "phase": "compilation",
-            "modules": ["aravis"]
-        },
-        {
-            "name": "libpcap-dev",
-            "version": ">= 1.7.4-2",
-            "phase": "compilation",
-            "modules": ["aravis"]
-        },
-        {
             "name": "libxml2",
             "version": ">= 2.9.3",
-            "phase": "runtime",
-            "modules": ["aravis"]
-        },
-        {
-            "name": "libpcap0.8",
-            "version": ">= 1.7.4-2",
             "phase": "runtime",
             "modules": ["aravis"]
         },
@@ -222,25 +185,6 @@
             "name": "qtbase5-dev",
             "version": ">= 5.9.5",
             "phase": "compilation",
-            "modules": ["gui", "tools"]
-        },
-
-        {
-            "name": "python3-pyqt5",
-            "version": ">= 5.5.1",
-            "phase": "runtime",
-            "modules": ["gui", "tools"]
-        },
-        {
-            "name": "python3-gi",
-            "version": ">= 3.20.0",
-            "phase": "runtime",
-            "modules": ["gui", "tools"]
-        },
-        {
-            "name": "python3-gst-1.0",
-            "version": ">= 1.14.0",
-            "phase": "runtime",
             "modules": ["gui", "tools"]
         },
         {

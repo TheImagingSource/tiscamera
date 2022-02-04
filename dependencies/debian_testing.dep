@@ -24,7 +24,6 @@
             "phase": "compilation",
             "modules": ["base"]
         },
-
         {
             "name": "libgstreamer1.0-dev",
             "version": ">= 1.8.3-1",
@@ -50,24 +49,11 @@
             "modules": ["base"]
         },
         {
-            "name": "libusb-1.0-0-dev",
-            "version": ">= 2:1.0.20.1",
-            "phase": "compilation",
-            "modules": ["base"]
-        },
-        {
             "name": "libzip-dev",
             "version": ">= 1.0.1",
             "phase": "compilation",
             "modules": ["base"]
         },
-        {
-            "name": "python3-setuptools",
-            "version": ">= 20.7.0-1",
-            "phase": "compilation",
-            "modules": ["tools-aravis"]
-        },
-
         {
             "name": "libzip4",
             "version": ">= 1.0.1",
@@ -87,17 +73,16 @@
             "modules": ["base"]
         },
         {
+            "name": "libusb-1.0-0-dev",
+            "version": ">= 2:1.0.20.1",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
             "name": "libusb-1.0-0",
             "version": ">= 2:1.0.20",
             "phase": "runtime",
             "modules": ["base"]
-        },
-
-        {
-            "name": "libuuid1",
-            "version": ">= 2.27",
-            "phase": "runtime",
-            "modules": ["v4l2"]
         },
         {
             "name": "uuid-dev",
@@ -105,7 +90,12 @@
             "phase": "compilation",
             "modules": ["v4l2"]
         },
-
+        {
+            "name": "libuuid1",
+            "version": ">= 2.27",
+            "phase": "runtime",
+            "modules": ["v4l2"]
+        },
         {
             "name": "libudev-dev",
             "version": ">= 229",
@@ -161,40 +151,9 @@
             "phase": "runtime",
             "modules": ["gstreamer"]
         },
-
         {
             "name": "libxml2-dev",
             "version": ">= 2.9.3",
-            "phase": "compilation",
-            "modules": ["aravis"]
-        },
-        {
-            "name": "libtool",
-            "version": ">= 2.4.6",
-            "phase": "compilation",
-            "modules": ["aravis"]
-        },
-        {
-            "name": "autoconf",
-            "version": ">= 2.69-9",
-            "phase": "compilation",
-            "modules": ["aravis"]
-        },
-        {
-            "name": "intltool",
-            "version": ">= 0.51.0",
-            "phase": "compilation",
-            "modules": ["aravis"]
-        },
-        {
-            "name": "gtk-doc-tools",
-            "version": ">= 1.25",
-            "phase": "compilation",
-            "modules": ["aravis"]
-        },
-        {
-            "name": "libpcap-dev",
-            "version": ">= 1.7.4-2",
             "phase": "compilation",
             "modules": ["aravis"]
         },
@@ -204,13 +163,6 @@
             "phase": "runtime",
             "modules": ["aravis"]
         },
-        {
-            "name": "libpcap0.8",
-            "version": ">= 1.7.4-2",
-            "phase": "runtime",
-            "modules": ["aravis"]
-        },
-
         {
             "name": "libqt5widgets5",
             "version": ">= 5.9.5",
@@ -228,31 +180,6 @@
             "version": ">= 5.9.5",
             "phase": "compilation",
             "modules": ["gui", "tools"]
-        },
-
-        {
-            "name": "python3-pyqt5",
-            "version": ">= 5.5.1",
-            "phase": "runtime",
-            "modules": ["gui", "tools"]
-        },
-        {
-            "name": "python3-gi",
-            "version": ">= 3.20.0",
-            "phase": "runtime",
-            "modules": ["gui", "tools"]
-        },
-        {
-            "name": "python3-gst-1.0",
-            "version": ">= 1.14.0",
-            "phase": "runtime",
-            "modules": ["gui", "tools"]
-        },
-        {
-            "name": "python3",
-            "version": ">= 3.8.0",
-            "phase": "runtime",
-            "modules": ["gui", "gige", "tools"]
         },
         {
             "name": "graphviz",
