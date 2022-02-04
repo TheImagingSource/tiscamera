@@ -76,16 +76,28 @@ else()
   set(TCAM_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "library installation path" FORCE)
   set(TCAM_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "header installation path" FORCE)
   set(TCAM_INSTALL_BIN "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "binary installation path" FORCE)
-  set(TCAM_INSTALL_UDEV "/etc/udev/rules.d" CACHE PATH "udev rules installation path" FORCE)
-  set(TCAM_INSTALL_SYSTEMD "/lib/systemd/system/" CACHE PATH "systemd unit installation path")
 
-  if (DEB_HOST_MULTIARCH)
-    set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/${DEB_HOST_MULTIARCH}/pkgconfig"
-      CACHE PATH "pkgconfig installation path")
-  else (DEB_HOST_MULTIARCH)
-    set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
-      CACHE PATH "pkgconfig installation path")
-  endif (DEB_HOST_MULTIARCH)
+  if (NOT TCAM_INSTALL_FORCE_PREFIX)
+
+    if (DEB_HOST_MULTIARCH)
+      set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/${DEB_HOST_MULTIARCH}/pkgconfig"
+        CACHE PATH "pkgconfig installation path" FORCE)
+    else (DEB_HOST_MULTIARCH)
+      set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
+        CACHE PATH "pkgconfig installation path" FORCE)
+    endif (DEB_HOST_MULTIARCH)
+
+    set(TCAM_INSTALL_UDEV "/etc/udev/rules.d" CACHE PATH "udev rules installation path" FORCE)
+    set(TCAM_INSTALL_SYSTEMD "/lib/systemd/system/" CACHE PATH "systemd unit installation path" FORCE)
+
+  else()
+
+    set(TCAM_INSTALL_UDEV "${CMAKE_INSTALL_PREFIX}/udev/rules.d" CACHE PATH "udev rules installation path" FORCE)
+    set(TCAM_INSTALL_SYSTEMD "${CMAKE_INSTALL_PREFIX}/lib/systemd/system/" CACHE PATH "systemd unit installation path" FORCE)
+
+    set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" CACHE PATH "pkgconfig installation path" FORCE)
+
+  endif (NOT TCAM_INSTALL_FORCE_PREFIX)
 
   set(TCAM_INSTALL_DOCUMENTATION
     "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/doc"
@@ -101,19 +113,6 @@ else()
 
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
-if (TCAM_BUILD_TOOLS)
-
-  find_package(PythonInterp 3 REQUIRED QUIET)
-
-  execute_process(COMMAND
-    python3 -c "from distutils.sysconfig import get_python_lib; lb=get_python_lib(); print(lb.startswith('${CMAKE_INSTALL_PREFIX}') and lb or lb)"
-    OUTPUT_VARIABLE
-    PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  set(TCAM_INSTALL_PYTHON3_MODULES "${PYTHON_SITE_PACKAGES}" CACHE PATH "Installation path for python3 modules")
-
-endif (TCAM_BUILD_TOOLS)
-
 
 ##
 # GObject installation directories
@@ -123,7 +122,7 @@ endif (TCAM_BUILD_TOOLS)
 pkg_check_variable(gobject-introspection-1.0 girdir)
 pkg_check_variable(gobject-introspection-1.0 typelibdir)
 
-if (GOBJECT_INTROSPECTION_1.0_GIRDIR)
+if (GOBJECT_INTROSPECTION_1.0_GIRDIR AND NOT TCAM_INSTALL_FORCE_PREFIX)
   set(TCAM_INSTALL_GIR "${GOBJECT_INTROSPECTION_1.0_GIRDIR}"
     CACHE PATH "gobject introspection installation path")
 else()
@@ -131,7 +130,7 @@ else()
     CACHE PATH "gobject introspection installation path")
 endif()
 
-if (GOBJECT_INTROSPECTION_1.0_TYPELIBDIR)
+if (GOBJECT_INTROSPECTION_1.0_TYPELIBDIR AND NOT TCAM_INSTALL_FORCE_PREFIX)
   set(TCAM_INSTALL_TYPELIB "${GOBJECT_INTROSPECTION_1.0_TYPELIBDIR}"
     CACHE PATH "gobject introspection typelib installation path")
 else()
@@ -148,8 +147,7 @@ if (TCAM_BUILD_GST_1_0)
   pkg_check_variable(gstreamer-1.0 pluginsdir)
   pkg_check_variable(gstreamer-1.0 includedir)
 
-
-  if (GSTREAMER_1.0_PLUGINSDIR)
+  if (GSTREAMER_1.0_PLUGINSDIR AND NOT TCAM_INSTALL_FORCE_PREFIX)
     set(TCAM_INSTALL_GST_1_0 "${GSTREAMER_1.0_PLUGINSDIR}"
       CACHE PATH "gstreamer-1.0 module installation path")
   else()
@@ -157,13 +155,13 @@ if (TCAM_BUILD_GST_1_0)
       CACHE PATH "gstreamer-1.0 module installation path")
   endif()
 
-  if (GSTREAMER_1.0_INCLUDEDIR)
+  if (GSTREAMER_1.0_INCLUDEDIR AND NOT TCAM_INSTALL_FORCE_PREFIX)
     set(TCAM_INSTALL_GST_1_0_HEADER "${GSTREAMER_1.0_INCLUDEDIR}"
       CACHE PATH "gstreamer-1.0 header installation path")
   else()
     set(TCAM_INSTALL_GST_1_0_HEADER "${CMAKE_INSTALL_PREFIX}/include/gstreamer-1.0"
       CACHE PATH "gstreamer-1.0 header installation path")
-  endif (GSTREAMER_1.0_INCLUDEDIR)
+  endif()
 
 endif (TCAM_BUILD_GST_1_0)
 

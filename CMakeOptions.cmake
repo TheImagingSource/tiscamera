@@ -29,6 +29,8 @@ option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system li
 option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." OFF)
 option(TCAM_DOWNLOAD_MESON "Download version of meson for compilation purposes" OFF)
 
+option(TCAM_INSTALL_FORCE_PREFIX "Force CMAKE_INSTALL_PREFIX onto all tiscamera parts. Only works with custom prefix." OFF)
+
 if (TCAM_ARAVIS_USB_VISION)
   # activate aravis since we need it for usb3vision
   set(TCAM_BUILD_ARAVIS ON CACHE BOOL "Include GigE support via aravis" FORCE)

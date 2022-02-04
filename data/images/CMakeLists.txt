@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(TCAM_IMAGE_DIR "${TCAM_SOURCE_DIR}/data/images/" CACHE INTERNAL "project folder for images")
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   DESTINATION "${TCAM_INSTALL_IMAGE_DIR}"
