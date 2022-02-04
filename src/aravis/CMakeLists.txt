@@ -35,20 +35,22 @@ if (TCAM_BUILD_ARAVIS)
     tcam-base
     )
 
+  find_package(GLIB2   REQUIRED QUIET)
+  target_include_directories(tcam-backend-aravis PRIVATE ${GLIB2_INCLUDE_DIR})
+  target_link_libraries(tcam-backend-aravis PRIVATE "${GLIB2_LIBRARIES}")
+
   if (TCAM_INTERNAL_ARAVIS)
 
     find_package(LibXml2 REQUIRED QUIET)
     find_package(PCAP REQUIRED QUIET)
 
     find_package(GObject REQUIRED QUIET)
-    find_package(GLIB2   REQUIRED QUIET)
     find_package(GIO     REQUIRED QUIET)
 
 
     target_include_directories(tcam-backend-aravis PRIVATE "${GIO_INCLUDE_DIR}")
 
     target_include_directories(tcam-backend-aravis PRIVATE ${GOBJECT_INCLUDE_DIR})
-    target_include_directories(tcam-backend-aravis PRIVATE ${GLIB2_INCLUDE_DIR})
 
     target_include_directories(tcam-backend-aravis SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/external/aravis/src")
     target_include_directories(tcam-backend-aravis PRIVATE SYSTEM "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/")
@@ -57,7 +59,6 @@ if (TCAM_BUILD_ARAVIS)
 
     target_link_libraries(tcam-backend-aravis PRIVATE "${LIBXML2_LIBRARIES}")
     target_link_libraries(tcam-backend-aravis PRIVATE "${GIO_LIBRARIES}")
-    target_link_libraries(tcam-backend-aravis PRIVATE "${GLIB2_LIBRARIES}")
     target_link_libraries(tcam-backend-aravis PRIVATE "${PCAP_LIBRARIES}")
 
   else (TCAM_INTERNAL_ARAVIS)
