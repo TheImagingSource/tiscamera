@@ -67,10 +67,11 @@ set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 
 if (TCAM_BUILD_ARAVIS)
 
-  set(ARAVIS_PRERM "systemctl stop gige-daemon.service
-        systemctl disable gige-daemon.service")
-  set(ARAVIS_POSTINST "systemctl enable gige-daemon.service
-        systemctl start gige-daemon.service")
+  set(ARAVIS_POSTINST "systemctl enable tcam-gige-daemon.service
+                       systemctl start tcam-gige-daemon.service")
+
+  set(ARAVIS_PRERM "systemctl stop tcam-gige-daemon.service
+                    systemctl disable tcam-gige-daemon.service")
 
   add_deps("aravis")
 
