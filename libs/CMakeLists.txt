@@ -15,4 +15,13 @@
 
 add_subdirectory(dutils_image EXCLUDE_FROM_ALL)
 add_subdirectory(gst-helper EXCLUDE_FROM_ALL)
+
+# Set variables to correctly install tcam-property
+
+set(TCAM_PROPERTY_INSTALL_LIB "${TCAM_INSTALL_LIB}")
+set(TCAM_PROPERTY_INSTALL_INCLUDE "${TCAM_INSTALL_INCLUDE}")
+
+set(TCAM_PROPERTY_INSTALL_GIR "${TCAM_INSTALL_GIR}")
+set(TCAM_PROPERTY_INSTALL_TYPELIB "${TCAM_INSTALL_TYPELIB}")
+
 add_subdirectory(tcam-property)
