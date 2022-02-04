@@ -19,12 +19,11 @@
 
 using namespace tcam;
 
-
-void AravisDevice::determine_scaling()
+void AravisDevice::determine_scaling_type()
 {
     scale_.scale_type = ImageScalingType::Unknown;
 
-    auto check_prop = [this](const std::string& name, ImageScalingType flag)
+    auto add_scaling_prop_if_av = [this](const std::string& name, ImageScalingType flag)
     {
         auto prop = tcam::property::find_property(internal_properties_, name);
         if (prop)
@@ -36,9 +35,9 @@ void AravisDevice::determine_scaling()
         return false;
     };
 
-    check_prop("Binning", ImageScalingType::Binning);
-    check_prop("BinningHorizontal", ImageScalingType::Binning);
-    check_prop("BinningVertical", ImageScalingType::Binning);
+    add_scaling_prop_if_av("Binning", ImageScalingType::Binning);
+    add_scaling_prop_if_av("BinningHorizontal", ImageScalingType::Binning);
+    add_scaling_prop_if_av("BinningVertical", ImageScalingType::Binning);
 
     ImageScalingType to_set = ImageScalingType::Skipping;
 
@@ -49,9 +48,8 @@ void AravisDevice::determine_scaling()
         to_set = ImageScalingType::BinningSkipping;
     }
 
-    check_prop("Skipping", to_set);
-    check_prop("DecimationHorizontal", to_set);
-    check_prop("DecimationVertical", to_set);
+    add_scaling_prop_if_av("DecimationHorizontal", to_set);
+    add_scaling_prop_if_av("DecimationVertical", to_set);
 
     if (scale_.scale_type == ImageScalingType::Unknown)
     {
@@ -60,12 +58,9 @@ void AravisDevice::determine_scaling()
 }
 
 
-void AravisDevice::generate_scales()
+void AravisDevice::generate_scaling_information()
 {
-    if (scale_.scale_type == ImageScalingType::Unknown)
-    {
-        determine_scaling();
-    }
+    determine_scaling_type();
 
     auto legal_value = [](const int i)
     {
@@ -111,7 +106,7 @@ void AravisDevice::generate_scales()
                     // SPDLOG_INFO("New binning: {}x{}", i, i);
                     //SPDLOG_ERROR("new", bh->);
 
-                    scale_.scales.push_back(new_scale);
+                    scale_.scaling_info_list.push_back(new_scale);
                 }
             }
         }
@@ -129,15 +124,15 @@ void AravisDevice::generate_scales()
                 {
                     if (entry == "X1")
                     {
-                        scale_.scales.push_back({ 1, 1 });
+                        scale_.scaling_info_list.push_back({ 1, 1 });
                     }
                     else if (entry == "X2")
                     {
-                        scale_.scales.push_back({ 2, 2 });
+                        scale_.scaling_info_list.push_back({ 2, 2 });
                     }
                     else if (entry == "X4")
                     {
-                        scale_.scales.push_back({ 4, 4 });
+                        scale_.scaling_info_list.push_back({ 4, 4 });
                     }
                     else
                     {
@@ -195,7 +190,7 @@ void AravisDevice::generate_scales()
                 new_scale.skipping_h = i;
                 new_scale.skipping_v = v;
 
-                scale_.scales.push_back(new_scale);
+                scale_.scaling_info_list.push_back(new_scale);
             }
         }
     }
@@ -245,11 +240,11 @@ void AravisDevice::generate_scales()
 
         auto scale_is_known = [=](const tcam::image_scaling& s)
         {
-            auto find = std::find_if(scale_.scales.begin(),
-                                     scale_.scales.end(),
+            auto find = std::find_if(scale_.scaling_info_list.begin(),
+                                     scale_.scaling_info_list.end(),
                                      [s](const tcam::image_scaling& vs) { return (s == vs); });
 
-            if (find == scale_.scales.end())
+            if (find == scale_.scaling_info_list.end())
             {
                 return false;
             }
@@ -295,7 +290,7 @@ void AravisDevice::generate_scales()
                             continue;
                         }
 
-                        scale_.scales.push_back(is);
+                        scale_.scaling_info_list.push_back(is);
                     }
                 }
             }
@@ -407,10 +402,7 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
 
 image_scaling AravisDevice::get_current_scaling()
 {
-    if (scale_.scale_type == ImageScalingType::Unknown)
-    {
-        determine_scaling();
-    }
+    assert(scale_.scale_type != ImageScalingType::Unknown);
 
     image_scaling ret = {};
 
@@ -484,29 +476,30 @@ image_scaling AravisDevice::get_current_scaling()
     if (scale_.scale_type == ImageScalingType::Skipping
         || scale_.scale_type == ImageScalingType::BinningSkipping)
     {
-        auto sk_hb = tcam::property::find_property(scale_.properties, "DecimationHorizontal");
-        auto sk_vb = tcam::property::find_property(scale_.properties, "DecimationVertical");
+        auto sk_h = tcam::property::find_property<tcam::property::IPropertyInteger>(scale_.properties, "DecimationHorizontal");
+        auto sk_v = tcam::property::find_property<tcam::property::IPropertyInteger>(scale_.properties, "DecimationVertical");
 
-        auto sk_h = dynamic_cast<tcam::property::IPropertyInteger*>(sk_hb.get());
-        auto sk_v = dynamic_cast<tcam::property::IPropertyInteger*>(sk_vb.get());
-
-        auto res = sk_h->get_value();
-
-        if (!res)
+        if (auto res = sk_h->get_value(); !res)
         {
             SPDLOG_ERROR("Unable to retrieve value for SkippingHorizontal: {}",
                          res.as_failure().error().message());
             return {};
         }
-        ret.skipping_h = res.value();
-        res = sk_v->get_value();
-        if (!res)
+        else
+        {
+            ret.skipping_h = res.value();
+        }
+        
+        if (auto res = sk_v->get_value(); !res)
         {
             SPDLOG_ERROR("Unable to retrieve value for SkippingVertical: {}",
                          res.as_failure().error().message());
             return {};
         }
-        ret.skipping_v = res.value();
+        else
+        {
+            ret.skipping_v = res.value();
+        }
     }
 
     return ret;

@@ -23,6 +23,7 @@
 #include <arv.h>
 #include <atomic>
 #include <mutex>
+#include <optional>
 
 VISIBILITY_INTERNAL
 
@@ -36,18 +37,22 @@ class AravisPropertyBackend;
 
 class AravisDevice : public DeviceInterface
 {
-
+    // #TODO This class could be removed when AravisDevice can be a std::shared_ptr
     class AravisFormatHandler : public FormatHandlerInterface
     {
         friend class AravisDevice;
 
     public:
-        AravisFormatHandler(AravisDevice*);
-        std::vector<double> get_framerates(const tcam_image_size&,
-                                           uint32_t pixelformat) final;
+        AravisFormatHandler(AravisDevice* dev) : device_(dev) {}
+
+        std::vector<double> get_framerates(const tcam_image_size& size, uint32_t pixelformat) final
+        {
+            tcam_video_format tmp = { pixelformat, {}, size.width, size.height, 0 };
+            return device_->get_framerates(VideoFormat(tmp));
+        }
 
     protected:
-        AravisDevice* device;
+        AravisDevice* device_ = nullptr;
     };
 
 public:
@@ -66,9 +71,17 @@ public:
 
     bool set_video_format(const VideoFormat&) final;
 
-    VideoFormat get_active_video_format() const final;
+    tcam::VideoFormat read_camera_current_video_format();
 
-    std::vector<VideoFormatDescription> get_available_video_formats() final;
+    VideoFormat get_active_video_format() const final
+    {
+        return active_video_format_;
+    }
+
+    std::vector<VideoFormatDescription> get_available_video_formats() final
+    {
+        return available_videoformats_;
+    }
 
     bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) final;
     bool release_buffers() final;
@@ -135,7 +148,7 @@ private:
     {
         std::vector<std::shared_ptr<tcam::property::IPropertyBase>> properties;
 
-        std::vector<image_scaling> scales;
+        std::vector<image_scaling> scaling_info_list;
 
         ImageScalingType scale_type = ImageScalingType::Unknown;
     };
@@ -143,8 +156,8 @@ private:
     device_scaling scale_;
 
 
-    void determine_scaling();
-    void generate_scales();
+    void determine_scaling_type();
+    void generate_scaling_information();
     bool set_scaling(const image_scaling& scale);
     image_scaling get_current_scaling();
 
@@ -153,21 +166,30 @@ private:
     std::vector<VideoFormatDescription> available_videoformats_;
     bool has_offset_ = false;
 
-
-    // found nodes that contain format information
-    std::vector<ArvGcNode*> format_nodes_;
-
-    void determine_active_video_format();
-
     void index_genicam();
-    void iterate_genicam(const char* feature);
-    void index_genicam_format(ArvGcNode* /* node */);
+    void generate_video_formats();
 
     void index_properties(const char* name);
 
     tcam_image_size get_sensor_size() const;
 
     void complete_aravis_stream_buffer(ArvBuffer* buffer, bool is_incomplete);
+
+    std::vector<double> get_framerates(const VideoFormat& fmt);
+
+    bool has_test_format_interface_ = false;
+    bool has_test_binning_h_ = false;
+    bool has_test_binning_v_ = false;
+    bool has_test_skipping_h_ = false;
+    bool has_test_skipping_v_ = false;
+    bool has_FPS_enum_interface_ = false;
+
+    auto fetch_test_itf_framerates(const VideoFormat& fmt)
+        -> std::optional<std::pair<double, double>>;
+
+    bool has_genicam_property( const char* name ) const;
+    ArvGcNode* get_genicam_property_node( const char* name ) const;
+
 
 }; /* class GigeCapture */
 

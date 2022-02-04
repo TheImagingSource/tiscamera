@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <optional>
 
 
 VISIBILITY_INTERNAL
@@ -95,6 +96,8 @@ double map_value_ranges(double input_start,
  * @return value of the environment variable or backup
  */
 std::string get_environment_variable(const std::string& name, const std::string& backup);
+
+std::optional<int> get_environment_variable_int(const std::string& name);
 
 /**
  * @brief set the thread name (for debuggers) of the specified thread.

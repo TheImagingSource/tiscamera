@@ -26,6 +26,14 @@ using namespace tcam;
 
 VideoFormat::VideoFormat(const tcam_video_format& new_format) noexcept : format(new_format) {}
 
+VideoFormat::VideoFormat(uint32_t fourcc,
+                         tcam_image_size dim,
+                         image_scaling scale_factors,
+                         double framerate) noexcept
+    : format { fourcc, scale_factors, dim.width, dim.height, framerate }
+{
+}
+
 bool VideoFormat::operator==(const VideoFormat& other) const noexcept
 {
     return format.fourcc == other.format.fourcc && format.width == other.format.width

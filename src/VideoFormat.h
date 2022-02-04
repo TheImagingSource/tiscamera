@@ -40,6 +40,7 @@ public:
     VideoFormat() = default;
 
     explicit VideoFormat(const tcam_video_format&) noexcept;
+    VideoFormat(uint32_t fourcc, tcam_image_size dim, image_scaling scale_factors, double framerate ) noexcept;
 
     VideoFormat(const VideoFormat&) = default;
     VideoFormat& operator=(const VideoFormat&) = default;

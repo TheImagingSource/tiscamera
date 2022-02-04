@@ -247,6 +247,26 @@ std::string tcam::get_environment_variable(const std::string& name, const std::s
     return value;
 }
 
+std::optional<int> tcam::get_environment_variable_int(const std::string& name)
+{
+    char* value = getenv(name.c_str());
+
+    if (!value)
+    {
+        return {};
+    }
+
+    try
+    {
+        return std::stoi(value);
+    }
+    catch (const std::exception& e)
+    {
+        SPDLOG_WARN("Failed to parse environment variable '{}' contents={}.", name, value);
+    }
+    return {};
+}
+
 int tcam::set_thread_name(const char* name, pthread_t thrd /*= pthread_self()*/)
 {
     return pthread_setname_np(thrd, name);
