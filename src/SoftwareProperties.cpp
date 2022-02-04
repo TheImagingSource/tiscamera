@@ -938,17 +938,16 @@ void SoftwareProperties::generate_focus_auto()
 
 void SoftwareProperties::generate_balance_white_channels()
 {
-    auto wb_selector =
+    m_wb.m_dev_wb_selector =
         tcam::property::find_property<IPropertyEnum>(m_device_properties, "BalanceRatioSelector");
-    auto wb_ratio =
+    m_wb.m_dev_wb_ratio =
         tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceRatioRaw");
-    if (!wb_ratio)
+    if (!m_wb.m_dev_wb_ratio)
     {
-        wb_ratio =
+        m_wb.m_dev_wb_ratio =
             tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceRatio");
     }
 
-    // #TODO check if all channels are present
     if (!m_wb.m_dev_wb_ratio || !m_wb.m_dev_wb_selector)
     {
         SPDLOG_ERROR("Unable to correctly identify balance white properties. Balance White "
@@ -956,13 +955,15 @@ void SoftwareProperties::generate_balance_white_channels()
         return;
     }
 
-    m_wb.m_dev_wb_ratio = wb_ratio;
-    m_wb.m_dev_wb_selector = wb_selector;
-
-    add_prop_entry(sp::BalanceWhiteRed, &prop_lst::BalanceWhiteRed, balance_white_channel_range);
-    add_prop_entry(
-        sp::BalanceWhiteGreen, &prop_lst::BalanceWhiteGreen, balance_white_channel_range);
-    add_prop_entry(sp::BalanceWhiteBlue, &prop_lst::BalanceWhiteBlue, balance_white_channel_range);
+    add_prop_entry(sp::BalanceWhiteRed,
+                   &prop_lst::BalanceWhiteRed,
+                   balance_white_channel_range);
+    add_prop_entry(sp::BalanceWhiteGreen,
+                   &prop_lst::BalanceWhiteGreen,
+                   balance_white_channel_range);
+    add_prop_entry(sp::BalanceWhiteBlue,
+                   &prop_lst::BalanceWhiteBlue,
+                   balance_white_channel_range);
 }
 
 void SoftwareProperties::generate_balance_white_auto()
@@ -1013,6 +1014,8 @@ void SoftwareProperties::generate_balance_white_auto()
     }
     else
     {
+        m_wb.m_emulated_wb = true;
+
         add_prop_entry(sp::ClaimBalanceWhiteSoftware, &prop_lst::ClaimBalanceWhiteSoftware, false);
 
         add_prop_entry(
@@ -1103,6 +1106,21 @@ outcome::result<double> SoftwareProperties::get_device_wb(emulated::software_pro
             SPDLOG_WARN("Resetting BalanceWhiteSelector failed with: {}", ret.error().message());
         }
         return actual_rval;
+    }
+    else if (m_wb.get_type() == wb_type::Emulation)
+    {
+        if (prop_id == emulated::software_prop::BalanceWhiteRed)
+        {
+            return m_auto_params.wb.channels.r;
+        }
+        else if (prop_id == emulated::software_prop::BalanceWhiteGreen)
+        {
+            return m_auto_params.wb.channels.g;
+        }
+        else
+        {
+            return m_auto_params.wb.channels.b;
+        }
     }
 
     return tcam::status::NotSupported;

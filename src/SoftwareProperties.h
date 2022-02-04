@@ -95,7 +95,8 @@ private:
     {
         None,
         DevChannel,
-        DevSelector
+        DevSelector,
+        Emulation,
     };
 
     struct wb_setter
@@ -106,6 +107,7 @@ private:
 
         std::shared_ptr<tcam::property::IPropertyEnum> m_dev_wb_selector = nullptr;
         std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_ratio = nullptr;
+        bool m_emulated_wb = false;
 
         auto get_type() const
         {
@@ -113,6 +115,8 @@ private:
                 return wb_type::DevChannel;
             if (m_dev_wb_selector)
                 return wb_type::DevSelector;
+            if (m_emulated_wb)
+                return wb_type::Emulation;
             return wb_type::None;
         }
 
