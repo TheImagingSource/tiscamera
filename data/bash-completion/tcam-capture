@@ -39,7 +39,9 @@ _tcam-capture () {
 
     case $prev in
         --serial)
-            COMPREPLY=( $( compgen -W "$( tcam-ctrl --list-serial-long)" -- "$cur" ) )
+            # explicitly use --gst-debug=*:0
+            # we do not want debug output for tab completion
+            COMPREPLY=( $( compgen -W "$( tcam-ctrl --list-serial-long --gst-debug=*:0)" -- "$cur" ) )
             return 0
             ;;
     esac

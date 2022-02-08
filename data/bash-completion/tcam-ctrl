@@ -39,8 +39,9 @@ _tcam-ctrl () {
     if [[ -n $command ]]; then
         case $command in
             list|properties|formats|caps|-c|-p|--caps|--properties)
-                # COMPREPLY=( $( compgen -W "$( tcam-ctrl -- | awk -print 'NF>1{print $5}' )" -- "$cur" ) )
-                COMPREPLY=( $( compgen -W "$( tcam-ctrl --list-serial-long)" -- "$cur" ) )
+                # explicitly use --gst-debug=*:0
+                # we do not want debug output for tab completion
+                COMPREPLY=( $( compgen -W "$( tcam-ctrl --list-serial-long --gst-debug=*:0)" -- "$cur" ) )
                 return 0
                 ;;
             --transform)
