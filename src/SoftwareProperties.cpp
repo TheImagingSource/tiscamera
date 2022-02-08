@@ -212,11 +212,13 @@ void tcam::property::SoftwareProperties::generate_public_properties(bool has_bay
     { // BalanceWhite stuff
         auto base_selector =
             tcam::property::find_property(m_device_properties, "BalanceRatioSelector");
+        auto base_ratio =
+            tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceRatio");
 
         auto base_r = tcam::property::find_property(m_device_properties, "BalanceWhiteRed");
         auto base_g = tcam::property::find_property(m_device_properties, "BalanceWhiteGreen");
         auto base_b = tcam::property::find_property(m_device_properties, "BalanceWhiteBlue");
-        if (base_selector && !(base_r || base_g || base_b))
+        if (base_selector && base_ratio && !(base_r || base_g || base_b))
         {
             generate_balance_white_channels();
         }
@@ -938,32 +940,24 @@ void SoftwareProperties::generate_focus_auto()
 
 void SoftwareProperties::generate_balance_white_channels()
 {
-    m_wb.m_dev_wb_selector =
+    auto selector =
         tcam::property::find_property<IPropertyEnum>(m_device_properties, "BalanceRatioSelector");
-    m_wb.m_dev_wb_ratio =
-        tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceRatioRaw");
-    if (!m_wb.m_dev_wb_ratio)
-    {
-        m_wb.m_dev_wb_ratio =
-            tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceRatio");
-    }
+    auto ratio = tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceRatio");
 
-    if (!m_wb.m_dev_wb_ratio || !m_wb.m_dev_wb_selector)
+    if (!ratio || !selector)
     {
         SPDLOG_ERROR("Unable to correctly identify balance white properties. Balance White "
                      "will not work correctly.");
         return;
     }
 
-    add_prop_entry(sp::BalanceWhiteRed,
-                   &prop_lst::BalanceWhiteRed,
-                   balance_white_channel_range);
-    add_prop_entry(sp::BalanceWhiteGreen,
-                   &prop_lst::BalanceWhiteGreen,
-                   balance_white_channel_range);
-    add_prop_entry(sp::BalanceWhiteBlue,
-                   &prop_lst::BalanceWhiteBlue,
-                   balance_white_channel_range);
+    m_wb.m_dev_wb_selector = selector;
+    m_wb.m_dev_wb_ratio = ratio;
+
+    add_prop_entry(sp::BalanceWhiteRed, &prop_lst::BalanceWhiteRed, balance_white_channel_range);
+    add_prop_entry(
+        sp::BalanceWhiteGreen, &prop_lst::BalanceWhiteGreen, balance_white_channel_range);
+    add_prop_entry(sp::BalanceWhiteBlue, &prop_lst::BalanceWhiteBlue, balance_white_channel_range);
 }
 
 void SoftwareProperties::generate_balance_white_auto()
