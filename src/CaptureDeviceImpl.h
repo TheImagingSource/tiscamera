@@ -106,6 +106,7 @@ public:
 
     void set_drop_incomplete_frames(bool b);
 
+    outcome::result<tcam::framerate_info> get_framerate_info(const VideoFormat& fmt);
 private:
     void push_image(const std::shared_ptr<ImageBuffer>& buffer) final;
 

@@ -37,13 +37,50 @@ struct framerate_mapping
 };
 
 
+struct framerate_info
+{
+    framerate_info() = default;
+    explicit framerate_info(std::vector<double> lst);
+    framerate_info(double min, double max) : min_ { min }, max_ { max } {}
+
+    bool is_discrete_list() const noexcept
+    {
+        return !list_.empty();
+    }
+
+    std::vector<double> to_list() const;
+
+    bool empty() const noexcept
+    {
+        return list_.empty() && max_ == 0.;
+    }
+    double min() const noexcept
+    {
+        return min_;
+    }
+    double max() const noexcept
+    {
+        return max_;
+    }
+private:
+    std::vector<double> list_;
+    double min_ = 0.;
+    double max_ = 0.;
+};
+
 class VideoFormatDescription
 {
 public:
     VideoFormatDescription() = delete;
 
-    VideoFormatDescription(std::shared_ptr<FormatHandlerInterface> handler,
-                           const tcam_video_format_description&,
+    VideoFormatDescription(nullptr_t,
+                           const tcam_video_format_description& desc,
+                           const std::vector<framerate_mapping>& map)
+        : VideoFormatDescription(desc, map)
+    {
+    }
+
+    VideoFormatDescription(const tcam_video_format_description&,
                            const std::vector<framerate_mapping>&);
 
     VideoFormatDescription(const VideoFormatDescription&) = default;
@@ -66,17 +103,12 @@ public:
 
     std::vector<tcam_resolution_description> get_resolutions() const;
 
-    // #TODO Christopher: I am not totally sure why there is a difference in this. It seems that these could be merged
-    std::vector<double> get_frame_rates(const tcam_resolution_description& size) const;
-
-    std::vector<double> get_framerates(const tcam_image_size& s) const;
+    std::vector<double> get_framerates(const VideoFormat& s) const;
 
 private:
     tcam_video_format_description format;
 
     std::vector<framerate_mapping> res;
-
-    std::weak_ptr<FormatHandlerInterface> format_handler;
 };
 
 } /* namespace tcam */

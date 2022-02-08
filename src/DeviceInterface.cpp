@@ -44,3 +44,15 @@ std::shared_ptr<DeviceInterface> tcam::openDeviceInterface(const DeviceInfo& dev
     }
     return nullptr;
 }
+
+outcome::result<tcam::framerate_info> DeviceInterface::get_framerate_info(const VideoFormat& fmt)
+{
+    for (auto&& desc : get_available_video_formats())
+    {
+        if (desc.get_fourcc() == fmt.get_fourcc())
+        {
+            return tcam::framerate_info { desc.get_framerates(fmt) };
+        }
+    }
+    return tcam::status::FormatInvalid;
+}

@@ -37,24 +37,6 @@ class AravisPropertyBackend;
 
 class AravisDevice : public DeviceInterface
 {
-    // #TODO This class could be removed when AravisDevice can be a std::shared_ptr
-    class AravisFormatHandler : public FormatHandlerInterface
-    {
-        friend class AravisDevice;
-
-    public:
-        AravisFormatHandler(AravisDevice* dev) : device_(dev) {}
-
-        std::vector<double> get_framerates(const tcam_image_size& size, uint32_t pixelformat) final
-        {
-            tcam_video_format tmp = { pixelformat, {}, size.width, size.height, 0 };
-            return device_->get_framerates(VideoFormat(tmp));
-        }
-
-    protected:
-        AravisDevice* device_ = nullptr;
-    };
-
 public:
     AravisDevice(const DeviceInfo&);
 
@@ -92,6 +74,8 @@ public:
 
     void stop_stream() final;
 
+    outcome::result<tcam::framerate_info> get_framerate_info(const VideoFormat& fmt) final;
+
 private:
     // helper function to set lifetime of control channel
     // depending on env and auto negotiation
@@ -104,8 +88,6 @@ private:
     static void aravis_new_buffer_callback(ArvStream* stream, void* user_data);
 
     static void device_lost(ArvGvDevice* device, void* user_data);
-
-    std::shared_ptr<AravisFormatHandler> format_handler_;
 
     ArvCamera* arv_camera_ = nullptr;
 
@@ -175,8 +157,6 @@ private:
 
     void complete_aravis_stream_buffer(ArvBuffer* buffer, bool is_incomplete);
 
-    std::vector<double> get_framerates(const VideoFormat& fmt);
-
     bool has_test_format_interface_ = false;
     bool has_test_binning_h_ = false;
     bool has_test_binning_v_ = false;
@@ -184,11 +164,10 @@ private:
     bool has_test_skipping_v_ = false;
     bool has_FPS_enum_interface_ = false;
 
-    auto fetch_test_itf_framerates(const VideoFormat& fmt)
-        -> std::optional<std::pair<double, double>>;
+    auto fetch_test_itf_framerates(const VideoFormat& fmt) -> outcome::result<tcam::framerate_info>;
 
-    bool has_genicam_property( const char* name ) const;
-    ArvGcNode* get_genicam_property_node( const char* name ) const;
+    bool has_genicam_property(const char* name) const;
+    ArvGcNode* get_genicam_property_node(const char* name) const;
 
 
 }; /* class GigeCapture */

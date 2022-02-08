@@ -202,7 +202,7 @@ bool device_state::open_camera()
     }
 
     auto caps =
-        tcambind::convert_videoformatsdescription_to_caps(dev->get_available_video_formats());
+        tcambind::convert_videoformatsdescription_to_caps(*dev,dev->get_available_video_formats());
     if (caps == nullptr || gst_caps_get_size(caps.get()) == 0)
     {
         GST_ELEMENT_ERROR(parent_, CORE, CAPS, ("Failed to create caps for device."), (NULL));

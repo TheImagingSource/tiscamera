@@ -110,6 +110,8 @@ public:
         drop_incomplete_frames_ = b;
     }
 
+    virtual outcome::result<tcam::framerate_info> get_framerate_info(const VideoFormat& fmt);
+
 protected:
     DeviceInfo device;
 

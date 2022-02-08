@@ -103,6 +103,11 @@ void CaptureDevice::set_drop_incomplete_frames(bool b)
     impl->set_drop_incomplete_frames(b);
 }
 
+outcome::result<tcam::framerate_info> CaptureDevice::get_framerate_info(const VideoFormat& fmt)
+{
+    return impl->get_framerate_info(fmt);
+}
+
 std::shared_ptr<CaptureDevice> tcam::open_device(const std::string& serial, TCAM_DEVICE_TYPE type)
 {
     auto _open = [](const DeviceInfo& info) -> std::shared_ptr<CaptureDevice> {

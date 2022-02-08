@@ -18,13 +18,12 @@
 #define TCAM_CAPTUREDEVICE_H
 
 #include "DeviceInfo.h"
+#include "ImageSink.h"
 #include "PropertyInterfaces.h"
 #include "SinkInterface.h"
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
 #include "compiler_defines.h"
-
-#include "ImageSink.h"
 
 #include <memory>
 #include <string>
@@ -113,6 +112,8 @@ public:
     bool stop_stream();
 
     void set_drop_incomplete_frames(bool b);
+
+    outcome::result<tcam::framerate_info> get_framerate_info(const VideoFormat& fmt);
 
 private:
     std::shared_ptr<CaptureDeviceImpl> impl;

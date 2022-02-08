@@ -339,10 +339,12 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
         gst_tcam_mainsrc_sh_callback(cb, self);
     };
 
-    self->device->sink = std::make_shared<tcam::ImageSink>(cb_func, tcam::VideoFormat(format), state.imagesink_buffers_);
+    self->device->sink = std::make_shared<tcam::ImageSink>(
+        cb_func, tcam::VideoFormat(format), state.imagesink_buffers_);
 
     auto res = self->device->device_->start_stream(self->device->sink);
-    if (!res) {
+    if (!res)
+    {
         GST_ERROR_OBJECT(self, "Failed to start stream.");
         return FALSE;
     }
@@ -374,8 +376,7 @@ static void gst_tcam_mainsrc_device_lost_callback(const tcam::tcam_device_info* 
                                    NOT_FOUND,
                                    ("Device lost (%s)", serial.c_str()),
                                    ((nullptr)),
-                                   ("serial", G_TYPE_STRING, serial.c_str(), nullptr)
-        );
+                                   ("serial", G_TYPE_STRING, serial.c_str(), nullptr));
 
     self->device->is_streaming_ = false;
 
@@ -721,6 +722,108 @@ static GstCaps* gst_tcam_mainsrc_fixate_caps(GstBaseSrc* bsrc, GstCaps* caps)
     return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->fixate(bsrc, caps);
 }
 
+
+// Returns true, when the query could be answered, otherwise returns false
+static bool fetch_framerate_via_query_caps_worker(device_state& device,
+                                                  GstQuery* query,
+                                                  GstCaps* query_caps)
+{
+    assert(gst_caps_is_fixed(query_caps));
+
+    GstStructure* structure = gst_caps_get_structure(query_caps, 0);
+
+    if (!gst_structure_has_field(structure, "framerate"))
+    {
+        return false;
+    }
+
+    int height = 0;
+    int width = 0;
+
+    if (!gst_structure_get_int(structure, "width", &width) || width <= 0)
+    {
+        SPDLOG_WARN("Failed to fetch 'width' from GstCaps structure.");
+        return false;
+    }
+    if (!gst_structure_get_int(structure, "height", &height) || height <= 0)
+    {
+        SPDLOG_WARN("Failed to fetch 'width' from GstCaps structure.");
+        return false;
+    }
+
+    const char* format_string = gst_structure_get_string(structure, "format");
+    if (format_string == nullptr)
+    {
+        SPDLOG_WARN("Failed to fetch 'format' from GstCaps structure.");
+        return false;
+    }
+
+    tcam::image_scaling scale_info = {};
+    if (auto bin_str = gst_structure_get_string(structure, "binning"); bin_str)
+    {
+        int h = 0, v = 0;
+        if (sscanf(bin_str, "%dx%d", &h, &v) != 2)
+        {
+            SPDLOG_WARN("Failed to parse GstStructure binning field contents '{}'", bin_str);
+        }
+        else
+        {
+            scale_info.binning_h = h;
+            scale_info.binning_v = v;
+        }
+    }
+    if (auto bin_str = gst_structure_get_string(structure, "skipping"); bin_str)
+    {
+        int h = 0, v = 0;
+        if (sscanf(bin_str, "%dx%d", &h, &v) != 2)
+        {
+            SPDLOG_WARN("Failed to parse GstStructure skipping field contents '{}'", bin_str);
+        }
+        else
+        {
+            scale_info.skipping_h = h;
+            scale_info.skipping_v = v;
+        }
+    }
+
+
+    uint32_t fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(
+        gst_structure_get_name(structure), format_string);
+
+    auto format_list = device.device_->get_available_video_formats();
+
+    auto fps_res = device.device_->get_framerate_info(
+        tcam ::VideoFormat { fourcc, { (uint32_t)width, (uint32_t)height }, scale_info });
+    if (fps_res.has_error())
+    {
+        SPDLOG_ERROR(
+            "Failed to get framerates for '{} ({}x{})' from device.", format_string, width, height);
+        return false;
+    }
+
+    const auto& fps_list = fps_res.value();
+
+    int fps_min_num = 0;
+    int fps_min_den = 0;
+    int fps_max_num = 0;
+    int fps_max_den = 0;
+    gst_util_double_to_fraction(fps_list.min(), &fps_min_num, &fps_min_den);
+    gst_util_double_to_fraction(fps_list.max(), &fps_max_num, &fps_max_den);
+
+    GValue fps_val = G_VALUE_INIT;
+    g_value_init(&fps_val, GST_TYPE_FRACTION_RANGE);
+
+    gst_value_set_fraction_range_full(&fps_val, fps_min_num, fps_min_den, fps_max_num, fps_max_den);
+
+    GstCaps* result_caps = gst_caps_copy(query_caps);
+
+    gst_caps_set_value(result_caps, "framerate", &fps_val);
+
+    gst_query_set_caps_result(query, result_caps);
+    return true;
+}
+
+
 static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(bsrc);
@@ -769,7 +872,7 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
         }
         case GST_QUERY_CAPS:
         {
-            GstCaps* query_caps;
+            GstCaps* query_caps = nullptr;
             gst_query_parse_caps(query, &query_caps);
 
             if (!query_caps || gst_caps_is_empty(query_caps))
@@ -777,7 +880,7 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
                 return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->query(bsrc, query);
             }
 
-            // these queries potentially require device interaction
+            // these queries require device interaction
             // no device means we return FALSE
 
             if (!self->device->is_device_open())
@@ -791,59 +894,12 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
 
             if (gst_caps_is_fixed(query_caps))
             {
-                //GST_ERROR("FIXED");
-
-                GstStructure* structure = gst_caps_get_structure(query_caps, 0);
-
-                if (!gst_structure_has_field(structure, "framerate"))
+                if (fetch_framerate_via_query_caps_worker(*self->device, query, query_caps))
                 {
-                    int height = 0;
-                    int width = 0;
-
-                    gst_structure_get_int(structure, "width", &width);
-                    gst_structure_get_int(structure, "height", &height);
-
-                    const char* format_string = gst_structure_get_string(structure, "format");
-
-                    uint32_t fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(
-                        gst_structure_get_name(structure), format_string);
-
-                    auto format = self->device->device_->get_available_video_formats();
-
-                    GstCaps* result_caps = gst_caps_copy(query_caps);
-
-                    int fps_min_num;
-                    int fps_min_den;
-                    int fps_max_num;
-                    int fps_max_den;
-
-                    for (auto& f : format)
-                    {
-                        if (f.get_fourcc() == fourcc)
-                        {
-                            auto fps = f.get_framerates({ (uint32_t)width, (uint32_t)height });
-
-                            gst_util_double_to_fraction(*std::min_element(fps.begin(), fps.end()),
-                                                        &fps_min_num,
-                                                        &fps_min_den);
-                            gst_util_double_to_fraction(*std::max_element(fps.begin(), fps.end()),
-                                                        &fps_max_num,
-                                                        &fps_max_den);
-
-                            GValue fps_val = G_VALUE_INIT;
-                            g_value_init(&fps_val, GST_TYPE_FRACTION_RANGE);
-
-                            gst_value_set_fraction_range_full(
-                                &fps_val, fps_min_num, fps_min_den, fps_max_num, fps_max_den);
-
-                            gst_caps_set_value(result_caps, "framerate", &fps_val);
-
-                            gst_query_set_caps_result(query, result_caps);
-                            return TRUE;
-                        }
-                    }
+                    return TRUE;
                 }
             }
+
             return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->query(bsrc, query);
         }
         default:

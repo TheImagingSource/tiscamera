@@ -56,8 +56,6 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc)
         auto_set_control_lifetime();
     }
 
-    format_handler_ = std::make_shared<AravisFormatHandler>(this);
-
     backend_ =
         std::make_shared<tcam::property::AravisPropertyBackend>(arv_camera_get_device(arv_camera_));
 
@@ -75,16 +73,14 @@ AravisDevice::~AravisDevice()
 {
     if (arv_camera_ != NULL)
     {
-        SPDLOG_INFO("Destroying arvcamera");
         g_object_unref(arv_camera_);
         arv_camera_ = NULL;
     }
 }
 
 
-
 auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
-    -> std::optional<std::pair<double, double>>
+    -> outcome::result<tcam::framerate_info>
 {
     auto dev = arv_camera_get_device(arv_camera_);
 
@@ -103,34 +99,34 @@ auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
 
     if (set_int("TestPixelFormat", fourcc2aravis(fmt.get_fourcc())) == false)
     {
-        return {};
+        return tcam::status::UndefinedError;
     }
     if (set_int("TestWidth", fmt.get_size().width) == false)
     {
-        return {};
+        return tcam::status::UndefinedError;
     }
     if (set_int("TestHeight", fmt.get_size().height) == false)
     {
-        return {};
+        return tcam::status::UndefinedError;
     }
     if (has_test_binning_h_
         && set_int("TestBinningHorizontal", fmt.get_scaling().binning_h) == false)
     {
-        return {};
+        return tcam::status::UndefinedError;
     }
     if (has_test_binning_h_ && set_int("TestBinningVertical", fmt.get_scaling().binning_v) == false)
     {
-        return {};
+        return tcam::status::UndefinedError;
     }
     if (has_test_skipping_h_
         && set_int("TestDecimationHoizontal", fmt.get_scaling().skipping_h) == false)
     {
-        return {};
+        return tcam::status::UndefinedError;
     }
     if (has_test_skipping_v_
         && set_int("TestDecimationVertical", fmt.get_scaling().skipping_v) == false)
     {
-        return {};
+        return tcam::status::UndefinedError;
     }
 
     GError* error = nullptr;
@@ -139,19 +135,19 @@ auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
     {
         SPDLOG_ERROR("Failed to get 'ResultingMinFPS'. Error: {}", error->message);
         g_clear_error(&error);
-        return {};
+        return tcam::status::UndefinedError;
     }
     auto max = arv_device_get_float_feature_value(dev, "ResultingMaxFPS", &error);
     if (error)
     {
         SPDLOG_ERROR("Failed to get 'ResultingMaxFPS'. Error: {}", error->message);
         g_clear_error(&error);
-        return {};
+        return tcam::status::UndefinedError;
     }
-    return std::make_pair(min, max);
+    return tcam::framerate_info { min, max };
 }
 
-static auto fetch_FPS_enum_framerates([[maybe_unused]] ArvDevice* dev) -> std::vector<double>
+static auto fetch_FPS_enum_framerates([[maybe_unused]] ArvDevice* dev) -> tcam::framerate_info
 {
     // 2022/02/02 Christopher: I think this is only used for very old cameras, so we can skip this
     // Another Note, this is not complete, I think there were excludes defined somewhere
@@ -185,7 +181,7 @@ static auto fetch_FPS_enum_framerates([[maybe_unused]] ArvDevice* dev) -> std::v
     {
         g_free(fps_values);
     }
-    return ret;
+    return tcam::framerate_info{ lst };
 #else
     SPDLOG_ERROR("Failed to fetch FPS list, because support for cameras with a FPS enumeration are "
                  "not supported anymore.");
@@ -281,27 +277,14 @@ static void restore_data_reapply(ArvCamera* camera, data_to_restore_active_forma
 }
 } // namespace
 
-std::vector<double> AravisDevice::get_framerates(const VideoFormat& fmt)
+
+outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(const VideoFormat& fmt)
 {
     auto dev = arv_camera_get_device(arv_camera_);
 
     if (has_test_format_interface_)
     {
-        if (auto range_from_test_itf = fetch_test_itf_framerates(fmt);
-            range_from_test_itf.has_value())
-        {
-            auto [min, max] = range_from_test_itf.value();
-
-            SPDLOG_TRACE("Queried: {}x{} fourcc {} Received range[{};{}]",
-                         fmt.get_size().width,
-                         fmt.get_size().height,
-                         fmt.get_fourcc_string(),
-                         min,
-                         max);
-
-            return create_steps_for_range(min, max);
-        }
-        return {};
+        return fetch_test_itf_framerates(fmt);
     }
     if (has_FPS_enum_interface_)
     {
@@ -313,13 +296,13 @@ std::vector<double> AravisDevice::get_framerates(const VideoFormat& fmt)
         // this means a stream is active do not touch settings
         SPDLOG_ERROR("Failed to fetch FPS list because the camera is currently open and it does "
                      "not have 'TestPixelFormat'.");
-        return {};
+        return tcam::status::DeviceBlocked;
     }
 
     auto restore_data = restore_data_fetch(arv_camera_, has_offset_);
     if (!restore_data)
     {
-        return {};
+        return tcam::status::DeviceBlocked;
     }
 
     auto s = fmt.get_size();
@@ -388,7 +371,7 @@ std::vector<double> AravisDevice::get_framerates(const VideoFormat& fmt)
                  min,
                  max);
 
-    return create_steps_for_range(min, max);
+    return tcam::framerate_info { min, max };
 }
 
 DeviceInfo AravisDevice::get_device_description() const
@@ -607,10 +590,10 @@ void AravisDevice::index_genicam()
 
     has_test_format_interface_ = has_genicam_property("TestPixelFormat");
 
-    has_test_binning_h_ = has_genicam_property( "TestBinningHorizontal");
-    has_test_binning_v_ = has_genicam_property( "TestBinningVertical");
-    has_test_skipping_h_ = has_genicam_property( "TestDecimationHorizontal");
-    has_test_skipping_v_ = has_genicam_property( "TestDecimationVertical");
+    has_test_binning_h_ = has_genicam_property("TestBinningHorizontal");
+    has_test_binning_v_ = has_genicam_property("TestBinningVertical");
+    has_test_skipping_h_ = has_genicam_property("TestDecimationHorizontal");
+    has_test_skipping_v_ = has_genicam_property("TestDecimationVertical");
 
     has_FPS_enum_interface_ = false;
     if (auto fps_node = get_genicam_property_node("FPS"); fps_node != nullptr)
@@ -829,7 +812,15 @@ void AravisDevice::generate_video_formats()
             rf.resolution.height_step_size = height_step;
         }
 
-        rf.framerates = get_framerates(VideoFormat{fcc, max_resolution, {}, 0});
+        if (auto framerate_res = get_framerate_info(VideoFormat { fcc, max_resolution, {}, 0 });
+            framerate_res.has_error())
+        {
+            continue;
+        }
+        else
+        {
+            rf.framerates = framerate_res.value().to_list();
+        }
 
         std::vector<framerate_mapping> res_vec;
         res_vec.push_back(rf);
@@ -858,23 +849,23 @@ void AravisDevice::generate_video_formats()
                 binned_max_size.width -= binned_max_size.width % width_step;
                 binned_max_size.height -= binned_max_size.height % height_step;
 
-                tcam_resolution_description res = { TCAM_RESOLUTION_TYPE_RANGE,
-                                                    min_resolution,
-                                                    binned_max_size,
-                                                    width_step,
-                                                    height_step,
-                                                    scaling_info
+                tcam_resolution_description res = {
+                    TCAM_RESOLUTION_TYPE_RANGE, min_resolution,        binned_max_size,
+                    (unsigned)width_step,       (unsigned)height_step, scaling_info
                 };
                 // SPDLOG_ERROR("{}x{} max:{}x{} =>",
                 //              new_rf.resolution.min_size.width, new_rf.resolution.min_size.height,
                 //              new_rf.resolution.max_size.width, new_rf.resolution.max_size.height);
 
                 VideoFormat fmt { fcc, binned_max_size, scaling_info, 0 };
-                res_vec.push_back({ res, get_framerates(fmt) });
+                if (auto framerate_res = get_framerate_info(fmt); !framerate_res.has_error())
+                {
+                    res_vec.push_back({ res, framerate_res.value().to_list() });
+                }
             }
         }
 
-        available_videoformats_.push_back(VideoFormatDescription(format_handler_, desc, res_vec));
+        available_videoformats_.push_back(VideoFormatDescription(nullptr, desc, res_vec));
     }
 }
 
@@ -911,12 +902,12 @@ tcam_image_size AravisDevice::get_sensor_size() const
     return { (uint32_t)res_w.value(), (uint32_t)res_h.value() };
 }
 
-bool  AravisDevice::has_genicam_property( const char* name ) const
+bool AravisDevice::has_genicam_property(const char* name) const
 {
-    return arv_gc_get_node( genicam_, name ) != nullptr;
+    return arv_gc_get_node(genicam_, name) != nullptr;
 }
 
-ArvGcNode* AravisDevice::get_genicam_property_node( const char* name ) const
+ArvGcNode* AravisDevice::get_genicam_property_node(const char* name) const
 {
-    return arv_gc_get_node( genicam_, name );
+    return arv_gc_get_node(genicam_, name);
 }

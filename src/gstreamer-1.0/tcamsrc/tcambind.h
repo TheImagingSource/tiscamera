@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "../../CaptureDevice.h"
 #include "../../VideoFormatDescription.h"
 
 #include <gst-helper/gst_ptr.h>
@@ -24,13 +25,14 @@
 namespace tcambind
 {
 /**
-* Seperates a string of layout 'serial-type' into first == serial, second == type.
+* Separates a string of layout 'serial-type' into first == serial, second == type.
 * If no '-' is found, first will contain the full input
 */
 std::pair<std::string, std::string> separate_serial_and_type(const std::string& input);
 
 
 gst_helper::gst_ptr<GstCaps> convert_videoformatsdescription_to_caps(
+    tcam::CaptureDevice& device,
     const std::vector<tcam::VideoFormatDescription>& descriptions);
 
 } // namespace tcambind

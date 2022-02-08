@@ -17,27 +17,7 @@
 #ifndef TCAM_FORMATHANDLERINTERFACE_H
 #define TCAM_FORMATHANDLERINTERFACE_H
 
-#include "base_types.h"
-#include "compiler_defines.h"
 
-#include <vector>
-
-VISIBILITY_INTERNAL
-
-namespace tcam
-{
-
-class FormatHandlerInterface
-{
-public:
-    virtual ~FormatHandlerInterface() = default;
-
-    virtual std::vector<double> get_framerates(const tcam_image_size&,
-                                               uint32_t pixelformat) = 0;
-};
-
-} /* namespace tcam */
-
-VISIBILITY_POP
+// dead file remove
 
 #endif /* TCAM_FORMATHANDLERINTERFACE_H */

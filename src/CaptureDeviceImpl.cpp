@@ -184,3 +184,8 @@ void CaptureDeviceImpl::push_image(const std::shared_ptr<ImageBuffer>& buffer)
 
     sink_->push_image(buffer);
 }
+
+outcome::result<tcam::framerate_info> CaptureDeviceImpl::get_framerate_info(const VideoFormat& fmt)
+{
+    return device_->get_framerate_info(fmt);
+}

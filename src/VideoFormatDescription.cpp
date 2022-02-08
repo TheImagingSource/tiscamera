@@ -26,10 +26,9 @@
 using namespace tcam;
 
 
-VideoFormatDescription::VideoFormatDescription(std::shared_ptr<FormatHandlerInterface> handler,
-                                               const struct tcam_video_format_description& f,
+VideoFormatDescription::VideoFormatDescription(const tcam_video_format_description& f,
                                                const std::vector<framerate_mapping>& r)
-    : format(f), res(r), format_handler(handler)
+    : format(f), res(r)
 {
 }
 
@@ -64,28 +63,14 @@ std::vector<struct tcam_resolution_description> VideoFormatDescription::get_reso
     return vec;
 }
 
-
-std::vector<double> VideoFormatDescription::get_frame_rates(
-    const tcam_resolution_description& desc) const
+std::vector<double> VideoFormatDescription::get_framerates(const VideoFormat& fmt) const
 {
-    for (const auto& m : res)
+    if (fmt.get_fourcc() != format.fourcc)
     {
-        if (m.resolution == desc)
-        {
-            return m.framerates;
-        }
-    }
-    return {};
-}
-
-
-std::vector<double> VideoFormatDescription::get_framerates(const tcam_image_size& s) const
-{
-    if (auto handler = format_handler.lock())
-    {
-        return handler->get_framerates(s, format.fourcc);
+        return {};
     }
 
+    auto s = fmt.get_size();
     for (const auto& r : res)
     {
         if (r.resolution.type == TCAM_RESOLUTION_TYPE_FIXED)
@@ -104,5 +89,23 @@ std::vector<double> VideoFormatDescription::get_framerates(const tcam_image_size
         }
     }
 
-    return std::vector<double>();
+    return {};
+}
+
+
+framerate_info::framerate_info(std::vector<double> lst) : list_ { std::move(lst) }
+{
+    assert(!list_.empty());
+    std::sort(list_.begin(), list_.end());
+    min_ = list_.front();
+    max_ = list_.back();
+}
+
+std::vector<double> framerate_info::to_list() const
+{
+    if (is_discrete_list())
+    {
+        return list_;
+    }
+    return tcam::create_steps_for_range(min_, max_);
 }
