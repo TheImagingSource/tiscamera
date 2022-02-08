@@ -36,6 +36,7 @@ constexpr spdlog::level::level_enum map_levels(GstDebugLevel lvl) noexcept
     switch (lvl)
     {
         case GstDebugLevel::GST_LEVEL_MEMDUMP:
+        // case 8: // this has no id, I have no idea why ...
         case GstDebugLevel::GST_LEVEL_TRACE:
         case GstDebugLevel::GST_LEVEL_LOG:
             return spdlog::level::trace;
@@ -53,7 +54,11 @@ constexpr spdlog::level::level_enum map_levels(GstDebugLevel lvl) noexcept
         case GstDebugLevel::GST_LEVEL_COUNT:
             return spdlog::level::n_levels;
     }
-    return spdlog::level::n_levels;
+    if (lvl > GstDebugLevel::GST_LEVEL_LOG)
+    {
+        return spdlog::level::trace;
+    }
+    return spdlog::level::off;
 }
 
 class gst_sink : public spdlog::sinks::base_sink<spdlog::details::null_mutex>
