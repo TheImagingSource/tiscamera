@@ -46,7 +46,7 @@ EXECS = 00-list-devices \
 	09-device-lost \
 	10-metadata \
 	11-json-state \
-	12-tcam-properties
+	12-tcam-properties \
 
 
 all: $(EXECS)

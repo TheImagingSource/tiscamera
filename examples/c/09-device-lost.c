@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 
     GstBus* bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
 
-    [[maybe_unused]]int bus_watch_id = gst_bus_add_watch(bus, bus_callback, NULL);
+    gst_bus_add_watch(bus, bus_callback, NULL);
 
     gst_object_unref(bus);
 
