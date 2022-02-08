@@ -723,6 +723,8 @@ static GstCaps* gst_tcam_mainsrc_fixate_caps(GstBaseSrc* bsrc, GstCaps* caps)
 }
 
 
+#if 0 // disable GST_QUERY_CAPS handling
+
 // Returns true, when the query could be answered, otherwise returns false
 static bool fetch_framerate_via_query_caps_worker(device_state& device,
                                                   GstQuery* query,
@@ -823,6 +825,8 @@ static bool fetch_framerate_via_query_caps_worker(device_state& device,
     return true;
 }
 
+#endif
+
 
 static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
 {
@@ -872,6 +876,7 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
         }
         case GST_QUERY_CAPS:
         {
+#if 0 // disable GST_QUERY_CAPS handling
             GstCaps* query_caps = nullptr;
             gst_query_parse_caps(query, &query_caps);
 
@@ -892,6 +897,8 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
                 return FALSE;
             }
 
+            SPDLOG_ERROR(" caps = {}", gst_helper::to_string(*query_caps));
+
             if (gst_caps_is_fixed(query_caps))
             {
                 if (fetch_framerate_via_query_caps_worker(*self->device, query, query_caps))
@@ -899,6 +906,7 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
                     return TRUE;
                 }
             }
+#endif
 
             return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->query(bsrc, query);
         }
