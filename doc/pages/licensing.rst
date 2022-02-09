@@ -20,7 +20,7 @@ The following projects are included in this project:
      - MIT
      - https://pugixml.org/
    * - Aravis
-     - LGPLv2
+     - LGPLv2.1
      - https://github.com/AravisProject/aravis
    * - json library by Niels Lohmann
      - MIT

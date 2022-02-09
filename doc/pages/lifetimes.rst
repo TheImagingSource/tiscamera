@@ -107,10 +107,10 @@ GST_STATE_READY -> GST_STATE_NULL
 
 - All property objects are invalid and should be discarded.
   Using property functions will return `TCAM_ERROR_NO_DEVICE_OPEN`.
-- All tcambin internal elements will be discarded
-- The tcambin source element will be discarded
+- All tcambin internal elements will be discarded.
+- The tcambin source element will be discarded.
   This closes the camera.
-- The tcamsrc will close the hardware device
+- The tcamsrc will close the hardware device.
 
 
   
