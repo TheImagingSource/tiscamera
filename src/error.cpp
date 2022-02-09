@@ -93,6 +93,10 @@ constexpr status_code_entry to_entry(int in) noexcept
         {
             return { "Not supported", std::errc::not_supported };
         }
+        case tcam::status::InvalidParameter:
+        {
+            return { "Invalid parameter", std::errc::invalid_argument };
+        }
         default:
             return {};
     };

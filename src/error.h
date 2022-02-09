@@ -41,6 +41,7 @@ enum class status : int
     UndefinedError,
     NotImplemented,
     NotSupported,
+    InvalidParameter,
 };
 
 std::error_code make_error_code(tcam::status e);
