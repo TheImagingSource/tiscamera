@@ -16,148 +16,145 @@
 
 #include "AravisPropertyBackend.h"
 
-#include <arv.h>
 #include "../logging.h"
+#include "AravisDevice.h"
+#include "aravis_utils.h"
 
-namespace tcam::property
+#include <arv.h>
+
+using namespace tcam::aravis;
+
+AravisPropertyBackend::AravisPropertyBackend(tcam::AravisDevice& parent, _ArvDevice* dev)
+    : parent_(parent), device_(dev)
 {
-
-AravisPropertyBackend::AravisPropertyBackend(_ArvDevice* dev) : p_device(dev) {}
+}
 
 outcome::result<int64_t> AravisPropertyBackend::get_int(const std::string& name)
 {
+    std::scoped_lock lck { parent_.arv_camera_access_ };
+
     GError* err = nullptr;
-    int i = arv_device_get_integer_feature_value(p_device, name.c_str(), &err);
+    auto i = arv_device_get_integer_feature_value(device_, name.c_str(), &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve integer {}: {}", name, err->message);
-        g_clear_error(&err);
+        return consume_GError( err );
     }
-
     return i;
 }
 
 outcome::result<void> AravisPropertyBackend::set_int(const std::string& name, int64_t new_value)
 {
+    std::scoped_lock lck { parent_.arv_camera_access_ };
+
     GError* err = nullptr;
-    arv_device_set_integer_feature_value(p_device, name.c_str(), new_value, &err);
+    arv_device_set_integer_feature_value(device_, name.c_str(), new_value, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to set integer {}: {}", name, err->message);
-        g_clear_error(&err);
+        return consume_GError(err);
     }
     return outcome::success();
 }
 
 outcome::result<double> AravisPropertyBackend::get_double(const std::string& name)
 {
+    std::scoped_lock lck { parent_.arv_camera_access_ };
+
     GError* err = nullptr;
-    double d = arv_device_get_float_feature_value(p_device, name.c_str(), &err);
+    double d = arv_device_get_float_feature_value(device_, name.c_str(), &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve float {}: {}", name, err->message);
-        g_clear_error(&err);
+        return consume_GError(err);
     }
-
     return d;
 }
 
 outcome::result<void> AravisPropertyBackend::set_double(const std::string& name, double new_value)
 {
+    std::scoped_lock lck { parent_.arv_camera_access_ };
+
     GError* err = nullptr;
-    arv_device_set_float_feature_value(p_device, name.c_str(), new_value, &err);
+    arv_device_set_float_feature_value(device_, name.c_str(), new_value, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to set float {}: {}", name, err->message);
-        g_clear_error(&err);
-        return tcam::status::UndefinedError;
+        return consume_GError(err);
     }
     return outcome::success();
 }
 
 outcome::result<bool> AravisPropertyBackend::get_bool(const std::string& name)
 {
+    std::scoped_lock lck { parent_.arv_camera_access_ };
+
     GError* err = nullptr;
-    int b = arv_device_get_boolean_feature_value(p_device, name.c_str(), &err);
+    gboolean b = arv_device_get_boolean_feature_value(device_, name.c_str(), &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve bool: {}", err->message);
-        g_clear_error(&err);
-        // TODO: GError to outcome?
-        return tcam::status::UndefinedError;
+        return consume_GError(err);
     }
-
-    if (b < 0 || b > 1)
-    {
-        SPDLOG_ERROR("Bool has undefined internal value {} {}", name.c_str(), b);
-        return tcam::status::PropertyOutOfBounds;
-    }
-
-    return b;
+    return b != FALSE;
 }
 
 outcome::result<void> AravisPropertyBackend::set_bool(const std::string& name, bool new_value)
 {
-    GError* err = nullptr;
+    std::scoped_lock lck { parent_.arv_camera_access_ };
 
-    arv_device_set_boolean_feature_value(p_device, name.c_str(), new_value, &err);
+    GError* err = nullptr;
+    arv_device_set_boolean_feature_value(device_, name.c_str(), new_value ? TRUE : FALSE, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to set bool: {}", err->message);
-        g_clear_error(&err);
+        return consume_GError(err);
     }
-
     return outcome::success();
 }
 
 outcome::result<void> AravisPropertyBackend::execute(const std::string& name)
 {
+    std::scoped_lock lck { parent_.arv_camera_access_ };
+
     GError* err = nullptr;
-
-    arv_device_execute_command(p_device, name.c_str(), &err);
-
+    arv_device_execute_command(device_, name.c_str(), &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to set button/command: {}", err->message);
-        g_clear_error(&err);
+        return consume_GError(err);
     }
-
     return outcome::success();
 }
 
 outcome::result<std::string_view> AravisPropertyBackend::get_enum(const std::string& name)
 {
+    std::scoped_lock lck { parent_.arv_camera_access_ };
+
     GError* err = nullptr;
-    std::string_view ret = arv_device_get_string_feature_value(p_device, name.c_str(), &err);
+    std::string_view ret = arv_device_get_string_feature_value(device_, name.c_str(), &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve enum/string: {}", err->message);
-        g_clear_error(&err);
-        return tcam::status::PropertyValueDoesNotExist;
+        return consume_GError(err);
     }
-
     return ret;
 }
 
 outcome::result<void> AravisPropertyBackend::set_enum(const std::string& name,
                                                       const std::string_view& value)
 {
-    GError* err = nullptr;
-
     // simple insurance that everything is null terminated
     std::string val = std::string(value);
 
-    arv_device_set_string_feature_value(p_device, name.c_str(), val.c_str(), &err);
+    std::scoped_lock lck { parent_.arv_camera_access_ };
 
+    GError* err = nullptr;
+    arv_device_set_string_feature_value(device_, name.c_str(), val.c_str(), &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to set enum: {}", err->message);
-
-        g_clear_error(&err);
+        return consume_GError(err);
     }
-
     return outcome::success();
 }
-
-
-} // namespace tcam::property

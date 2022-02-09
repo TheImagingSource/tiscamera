@@ -57,7 +57,7 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc)
     }
 
     backend_ =
-        std::make_shared<tcam::property::AravisPropertyBackend>(arv_camera_get_device(arv_camera_));
+        std::make_shared<tcam::aravis::AravisPropertyBackend>(*this, arv_camera_get_device(arv_camera_));
 
     genicam_ = arv_device_get_genicam(arv_camera_get_device(this->arv_camera_));
 

@@ -20,14 +20,17 @@
 
 struct _ArvDevice;
 
-namespace tcam::property
+namespace tcam
 {
+class AravisDevice;
+}
 
+namespace tcam::aravis
+{
 class AravisPropertyBackend
 {
-
 public:
-    AravisPropertyBackend(_ArvDevice*);
+    AravisPropertyBackend(AravisDevice& parent, _ArvDevice*);
 
     outcome::result<int64_t> get_int(const std::string& name);
     outcome::result<void> set_int(const std::string& name, int64_t new_value);
@@ -42,10 +45,9 @@ public:
 
     outcome::result<std::string_view> get_enum(const std::string& name);
     outcome::result<void> set_enum(const std::string& name, const std::string_view& value);
-
-
 private:
-    _ArvDevice* p_device;
+    AravisDevice& parent_;
+    _ArvDevice* device_;
 };
 
 } // namespace tcam::property

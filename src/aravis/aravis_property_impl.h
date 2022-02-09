@@ -24,10 +24,14 @@
 
 VISIBILITY_INTERNAL
 
+namespace tcam::aravis
+{
+class AravisPropertyBackend;
+}
+
 namespace tcam::property
 {
-
-class AravisPropertyBackend;
+using tcam::aravis::AravisPropertyBackend;
 
 class AravisPropertyIntegerImpl : public IPropertyInteger
 {

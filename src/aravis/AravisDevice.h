@@ -27,16 +27,19 @@
 
 VISIBILITY_INTERNAL
 
-namespace tcam
-{
 
-namespace property
+namespace tcam::aravis
 {
 class AravisPropertyBackend;
 }
 
+namespace tcam
+{
+
 class AravisDevice : public DeviceInterface
 {
+    friend aravis::AravisPropertyBackend;
+
 public:
     AravisDevice(const DeviceInfo&);
 
@@ -89,13 +92,15 @@ private:
 
     static void device_lost(ArvGvDevice* device, void* user_data);
 
+    std::mutex arv_camera_access_;
+
     ArvCamera* arv_camera_ = nullptr;
 
     std::weak_ptr<IImageBufferSink> sink_;
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> properties_;
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> internal_properties_;
-    std::shared_ptr<tcam::property::AravisPropertyBackend> backend_;
+    std::shared_ptr<tcam::aravis::AravisPropertyBackend> backend_;
 
     ArvStream* stream_ = nullptr;
     ArvGc* genicam_ = nullptr;
