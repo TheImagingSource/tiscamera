@@ -47,8 +47,11 @@ public:
 
     ~AravisDevice();
 
-    DeviceInfo get_device_description() const final;
-
+    DeviceInfo get_device_description() const final
+    {
+        return device;
+    }
+    
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
         return properties_;

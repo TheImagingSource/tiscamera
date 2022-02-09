@@ -82,51 +82,62 @@ AravisDevice::~AravisDevice()
 auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
     -> outcome::result<tcam::framerate_info>
 {
-    auto dev = arv_camera_get_device(arv_camera_);
+    std::scoped_lock lck { arv_camera_access_ };
 
-    auto set_int = [dev](const char* name, int value) -> bool
+    auto dev = arv_camera_get_device(arv_camera_);
+    if (dev == nullptr)
+    {
+        return tcam::status::DeviceCouldNotBeOpened;
+    }
+
+    auto set_int = [dev](const char* name, int value) -> tcam::status
     {
         GError* error = nullptr;
         arv_device_set_integer_feature_value(dev, name, value, &error);
         if (error)
         {
             SPDLOG_ERROR("Failed to set '{}'. Error: {}", name, error->message);
-            g_clear_error(&error);
-            return false;
+            return tcam::aravis::consume_GError(error);
         }
-        return true;
+        return tcam::status::Success;
     };
 
-    if (set_int("TestPixelFormat", fourcc2aravis(fmt.get_fourcc())) == false)
+    if (auto res = set_int("TestPixelFormat", fourcc2aravis(fmt.get_fourcc()));
+        res != tcam::status::Success)
     {
         return tcam::status::UndefinedError;
     }
-    if (set_int("TestWidth", fmt.get_size().width) == false)
+    if (auto res = set_int("TestWidth", fmt.get_size().width); res != status::Success)
     {
         return tcam::status::UndefinedError;
     }
-    if (set_int("TestHeight", fmt.get_size().height) == false)
+    if (auto res = set_int("TestHeight", fmt.get_size().height); res != status::Success)
     {
         return tcam::status::UndefinedError;
     }
-    if (has_test_binning_h_
-        && set_int("TestBinningHorizontal", fmt.get_scaling().binning_h) == false)
+    if (has_test_binning_h_)
     {
-        return tcam::status::UndefinedError;
+        if (auto res = set_int("TestBinningHorizontal", fmt.get_scaling().binning_h);
+            res != status::Success)
+            return tcam::status::UndefinedError;
     }
-    if (has_test_binning_h_ && set_int("TestBinningVertical", fmt.get_scaling().binning_v) == false)
+    if (has_test_binning_v_)
     {
-        return tcam::status::UndefinedError;
+        if (auto res = set_int("TestBinningVertical", fmt.get_scaling().binning_v);
+            res != status::Success)
+            return tcam::status::UndefinedError;
     }
-    if (has_test_skipping_h_
-        && set_int("TestDecimationHoizontal", fmt.get_scaling().skipping_h) == false)
+    if (has_test_skipping_h_)
     {
-        return tcam::status::UndefinedError;
+        if (auto res = set_int("TestDecimationHoizontal", fmt.get_scaling().skipping_h);
+            res != status::Success)
+            return tcam::status::UndefinedError;
     }
-    if (has_test_skipping_v_
-        && set_int("TestDecimationVertical", fmt.get_scaling().skipping_v) == false)
+    if (has_test_skipping_v_)
     {
-        return tcam::status::UndefinedError;
+        if (auto res = set_int("TestDecimationVertical", fmt.get_scaling().skipping_v);
+            res != status::Success)
+            return tcam::status::UndefinedError;
     }
 
     GError* error = nullptr;
@@ -134,20 +145,19 @@ auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
     if (error)
     {
         SPDLOG_ERROR("Failed to get 'ResultingMinFPS'. Error: {}", error->message);
-        g_clear_error(&error);
-        return tcam::status::UndefinedError;
+        return aravis::consume_GError(error);
     }
     auto max = arv_device_get_float_feature_value(dev, "ResultingMaxFPS", &error);
     if (error)
     {
         SPDLOG_ERROR("Failed to get 'ResultingMaxFPS'. Error: {}", error->message);
-        g_clear_error(&error);
-        return tcam::status::UndefinedError;
+        return aravis::consume_GError(error);
     }
     return tcam::framerate_info { min, max };
 }
 
-static auto fetch_FPS_enum_framerates([[maybe_unused]] ArvDevice* dev) -> tcam::framerate_info
+static auto fetch_FPS_enum_framerates([[maybe_unused]] ArvDevice* dev)
+    -> outcome::result<tcam::framerate_info>
 {
     // 2022/02/02 Christopher: I think this is only used for very old cameras, so we can skip this
     // Another Note, this is not complete, I think there were excludes defined somewhere
@@ -185,7 +195,7 @@ static auto fetch_FPS_enum_framerates([[maybe_unused]] ArvDevice* dev) -> tcam::
 #else
     SPDLOG_ERROR("Failed to fetch FPS list, because support for cameras with a FPS enumeration are "
                  "not supported anymore.");
-    return {};
+    return tcam::status::NotSupported;
 #endif
 }
 
@@ -280,12 +290,12 @@ static void restore_data_reapply(ArvCamera* camera, data_to_restore_active_forma
 
 outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(const VideoFormat& fmt)
 {
-    auto dev = arv_camera_get_device(arv_camera_);
-
     if (has_test_format_interface_)
     {
         return fetch_test_itf_framerates(fmt);
     }
+
+    auto dev = arv_camera_get_device(arv_camera_);
     if (has_FPS_enum_interface_)
     {
         return fetch_FPS_enum_framerates(dev);
@@ -372,11 +382,6 @@ outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(con
                  max);
 
     return tcam::framerate_info { min, max };
-}
-
-DeviceInfo AravisDevice::get_device_description() const
-{
-    return device;
 }
 
 
