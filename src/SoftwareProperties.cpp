@@ -122,28 +122,23 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
 
             if (!res)
             {
-                SPDLOG_ERROR("Setting whitebalance caused an error: {}",
+                SPDLOG_DEBUG("Setting whitebalance caused an error: {}",
                              res.as_failure().error().message());
-                return;
             }
-
             res = set_device_wb(emulated::software_prop::BalanceWhiteGreen,
                                 auto_pass_ret.wb.channels.g);
-
             if (!res)
             {
-                SPDLOG_ERROR("Setting whitebalance caused an error: {}",
+                SPDLOG_DEBUG("Setting whitebalance caused an error: {}",
                              res.as_failure().error().message());
-                return;
             }
 
             res = set_device_wb(emulated::software_prop::BalanceWhiteBlue,
                                 auto_pass_ret.wb.channels.b);
             if (!res)
             {
-                SPDLOG_ERROR("Setting whitebalance caused an error: {}",
+                SPDLOG_DEBUG("Setting whitebalance caused an error: {}",
                              res.as_failure().error().message());
-                return;
             }
         }
     }
@@ -1166,15 +1161,10 @@ outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop 
         }
         return actual_rval;
     }
-    else
-    {
-        SPDLOG_ERROR(
-            "Device has no properties for whitebalance. Only software whitebalance are available!");
 
-        return tcam::status::NotSupported;
-    }
+    SPDLOG_ERROR(
+        "Device has no properties for whitebalance. Only software whitebalance are available!");
 
-    SPDLOG_ERROR("Not a whitebalance property");
     return tcam::status::NotSupported;
 }
 

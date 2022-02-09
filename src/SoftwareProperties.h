@@ -84,10 +84,6 @@ private:
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_iris = nullptr;
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_focus = nullptr;
 
-    std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_r = nullptr;
-    std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_g = nullptr;
-    std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_b = nullptr;
-
     bool m_is_software_auto_wb = false;
     bool m_wb_is_claimed = false;
 
@@ -122,7 +118,7 @@ private:
 
         bool is_dev_wb() const
         {
-            return get_type() != wb_type::None;
+            return get_type() == wb_type::DevSelector || get_type() == wb_type::DevChannel;
         }
     };
     wb_setter m_wb;
