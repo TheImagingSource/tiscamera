@@ -19,7 +19,9 @@
 
 #include "../DeviceInfo.h"
 #include "../compiler_defines.h"
+#include "../error.h"	// tcam::status
 
+#include <arv.h>		// ArvGcError/.../GError
 #include <string_view>
 #include <vector>
 
@@ -40,6 +42,17 @@ std::vector<DeviceInfo> get_aravis_device_list();
 bool is_private_setting(std::string_view name);
 
 } /* namespace tcam */
+
+namespace tcam::aravis
+{
+tcam::status translate_error(ArvGcError err);
+tcam::status translate_error(ArvDeviceError err);
+
+/* Translates the contents of the GError to a tcam::status, frees the error and sets the pointer to nullptr.
+* If err == nullptr, tcam::status::success is returned.
+*/
+tcam::status consume_GError(GError*& err);
+} // namespace tcam::aravis
 
 VISIBILITY_POP
 
