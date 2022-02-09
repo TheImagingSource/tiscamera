@@ -392,17 +392,17 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         return false;
     }
 
-    SPDLOG_DEBUG("Setting format to '{}'", new_format.to_string().c_str());
+    SPDLOG_DEBUG("Setting format to '{}'", new_format.to_string());
+    
     GError* err = nullptr;
 
     // // arv_camera_set_frame_rate overwrites TriggerSelector and TriggerMode
-    // // set them again after changing the framerate to ensure consistent behaviour
+    // // set them again after changing the framerate to ensure consistent behavior
     const char* trig_selector = arv_device_get_string_feature_value(
         arv_camera_get_device(arv_camera_), "TriggerSelector", &err);
-
     if (err)
     {
-        SPDLOG_ERROR("Caught error: {}", err->message);
+        SPDLOG_WARN("Failed to fetch TriggerSelector. error: {}", err->message);
         g_clear_error(&err);
     }
 
@@ -410,22 +410,21 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         arv_camera_get_device(arv_camera_), "TriggerMode", &err);
     if (err)
     {
-        SPDLOG_ERROR("Caught error: {}", err->message);
+        SPDLOG_WARN("Failed to fetch TriggerMode. error: {}", err->message);
         g_clear_error(&err);
     }
 
     arv_camera_set_frame_rate(this->arv_camera_, new_format.get_framerate(), &err);
-
     if (err)
     {
-        SPDLOG_ERROR("Caught error: {}", err->message);
+        SPDLOG_ERROR("Failed to set framerate. error: {}", err->message);
         g_clear_error(&err);
     }
     arv_device_set_string_feature_value(
         arv_camera_get_device(arv_camera_), "TriggerSelector", trig_selector, &err);
     if (err)
     {
-        SPDLOG_ERROR("Caught error: {}", err->message);
+        SPDLOG_ERROR("Failed to reset 'TriggerSelector' error: {}", err->message);
         g_clear_error(&err);
     }
     arv_device_set_string_feature_value(
@@ -433,7 +432,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
 
     if (err)
     {
-        SPDLOG_ERROR("Caught error: {}", err->message);
+        SPDLOG_ERROR("Failed to reset 'TriggerMode' error: {}", err->message);
         g_clear_error(&err);
     }
     arv_camera_set_pixel_format(this->arv_camera_, fourcc2aravis(new_format.get_fourcc()), &err);
@@ -445,7 +444,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         return false;
     }
 
-    // TODO: auto center
+    // #TODO: auto center
     if (has_offset_)
     {
         int offset_x = 0;
@@ -467,9 +466,24 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
     else
     {
         arv_camera_set_integer(arv_camera_, "Width", new_format.get_size().width, &err);
+        if (err)
+        {
+            SPDLOG_ERROR("Unable to set Width: {}", err->message);
+            g_clear_error(&err);
+            return false;
+        }
         arv_camera_set_integer(arv_camera_, "Height", new_format.get_size().height, &err);
+        if (err)
+        {
+            SPDLOG_ERROR("Unable to set Width: {}", err->message);
+            g_clear_error(&err);
+            return false;
+        }
     }
-    set_scaling(new_format.get_scaling());
+    if (!set_scaling(new_format.get_scaling()))
+    {
+        return false;
+    }
 
     active_video_format_ = read_camera_current_video_format();
 
@@ -659,20 +673,22 @@ static auto fetch_pixel_format_list(ArvCamera* camera) -> std::vector<pixel_form
         arv_camera_dup_available_pixel_formats_as_strings(camera, &n2_formats, &err);
     if (err)
     {
+        g_free(pixel_format_ints);
+
         SPDLOG_ERROR("Unable to retrieve pixel format description strings: {}", err->message);
         g_clear_error(&err);
-        g_free(pixel_format_ints);
         return {};
     }
 
     if (n_formats != n2_formats)
     {
+        g_free(pixel_format_ints);
+        g_free(format_str);
+
         SPDLOG_ERROR(
             "Format retrieval encountered nonsensical information n_formats={}, n2_formats={}",
             n_formats,
             n2_formats);
-        g_free(pixel_format_ints);
-        g_free(format_str);
         return {};
     }
 
@@ -877,10 +893,8 @@ void AravisDevice::generate_video_formats()
 
 tcam_image_size AravisDevice::get_sensor_size() const
 {
-    auto width = tcam::property::find_property<tcam::property::IPropertyInteger>(
-        internal_properties_, "SensorWidth");
-    auto height = tcam::property::find_property<tcam::property::IPropertyInteger>(
-        internal_properties_, "SensorHeight");
+    auto width = find_cam_property<tcam::property::IPropertyInteger>("SensorWidth");
+    auto height = find_cam_property<tcam::property::IPropertyInteger>("SensorHeight");
 
     if (!width || !height)
     {

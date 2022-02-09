@@ -98,6 +98,8 @@ private:
     std::mutex arv_camera_access_;
 
     ArvCamera* arv_camera_ = nullptr;
+    ArvStream* stream_ = nullptr;
+    ArvGc* genicam_ = nullptr;
 
     std::weak_ptr<IImageBufferSink> sink_;
 
@@ -105,8 +107,6 @@ private:
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> internal_properties_;
     std::shared_ptr<tcam::aravis::AravisPropertyBackend> backend_;
 
-    ArvStream* stream_ = nullptr;
-    ArvGc* genicam_ = nullptr;
 
     struct buffer_info
     {
@@ -154,7 +154,6 @@ private:
     VideoFormat active_video_format_;
 
     std::vector<VideoFormatDescription> available_videoformats_;
-    bool has_offset_ = false;
 
     void index_genicam();
     void generate_video_formats();
@@ -164,6 +163,8 @@ private:
     tcam_image_size get_sensor_size() const;
 
     void complete_aravis_stream_buffer(ArvBuffer* buffer, bool is_incomplete);
+
+    bool has_offset_ = false;
 
     bool has_test_format_interface_ = false;
     bool has_test_binning_h_ = false;
@@ -176,6 +177,14 @@ private:
 
     bool has_genicam_property(const char* name) const;
     ArvGcNode* get_genicam_property_node(const char* name) const;
+
+    template<class TItf> std::shared_ptr<TItf> find_cam_property(std::string_view name) const
+    {
+        auto ptr = tcam::property::find_property<TItf>(properties_, name);
+        if (ptr)
+            return ptr;
+        return tcam::property::find_property<TItf>(internal_properties_, name);
+    }
 
 
 }; /* class GigeCapture */
