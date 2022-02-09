@@ -129,7 +129,7 @@ auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
     }
     if (has_test_skipping_h_)
     {
-        if (auto res = set_int("TestDecimationHoizontal", fmt.get_scaling().skipping_h);
+        if (auto res = set_int("TestDecimationHorizontal", fmt.get_scaling().skipping_h);
             res != status::Success)
             return tcam::status::UndefinedError;
     }
