@@ -194,7 +194,7 @@ const prop_static_info_enumeration lst::FocusAuto = make_Enumeration(
     "Enables the automatic Focus control."
 );
 
-const prop_static_info_enumeration lst::AutoFocusROIEnable = make_Enumeration(
+const prop_static_info_boolean lst::AutoFocusROIEnable = make_Boolean(
     "AutoFocusROIEnable",
     "Lens", "Auto Focus ROI Enable",
     "Enables selection of the auto focus region."
@@ -227,7 +227,7 @@ const prop_static_info_integer lst::Zoom = make_Integer(
     "Changes the zoom setting of the lens."
 );
 
-const prop_static_info_integer lst::IRCutFilterEnable = make_Integer(
+const prop_static_info_boolean lst::IRCutFilterEnable = make_Boolean(
     "IRCutFilterEnable",
     "Lens", "IRCut Filter Enable",
     "Enables the IRCutFilter in from of the sensor."
@@ -591,11 +591,11 @@ const prop_static_info_integer lst::LUTIndex = make_Integer(
     "", IntRepresentation_t::Linear, Visibility_t::Expert
 );
 
-const prop_static_info_integer lst::LUTSelector = make_Integer(
+const prop_static_info_enumeration lst::LUTSelector = make_Enumeration(
     "LUTSelector",
     "LUT Control", "LUT Selector",
-    "",
-    "", IntRepresentation_t::Linear, Visibility_t::Expert
+    "Selects which LUT to control.",
+    Visibility_t::Expert
 );
 
 const prop_static_info_integer lst::LUTValue = make_Integer(

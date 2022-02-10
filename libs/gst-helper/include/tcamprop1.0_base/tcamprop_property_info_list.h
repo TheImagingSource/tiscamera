@@ -70,7 +70,7 @@ namespace tcamprop1::prop_list
 
     extern const prop_static_info_integer Focus;
     extern const prop_static_info_enumeration FocusAuto;
-    extern const prop_static_info_enumeration AutoFocusROIEnable;
+    extern const prop_static_info_boolean AutoFocusROIEnable;
     extern const prop_static_info_integer AutoFocusROILeft;
     extern const prop_static_info_integer AutoFocusROITop;
     extern const prop_static_info_integer AutoFocusROIWidth;
@@ -78,7 +78,7 @@ namespace tcamprop1::prop_list
 
     extern const prop_static_info_integer Zoom;
 
-    extern const prop_static_info_integer IRCutFilterEnable;
+    extern const prop_static_info_boolean IRCutFilterEnable;
 
     extern const prop_static_info_boolean AutoFunctionsROIEnable;
     extern const prop_static_info_enumeration AutoFunctionsROIPreset;
@@ -167,7 +167,7 @@ namespace tcamprop1::prop_list
 
     extern const prop_static_info_boolean LUTEnable;
     extern const prop_static_info_integer LUTIndex;
-    extern const prop_static_info_integer LUTSelector;
+    extern const prop_static_info_enumeration LUTSelector;
     extern const prop_static_info_integer LUTValue;
 
     extern const prop_static_info_boolean MultiFrameSetOutputModeCustomGain;
