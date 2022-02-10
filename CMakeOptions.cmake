@@ -69,6 +69,11 @@ if (NOT TCAM_EXCLUSIVE_BUILD)
 
   if (TCAM_BUILD_ARAVIS)
     add_module("aravis")
+
+    if (TCAM_ARAVIS_USB_VISION)
+      add_module("arvu3v")
+    endif (TCAM_ARAVIS_USB_VISION)
+
   endif (TCAM_BUILD_ARAVIS)
 
   if (TCAM_BUILD_V4L2)
