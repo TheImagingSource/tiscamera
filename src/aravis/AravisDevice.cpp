@@ -475,7 +475,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         arv_camera_set_integer(arv_camera_, "Height", new_format.get_size().height, &err);
         if (err)
         {
-            SPDLOG_ERROR("Unable to set Width: {}", err->message);
+            SPDLOG_ERROR("Unable to set Height: {}", err->message);
             g_clear_error(&err);
             return false;
         }
