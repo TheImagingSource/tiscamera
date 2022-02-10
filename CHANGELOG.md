@@ -69,6 +69,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - environment variable TCAM_LOG, replaced with gstreamer logging category `tcam-libtcam`
 - unmaintained unit tests
 
+### Known Issues
+
+- Auto Function ROI emulation is missing
+- In camera Auto Functions ROI may not correctly lock properties
+- AFU050: image/jpeg,width=1280,height=960 may cause segfault when used
+  Cause is in external library.
+
 ## [0.14.0] - 2021.07.05
 
 ### Added
