@@ -781,18 +781,14 @@ void SoftwareProperties::update_to_new_format(const tcam::VideoFormat& new_forma
 
 void tcam::property::SoftwareProperties::generate_exposure_auto()
 {
-    auto exp_base = tcam::property::find_property(m_device_properties, "ExposureTime");
-    if (!exp_base)
-    {
-        SPDLOG_ERROR("Unable to identify exposure interface.");
-        return;
-    }
-    m_dev_exposure = std::static_pointer_cast<tcam::property::IPropertyFloat>(exp_base);
+    m_dev_exposure = tcam::property::find_property<tcam::property::IPropertyFloat>(m_device_properties, "ExposureTime");
     if (!m_dev_exposure)
     {
         SPDLOG_ERROR("Unable to identify exposure interface.");
         return;
     }
+
+    SPDLOG_INFO("Adding software ExposureAuto.");
 
     m_auto_params.exposure.granularity = m_dev_exposure->get_range().stp;
 
@@ -805,7 +801,7 @@ void tcam::property::SoftwareProperties::generate_exposure_auto()
     }
     else
     {
-        SPDLOG_ERROR("Unable to retrieve value for property '{}', due to {}", exp_base->get_name(), exp_val.error().message());
+        SPDLOG_ERROR("Unable to retrieve value for property '{}', due to {}", m_dev_exposure->get_name(), exp_val.error().message());
     }
 
     m_auto_params.exposure.auto_enabled = true;
@@ -862,6 +858,8 @@ void tcam::property::SoftwareProperties::generate_gain_auto()
         return;
     }
 
+    SPDLOG_INFO("Adding software GainAuto.");
+
     const auto prop_range = emulated::to_range(*m_dev_gain);
     const auto prop_range_lower_limit =
         emulated::prop_range_float_def { prop_range.range, prop_range.range.min };
@@ -896,6 +894,8 @@ void tcam::property::SoftwareProperties::generate_iris_auto()
         SPDLOG_ERROR("Unable to retrieve Iris value: {}", val.error().message());
     }
 
+    SPDLOG_INFO("Adding software IrisAuto.");
+
     // #TODO: granularity/step
 
     add_prop_entry(
@@ -919,6 +919,8 @@ void SoftwareProperties::generate_focus_auto()
     {
         SPDLOG_ERROR("Unable to retrieve value: {}", val.error().message());
     }
+
+    SPDLOG_INFO("Adding software FocusAuto.");
 
     m_auto_params.focus_onepush_params.enable_focus = true;
     m_auto_params.focus_onepush_params.run_cmd_params.focus_range_min =
@@ -945,6 +947,8 @@ void SoftwareProperties::generate_balance_white_channels()
                      "will not work correctly.");
         return;
     }
+
+    SPDLOG_INFO("Adding BalanceWhiteRGB channels.");
 
     m_wb.m_dev_wb_selector = selector;
     m_wb.m_dev_wb_ratio = ratio;
@@ -978,6 +982,8 @@ void SoftwareProperties::generate_balance_white_auto()
         m_auto_params.wb.channels.r = get_safe(sp::BalanceWhiteRed);
         m_auto_params.wb.channels.g = get_safe(sp::BalanceWhiteGreen);
         m_auto_params.wb.channels.b = get_safe(sp::BalanceWhiteBlue);
+
+        SPDLOG_INFO("Adding BalanceWhiteAuto device selector based.");
     }
     else if (base_r && base_g && base_b)
     {
@@ -1000,6 +1006,8 @@ void SoftwareProperties::generate_balance_white_auto()
         m_auto_params.wb.channels.r = get_safe(sp::BalanceWhiteRed);
         m_auto_params.wb.channels.g = get_safe(sp::BalanceWhiteGreen);
         m_auto_params.wb.channels.b = get_safe(sp::BalanceWhiteBlue);
+
+        SPDLOG_INFO("Adding BalanceWhiteAuto device based.");
     }
     else
     {
@@ -1016,6 +1024,8 @@ void SoftwareProperties::generate_balance_white_auto()
 
         m_auto_params.wb.is_software_whitebalance = true;
         m_wb_is_claimed = false;
+
+        SPDLOG_INFO("Adding BalanceWhiteAuto software based.");
     }
 
     add_prop_entry(sp::BalanceWhiteAuto,
