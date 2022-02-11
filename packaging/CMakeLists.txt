@@ -67,11 +67,41 @@ set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 
 if (TCAM_BUILD_ARAVIS)
 
-  set(ARAVIS_POSTINST "systemctl enable tcam-gige-daemon.service
-                       systemctl start tcam-gige-daemon.service")
+  set(ARAVIS_PRERM "
+# Based on output by dh_installsystemd/13.5.2
 
-  set(ARAVIS_PRERM "systemctl stop tcam-gige-daemon.service
-                    systemctl disable tcam-gige-daemon.service")
+if [ -z \"${DPKG_ROOT\:-}\" ] && [ \"$1\" = remove ] && [ -d /run/systemd/system ] ; then
+	deb-systemd-invoke stop 'tcam-gige-daemon.service' > /dev/null || true
+fi
+")
+
+
+  set(ARAVIS_POSTINST "
+# End automatically added section
+# Based on output by dh_installsystemd/13.5.2
+
+if [ \"$1\" = \"configure\" ] || [ \"$1\" = \"abort-upgrade\" ] || [ \"$1\" = \"abort-deconfigure\" ] || [ \"$1\" = \"abort-remove\" ] ; then
+
+	# was-enabled defaults to true, so new installations run enable.
+	if deb-systemd-helper --quiet was-enabled 'tcam-gige-daemon.service'; then
+		# Enables the unit on first installation, creates new
+		# symlinks on upgrades if the unit file has changed.
+		deb-systemd-helper enable 'tcam-gige-daemon.service' >/dev/null || true
+	else
+		# Update the statefile to add new symlinks (if any), which need to be
+		# cleaned up on purge. Also remove old symlinks.
+		deb-systemd-helper update-state 'tcam-gige-daemon.service' >/dev/null || true
+	fi
+fi
+if [ \"$1\" = \"configure\" ] || [ \"$1\" = \"abort-upgrade\" ] || [ \"$1\" = \"abort-deconfigure\" ] || [ \"$1\" = \"abort-remove\" ] ; then
+	if [ -z \"${DPKG_ROOT\:-}\" ] && [ -d /run/systemd/system ]; then
+		systemctl --system daemon-reload >/dev/null || true
+		deb-systemd-invoke restart 'tcam-gige-daemon.service' >/dev/null || true
+	fi
+fi
+
+") #
+#  dh_systemd_start --name=tcam-gige-daemon tcam-gige-daemon.service
 
   add_deps("aravis")
 
@@ -140,7 +170,6 @@ string(REGEX REPLACE "\n" "" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAG
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/postinst.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/prerm.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/prerm")
-configure_file("${CMAKE_CURRENT_BINARY_DIR}/../data/systemd/tcam-gige-daemon.service" "${CMAKE_CURRENT_BINARY_DIR}/deb/tiscamera.tcam-gige-daemon.service")
 
 set(CPACK_DEBIAN_PACKAGE_PROVIDES "tiscamera-tcamproperty")
 set(CPACK_DEBIAN_PACKAGE_CONFLICTS "tiscamera-tcamproperty")

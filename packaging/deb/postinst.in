@@ -1,35 +1,12 @@
 #!/bin/sh
-# postinst script for webpy-example
-#
-# see: dh_installdeb(1)
+# postinst script for tiscamera
 
 set -e
-
-# summary of how this script can be called:
-#        * <postinst> `configure' <most-recently-configured-version>
-#        * <old-postinst> `abort-upgrade' <new version>
-#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
-#          <new-version>
-#        * <postinst> `abort-remove'
-#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
-#          <failed-install-package> <version> `removing'
-#          <conflicting-package> <version>
-# for details, see http://www.debian.org/doc/debian-policy/ or
-# the debian-policy package
-
-# source debconf library
-. /usr/share/debconf/confmodule
-
-# Source dbconfig-common functions
-if [ -f /usr/share/dbconfig-common/dpkg/postinst.pgsql  ]; then
-. /usr/share/dbconfig-common/dpkg/postinst.pgsql
-fi
 
 case "$1" in
 
     configure)
         ldconfig
-        @ARAVIS_POSTINST@
         ;;
 
 
@@ -43,8 +20,7 @@ case "$1" in
         ;;
 esac
 
-#DEBHELPER#
+@ARAVIS_POSTINST@
 
-db_stop
 
 exit 0
