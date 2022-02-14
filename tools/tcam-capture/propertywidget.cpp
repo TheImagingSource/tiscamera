@@ -308,6 +308,11 @@ void IntWidget::setup_ui()
         {
             p_slider = new TcamSlider(TcamSliderScale::Logarithmic);
         }
+        else if (representation == TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER)
+        {
+            auto name = tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+            qWarning("Property '%s', TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER not implemented.", name);
+        }
         else
         {
             qWarning("representation not implemented.");
