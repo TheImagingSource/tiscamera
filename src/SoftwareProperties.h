@@ -53,7 +53,6 @@ private:
     void generate_focus_auto();
 
     void generate_balance_white_auto();
-    void generate_balance_white_channels();
 
     outcome::result<double> get_device_wb(emulated::software_prop prop_id);
     outcome::result<void> set_device_wb(emulated::software_prop prop_id, double new_value);
@@ -89,7 +88,6 @@ private:
     {
         None,
         DevChannel,
-        DevSelector,
         Emulation,
     };
 
@@ -99,16 +97,12 @@ private:
         std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_g = nullptr;
         std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_b = nullptr;
 
-        std::shared_ptr<tcam::property::IPropertyEnum> m_dev_wb_selector = nullptr;
-        std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_ratio = nullptr;
         bool m_emulated_wb = false;
 
         auto get_type() const
         {
             if (m_dev_wb_r)
                 return wb_type::DevChannel;
-            if (m_dev_wb_selector)
-                return wb_type::DevSelector;
             if (m_emulated_wb)
                 return wb_type::Emulation;
             return wb_type::None;
@@ -116,7 +110,7 @@ private:
 
         bool is_dev_wb() const
         {
-            return get_type() == wb_type::DevSelector || get_type() == wb_type::DevChannel;
+            return get_type() == wb_type::DevChannel;
         }
     };
     wb_setter m_wb;

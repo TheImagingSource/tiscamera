@@ -202,18 +202,6 @@ void tcam::property::SoftwareProperties::generate_public_properties(bool has_bay
     }
 
     { // BalanceWhite stuff
-        auto base_selector =
-            tcam::property::find_property(m_device_properties, "BalanceRatioSelector");
-        auto base_ratio =
-            tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceRatio");
-
-        auto base_r = tcam::property::find_property(m_device_properties, "BalanceWhiteRed");
-        auto base_g = tcam::property::find_property(m_device_properties, "BalanceWhiteGreen");
-        auto base_b = tcam::property::find_property(m_device_properties, "BalanceWhiteBlue");
-        if (base_selector && base_ratio && !(base_r || base_g || base_b))
-        {
-            generate_balance_white_channels();
-        }
         if (has_bayer)
         {
             bool has_wb_auto = find_property(m_device_properties, "BalanceWhiteAuto") != nullptr;
@@ -730,11 +718,8 @@ tcam::property::PropertyFlags SoftwareProperties::get_flags(emulated::software_p
             {
                 return add_locked(m_auto_params.wb.auto_enabled);
             }
-            if (m_wb.m_dev_wb_ratio)
-            {
-                return m_wb.m_dev_wb_ratio->get_flags();
-            }
-            assert( m_is_software_auto_wb || m_wb.m_dev_wb_ratio );
+
+            assert( m_is_software_auto_wb );
             // this should not occur
             return add_locked(m_auto_params.wb.auto_enabled);
         }
