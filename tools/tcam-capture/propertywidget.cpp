@@ -18,6 +18,8 @@
 
 #include <gst/gst.h>
 
+#include <QTimer>
+
 QString Property::get_name() const
 {
     auto prop = get_property_base();
@@ -127,12 +129,32 @@ void EnumWidget::update()
             }
         }
 
+        if (value == "Once")
+        {
+            QTimer::singleShot(500, [this]() 
+            {
+                emit this->update_category(get_category().c_str()); 
+            } );
+        }        
+
         p_combobox->blockSignals(false);
     }
 }
 
-void EnumWidget::drop_down_changed(const QString& /*entry*/)
+void EnumWidget::drop_down_changed(const QString& entry)
 {
+    // This property is in a state where
+    // other properties in the same category are still
+    // actively being changed and the property
+    // itself will also soon have a different value
+    // update the category until the property has a different value
+    if (entry == "Once")
+    {
+        QTimer::singleShot(500, [this]() 
+        {
+             emit this->update_category(get_category().c_str()); 
+        } );
+    }
     emit value_changed(this);
 }
 

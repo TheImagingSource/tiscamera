@@ -180,6 +180,7 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
             {
                 auto ptr = new EnumWidget(TCAM_PROPERTY_ENUMERATION(prop));
                 connect(ptr, &EnumWidget::value_changed, p_worker, &PropertyWorker::write_property);
+                connect(ptr, &EnumWidget::update_category, p_worker, &PropertyWorker::update_category);
                 connect(ptr, &EnumWidget::device_lost, this, &PropertyDialog::notify_device_lost);
                 prop_list.push_back(ptr);
                 break;

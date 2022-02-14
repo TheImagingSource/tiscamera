@@ -67,6 +67,9 @@ public slots:
 
 signals:
 
+    // update_category signal is
+    // used for QTimer::singleShot to update Once actions
+    void update_category(QString category);
     void value_changed(Property*);
     void device_lost(const QString& info);
 
