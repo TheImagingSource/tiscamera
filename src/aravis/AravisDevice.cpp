@@ -57,7 +57,7 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc)
     }
 
     backend_ =
-        std::make_shared<tcam::aravis::AravisPropertyBackend>(*this, arv_camera_get_device(arv_camera_));
+        std::make_shared<tcam::aravis::AravisPropertyBackend>(*this);
 
     genicam_ = arv_device_get_genicam(arv_camera_get_device(this->arv_camera_));
 
@@ -605,7 +605,7 @@ void AravisDevice::index_genicam()
 {
     assert(genicam_ != nullptr);
 
-    index_properties("Root");
+    generate_properties_from_genicam();
 
     has_test_format_interface_ = has_genicam_property("TestPixelFormat");
 

@@ -18,9 +18,9 @@
 
 #include "../PropertyInterfaces.h"
 #include "../compiler_defines.h"
-#include <tcamprop1.0_base/tcamprop_property_info.h>
 
 #include <arv.h>
+#include <tcamprop1.0_base/tcamprop_property_info.h>
 
 VISIBILITY_INTERNAL
 
@@ -29,36 +29,63 @@ namespace tcam::aravis
 class AravisPropertyBackend;
 }
 
-namespace tcam::property
+namespace tcam::aravis
 {
-using tcam::aravis::AravisPropertyBackend;
+using namespace tcam::property;
 
-class AravisPropertyIntegerImpl : public IPropertyInteger
+struct aravis_backend_guard;
+
+class prop_base_impl
 {
-
 public:
-    AravisPropertyIntegerImpl(const std::string& name,
-                              ArvCamera* camera,
+    prop_base_impl(const std::shared_ptr<AravisPropertyBackend>& cam,
+                   ArvGcFeatureNode* feature_node)
+        : backend_ { cam }, feature_node_ { feature_node }
+    {
+    }
+
+protected:
+    PropertyFlags get_flags_impl() const;
+
+    aravis_backend_guard acquire_backend_guard() const noexcept;
+
+    tcamprop1::prop_static_info_str build_static_info(
+        std::string_view category,
+        std::string_view name_override) const noexcept;
+
+private:
+    std::weak_ptr<AravisPropertyBackend> backend_;
+    ArvGcFeatureNode* feature_node_ = nullptr;
+};
+
+class AravisPropertyIntegerImpl : public prop_base_impl, public IPropertyInteger
+{
+public:
+    AravisPropertyIntegerImpl(std::string_view name,
+                              std::string_view category,
                               ArvGcNode* node,
-                              std::shared_ptr<AravisPropertyBackend>);
+                              const std::shared_ptr<AravisPropertyBackend>&);
 
     tcamprop1::prop_static_info get_static_info() const final
     {
-        if (p_static_info)
-        {
-            return *p_static_info;
-        }
-        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+        return static_info_.to_prop_static_info();
     }
-    std::string_view get_unit() const final;
-    tcamprop1::IntRepresentation_t get_representation() const final;
-
-    PropertyFlags get_flags() const final;
-
-    tcamprop1::prop_range_integer get_range() const final
+    PropertyFlags get_flags() const final
     {
-        return { m_min, m_max, m_step };
+        return get_flags_impl();
     }
+
+    std::string_view get_unit() const final
+    {
+        return unit_;
+    }
+    tcamprop1::IntRepresentation_t get_representation() const final
+    {
+        return int_rep_;
+    }
+
+    tcamprop1::prop_range_integer get_range() const final;
+
     int64_t get_default() const final
     {
         return m_default;
@@ -68,98 +95,76 @@ public:
     outcome::result<void> set_value(int64_t new_value) final;
 
 private:
-    std::weak_ptr<AravisPropertyBackend> m_cam;
+    ArvGcInteger* arv_gc_node_ = nullptr;
 
-    // display name
-    std::string m_name;
-    // some legacy cameras have incorrect
-    // property names. those incorrect names are
-    // still used for camera interactions
-    std::string m_actual_name;
+    tcamprop1::prop_static_info_str static_info_;
+    std::string unit_;
+    tcamprop1::IntRepresentation_t int_rep_ = tcamprop1::IntRepresentation_t::Linear;
 
-    int64_t m_min;
-    int64_t m_max;
-    int64_t m_step;
-    int64_t m_default;
-
-    ArvGcNode* p_node;
-    const tcamprop1::prop_static_info_integer* p_static_info;
+    int64_t m_default = 0;
 };
 
-
-class AravisPropertyDoubleImpl : public IPropertyFloat
+class AravisPropertyDoubleImpl : public prop_base_impl, public IPropertyFloat
 {
 
 public:
-    AravisPropertyDoubleImpl(const std::string& name,
-                             ArvCamera* camera,
+    AravisPropertyDoubleImpl(std::string_view name,
+                             std::string_view category,
                              ArvGcNode* node,
-                             std::shared_ptr<AravisPropertyBackend>);
+                             const std::shared_ptr<AravisPropertyBackend>&);
 
     tcamprop1::prop_static_info get_static_info() const final
     {
-        if (p_static_info)
-        {
-            return *p_static_info;
-        }
-        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+        return static_info_.to_prop_static_info();
     }
-    std::string_view get_unit() const final;
-    tcamprop1::FloatRepresentation_t get_representation() const final;
-
-    PropertyFlags get_flags() const final;
-    tcamprop1::prop_range_float get_range() const final
+    PropertyFlags get_flags() const final
     {
-        return { m_min, m_max, m_step };
+        return get_flags_impl();
     }
+    std::string_view get_unit() const final
+    {
+        return unit_;
+    }
+    tcamprop1::FloatRepresentation_t get_representation() const final
+    {
+        return float_rep_;
+    }
+    tcamprop1::prop_range_float get_range() const final;
     double get_default() const final
     {
         return m_default;
     }
     outcome::result<double> get_value() const final;
-
     outcome::result<void> set_value(double new_value) final;
 
 private:
-    outcome::result<void> valid_value(double val) const;
+    ArvGcFloat* arv_gc_node_ = nullptr;
 
-    std::weak_ptr<AravisPropertyBackend> m_cam;
+    tcamprop1::prop_static_info_str static_info_;
+    std::string unit_;
+    tcamprop1::FloatRepresentation_t float_rep_ = tcamprop1::FloatRepresentation_t::Linear;
 
-    // display name
-    std::string m_name;
-    // some legacy cameras have incorrect
-    // property names. those incorrect names are
-    // still used for camera interactions
-    std::string m_actual_name;
-
-    double m_min;
-    double m_max;
-    double m_step;
-    double m_default;
-
-    ArvGcNode* p_node;
-    const tcamprop1::prop_static_info_float* p_static_info;
+    double m_default = 0;
 };
 
 
-class AravisPropertyBoolImpl : public IPropertyBool
+class AravisPropertyBoolImpl : public prop_base_impl, public IPropertyBool
 {
 public:
-    AravisPropertyBoolImpl(const std::string& name,
-                           ArvCamera* camera,
+    AravisPropertyBoolImpl(std::string_view name,
+                           std::string_view category,
                            ArvGcNode* node,
-                           std::shared_ptr<AravisPropertyBackend> backend);
+                           const std::shared_ptr<AravisPropertyBackend>& backend);
 
     tcamprop1::prop_static_info get_static_info() const final
     {
-        if (p_static_info)
-        {
-            return *p_static_info;
-        }
-        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+        return static_info_.to_prop_static_info();
     }
 
-    PropertyFlags get_flags() const final;
+    PropertyFlags get_flags() const final
+    {
+        return get_flags_impl();
+    }
 
     bool get_default() const final
     {
@@ -170,74 +175,56 @@ public:
     outcome::result<void> set_value(bool new_value) final;
 
 private:
-    std::weak_ptr<AravisPropertyBackend> m_cam;
+    ArvGcBoolean* arv_gc_node_ = nullptr;
+    tcamprop1::prop_static_info_str static_info_;
 
-    // display name
-    std::string m_name;
-    // some legacy cameras have incorrect
-    // property names. those incorrect names are
-    // still used for camera interactions
-    std::string m_actual_name;
-
-    bool m_default;
-    ArvGcNode* p_node;
-    const tcamprop1::prop_static_info_boolean* p_static_info;
+    bool m_default = false;
 };
 
 
-class AravisPropertyCommandImpl : public IPropertyCommand
+class AravisPropertyCommandImpl : public prop_base_impl, public IPropertyCommand
 {
 public:
-    AravisPropertyCommandImpl(const std::string& name,
+    AravisPropertyCommandImpl(std::string_view name,
+                              std::string_view category,
                               ArvGcNode* node,
-                              std::shared_ptr<AravisPropertyBackend> backend);
+                              const std::shared_ptr<AravisPropertyBackend>& backend);
 
     tcamprop1::prop_static_info get_static_info() const final
     {
-        if (p_static_info)
-        {
-            return *p_static_info;
-        }
-        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+        return static_info_.to_prop_static_info();
     }
 
-    PropertyFlags get_flags() const final;
+    PropertyFlags get_flags() const final
+    {
+        return get_flags_impl();
+    }
 
     outcome::result<void> execute() final;
 
 private:
-    std::weak_ptr<AravisPropertyBackend> m_cam;
-
-    // display name
-    std::string m_name;
-    // some legacy cameras have incorrect
-    // property names. those incorrect names are
-    // still used for camera interactions
-    std::string m_actual_name;
-
-    ArvGcNode* p_node;
-    const tcamprop1::prop_static_info_command* p_static_info;
+    tcamprop1::prop_static_info_str static_info_;
+    ArvGcCommand* arv_gc_node_ = nullptr;
 };
 
 
-class AravisPropertyEnumImpl : public IPropertyEnum
+class AravisPropertyEnumImpl : public prop_base_impl, public IPropertyEnum
 {
 public:
-    AravisPropertyEnumImpl(const std::string& name,
-                           ArvCamera* camera,
+    AravisPropertyEnumImpl(std::string_view name,
+                           std::string_view category,
                            ArvGcNode* node,
-                           std::shared_ptr<AravisPropertyBackend> backend);
+                           const std::shared_ptr<AravisPropertyBackend>& backend);
 
     tcamprop1::prop_static_info get_static_info() const final
     {
-        if (p_static_info)
-        {
-            return *p_static_info;
-        }
-        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+        return static_info_.to_prop_static_info();
     }
 
-    PropertyFlags get_flags() const final;
+    PropertyFlags get_flags() const final
+    {
+        return get_flags_impl();
+    }
 
     outcome::result<void> set_value_str(const std::string_view& new_value) final;
     outcome::result<std::string_view> get_value() const final;
@@ -247,28 +234,162 @@ public:
         return m_default;
     }
 
-    std::vector<std::string> get_entries() const final;
+    std::vector<std::string> get_entries() const final
+    {
+        std::vector<std::string> rval;
+        for (auto& e : entries_) { rval.push_back(e.display_name); }
+        return rval;
+    }
 
 private:
-    // outcome::result<void> valid_value(int value);
-    std::vector<std::string> m_entries;
-    //std::map<int, std::string> m_entries;
-    std::weak_ptr<AravisPropertyBackend> m_cam;
+    tcamprop1::prop_static_info_str static_info_;
+    ArvGcEnumeration* arv_gc_node_ = nullptr;
 
-    // display name
-    std::string m_name;
-    // some legacy cameras have incorrect
-    // property names. those incorrect names are
-    // still used for camera interactions
-    std::string m_actual_name;
+    struct enum_entry
+    {
+        std::string display_name;
+        int64_t value;
+    };
+
+    std::vector<enum_entry> entries_;
 
     std::string m_default;
+};
 
-    ArvGcNode* p_node;
-    const tcamprop1::prop_static_info_enumeration* p_static_info;
+class balance_ratio_raw_to_wb_channel : public IPropertyFloat2
+{
+public:
+    balance_ratio_raw_to_wb_channel(const std::shared_ptr<IPropertyEnum>& sel,
+                                    const std::shared_ptr<IPropertyInteger>& val,
+                                    const std::string& sel_entry,
+                                    const tcamprop1::prop_static_info_float* info_entry)
+        : selector_(sel), value_(val), selector_entry_(sel_entry), prop_entry_(info_entry)
+    {
+    }
+
+    tcamprop1::prop_static_info_float get_static_info_ext() const final
+    {
+        return *prop_entry_;
+    }
+
+    PropertyFlags get_flags() const final
+    {
+        return value_->get_flags();
+    }
+
+    tcamprop1::prop_range_float get_range() const final
+    {
+        return { 0., 4., 1. / 64. };
+    }
+    double get_default() const final
+    {
+        return 1.0;
+    }
+    outcome::result<double> get_value() const final
+    {
+        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        {
+            return sel_res.error();
+        }
+        auto res = value_->get_value();
+        if (!res)
+        {
+            return res.error();
+        }
+        return res.value() / 64.0;
+    }
+    outcome::result<void> set_value(double new_value) final
+    {
+        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        {
+            return sel_res.error();
+        }
+        return value_->set_value(new_value * 64.);
+    }
+
+private:
+    std::shared_ptr<IPropertyEnum> selector_;
+    std::shared_ptr<IPropertyInteger> value_;
+    std::string selector_entry_;
+
+    const tcamprop1::prop_static_info_float* prop_entry_ = nullptr;
 };
 
 
-} // namespace tcam::property
+class balance_ratio_to_wb_channel : public IPropertyFloat2
+{
+public:
+    balance_ratio_to_wb_channel(const std::shared_ptr<IPropertyEnum>& sel,
+                                const std::shared_ptr<IPropertyFloat>& val,
+                                const std::string& sel_entry,
+                                const tcamprop1::prop_static_info_float* info_entry)
+        : selector_(sel), value_(val), selector_entry_(sel_entry), prop_entry_(info_entry)
+    {
+    }
+
+    tcamprop1::prop_static_info_float get_static_info_ext() const final
+    {
+        return *prop_entry_;
+    }
+
+    PropertyFlags get_flags() const final
+    {
+        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        {
+            // do nothing
+            //return sel_res.error();
+        }
+        return value_->get_flags();
+    }
+
+    tcamprop1::prop_range_float get_range() const final
+    {
+        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        {
+            // do nothing
+            //return sel_res.error();
+        }
+        return value_->get_range();
+    }
+    double get_default() const final
+    {
+        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        {
+            // do nothing
+            //return sel_res.error();
+        }
+        return value_->get_default();
+    }
+    outcome::result<double> get_value() const final
+    {
+        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        {
+            return sel_res.error();
+        }
+        auto res = value_->get_value();
+        if (!res)
+        {
+            return res.error();
+        }
+        return res.value();
+    }
+    outcome::result<void> set_value(double new_value) final
+    {
+        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        {
+            return sel_res.error();
+        }
+        return value_->set_value(new_value);
+    }
+
+private:
+    std::shared_ptr<IPropertyEnum> selector_;
+    std::shared_ptr<IPropertyFloat> value_;
+    std::string selector_entry_;
+
+    const tcamprop1::prop_static_info_float* prop_entry_ = nullptr;
+};
+
+} // namespace tcam::aravis
 
 VISIBILITY_POP

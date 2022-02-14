@@ -125,7 +125,7 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
         key_t shmkey = ftok(LOCK_FILE, 'G');
         if (shmkey == -1)
         {
-            if (!not_using_gige_deamon_message_reported)    // print this message only once and not every time we are queried
+            if (!not_using_gige_deamon_message_reported) // print this message only once and not every time we are queried
             {
                 SPDLOG_INFO("Failed to create shmkey. Not using gige-daemon to enumerate devices.");
                 not_using_gige_deamon_message_reported = true;
@@ -133,7 +133,8 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
             return std::nullopt;
         }
 
-        not_using_gige_deamon_message_reported = false; // reset message when fetching the lock worked
+        not_using_gige_deamon_message_reported =
+            false; // reset message when fetching the lock worked
 
         key_t shm_semaphore_key = ftok(LOCK_FILE, 'S');
         if (shm_semaphore_key == -1)
@@ -223,11 +224,10 @@ std::vector<DeviceInfo> tcam::get_gige_device_list()
     std::vector<DeviceInfo> to_add;
     for (auto& entry : current_devices)
     {
-        auto known_dev = std::find_if(dev_life_tracking_list.begin(), dev_life_tracking_list.end(),
-                                      [entry] (const dev_life_tracking& d)
-                                      {
-                                          return d.dev == entry;
-                                      });
+        auto known_dev =
+            std::find_if(dev_life_tracking_list.begin(),
+                         dev_life_tracking_list.end(),
+                         [entry](const dev_life_tracking& d) { return d.dev == entry; });
 
         // known device
         if (known_dev != dev_life_tracking_list.end())
@@ -245,15 +245,12 @@ std::vector<DeviceInfo> tcam::get_gige_device_list()
     // and add to current_devices if considered still alive
     for (auto& entry : dev_life_tracking_list)
     {
-        if (!std::any_of(current_devices.begin(), current_devices.end(),
-                        [entry] (const DeviceInfo& d)
-                        {
-                            return d == entry.dev;
-                        }))
+        if (!std::any_of(current_devices.begin(),
+                         current_devices.end(),
+                         [entry](const DeviceInfo& d) { return d == entry.dev; }))
         {
-            auto is_gige_dev = [] (const DeviceInfo& dev)
+            auto is_gige_dev = [](const DeviceInfo& dev)
             {
-
                 std::string info = dev.get_info().additional_identifier;
 
                 if (info == "USB3")
@@ -275,21 +272,15 @@ std::vector<DeviceInfo> tcam::get_gige_device_list()
                 current_devices.push_back(entry.dev);
             }
         }
-
     }
 
     // add new entries
-    for (auto& entry : to_add)
-    {
-        dev_life_tracking_list.push_back({entry, 0});
-    }
+    for (auto& entry : to_add) { dev_life_tracking_list.push_back({ entry, 0 }); }
 
     // remove deprecated entried
-    std::remove_if(dev_life_tracking_list.begin(), dev_life_tracking_list.end(),
-                   [] (const auto& entry)
-                   {
-                       return entry.lost_count >= lost_count_max;
-                   });
+    std::remove_if(dev_life_tracking_list.begin(),
+                   dev_life_tracking_list.end(),
+                   [](const auto& entry) { return entry.lost_count >= lost_count_max; });
 
     return current_devices;
 }
@@ -336,112 +327,13 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list()
             strncpy(info.serial_number, serial, sizeof(info.serial_number) - 1);
         }
 
-        strncpy(info.additional_identifier, arv_get_device_address(i), sizeof(info.additional_identifier) - 1);
+        strncpy(info.additional_identifier,
+                arv_get_device_address(i),
+                sizeof(info.additional_identifier) - 1);
 
         device_list.push_back(DeviceInfo(info));
     }
     return device_list;
-}
-
-
-bool tcam::is_private_setting(std::string_view name)
-{
-    static const std::string_view private_settings[] = {
-        "TLParamsLocked",
-        "GevSCPSDoNotFragment",
-        "GevTimestampTickFrequency",
-        "GevTimeSCPD",
-        "GevSCPD",
-        "PayloadSize",
-        "PayloadPerFrame",
-        "PayloadPerPacket",
-        "TotalPacketSize",
-        "PacketsPerFrame",
-        "PacketTimeUS",
-        "GevSCPSPacketSize",
-        "GevSCPSFireTestPacket",
-        "DeviceVendorName",
-        "DeviceType",
-        "DeviceModelType",
-        "DeviceVersion",
-        "DeviceSerialNumber",
-        "DeviceUserID",
-        "DeviceSFNCVersionMajor",
-        "DeviceSFNCVersionMinor",
-        "DeviceTLType",
-        "DeviceTLTypeMajor",
-        "DeviceTLTypeMinor",
-        "DeviceTLTypeSubMinor",
-        "DeviceLinkSelector",
-        "WidthMax",
-        "HeightMax",
-        "ChunkModeActive",
-        "ChunkImage",
-        "ChunkBlockId",
-        "ActionDeviceKey",
-        "ActionSelector",
-        "ActionGroupMask",
-        "ActionGroupKey",
-        "UserSetSelector",
-        "UserSetLoad",
-        "UserSetSave",
-        "UserSetDefault",
-        "DeviceScanType",
-        "StringReg",
-        "DeviceModelName",
-        "DeviceSFNCVersionSubMinor",
-        "MaskedIntReg",
-        "DeviceTLVersionMajor",
-        "MaskedIntReg",
-        "DeviceTLVersionMinor",
-        "DeviceTLVersionSubMinor",
-        "DeviceLinkHeartbeatTimeout",
-        "DeviceStreamChannelCount",
-        "DeviceStreamChannelSelector",
-        "DeviceStreamChannelType",
-        "DeviceStreamChannelLink",
-        "DeviceStreamChannelEndianness",
-        "DeviceStreamChannelPacketSize",
-        "DeviceEventChannelCount",
-        "DeviceTemperatureConverter",
-        "IMX174HardwareWDRShutterMode",
-        "IMX174HardwareWDREnable",
-        "IMX174WDRShutter2",
-        "ChunkIMX174FrameSet",
-        "ChunkIMX174FrameId",
-        "SensorPixelHeight",
-        "SensorPixelWidth",
-        "AcquisitionStart",
-        "AcquisitionStop",
-        "AcquisitionMode",
-        "SensorWidth",
-        "SensorHeight",
-        "Width",
-        "Height",
-        "FPS",
-        "AcquisitionFrameRate",
-        "PixelFormat",
-        "Binning",
-        "BinningHorizontal",
-        "BinningVertical",
-        "SkippingHorizontal",
-        "SkippingVertical",
-        "DecimationHorizontal",
-        "DecimationVertical",
-        "ColorTransformationSelector",
-        "LUTSelector",
-        "LUTControl",
-        "LUTEnable",
-        "LUTIndex",
-        "LUTValue"
-    };
-
-    if (std::find(std::begin(private_settings), std::end(private_settings), name)
-        != std::end(private_settings))
-    {
-        return true;
-    }
-    return false;
 }
 
 tcam::status tcam::aravis::translate_error(ArvDeviceError err)

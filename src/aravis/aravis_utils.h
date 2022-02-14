@@ -19,9 +19,9 @@
 
 #include "../DeviceInfo.h"
 #include "../compiler_defines.h"
-#include "../error.h"	// tcam::status
+#include "../error.h" // tcam::status
 
-#include <arv.h>		// ArvGcError/.../GError
+#include <arv.h> // ArvGcError/.../GError
 #include <string_view>
 #include <vector>
 
@@ -38,8 +38,6 @@ unsigned int get_gige_device_count();
 std::vector<DeviceInfo> get_gige_device_list();
 
 std::vector<DeviceInfo> get_aravis_device_list();
-
-bool is_private_setting(std::string_view name);
 
 } /* namespace tcam */
 

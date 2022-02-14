@@ -14,113 +14,295 @@
  * limitations under the License.
  */
 
+#include "../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info_list.h"
 #include "../error.h"
 #include "../logging.h"
 #include "AravisDevice.h"
+#include "AravisPropertyBackend.h"
 #include "aravis_property_impl.h"
 #include "aravis_utils.h"
 
 namespace
 {
-
-
-static const std::pair<std::string_view, std::string_view> name_table[] = {
-    { "OffsetAuto", "OffsetAutoCenter" },
-    { "IRCutFilterEnableElement", "IRCutFilterEnable" },
-    { "ExposureAutoHighlighReduction", "ExposureAutoHighlightReduction" },
+enum class map_type
+{
+    pub, // public       added to AravisDevice::properties_
+    priv, // private      added to AravisDevice::internal_properties_
+    blacklist, // blocklisted  not-added
 };
 
-std::string find_conversion_name(const std::string& name)
+struct aravis_property_name_map
 {
-    for (const auto& entry : name_table)
+    constexpr aravis_property_name_map() = default;
+    constexpr aravis_property_name_map(std::string_view n, map_type m) noexcept : name(n), type(m)
     {
-        if (entry.first == name)
-        {
-            return std::string(entry.second);
-        }
+    }
+    constexpr aravis_property_name_map(std::string_view n,
+                                       std::string_view new_n,
+                                       map_type m = map_type::pub) noexcept
+        : name(n), type(m), new_name(new_n)
+    {
+    }
+
+    std::string_view name;
+
+    map_type type = map_type::pub;
+
+    std::string_view new_name;
+};
+
+// clang-format off
+static const aravis_property_name_map aravis_property_name_mapping_list[] =
+{
+    { "TLParamsLocked", map_type::priv },
+    { "GevSCPSDoNotFragment", map_type::priv },
+    { "GevTimestampTickFrequency", map_type::priv },
+    { "GevTimeSCPD", map_type::priv },
+    { "GevSCPD", map_type::priv },
+    
+    { "PayloadSize", map_type::blacklist }, // blacklist because of warning in aravis
+    { "PayloadPerFrame", map_type::priv },
+    { "PayloadPerPacket", map_type::priv },
+    { "TotalPacketSize", map_type::priv },
+    { "PacketsPerFrame", map_type::priv },
+    { "PacketTimeUS", map_type::priv },
+    { "GevSCPSPacketSize", map_type::priv },
+    { "GevSCPSFireTestPacket", map_type::priv },
+    { "GevGVSPExtendedIDMode", map_type::priv },
+
+    { "TimestampReset", map_type::priv },
+    { "TimestampLatch", map_type::priv },
+    { "TimestampLatchValue", map_type::priv },
+    { "TimestampLatchString", map_type::blacklist }, // blacklist because this is StringReg
+
+    { "ChunkModeActive", map_type::priv },
+    { "ChunkImage", map_type::blacklist },  // is Register
+    { "ChunkBlockId", map_type::priv },
+
+    { "ActionDeviceKey", map_type::priv },
+    { "ActionSelector", map_type::priv },
+    { "ActionGroupMask", map_type::priv },
+    { "ActionGroupKey", map_type::priv },
+
+    
+    // GigEVision stuff?
+    { "DeviceVendorName", map_type::blacklist },
+    { "DeviceType", map_type::blacklist },
+    { "DeviceModelType", map_type::blacklist },
+    { "DeviceVersion", map_type::blacklist },
+    { "DeviceSerialNumber", map_type::blacklist },
+    { "DeviceUserID", map_type::blacklist },
+    { "DeviceSFNCVersionMajor", map_type::blacklist },
+    { "DeviceSFNCVersionMinor", map_type::blacklist },
+    { "DeviceTLType", map_type::blacklist },
+    { "DeviceTLTypeMajor", map_type::blacklist },
+    { "DeviceTLTypeMinor", map_type::blacklist },
+    { "DeviceTLTypeSubMinor", map_type::blacklist },
+    { "DeviceLinkSelector", map_type::blacklist },
+    { "DeviceModelName", map_type::blacklist },
+    { "DeviceSFNCVersionSubMinor", map_type::blacklist },
+    { "DeviceTLVersionMajor", map_type::blacklist },
+    { "DeviceTLVersionMinor", map_type::blacklist },
+    { "DeviceTLVersionSubMinor", map_type::blacklist },
+    { "DeviceLinkHeartbeatTimeout", map_type::blacklist },
+    { "DeviceStreamChannelCount", map_type::blacklist },
+    { "DeviceStreamChannelSelector", map_type::blacklist },
+    { "DeviceStreamChannelType", map_type::blacklist },
+    { "DeviceStreamChannelLink", map_type::blacklist },
+    { "DeviceStreamChannelEndianness", map_type::blacklist },
+    { "DeviceStreamChannelPacketSize", map_type::blacklist },
+    { "DeviceEventChannelCount", map_type::blacklist },
+    { "DeviceScanType", map_type::priv },
+
+    { "DeviceReset", map_type::blacklist },
+    { "DeviceFactoryReset", map_type::blacklist },
+    
+    // Multi-frameset stuff?
+    { "IMX174HardwareWDRShutterMode", map_type::pub },
+    { "IMX174HardwareWDREnable", map_type::pub },
+    { "IMX174WDRShutter2", map_type::pub },
+    // Chunk stuff
+    { "ChunkIMX174FrameSet", map_type::blacklist },
+    { "ChunkIMX174FrameId", map_type::blacklist },
+
+    // AcquisitionControl
+    { "SensorPixelHeight", map_type::priv },
+    { "SensorPixelWidth", map_type::priv },
+    { "AcquisitionStart", map_type::priv },
+    { "AcquisitionStop", map_type::priv },
+    { "AcquisitionMode", map_type::priv },
+    { "Width", map_type::priv },
+    { "Height", map_type::priv },
+    { "FPS", map_type::priv },
+    { "AcquisitionFrameRate", map_type::priv },
+    { "PixelFormat", map_type::priv },
+
+    // Binning etc.
+    { "Binning", map_type::priv },
+    { "BinningHorizontal", map_type::priv },
+    { "BinningVertical", map_type::priv },
+    { "SkippingHorizontal", map_type::priv },
+    { "SkippingVertical", map_type::priv },
+    { "DecimationHorizontal", map_type::priv },
+    { "DecimationVertical", map_type::priv },
+
+    { "LUTSelector", map_type::priv },
+    { "LUTControl", map_type::priv },
+    { "LUTEnable", map_type::priv },
+    { "LUTIndex", map_type::priv },
+    { "LUTValue", map_type::priv },
+    { "LUTValueAll", map_type::blacklist },
+
+    // these don't nicely map to an actual interface, so just blacklist
+    { "WidthMax", map_type::blacklist },
+    { "HeightMax", map_type::blacklist },
+
+    // rename stuff
+    { "OffsetAuto", "OffsetAutoCenter", map_type::pub },
+    { "IRCutFilterEnableElement", "IRCutFilterEnable", map_type::pub },
+    { "ExposureAutoHighlighReduction", "ExposureAutoHighlightReduction", map_type::pub }, // This should already be there??
+
+    // Hide BalanceRatio controls
+    { "BalanceRatioSelector", map_type::priv },
+    { "BalanceRatio", map_type::priv },
+    { "BalanceRatioRaw", map_type::priv },
+
+    // #TODO properties to maybe add
+    { "ColorTransformationSelector", map_type::priv },  // Enum, RGBtoRGB
+    { "ColorTransformationValueSelector", map_type::priv },
+    { "ColorTransformationValue", map_type::priv },
+
+    { "SensorWidth", map_type::priv },
+    { "SensorHeight", map_type::priv },
+    { "DeviceTemperatureSelector", map_type::priv },
+    { "DeviceTemperature", map_type::priv },
+    { "PtpClockAccuracy", map_type::priv },
+    { "PtpEnable", map_type::priv },
+    { "PtpStatus", map_type::priv },
+        
+    { "UserSetSelector", map_type::priv },
+    { "UserSetLoad", map_type::priv },
+    { "UserSetSave", map_type::priv },
+    { "UserSetDefault", map_type::priv },
+};
+
+static const aravis_property_name_map unlinked_property_map[] =
+{
+    { "TestBinningHorizontal", map_type::priv },
+    { "TestBinningVertical", map_type::priv },
+    { "TestDecimationHorizontal", map_type::priv },
+    { "TestDecimationVertical", map_type::priv },
+};
+
+// clang-format on
+
+
+auto find_map_info(std::string_view name) noexcept -> aravis_property_name_map
+{
+    auto f = std::find_if(std::begin(aravis_property_name_mapping_list),
+                          std::end(aravis_property_name_mapping_list),
+                          [name](const auto& v) { return v.name == name; });
+    if (f != std::end(aravis_property_name_mapping_list))
+    {
+        return *f;
+    }
+    f = std::find_if(std::begin(unlinked_property_map),
+                     std::end(unlinked_property_map),
+                     [name](const auto& v) { return v.name == name; });
+    if (f != std::end(unlinked_property_map))
+    {
+        return *f;
     }
     return {};
 }
 
-} // namespace
-
-
-namespace tcam
+auto build_property_from_node(std::string_view name,
+                              std::string_view category,
+                              ArvGcNode* node,
+                              const std::shared_ptr<tcam::aravis::AravisPropertyBackend>& backend,
+                              const aravis_property_name_map& map_entry)
+    -> std::shared_ptr<tcam::property::IPropertyBase>
 {
+    using namespace tcam::aravis;
 
-void AravisDevice::index_properties(const char* name)
-{
-    ArvGcNode* node = arv_gc_get_node(genicam_, name);
-
-    if (ARV_IS_GC_FEATURE_NODE(node)
-        && arv_gc_feature_node_is_implemented(ARV_GC_FEATURE_NODE(node), NULL)
-        && arv_gc_feature_node_is_available(ARV_GC_FEATURE_NODE(node), NULL))
+    std::string_view prop_name = name;
+    if (!map_entry.new_name.empty())
     {
-        if (ARV_IS_GC_CATEGORY(node))
-        {
-            std::string node_name = arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node));
-
-            if (node_name == "DeviceControl" || node_name == "TransportLayerControl")
-            {
-                return;
-            }
-
-            auto features = arv_gc_category_get_features(ARV_GC_CATEGORY(node));
-
-            for (auto iter = features; iter != NULL; iter = iter->next)
-            {
-                index_properties((char*)iter->data);
-            }
-            return;
-        }
-    }
-
-    std::string actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
-
-    std::string prop_name = actual_name;
-    if (auto conv_name = find_conversion_name(prop_name); !conv_name.empty())
-    {
-        prop_name = conv_name;
+        prop_name = map_entry.new_name;
     }
 
     std::shared_ptr<tcam::property::IPropertyBase> prop;
-    if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Float") == 0)
+    if (ARV_IS_GC_ENUMERATION(node))
     {
-        prop = std::make_shared<tcam::property::AravisPropertyDoubleImpl>(
-            prop_name, arv_camera_, node, backend_);
+        prop = std::make_shared<AravisPropertyEnumImpl>(prop_name, category, node, backend);
     }
-    else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Integer") == 0)
+    else if (ARV_IS_GC_FLOAT(node))
     {
-        prop = std::make_shared<tcam::property::AravisPropertyIntegerImpl>(
-            prop_name, arv_camera_, node, backend_);
+        prop = std::make_shared<AravisPropertyDoubleImpl>(prop_name, category, node, backend);
     }
-    else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Boolean") == 0)
+    else if (ARV_IS_GC_INTEGER(node))
     {
-        prop = std::make_shared<tcam::property::AravisPropertyBoolImpl>(
-            prop_name, arv_camera_, node, backend_);
+        prop = std::make_shared<AravisPropertyIntegerImpl>(prop_name, category, node, backend);
     }
-    else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Command") == 0)
+    else if (ARV_IS_GC_BOOLEAN(node))
     {
-        prop =
-            std::make_shared<tcam::property::AravisPropertyCommandImpl>(prop_name, node, backend_);
+        prop = std::make_shared<AravisPropertyBoolImpl>(prop_name, category, node, backend);
     }
-    else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Enumeration") == 0)
+    else if (ARV_IS_GC_COMMAND(node))
     {
-        prop = std::make_shared<tcam::property::AravisPropertyEnumImpl>(
-            prop_name, arv_camera_, node, backend_);
+        prop = std::make_shared<AravisPropertyCommandImpl>(prop_name, category, node, backend);
     }
     else
     {
-        SPDLOG_ERROR("Not implemented - {} - {}!!!!",
-                     arv_dom_node_get_node_name(ARV_DOM_NODE(node)),
-                     prop_name);
+        std::string_view dom_node_name = arv_dom_node_get_node_name(ARV_DOM_NODE(node));
+
+        SPDLOG_INFO("Property '{}' node-name '{}' not implemented.", prop_name, dom_node_name);
+    }
+    return prop;
+}
+
+
+} // namespace
+
+bool tcam::aravis::is_private_setting(std::string_view name)
+{
+    auto info = find_map_info(name);
+    return info.type != map_type::pub;
+}
+
+void tcam::AravisDevice::index_properties(const char* category, const char* name)
+{
+    ArvGcNode* node = arv_gc_get_node(genicam_, name);
+
+    if (!ARV_IS_GC_FEATURE_NODE(node)
+        || !arv_gc_feature_node_is_implemented(ARV_GC_FEATURE_NODE(node), NULL))
+    {
+        return;
     }
 
+    if (ARV_IS_GC_CATEGORY(node))
+    {
+        auto features = arv_gc_category_get_features(ARV_GC_CATEGORY(node));
+
+        for (auto iter = features; iter != NULL; iter = iter->next)
+        {
+            index_properties(name, (char*)iter->data);
+        }
+        return;
+    }
+
+    std::string prop_name = arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node));
+    auto map_info = find_map_info(prop_name);
+    if (map_info.type == map_type::blacklist)
+    {
+        return;
+    }
+
+    auto prop = build_property_from_node(prop_name, category, node, backend_, map_info);
     if (prop != nullptr)
     {
-        if (is_private_setting(actual_name))
+        if (map_info.type == map_type::priv)
         {
-            //SPDLOG_ERROR("Private setting {}", arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node)));
             internal_properties_.push_back(prop);
         }
         else
@@ -130,4 +312,84 @@ void AravisDevice::index_properties(const char* name)
     }
 }
 
-} // namespace tcam
+
+void tcam::AravisDevice::generate_properties_from_genicam()
+{
+    index_properties(nullptr, "Root");
+
+    // this adds things like TestBinningVertical to the private properties
+    for (auto&& e : unlinked_property_map)
+    {
+        ArvGcNode* node = arv_gc_get_node(genicam_, std::string(e.name).c_str());
+        if (node == nullptr)
+        {
+            continue;
+        }
+
+        auto prop = build_property_from_node(e.name, "internal", node, backend_, e);
+        if (prop != nullptr)
+        {
+            if (e.type == map_type::priv)
+            {
+                internal_properties_.push_back(prop);
+            }
+            else
+            {
+                properties_.push_back(prop);
+            }
+        }
+    }
+
+    auto balance_ratio_selector =
+        find_cam_property<tcam::property::IPropertyEnum>("BalanceRatioSelector");
+    if (balance_ratio_selector)
+    {
+        auto balance_ratio_float =
+            find_cam_property<tcam::property::IPropertyFloat>("BalanceRatio");
+        if (balance_ratio_float)
+        {
+            properties_.push_back(std::make_shared<tcam::aravis::balance_ratio_to_wb_channel>(
+                balance_ratio_selector,
+                balance_ratio_float,
+                "Red",
+                &tcamprop1::prop_list::BalanceWhiteRed));
+            properties_.push_back(std::make_shared<tcam::aravis::balance_ratio_to_wb_channel>(
+                balance_ratio_selector,
+                balance_ratio_float,
+                "Green",
+                &tcamprop1::prop_list::BalanceWhiteGreen));
+            properties_.push_back(std::make_shared<tcam::aravis::balance_ratio_to_wb_channel>(
+                balance_ratio_selector,
+                balance_ratio_float,
+                "Blue",
+                &tcamprop1::prop_list::BalanceWhiteBlue));
+        }
+        else
+        {
+            auto balance_ratio_raw =
+                find_cam_property<tcam::property::IPropertyInteger>("BalanceRatioRaw");
+
+            if (balance_ratio_raw)
+            {
+                properties_.push_back(
+                    std::make_shared<tcam::aravis::balance_ratio_raw_to_wb_channel>(
+                        balance_ratio_selector,
+                        balance_ratio_raw,
+                        "Red",
+                        &tcamprop1::prop_list::BalanceWhiteRed));
+                properties_.push_back(
+                    std::make_shared<tcam::aravis::balance_ratio_raw_to_wb_channel>(
+                        balance_ratio_selector,
+                        balance_ratio_raw,
+                        "Green",
+                        &tcamprop1::prop_list::BalanceWhiteGreen));
+                properties_.push_back(
+                    std::make_shared<tcam::aravis::balance_ratio_raw_to_wb_channel>(
+                        balance_ratio_selector,
+                        balance_ratio_raw,
+                        "Blue",
+                        &tcamprop1::prop_list::BalanceWhiteBlue));
+            }
+        }
+    }
+}

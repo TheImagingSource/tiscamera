@@ -18,7 +18,9 @@
 
 #include "../error.h"
 
-struct _ArvDevice;
+#include <arv.h>
+#include <mutex>
+#include <tcamprop1.0_base/tcamprop_base.h>
 
 namespace tcam
 {
@@ -27,27 +29,20 @@ class AravisDevice;
 
 namespace tcam::aravis
 {
+bool is_private_setting(std::string_view name);
+
+tcamprop1::Visibility_t to_Visibility(ArvGcVisibility v) noexcept;
+tcamprop1::Access_t to_Access(ArvGcAccessMode v) noexcept;
+
 class AravisPropertyBackend
 {
 public:
-    AravisPropertyBackend(AravisDevice& parent, _ArvDevice*);
+    AravisPropertyBackend(AravisDevice& parent);
 
-    outcome::result<int64_t> get_int(const std::string& name);
-    outcome::result<void> set_int(const std::string& name, int64_t new_value);
+    std::recursive_mutex& get_mutex() noexcept;
 
-    outcome::result<double> get_double(const std::string& name);
-    outcome::result<void> set_double(const std::string& name, double new_value);
-
-    outcome::result<bool> get_bool(const std::string& name);
-    outcome::result<void> set_bool(const std::string& name, bool new_value);
-
-    outcome::result<void> execute(const std::string& name);
-
-    outcome::result<std::string_view> get_enum(const std::string& name);
-    outcome::result<void> set_enum(const std::string& name, const std::string_view& value);
 private:
     AravisDevice& parent_;
-    _ArvDevice* device_;
 };
 
-} // namespace tcam::property
+} // namespace tcam::aravis

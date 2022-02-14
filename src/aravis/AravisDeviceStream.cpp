@@ -498,7 +498,7 @@ void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((u
         auto ptr = translate_arv_buffer_status(status);
         if (ptr)
         {
-            SPDLOG_WARN("arvBufferStatus: {}", ptr);
+            SPDLOG_DEBUG("arvBufferStatus: {}", ptr);
         }
     }
 }

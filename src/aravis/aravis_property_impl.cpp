@@ -16,47 +16,143 @@
 
 #include "aravis_property_impl.h"
 
+#include "../logging.h"
 #include "AravisPropertyBackend.h"
 #include "aravis_utils.h"
-#include "../logging.h"
+
+using namespace tcam::aravis;
 
 namespace
 {
-
-tcam::property::AccessMode arv_access_to_tcam(ArvGcAccessMode mode)
+auto to_stdstring(const char* f) -> std::string
 {
-    switch (mode)
+    return f == nullptr ? std::string {} : f;
+}
+
+
+tcamprop1::prop_static_info_str get_static_feature_node_info(ArvGcFeatureNode* node)
+{
+    tcamprop1::prop_static_info_str rval;
+
+    rval.name = to_stdstring(arv_gc_feature_node_get_name(node));
+    rval.iccategory = {};
+    rval.display_name = to_stdstring(arv_gc_feature_node_get_display_name(node));
+    rval.description = to_stdstring(arv_gc_feature_node_get_description(node));
+    rval.visibility = to_Visibility(arv_gc_feature_node_get_visibility(node));
+    rval.access = to_Access(arv_gc_feature_node_get_actual_access_mode(node));
+    return rval;
+}
+
+#if 0 // not used
+static void update_prop_info_from_tcamprop1_list(
+    const tcamprop1::prop_static_info_str& prop_info,
+    const tcamprop1::prop_static_info& static_info)
+{
+    if (prop_info.description != static_info.description)
+        SPDLOG_INFO("Property '{}' description='{}' != tcamprop1-description='{}",
+                    prop_info.name,
+                    prop_info.description,
+                    static_info.description);
+    if (prop_info.display_name != static_info.display_name)
+        SPDLOG_INFO("Property '{}' display_name='{}' != tcamprop1-display_name='{}",
+                    prop_info.name,
+                    prop_info.display_name,
+                    static_info.display_name);
+    if (prop_info.visibility != static_info.visibility)
+        SPDLOG_INFO("Property '{}' visibility='{}' != tcamprop1-visibility='{}",
+                    prop_info.name,
+                    to_string(prop_info.visibility),
+                    to_string(static_info.visibility));
+        //if (prop_info.access != static_info.access)
+        //    SPDLOG_INFO("Property '{}' display_name='{}' != tcamprop1-display_name='{}",
+        //                prop_info.name,
+        //                to_string(prop_info.access),
+        //                to_string(static_info.access));
+}
+#endif
+
+
+void update_with_tcamprop1_static_info(std::string_view tcamprop1_name,
+                                       tcamprop1::prop_static_info_str& gc_node_info,
+                                       tcamprop1::prop_type gc_node_type)
+{
+    auto static_info = tcamprop1::find_prop_static_info(tcamprop1_name);
+    if (static_info)
     {
-        case ARV_GC_ACCESS_MODE_RW:
+        gc_node_info.iccategory = static_info.info_ptr->iccategory;
+
+        if (gc_node_info.description.empty())
+            gc_node_info.description = static_info.info_ptr->description;
+        if (gc_node_info.display_name.empty())
+            gc_node_info.display_name = static_info.info_ptr->display_name;
+
+        if (static_info.type != gc_node_type)
         {
-            return tcam::property::AccessMode::RW;
+            SPDLOG_WARN("{} '{}' type != tcamprop1 type of '{}'.",
+                        tcamprop1::to_string(gc_node_type),
+                        tcamprop1_name,
+                        tcamprop1::to_string(static_info.type));
         }
-        case ARV_GC_ACCESS_MODE_RO:
+    }
+    else
+    {
+        if (!tcam::aravis::is_private_setting(tcamprop1_name))
         {
-            return tcam::property::AccessMode::RO;
-        }
-        case ARV_GC_ACCESS_MODE_WO:
-        {
-            return tcam::property::AccessMode::WO;
-        }
-        case ARV_GC_ACCESS_MODE_UNDEFINED:
-        default:
-        {
-            return tcam::property::AccessMode::NoAccess;
+            SPDLOG_WARN("tcamprop1 information for '{}' not found!", tcamprop1_name);
         }
     }
 }
 
 
-tcam::property::PropertyFlags arv_flags_to_tcam(ArvGcNode* node)
+auto to_IntRepresentation(ArvGcRepresentation rep) noexcept
 {
+    switch (rep)
+    {
+        case ARV_GC_REPRESENTATION_UNDEFINED:
+            return tcamprop1 ::IntRepresentation_t::Linear;
+        case ARV_GC_REPRESENTATION_LINEAR:
+            return tcamprop1 ::IntRepresentation_t::Linear;
+        case ARV_GC_REPRESENTATION_LOGARITHMIC:
+            return tcamprop1 ::IntRepresentation_t::Logarithmic;
+        case ARV_GC_REPRESENTATION_BOOLEAN:
+            return tcamprop1 ::IntRepresentation_t::Boolean;
+        case ARV_GC_REPRESENTATION_PURE_NUMBER:
+            return tcamprop1 ::IntRepresentation_t::PureNumber;
+        case ARV_GC_REPRESENTATION_HEX_NUMBER:
+            return tcamprop1 ::IntRepresentation_t::HexNumber;
+        case ARV_GC_REPRESENTATION_IPV4_ADDRESS:
+            return tcamprop1 ::IntRepresentation_t::IPV4Address;
+        case ARV_GC_REPRESENTATION_MAC_ADDRESS:
+            return tcamprop1 ::IntRepresentation_t::MACAddress;
+    }
+    return tcamprop1 ::IntRepresentation_t::Linear;
+}
 
+auto to_FloatRepresentation(ArvGcRepresentation rep) noexcept
+{
+    switch (rep)
+    {
+        case ARV_GC_REPRESENTATION_UNDEFINED:
+            return tcamprop1 ::FloatRepresentation_t::Linear;
+        case ARV_GC_REPRESENTATION_LINEAR:
+            return tcamprop1 ::FloatRepresentation_t::Linear;
+        case ARV_GC_REPRESENTATION_LOGARITHMIC:
+            return tcamprop1 ::FloatRepresentation_t::Logarithmic;
+        case ARV_GC_REPRESENTATION_PURE_NUMBER:
+            return tcamprop1 ::FloatRepresentation_t::PureNumber;
+        default:
+            return tcamprop1 ::FloatRepresentation_t::Linear;
+    }
+    return tcamprop1 ::FloatRepresentation_t::Linear;
+}
+
+
+tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node) noexcept
+{
     tcam::property::PropertyFlags flags = tcam::property::PropertyFlags::None;
 
     GError* err = nullptr;
-
-    bool ret_avail = arv_gc_feature_node_is_available(ARV_GC_FEATURE_NODE(node), &err);
-
+    bool ret_avail = arv_gc_feature_node_is_available(node, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
@@ -71,8 +167,7 @@ tcam::property::PropertyFlags arv_flags_to_tcam(ArvGcNode* node)
         }
     }
 
-    bool ret_implemented = arv_gc_feature_node_is_implemented(ARV_GC_FEATURE_NODE(node), &err);
-
+    bool ret_implemented = arv_gc_feature_node_is_implemented(node, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
@@ -87,10 +182,7 @@ tcam::property::PropertyFlags arv_flags_to_tcam(ArvGcNode* node)
         }
     }
 
-    bool ret_locked = arv_gc_feature_node_is_locked(ARV_GC_FEATURE_NODE(node), &err);
-    auto access_mode =
-        arv_access_to_tcam(arv_gc_feature_node_get_actual_access_mode(ARV_GC_FEATURE_NODE(node)));
-
+    bool ret_locked = arv_gc_feature_node_is_locked(node, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
@@ -99,7 +191,9 @@ tcam::property::PropertyFlags arv_flags_to_tcam(ArvGcNode* node)
     }
     else
     {
-        if (ret_locked || access_mode == tcam::property::AccessMode::RO)
+        auto access_mode =
+            to_Access(arv_gc_feature_node_get_actual_access_mode(ARV_GC_FEATURE_NODE(node)));
+        if (ret_locked || access_mode == tcamprop1::Access_t::RO)
         {
             flags |= tcam::property::PropertyFlags::Locked;
         }
@@ -107,472 +201,413 @@ tcam::property::PropertyFlags arv_flags_to_tcam(ArvGcNode* node)
 
     return flags;
 }
-
-
 } // namespace
 
 
-namespace tcam::property
+namespace tcam::aravis
 {
 
-
-AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(const std::string& name,
-                                                     ArvCamera* camera,
-                                                     ArvGcNode* node,
-                                                     std::shared_ptr<AravisPropertyBackend> backend)
-    : m_cam(backend), m_name(name), p_node(node)
+struct aravis_backend_guard
 {
-    GError* err = nullptr;
-    m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
-
-    m_default = arv_device_get_integer_feature_value(
-        arv_camera_get_device(camera), m_actual_name.c_str(), &err);
-    if (err)
+    explicit aravis_backend_guard(std::weak_ptr<AravisPropertyBackend> cam)
     {
-        SPDLOG_ERROR("Unable to retrieve aravis int - {}: {}", name, err->message);
-        g_clear_error(&err);
-    }
-
-    m_step = 1;
-
-    arv_device_get_integer_feature_bounds(
-        arv_camera_get_device(camera), m_actual_name.c_str(), &m_min, &m_max, &err);
-    if (err)
-    {
-        SPDLOG_ERROR("Unable to retrieve aravis int bounds: {}", err->message);
-        g_clear_error(&err);
-    }
-
-    auto static_info = tcamprop1::find_prop_static_info(m_name);
-
-    if (static_info.type == tcamprop1::prop_type::Integer && static_info.info_ptr)
-    {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
-    }
-    else if (!static_info.info_ptr)
-    {
-        if (!is_private_setting(m_name))
+        owner_ = cam.lock();
+        if (owner_)
         {
-            SPDLOG_ERROR("static information for {} do not exist!", m_name);
+            backend_mtx_ = &owner_->get_mutex();
+            backend_mtx_->lock();
         }
-        p_static_info = nullptr;
     }
-    else
+    ~aravis_backend_guard()
     {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
-        p_static_info = nullptr;
+        if (backend_mtx_)
+        {
+            backend_mtx_->unlock();
+        }
+        owner_.reset();
     }
-}
 
+    explicit operator bool() const noexcept
+    {
+        return owner_ != nullptr;
+    }
 
-std::string_view AravisPropertyIntegerImpl::get_unit() const
+private:
+    std::shared_ptr<AravisPropertyBackend> owner_;
+    std::recursive_mutex* backend_mtx_ = nullptr;
+};
+
+tcam::property::PropertyFlags prop_base_impl::get_flags_impl() const
 {
-    if (!p_static_info)
+    aravis_backend_guard lck = acquire_backend_guard();
+    if (!lck)
     {
-        return std::string_view();
+        return tcam::property::PropertyFlags::None;
     }
-    else
+    if (!feature_node_)
     {
-        return p_static_info->unit;
+        return tcam::property::PropertyFlags::None;
     }
+    return arv_gc_get_tcam_flags(feature_node_);
 }
 
-
-tcamprop1::IntRepresentation_t AravisPropertyIntegerImpl::get_representation() const
+aravis_backend_guard prop_base_impl::acquire_backend_guard() const noexcept
 {
-    if (p_static_info)
-    {
-        return p_static_info->representation;
-    }
-    return tcamprop1::IntRepresentation_t::Linear;
+    return aravis_backend_guard { backend_ };
 }
 
-
-PropertyFlags AravisPropertyIntegerImpl::get_flags() const
+tcamprop1::prop_static_info_str prop_base_impl::build_static_info(
+    std::string_view category,
+    std::string_view name_override) const noexcept
 {
-    return arv_flags_to_tcam(p_node);
+    auto res = get_static_feature_node_info(feature_node_);
+    if (!name_override.empty())
+        res.name = name_override;
+    res.iccategory = category;
+    return res;
 }
 
+AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(
+    std::string_view name,
+    std::string_view category,
+    ArvGcNode* node,
+    const std::shared_ptr<AravisPropertyBackend>& backend)
+    : prop_base_impl(backend, ARV_GC_FEATURE_NODE(node)), arv_gc_node_ { ARV_GC_INTEGER(node) }
+{
+    static_info_ = build_static_info(category, name);
+
+    GError* err = nullptr;
+    m_default = arv_gc_integer_get_value(arv_gc_node_, &err);
+    if (err)
+    {
+        SPDLOG_ERROR("arv_gc_integer_get_value for '{}': {}", name, err->message);
+        g_clear_error(&err);
+    }
+
+    unit_ = to_stdstring(arv_gc_integer_get_unit(arv_gc_node_));
+    int_rep_ = to_IntRepresentation(arv_gc_integer_get_representation(arv_gc_node_));
+
+    update_with_tcamprop1_static_info(name, static_info_, tcamprop1::prop_type::Integer);
+}
 
 outcome::result<int64_t> AravisPropertyIntegerImpl::get_value() const
 {
-    if (auto ptr = m_cam.lock())
+    aravis_backend_guard lck = acquire_backend_guard();
+    if (!lck)
     {
-        auto ret = ptr->get_int(m_actual_name);
-        if (ret)
-        {
-            return ret.value();
-        }
-        return ret.as_failure();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock aravis device backend. Cannot retrieve value.");
+        SPDLOG_ERROR("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
+
+    GError* err = nullptr;
+    auto rval = arv_gc_integer_get_value(arv_gc_node_, &err);
+    if (err)
+        return consume_GError(err);
+    return rval;
 }
 
 outcome::result<void> AravisPropertyIntegerImpl::set_value(int64_t new_value)
 {
-    if (auto ptr = m_cam.lock())
+    aravis_backend_guard lck = acquire_backend_guard();
+    if (!lck)
     {
-        auto r = ptr->set_int(m_actual_name, new_value);
-        if (!r)
-        {
-            return r.as_failure();
-        }
-        return outcome::success();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock write device backend. Cannot write value.");
+        SPDLOG_ERROR("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
-}
 
-AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(const std::string& name,
-                                                   ArvCamera* camera,
-                                                   ArvGcNode* node,
-                                                   std::shared_ptr<AravisPropertyBackend> backend)
-    : m_cam(backend), m_name(name), p_node(node)
-{
     GError* err = nullptr;
-    m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
+    arv_gc_integer_set_value(arv_gc_node_, new_value, &err);
+    if (err)
+        return consume_GError(err);
+    return outcome::success();
+}
 
-    m_default = arv_device_get_float_feature_value(
-        arv_camera_get_device(camera), m_actual_name.c_str(), &err);
+tcamprop1::prop_range_integer AravisPropertyIntegerImpl::get_range() const
+{
+    aravis_backend_guard lck = acquire_backend_guard();
+    if (!lck)
+    {
+        return {};
+    }
+
+    tcamprop1::prop_range_integer range = {};
+    GError* err = nullptr;
+    range.stp = arv_gc_integer_get_inc(arv_gc_node_, &err);
     if (err)
     {
-        SPDLOG_ERROR("Unable to retrieve aravis float: {}", err->message);
+        SPDLOG_TRACE("arv_gc_integer_get_inc for '{}': {}", get_name(), err->message);
+        g_clear_error(&err);
+        range.stp = 1;
+    }
+    if (range.stp == 0)
+        range.stp = 1;
+    range.min = arv_gc_integer_get_min(arv_gc_node_, &err);
+    if (err)
+    {
+        SPDLOG_ERROR("arv_gc_integer_get_min for '{}': {}", get_name(), err->message);
+        g_clear_error(&err);
+    }
+    range.max = arv_gc_integer_get_max(arv_gc_node_, &err);
+    if (err)
+    {
+        SPDLOG_ERROR("arv_gc_integer_get_max for '{}': {}", get_name(), err->message);
+        g_clear_error(&err);
+    }
+    return range;
+}
+
+AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(
+    std::string_view name,
+    std::string_view category,
+    ArvGcNode* node,
+    const std::shared_ptr<AravisPropertyBackend>& backend)
+    : prop_base_impl(backend, ARV_GC_FEATURE_NODE(node)), arv_gc_node_(ARV_GC_FLOAT(node))
+{
+    static_info_ = build_static_info(category, name);
+
+    GError* err = nullptr;
+    m_default = arv_gc_float_get_value(arv_gc_node_, &err);
+    if (err)
+    {
+        SPDLOG_ERROR("arv_gc_integer_get_value for '{}': {}", name, err->message);
         g_clear_error(&err);
     }
 
-    m_step = 0.01;
+    unit_ = to_stdstring(arv_gc_float_get_unit(arv_gc_node_));
+    float_rep_ = to_FloatRepresentation(arv_gc_float_get_representation(arv_gc_node_));
 
-    arv_device_get_float_feature_bounds(
-        arv_camera_get_device(camera), m_actual_name.c_str(), &m_min, &m_max, &err);
-    if (err)
-    {
-        SPDLOG_ERROR("Unable to retrieve aravis float bounds: {}", err->message);
-        g_clear_error(&err);
-    }
-
-    auto static_info = tcamprop1::find_prop_static_info(m_name);
-
-    if (static_info.type == tcamprop1::prop_type::Float && static_info.info_ptr)
-    {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_float*>(static_info.info_ptr);
-    }
-    else if (!static_info.info_ptr)
-    {
-        if (!is_private_setting(m_name))
-        {
-            SPDLOG_ERROR("static information for {} do not exist!", m_name);
-        }
-        p_static_info = nullptr;
-    }
-    else
-    {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
-        p_static_info = nullptr;
-    }
+    update_with_tcamprop1_static_info(name, static_info_, tcamprop1::prop_type::Float);
 }
-
-std::string_view AravisPropertyDoubleImpl::get_unit() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->unit;
-    }
-}
-
-
-tcamprop1::FloatRepresentation_t AravisPropertyDoubleImpl::get_representation() const
-{
-    if (!p_static_info)
-    {
-        return tcamprop1::FloatRepresentation_t::Linear;
-    }
-    else
-    {
-        return p_static_info->representation;
-    }
-}
-
-
-PropertyFlags AravisPropertyDoubleImpl::get_flags() const
-{
-    return arv_flags_to_tcam(p_node);
-}
-
 
 outcome::result<void> AravisPropertyDoubleImpl::set_value(double new_value)
 {
-    if (auto ptr = m_cam.lock())
+    auto lck = acquire_backend_guard();
+    if (!lck)
     {
-        auto r = ptr->set_double(m_actual_name, new_value);
-        if (!r)
-        {
-            return r.as_failure();
-        }
-        return outcome::success();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock write device backend. Cannot write value.");
+        SPDLOG_ERROR("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
+    GError* err = nullptr;
+    arv_gc_float_set_value(arv_gc_node_, new_value, &err);
+    if (err)
+        return consume_GError(err);
+    return outcome::success();
 }
-
 
 outcome::result<double> AravisPropertyDoubleImpl::get_value() const
 {
-    if (auto ptr = m_cam.lock())
+    auto lck = acquire_backend_guard();
+    if (!lck)
     {
-        auto ret = ptr->get_double(m_actual_name);
-        if (ret)
-        {
-            return ret.value();
-        }
-        return ret.as_failure();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock aravis device backend. Cannot retrieve value.");
+        SPDLOG_ERROR("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
+    GError* err = nullptr;
+    auto ret = arv_gc_float_get_value(arv_gc_node_, &err);
+    if (err)
+        return consume_GError(err);
+    return ret;
 }
 
-AravisPropertyBoolImpl::AravisPropertyBoolImpl(const std::string& name,
-                                               ArvCamera* camera,
-                                               ArvGcNode* node,
-                                               std::shared_ptr<AravisPropertyBackend> backend)
-    : m_cam(backend), m_name(name), p_node(node)
+tcamprop1::prop_range_float AravisPropertyDoubleImpl::get_range() const
+{
+    aravis_backend_guard lck = acquire_backend_guard();
+    if (!lck)
+    {
+        SPDLOG_ERROR("Unable to lock backend.");
+        return {};
+    }
+
+    tcamprop1::prop_range_float range = {};
+
+    GError* err = nullptr;
+    range.min = arv_gc_float_get_min(arv_gc_node_, &err);
+    if (err)
+    {
+        SPDLOG_ERROR("arv_gc_float_get_min for '{}': {}", get_name(), err->message);
+        g_clear_error(&err);
+    }
+    range.max = arv_gc_float_get_max(arv_gc_node_, &err);
+    if (err)
+    {
+        SPDLOG_ERROR("arv_gc_float_get_max for '{}': {}", get_name(), err->message);
+        g_clear_error(&err);
+    }
+    range.stp = arv_gc_float_get_inc(arv_gc_node_, &err);
+    if (err)
+    {
+        SPDLOG_WARN("arv_gc_float_get_inc for '{}': {}", get_name(), err->message);
+        g_clear_error(&err);
+    }
+    return range;
+}
+
+AravisPropertyBoolImpl::AravisPropertyBoolImpl(
+    std::string_view name,
+    std::string_view category,
+    ArvGcNode* node,
+    const std::shared_ptr<AravisPropertyBackend>& backend)
+    : prop_base_impl(backend, ARV_GC_FEATURE_NODE(node)), arv_gc_node_(ARV_GC_BOOLEAN(node))
 {
     GError* err = nullptr;
-    m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
-    m_default = arv_device_get_boolean_feature_value(
-        arv_camera_get_device(camera), m_actual_name.c_str(), &err);
+    m_default = arv_gc_boolean_get_value(arv_gc_node_, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve aravis bool: {}", err->message);
         g_clear_error(&err);
     }
 
-    m_cam = backend;
+    static_info_ = build_static_info(category, name);
 
-    auto static_info = tcamprop1::find_prop_static_info(m_name);
-
-    if (static_info.type == tcamprop1::prop_type::Boolean && static_info.info_ptr)
-    {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_boolean*>(static_info.info_ptr);
-    }
-    else if (!static_info.info_ptr)
-    {
-        if (!is_private_setting(m_name))
-        {
-            SPDLOG_ERROR("static information for {} do not exist!", m_name);
-        }
-        p_static_info = nullptr;
-    }
-    else
-    {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
-        p_static_info = nullptr;
-    }
+    update_with_tcamprop1_static_info(name, static_info_, tcamprop1::prop_type::Boolean);
 }
-
-PropertyFlags AravisPropertyBoolImpl::get_flags() const
-{
-    return arv_flags_to_tcam(p_node);
-}
-
 
 outcome::result<bool> AravisPropertyBoolImpl::get_value() const
 {
-    if (auto ptr = m_cam.lock())
+    auto lck = acquire_backend_guard();
+    if (!lck)
     {
-        return ptr->get_bool(m_actual_name);
-        auto ret = ptr->get_bool(m_actual_name);
-        if (ret)
-        {
-            return ret.value();
-        }
-        return ret.as_failure();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
+        SPDLOG_ERROR("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
+    GError* err = nullptr;
+    auto ret = arv_gc_boolean_get_value(arv_gc_node_, &err);
+    if (err)
+        return consume_GError(err);
+    return ret;
 }
 
 
 outcome::result<void> AravisPropertyBoolImpl::set_value(bool new_value)
 {
-    if (auto ptr = m_cam.lock())
+    auto lck = acquire_backend_guard();
+    if (!lck)
     {
-        auto ret = ptr->set_bool(m_actual_name, new_value);
-        if (!ret)
-        {
-            return ret.as_failure();
-        }
-        return outcome::success();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
+        SPDLOG_ERROR("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
+    GError* err = nullptr;
+    arv_gc_boolean_set_value(arv_gc_node_, new_value, &err);
+    if (err)
+        return consume_GError(err);
+    return outcome::success();
 }
 
 
-AravisPropertyCommandImpl::AravisPropertyCommandImpl(const std::string& name,
-                                                     ArvGcNode* node,
-                                                     std::shared_ptr<AravisPropertyBackend> backend)
-    : m_cam(backend), m_name(name), p_node(node)
+AravisPropertyCommandImpl::AravisPropertyCommandImpl(
+    std::string_view name,
+    std::string_view category,
+    ArvGcNode* node,
+    const std::shared_ptr<AravisPropertyBackend>& backend)
+    : prop_base_impl(backend, ARV_GC_FEATURE_NODE(node)), arv_gc_node_(ARV_GC_COMMAND(node))
 {
-    m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
+    static_info_ = build_static_info(category, name);
 
-    auto static_info = tcamprop1::find_prop_static_info(m_name);
-
-    if (static_info.type == tcamprop1::prop_type::Command  && static_info.info_ptr)
-    {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_command*>(static_info.info_ptr);
-    }
-    else if (!static_info.info_ptr)
-    {
-        if (!is_private_setting(m_name))
-        {
-            SPDLOG_ERROR("static information for {} do not exist!", m_name);
-        }
-        p_static_info = nullptr;
-    }
-    else
-    {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
-        p_static_info = nullptr;
-    }
+    update_with_tcamprop1_static_info(name, static_info_, tcamprop1::prop_type::Command);
 }
-
-PropertyFlags AravisPropertyCommandImpl::get_flags() const
-{
-    return arv_flags_to_tcam(p_node);
-}
-
 
 outcome::result<void> AravisPropertyCommandImpl::execute()
 {
-    if (auto ptr = m_cam.lock())
+    auto lck = acquire_backend_guard();
+    if (!lck)
     {
-        return ptr->execute(m_actual_name);
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock aravis backend. Cannot execute command property {}", m_name);
+        SPDLOG_ERROR("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
-}
-
-
-AravisPropertyEnumImpl::AravisPropertyEnumImpl(const std::string& name,
-                                               ArvCamera* camera,
-                                               ArvGcNode* node,
-                                               std::shared_ptr<AravisPropertyBackend> backend)
-    : m_cam(backend), m_name(name), p_node(node)
-{
-    m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
-
-    unsigned int n_entries = 0;
     GError* err = nullptr;
-
-    const char** entries = arv_camera_dup_available_enumerations_as_strings(
-        camera, m_actual_name.c_str(), &n_entries, &err);
-    if (err)
-    {
-        SPDLOG_ERROR("Error while retrieving enum values: {}", err->message);
-    }
-
-    if (entries)
-    {
-        m_entries.reserve(n_entries);
-        for (unsigned int i = 0; i < n_entries; ++i) { m_entries.push_back(entries[i]); }
-    }
-
-    const char* def_ret = arv_device_get_string_feature_value(
-        arv_camera_get_device(camera), m_actual_name.c_str(), &err);
-
-    if (err)
-    {
-        SPDLOG_ERROR("Error while retrieving current enum value: {}", err->message);
-        m_default = "";
-    }
-    else
-    {
-        m_default = def_ret;
-    }
-
-    auto static_info = tcamprop1::find_prop_static_info(m_name);
-
-    if (static_info.type == tcamprop1::prop_type::Enumeration && static_info.info_ptr)
-    {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_enumeration*>(static_info.info_ptr);
-    }
-    else if (!static_info.info_ptr)
-    {
-        if (!is_private_setting(m_name))
-        {
-            SPDLOG_ERROR("static information for {} do not exist!", m_name);
-        }
-        p_static_info = nullptr;
-    }
-    else
-    {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
-        p_static_info = nullptr;
-    }
+    arv_gc_command_execute(arv_gc_node_, &err);
+    return consume_GError(err);
 }
 
-PropertyFlags AravisPropertyEnumImpl::get_flags() const
+
+AravisPropertyEnumImpl::AravisPropertyEnumImpl(
+    std::string_view name,
+    std::string_view category,
+    ArvGcNode* node,
+    const std::shared_ptr<AravisPropertyBackend>& backend)
+    : prop_base_impl(backend, ARV_GC_FEATURE_NODE(node)), arv_gc_node_(ARV_GC_ENUMERATION(node))
 {
-    return arv_flags_to_tcam(p_node);
-}
+    static_info_ = build_static_info(category, name);
 
+    GError* err = nullptr;
+    auto entries = arv_gc_enumeration_get_entries(arv_gc_node_);
+    for (auto entry = entries; entry != nullptr; entry = entry->next)
+    {
+        auto ptr = ARV_GC_ENUM_ENTRY(entry->data);
+        auto value = arv_gc_enum_entry_get_value(ptr, &err);
+        if (err)
+        {
+            SPDLOG_ERROR(
+                "Failed to retrieve enum-enry value in '{}'. Error: {}.", get_name(), err->message);
+            g_clear_error(&err);
+            continue;
+        }
+
+        auto entry_name =
+            to_stdstring(arv_gc_feature_node_get_display_name(ARV_GC_FEATURE_NODE(ptr)));
+        if (entry_name.empty())
+        {
+            entry_name = to_stdstring(arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(ptr)));
+        }
+        entries_.push_back(enum_entry { entry_name, value });
+    }
+
+    auto current_value = arv_gc_enumeration_get_int_value(arv_gc_node_, &err);
+    if (err)
+    {
+        g_clear_error(&err);
+    }
+
+    for (auto& e : entries_)
+    {
+        if (e.value == current_value)
+            m_default = e.display_name;
+    }
+
+    update_with_tcamprop1_static_info(name, static_info_, tcamprop1::prop_type::Enumeration);
+}
 
 outcome::result<void> AravisPropertyEnumImpl::set_value_str(const std::string_view& new_value)
 {
-    if (auto ptr = m_cam.lock())
+    auto lck = acquire_backend_guard();
+    if (!lck)
     {
-        return ptr->set_enum(m_actual_name, new_value);
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock aravis backend. Cannot execute command property {}", m_name);
+        SPDLOG_ERROR("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
+    for (auto& e : entries_)
+    {
+        if (e.display_name == new_value)
+        {
+            GError* err = nullptr;
+            arv_gc_enumeration_set_int_value(arv_gc_node_, e.value, &err);
+            if (err)
+                return consume_GError(err);
+            return outcome::success();
+        }
+    }
+    return tcam::status::PropertyValueDoesNotExist;
 }
 
 outcome::result<std::string_view> AravisPropertyEnumImpl::get_value() const
 {
-    if (auto ptr = m_cam.lock())
+    auto lck = acquire_backend_guard();
+    if (!lck)
     {
-        return ptr->get_enum(m_actual_name);
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock aravis backend. Cannot get value command property {}", m_name);
+        SPDLOG_ERROR("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
+    GError* err = nullptr;
+    auto current_value = arv_gc_enumeration_get_int_value(arv_gc_node_, &err);
+    if (err)
+        return consume_GError(err);
+
+    for (auto& e : entries_)
+    {
+        if (e.value == current_value)
+            return e.display_name;
+    }
+    return tcam::status::PropertyValueDoesNotExist;
 }
 
-std::vector<std::string> AravisPropertyEnumImpl::get_entries() const
-{
-    return m_entries;
-}
-
-
-} // namespace tcam::property
+} // namespace tcam::aravis

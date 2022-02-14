@@ -95,7 +95,7 @@ private:
 
     static void device_lost(ArvGvDevice* device, void* user_data);
 
-    std::mutex arv_camera_access_;
+    std::recursive_mutex arv_camera_access_;
 
     ArvCamera* arv_camera_ = nullptr;
     ArvStream* stream_ = nullptr;
@@ -158,7 +158,8 @@ private:
     void index_genicam();
     void generate_video_formats();
 
-    void index_properties(const char* name);
+    void generate_properties_from_genicam();
+    void index_properties(const char* category,const char* name);
 
     tcam_image_size get_sensor_size() const;
 
