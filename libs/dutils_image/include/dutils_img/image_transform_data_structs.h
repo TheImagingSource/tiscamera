@@ -78,6 +78,14 @@ namespace img
 
         constexpr int16_t& operator[]( int idx ) noexcept { return fac[idx]; }
         constexpr int16_t operator[]( int idx ) const noexcept { return fac[idx]; }
+
+        color_matrix_float  to_float() const noexcept {
+            color_matrix_float rval;
+            for( int i = 0; i < 9; ++i ) {
+                rval.fac[i] = fac[i] / 64.f;
+            }
+            return rval;
+        }
     };
 
     struct tonemapping_params

@@ -41,6 +41,7 @@ namespace img
             flags_no_wrap_beg = 0x1,    // it is not necessary to wrap on the start line (e.g. debayering may access p_data + pitch * -1 and p_data + pitch * -2)
             flags_no_wrap_end = 0x2,    // it is not necessary to wrap on the end line (e.g. debayering may access p_data + data_length + pitch and p_data + data_length + pitch
             flags_no_flip = 0x4,        // this indicates that the image is already flipped, this flag is needed when separating the image in strips
+            flags_read_only = 0x8,
         };
 
         constexpr fourcc        fourcc_type() const noexcept { return static_cast<fourcc>(type); }

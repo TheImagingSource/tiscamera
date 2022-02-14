@@ -499,8 +499,9 @@ auto_alg::auto_pass_results	    auto_alg::auto_pass( auto_pass_state& state, con
         }
     }
 
+    state.frame_number_ = params.frame_number;
     state.last_frame_time_ = params.time_point;
-    state.last_frame_number_ = state.frame_number_;
+    state.last_frame_number_ = params.frame_number;
 
     const bool need_brightness_calculations = need_brightness_calc( params );
     const bool need_whitebalance_calculations = need_whitebalance_calc( params );

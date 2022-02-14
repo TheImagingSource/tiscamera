@@ -49,4 +49,4 @@ PUBLIC
     dutils_img::img
 )
 
-add_library( dutils_img::pipe_auto ALIAS dutils_img_pipe_auto)
+add_library( dutils_img::pipe_auto ALIAS dutils_img_pipe_auto )
