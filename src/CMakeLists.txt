@@ -34,6 +34,7 @@ add_library(tcam-base STATIC
   
   SoftwareProperties.cpp
   SoftwarePropertiesBalanceWhite.cpp
+  SoftwarePropertiesColorTransform.cpp
   SoftwarePropertiesImpl.cpp
   utils.cpp
   VideoFormat.cpp

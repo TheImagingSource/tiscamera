@@ -4,6 +4,7 @@
 
 #include "PropertyInterfaces.h"
 #include "SoftwarePropertiesBase.h"
+#include "SoftwarePropertiesImpl.h"
 #include "VideoFormat.h"
 #include "compiler_defines.h"
 
@@ -11,9 +12,6 @@
 #include <memory>
 #include <mutex>
 #include <vector>
-
-//VISIBILITY_INTERNAL
-
 namespace tcam::property
 {
 
@@ -140,10 +138,37 @@ private:
     template<class Tprop_info_type, typename... Tparams>
     void add_prop_entry(emulated::software_prop id,
                         const Tprop_info_type* prop_info,
-                        Tparams&&... params);
-};
+                        Tparams&&... params)
+    {
+        std::shared_ptr<IPropertyBase> prop;
+        if constexpr (Tprop_info_type::property_type == tcamprop1::prop_type::Boolean)
+        {
+            prop = std::make_shared<tcam::property::emulated::SoftwarePropertyBoolImpl>(
+                shared_from_this(), id, prop_info, std::forward<Tparams>(params)...);
+        }
+        else if constexpr (Tprop_info_type::property_type == tcamprop1::prop_type::Integer)
+        {
+            prop = std::make_shared<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+                shared_from_this(), id, prop_info, std::forward<Tparams>(params)...);
+        }
+        else if constexpr (Tprop_info_type::property_type == tcamprop1::prop_type::Float)
+        {
+            prop = std::make_shared<tcam::property::emulated::SoftwarePropertyDoubleImpl>(
+                shared_from_this(), id, prop_info, std::forward<Tparams>(params)...);
+        }
+        else if constexpr (Tprop_info_type::property_type == tcamprop1::prop_type::Enumeration)
+        {
+            prop = std::make_shared<tcam::property::emulated::SoftwarePropertyEnumImpl>(
+                shared_from_this(), id, prop_info, std::forward<Tparams>(params)...);
+        }
+        else
+        {
+            static_assert(Tprop_info_type::property_type == tcamprop1::prop_type::Enumeration);
+            return;
+        }
+        m_properties.push_back(prop);
+    }
 
+} ; //class SoftwareProperties
 
 } // namespace tcam::property
-
-//VISIBILITY_POP
