@@ -7,7 +7,6 @@ using sp = tcam::property::emulated::software_prop;
 
 namespace
 {
-namespace prop_lst = tcamprop1::prop_list;
 
 static constexpr auto balance_white_channel_range =
     tcam::property::emulated::prop_range_float_def { 0.0, 4.0, 0.01, 1.0 };
@@ -39,12 +38,12 @@ void SoftwareProperties::generate_balance_white_auto()
         m_wb.m_dev_wb_b = base_b;
 
         add_prop_entry(
-            sp::BalanceWhiteRed, &prop_lst::BalanceWhiteRed, emulated::to_range(*m_wb.m_dev_wb_r));
+            sp::BalanceWhiteRed, &tcamprop1::prop_list::BalanceWhiteRed, emulated::to_range(*m_wb.m_dev_wb_r));
         add_prop_entry(sp::BalanceWhiteGreen,
-                       &prop_lst::BalanceWhiteGreen,
+                       &tcamprop1::prop_list::BalanceWhiteGreen,
                        emulated::to_range(*m_wb.m_dev_wb_g));
         add_prop_entry(sp::BalanceWhiteBlue,
-                       &prop_lst::BalanceWhiteBlue,
+                       &tcamprop1::prop_list::BalanceWhiteBlue,
                        emulated::to_range(*m_wb.m_dev_wb_b));
 
         m_auto_params.wb.is_software_whitebalance = false;
@@ -60,14 +59,14 @@ void SoftwareProperties::generate_balance_white_auto()
     {
         m_wb.m_emulated_wb = true;
 
-        add_prop_entry(sp::ClaimBalanceWhiteSoftware, &prop_lst::ClaimBalanceWhiteSoftware, false);
+        add_prop_entry(sp::ClaimBalanceWhiteSoftware, &tcamprop1::prop_list::ClaimBalanceWhiteSoftware, false);
 
         add_prop_entry(
-            sp::BalanceWhiteRed, &prop_lst::BalanceWhiteRed, balance_white_channel_range);
+            sp::BalanceWhiteRed, &tcamprop1::prop_list::BalanceWhiteRed, balance_white_channel_range);
         add_prop_entry(
-            sp::BalanceWhiteGreen, &prop_lst::BalanceWhiteGreen, balance_white_channel_range);
+            sp::BalanceWhiteGreen, &tcamprop1::prop_list::BalanceWhiteGreen, balance_white_channel_range);
         add_prop_entry(
-            sp::BalanceWhiteBlue, &prop_lst::BalanceWhiteBlue, balance_white_channel_range);
+            sp::BalanceWhiteBlue, &tcamprop1::prop_list::BalanceWhiteBlue, balance_white_channel_range);
 
         m_auto_params.wb.is_software_whitebalance = true;
         m_wb_is_claimed = false;
@@ -76,8 +75,8 @@ void SoftwareProperties::generate_balance_white_auto()
     }
 
     add_prop_entry(sp::BalanceWhiteAuto,
-                   &prop_lst::BalanceWhiteAuto,
-                   emulated::to_range(prop_lst::enum_entries_off_auto_once),
+                   &tcamprop1::prop_list::BalanceWhiteAuto,
+                   emulated::to_range(tcamprop1::prop_list::enum_entries_off_auto_once),
                    1);
     m_auto_params.wb.auto_enabled = true;
     m_is_software_auto_wb = true;

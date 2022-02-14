@@ -8,50 +8,42 @@ using namespace tcam;
 
 using sp = tcam::property::emulated::software_prop;
 
-namespace
-{
 
-namespace prop_lst = tcamprop1::prop_list;
-
-} // namespace
-
-namespace tcam::property
+static std::string_view to_transform_name(tcam::property::emulated::software_prop prop)
 {
-static std::string_view to_transform_name(emulated::software_prop prop)
-{
-    if (prop == emulated::software_prop::ColorTransformRedToRed)
+    if (prop == sp::ColorTransformRedToRed)
     {
         return "Gain00";
     }
-    if (prop == emulated::software_prop::ColorTransformGreenToRed)
+    if (prop == sp::ColorTransformGreenToRed)
     {
         return "Gain01";
     }
-    if (prop == emulated::software_prop::ColorTransformBlueToRed)
+    if (prop == sp::ColorTransformBlueToRed)
     {
         return "Gain02";
     }
-    if (prop == emulated::software_prop::ColorTransformRedToGreen)
+    if (prop == sp::ColorTransformRedToGreen)
     {
         return "Gain10";
     }
-    if (prop == emulated::software_prop::ColorTransformGreenToGreen)
+    if (prop == sp::ColorTransformGreenToGreen)
     {
         return "Gain11";
     }
-    if (prop == emulated::software_prop::ColorTransformBlueToGreen)
+    if (prop == sp::ColorTransformBlueToGreen)
     {
         return "Gain12";
     }
-    if (prop == emulated::software_prop::ColorTransformRedToBlue)
+    if (prop == sp::ColorTransformRedToBlue)
     {
         return "Gain20";
     }
-    if (prop == emulated::software_prop::ColorTransformGreenToBlue)
+    if (prop == sp::ColorTransformGreenToBlue)
     {
         return "Gain21";
     }
-    if (prop == emulated::software_prop::ColorTransformBlueToBlue)
+    if (prop == sp::ColorTransformBlueToBlue)
     {
         return "Gain22";
     }
@@ -59,7 +51,7 @@ static std::string_view to_transform_name(emulated::software_prop prop)
 }
 
 
-outcome::result<double> SoftwareProperties::get_device_color_transform (emulated::software_prop prop_id)
+outcome::result<double> tcam::property::SoftwareProperties::get_device_color_transform (emulated::software_prop prop_id)
 {
     auto channel = to_transform_name(prop_id);
 
@@ -74,8 +66,8 @@ outcome::result<double> SoftwareProperties::get_device_color_transform (emulated
 }
 
 
-outcome::result<void> SoftwareProperties::set_device_color_transform (emulated::software_prop prop_id,
-                                                                      double new_value_tmp)
+outcome::result<void> tcam::property::SoftwareProperties::set_device_color_transform (emulated::software_prop prop_id,
+                                                                                      double new_value_tmp)
 {
     auto channel = to_transform_name(prop_id);
 
@@ -90,51 +82,49 @@ outcome::result<void> SoftwareProperties::set_device_color_transform (emulated::
 }
 
 
-void SoftwareProperties::generate_color_transformation()
+void tcam::property::SoftwareProperties::generate_color_transformation()
 {
     m_dev_color_transform_enable = tcam::property::find_property<IPropertyBool>(m_device_properties, "ColorTransformationEnable");
     m_dev_color_transform_value = tcam::property::find_property<IPropertyFloat>(m_device_properties, "ColorTransformationValue");
     m_dev_color_transform_value_selector = tcam::property::find_property<IPropertyEnum>(m_device_properties, "ColorTransformationValueSelector");
 
     add_prop_entry(sp::ColorTransformEnable,
-                   &prop_lst::ColorTransformationEnable,
+                   &tcamprop1::prop_list::ColorTransformationEnable,
                    false);
 
     add_prop_entry(sp::ColorTransformRedToRed,
-                   &prop_lst::ColorTransformation_Value_Gain00,
+                   &tcamprop1::prop_list::ColorTransformation_Value_Gain00,
                    emulated::to_range(*m_dev_color_transform_value));
 
     add_prop_entry(sp::ColorTransformBlueToRed,
-                   &prop_lst::ColorTransformation_Value_Gain01,
+                   &tcamprop1::prop_list::ColorTransformation_Value_Gain01,
                    emulated::to_range(*m_dev_color_transform_value));
 
     add_prop_entry(sp::ColorTransformGreenToRed,
-                   &prop_lst::ColorTransformation_Value_Gain02,
+                   &tcamprop1::prop_list::ColorTransformation_Value_Gain02,
                    emulated::to_range(*m_dev_color_transform_value));
 
     add_prop_entry(sp::ColorTransformRedToGreen,
-                   &prop_lst::ColorTransformation_Value_Gain10,
+                   &tcamprop1::prop_list::ColorTransformation_Value_Gain10,
                    emulated::to_range(*m_dev_color_transform_value));
 
     add_prop_entry(sp::ColorTransformGreenToGreen,
-                   &prop_lst::ColorTransformation_Value_Gain11,
+                   &tcamprop1::prop_list::ColorTransformation_Value_Gain11,
                    emulated::to_range(*m_dev_color_transform_value));
 
     add_prop_entry(sp::ColorTransformBlueToGreen,
-                   &prop_lst::ColorTransformation_Value_Gain12,
+                   &tcamprop1::prop_list::ColorTransformation_Value_Gain12,
                    emulated::to_range(*m_dev_color_transform_value));
 
     add_prop_entry(sp::ColorTransformRedToBlue,
-                   &prop_lst::ColorTransformation_Value_Gain20,
+                   &tcamprop1::prop_list::ColorTransformation_Value_Gain20,
                    emulated::to_range(*m_dev_color_transform_value));
 
     add_prop_entry(sp::ColorTransformGreenToBlue,
-                   &prop_lst::ColorTransformation_Value_Gain21,
+                   &tcamprop1::prop_list::ColorTransformation_Value_Gain21,
                    emulated::to_range(*m_dev_color_transform_value));
 
     add_prop_entry(sp::ColorTransformBlueToBlue,
-                   &prop_lst::ColorTransformation_Value_Gain22,
+                   &tcamprop1::prop_list::ColorTransformation_Value_Gain22,
                    emulated::to_range(*m_dev_color_transform_value));
 }
-
-} // namepace tcam::property

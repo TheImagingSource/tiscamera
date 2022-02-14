@@ -13,21 +13,13 @@ using namespace tcam;
 
 using sp = tcam::property::emulated::software_prop;
 
-namespace
-{
-namespace prop_lst = tcamprop1::prop_list;
 
-} // namespace
-
-namespace tcam::property
-{
-
-SoftwareProperties::SoftwareProperties( const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties )
+tcam::property::SoftwareProperties::SoftwareProperties( const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties )
 :     m_device_properties( dev_properties ), p_state( auto_alg::make_state_ptr() )
 
 {}
 
-std::shared_ptr<SoftwareProperties> SoftwareProperties::create(
+std::shared_ptr<tcam::property::SoftwareProperties> tcam::property::SoftwareProperties::create(
     const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties,
     bool has_bayer)
 {
@@ -44,7 +36,7 @@ static uint64_t time_now_in_us() noexcept
 }
 
 
-void SoftwareProperties::auto_pass(const img::img_descriptor& image)
+void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& image)
 {
     auto_alg::auto_pass_params tmp_params;
     {
@@ -655,7 +647,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
 }
 
 
-tcam::property::PropertyFlags SoftwareProperties::get_flags(emulated::software_prop id) const
+tcam::property::PropertyFlags tcam::property::SoftwareProperties::get_flags (tcam::property::emulated::software_prop id) const
 {
     std::scoped_lock lock(m_property_mtx);
 
@@ -749,7 +741,7 @@ tcam::property::PropertyFlags SoftwareProperties::get_flags(emulated::software_p
 }
 
 
-void SoftwareProperties::update_to_new_format(const tcam::VideoFormat& new_format)
+void tcam::property::SoftwareProperties::update_to_new_format(const tcam::VideoFormat& new_format)
 {
     m_frame_counter = 0;
     m_format = new_format;
@@ -760,7 +752,7 @@ void SoftwareProperties::update_to_new_format(const tcam::VideoFormat& new_forma
     }
 }
 
-void SoftwareProperties::generate_focus_auto()
+void tcam::property::SoftwareProperties::generate_focus_auto()
 {
     m_dev_focus = tcam::property::find_property<IPropertyInteger>(m_device_properties, "Focus");
     if (!m_dev_focus)
@@ -786,10 +778,8 @@ void SoftwareProperties::generate_focus_auto()
         m_dev_focus->get_range().max;
 
     add_prop_entry(sp::FocusAuto,
-                   &prop_lst::FocusAuto,
-                   emulated::to_range(prop_lst::enum_entries_off_once),
+                   &tcamprop1::prop_list::FocusAuto,
+                   emulated::to_range(tcamprop1::prop_list::enum_entries_off_once),
                    0);
-    add_prop_entry(sp::Focus, &prop_lst::Focus, emulated::to_range(*m_dev_focus));
+    add_prop_entry(sp::Focus, &tcamprop1::prop_list::Focus, emulated::to_range(*m_dev_focus));
 }
-
-} // namespace tcam::property

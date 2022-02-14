@@ -6,15 +6,7 @@ using namespace tcam;
 
 using sp = tcam::property::emulated::software_prop;
 
-namespace
-{
 
-namespace prop_lst = tcamprop1::prop_list;
-
-} // namespace
-
-namespace tcam::property
-{
 void tcam::property::SoftwareProperties::generate_exposure_auto()
 {
     m_dev_exposure = tcam::property::find_property<tcam::property::IPropertyFloat>(m_device_properties, "ExposureTime");
@@ -50,23 +42,23 @@ void tcam::property::SoftwareProperties::generate_exposure_auto()
     const auto prop_range_upper_limit =
         emulated::prop_range_float_def { prop_range.range, prop_range.range.max };
 
-    add_prop_entry(sp::ExposureTime, &prop_lst::ExposureTime, prop_range);
+    add_prop_entry(sp::ExposureTime, &tcamprop1::prop_list::ExposureTime, prop_range);
     add_prop_entry(sp::ExposureAuto,
-                   &prop_lst::ExposureAuto,
-                   emulated::to_range(prop_lst::enum_entries_off_auto),
+                   &tcamprop1::prop_list::ExposureAuto,
+                   emulated::to_range(tcamprop1::prop_list::enum_entries_off_auto),
                    1);
     add_prop_entry(sp::ExposureAutoReference,
-                   &prop_lst::ExposureAutoReference,
+                   &tcamprop1::prop_list::ExposureAutoReference,
                    emulated::prop_range_integer_def { 0, 255, 1, 128 });
     add_prop_entry(
-        sp::ExposureAutoLowerLimit, &prop_lst::ExposureAutoLowerLimit, prop_range_lower_limit);
+        sp::ExposureAutoLowerLimit, &tcamprop1::prop_list::ExposureAutoLowerLimit, prop_range_lower_limit);
     add_prop_entry(
-        sp::ExposureAutoUpperLimit, &prop_lst::ExposureAutoUpperLimit, prop_range_upper_limit);
+        sp::ExposureAutoUpperLimit, &tcamprop1::prop_list::ExposureAutoUpperLimit, prop_range_upper_limit);
     add_prop_entry(sp::ExposureAutoUpperLimitAuto,
-                   &prop_lst::ExposureAutoUpperLimitAuto,
+                   &tcamprop1::prop_list::ExposureAutoUpperLimitAuto,
                    true);
     add_prop_entry(
-        sp::ExposureAutoHighlightReduction, &prop_lst::ExposureAutoHighlightReduction, false);
+        sp::ExposureAutoHighlightReduction, &tcamprop1::prop_list::ExposureAutoHighlightReduction, false);
 }
 
 void tcam::property::SoftwareProperties::generate_gain_auto()
@@ -102,11 +94,11 @@ void tcam::property::SoftwareProperties::generate_gain_auto()
     const auto prop_range_upper_limit =
         emulated::prop_range_float_def { prop_range.range, prop_range.range.max };
 
-    add_prop_entry(sp::Gain, &prop_lst::Gain, prop_range);
+    add_prop_entry(sp::Gain, &tcamprop1::prop_list::Gain, prop_range);
     add_prop_entry(
-        sp::GainAuto, &prop_lst::GainAuto, emulated::to_range(prop_lst::enum_entries_off_auto), 1);
-    add_prop_entry(sp::GainAutoLowerLimit, &prop_lst::GainAutoLowerLimit, prop_range_lower_limit);
-    add_prop_entry(sp::GainAutoUpperLimit, &prop_lst::GainAutoUpperLimit, prop_range_upper_limit);
+        sp::GainAuto, &tcamprop1::prop_list::GainAuto, emulated::to_range(tcamprop1::prop_list::enum_entries_off_auto), 1);
+    add_prop_entry(sp::GainAutoLowerLimit, &tcamprop1::prop_list::GainAutoLowerLimit, prop_range_lower_limit);
+    add_prop_entry(sp::GainAutoUpperLimit, &tcamprop1::prop_list::GainAutoUpperLimit, prop_range_upper_limit);
 }
 
 
@@ -135,8 +127,6 @@ void tcam::property::SoftwareProperties::generate_iris_auto()
     // #TODO: granularity/step
 
     add_prop_entry(
-        sp::IrisAuto, &prop_lst::IrisAuto, emulated::to_range(prop_lst::enum_entries_off_auto), 1);
-    add_prop_entry(sp::Iris, &prop_lst::Iris, emulated::to_range(*m_dev_iris));
+        sp::IrisAuto, &tcamprop1::prop_list::IrisAuto, emulated::to_range(tcamprop1::prop_list::enum_entries_off_auto), 1);
+    add_prop_entry(sp::Iris, &tcamprop1::prop_list::Iris, emulated::to_range(*m_dev_iris));
 }
-
-} // namespace tcam::property
