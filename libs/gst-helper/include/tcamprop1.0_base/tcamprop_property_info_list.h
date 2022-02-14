@@ -145,6 +145,7 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_integer TriggerBurstCount;
     extern const prop_static_info_enumeration TriggerOperation;
     extern const prop_static_info_enumeration TriggerOverlap;
+    extern const prop_static_info_integer AcquisitionBurstFrameCount; // seems to be the same as TriggerBurstCount, rename?
 
     extern const prop_static_info_float TriggerMask;
     extern const prop_static_info_float TriggerDenoise;
@@ -156,14 +157,6 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_integer GPIn;
     extern const prop_static_info_integer GPOut;
     extern const prop_static_info_integer GPIO;
-
-    extern const prop_static_info_integer AcquisitionBurstFrameCount;
-    extern const prop_static_info_integer ActionQueueSize;
-    extern const prop_static_info_command ActionSchedulerCancel;
-    extern const prop_static_info_command ActionSchedulerCommit;
-    extern const prop_static_info_integer ActionSchedulerInterval;
-    extern const prop_static_info_enumeration ActionSchedulerStatus;
-    extern const prop_static_info_integer ActionSchedulerTime;
 
     extern const prop_static_info_boolean LUTEnable;
     extern const prop_static_info_integer LUTIndex;
@@ -182,14 +175,25 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_float MultiFrameSetOutputModeGain2;
     extern const prop_static_info_float MultiFrameSetOutputModeGain3;
 
+/* Disable these, because this is a device-specific property, and should always come out of the GenICam document of the device itself.
+    extern const prop_static_info_integer ActionQueueSize;
+    extern const prop_static_info_command ActionSchedulerCancel;
+    extern const prop_static_info_command ActionSchedulerCommit;
+    extern const prop_static_info_integer ActionSchedulerInterval;
+    extern const prop_static_info_enumeration ActionSchedulerStatus;
+    extern const prop_static_info_integer ActionSchedulerTime;
+*/
+
     /* Missing here but present in Tims list
         String          DeviceUserID
         Enumeration     DeviceTemperatureSelector
         Float           DeviceTemperature
+
         Enumeration     UserSetSelector
         Command         UserSetLoad
         Command         UserSetSave
         Enumeration     UserSetDefault
+
         Integer         BinningHorizontal
         Integer         BinningVertical
         Integer         DecimationHorizontal

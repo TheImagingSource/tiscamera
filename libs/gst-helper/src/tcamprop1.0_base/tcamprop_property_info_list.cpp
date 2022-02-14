@@ -537,6 +537,7 @@ const prop_static_info_integer lst::AcquisitionBurstFrameCount = make_Integer(
     "Number of frames to acquire for each trigger."
 );
 
+/* Disable these, because this is a device-specific property, and should always come out of the GenICam document of the device itself.
 const prop_static_info_integer lst::ActionQueueSize = make_Integer(
     "ActionQueueSize",
     "Action Control", "Action Queue Size",
@@ -576,6 +577,7 @@ const prop_static_info_integer lst::ActionSchedulerTime = make_Integer(
     "the time for when an action is scheduled, specified as a PTP timestamp in nanosecond units.",
     "ns"
 );
+*/
 
 const prop_static_info_boolean lst::LUTEnable = make_Boolean(
     "LUTEnable",
