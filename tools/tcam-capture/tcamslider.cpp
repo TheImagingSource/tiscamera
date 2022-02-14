@@ -18,16 +18,13 @@ double log_(double value)
 
 static const int slider_max_steps = 10000;
 
-}
+} // namespace
 
 
-
-TcamSlider::TcamSlider(TcamSliderScale scale_type)
-    : m_scale_type(scale_type)
+TcamSlider::TcamSlider(TcamSliderScale scale_type) : m_scale_type(scale_type)
 {
     setOrientation(Qt::Orientation::Horizontal);
     connect(this, &QSlider::valueChanged, this, &TcamSlider::onSliderChanged);
-
 }
 
 void TcamSlider::mouseDoubleClickEvent(QMouseEvent* event)
@@ -38,38 +35,29 @@ void TcamSlider::mouseDoubleClickEvent(QMouseEvent* event)
 }
 
 
-void TcamSlider::setRange(double min, double max)
+void TcamSlider::setRange(double min, double max, double step)
 {
     m_value_min = min;
     m_value_max = max;
 
+    auto diff = std::abs(max - min);
+    if( step == 0. || ((diff / step) > slider_max_steps))
+    {
+        step = diff / slider_max_steps;  // if the property has not specific range, we scale it down to 1/10'000
+    }
+
+    m_linear_scale = 1 / step;
+
     if (m_scale_type == TcamSliderScale::Linear)
     {
-        QSlider::setRange(min * m_scale, max * m_scale);
+        QSlider::setRange(min * m_linear_scale, max * m_linear_scale);
+        QSlider::setSingleStep(step * m_linear_scale);
     }
     else
     {
         double min_ = calculate_slider_value(min);
         double max_ = calculate_slider_value(max);
         QSlider::setRange(min_, max_);
-    }
-}
-
-
-void TcamSlider::setSingleStep(double step)
-{
-    if( step == 0. )
-        step = 1.;
-
-    m_value_step = step;
-    m_scale = 1 / step;
-
-    if (m_scale_type == TcamSliderScale::Linear)
-    {
-        QSlider::setSingleStep(step * m_scale);
-    }
-    else
-    {
         QSlider::setSingleStep(step);
     }
 }
@@ -79,7 +67,7 @@ void TcamSlider::setValue(double value)
 {
     if (m_scale_type == TcamSliderScale::Linear)
     {
-        QSlider::setValue(value * m_scale);
+        QSlider::setValue(value * m_linear_scale);
     }
     else
     {
@@ -91,7 +79,7 @@ double TcamSlider::value()
 {
     if (m_scale_type == TcamSliderScale::Linear)
     {
-        return QSlider::value() / m_scale;
+        return QSlider::value() / m_linear_scale;
     }
     else
     {
@@ -103,7 +91,7 @@ void TcamSlider::onSliderChanged(double value)
 {
     if (m_scale_type == TcamSliderScale::Linear)
     {
-        emit valueChanged(value / m_scale);
+        emit valueChanged(value / m_linear_scale);
     }
     else
     {
@@ -112,7 +100,7 @@ void TcamSlider::onSliderChanged(double value)
 }
 
 
-int TcamSlider::calculate_slider_value (double user_value)
+int TcamSlider::calculate_slider_value(double user_value)
 {
     double minval = log_(m_value_min);
     double rangelen = log_(m_value_max) - minval;
@@ -123,7 +111,7 @@ int TcamSlider::calculate_slider_value (double user_value)
 }
 
 
-double TcamSlider::calculate_user_value (int slider_value)
+double TcamSlider::calculate_user_value(int slider_value)
 {
     double minval = log_(m_value_min);
 
@@ -136,8 +124,6 @@ double TcamSlider::calculate_user_value (int slider_value)
     {
         return val;
     }
-
-    val -= fmod(val, m_value_step);
 
     return std::max(std::min(m_value_max, val), minval);
 }

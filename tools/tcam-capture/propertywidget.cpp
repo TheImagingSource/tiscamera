@@ -210,8 +210,7 @@ void IntWidget::update()
         {
             p_slider->blockSignals(true);
 
-            p_slider->setRange(min, max);
-            p_slider->setSingleStep(step);
+            p_slider->setRange(min, max, step);
 
             p_slider->setValue(value);
             p_slider->setDisabled(lock);
@@ -359,8 +358,7 @@ void DoubleWidget::update()
         if (p_slider)
         {
             p_slider->blockSignals(true);
-            p_slider->setRange(min, max);
-            p_slider->setSingleStep(step);
+            p_slider->setRange(min, max, step);
 
             p_slider->setValue(value);
             p_slider->setDisabled(lock);
