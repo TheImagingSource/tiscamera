@@ -225,6 +225,18 @@ void IntWidget::update()
         gint64 value = tcam_property_integer_get_value(p_prop, &err);
         HANDLE_ERROR(err, return );
 
+        // fix behaviour of QSlider/QBox to only show 0, when the range is extremly large
+        if (min <= INT_MIN && max >= INT_MAX)
+        {
+            min = value - 1;
+            max = value;
+        }
+        else if (std::abs(max - min) == 0) // Fix Qt behaviour when range is 0
+        {
+            min = value - 1;
+            max = value;
+        }
+
         bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
         HANDLE_ERROR(err, return );
 
