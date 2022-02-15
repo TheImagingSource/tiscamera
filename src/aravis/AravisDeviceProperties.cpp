@@ -55,36 +55,29 @@ struct aravis_property_name_map
 static const aravis_property_name_map aravis_property_name_mapping_list[] =
 {
     { "TLParamsLocked", map_type::priv },
-    { "GevSCPSDoNotFragment", map_type::priv },
-    { "GevTimestampTickFrequency", map_type::priv },
-    { "GevTimeSCPD", map_type::priv },
-    { "GevSCPD", map_type::priv },
+    // should not be accessible because they are used by aravis
+    { "GevSCPSDoNotFragment", map_type::blacklist },
+    { "GevSCPSPacketSize", map_type::blacklist },
+    { "GevSCPSFireTestPacket", map_type::blacklist },
+    { "GevTimestampTickFrequency", map_type::priv }, // public?
+    { "GevSCPD", map_type::priv }, // public? Sets the inter-packet delay (in ticks) for the selected stream channel
     
     { "PayloadSize", map_type::blacklist }, // blacklist because of warning in aravis
-    { "PayloadPerFrame", map_type::priv },
-    { "PayloadPerPacket", map_type::priv },
-    { "TotalPacketSize", map_type::priv },
-    { "PacketsPerFrame", map_type::priv },
-    { "PacketTimeUS", map_type::priv },
-    { "GevSCPSPacketSize", map_type::priv },
-    { "GevSCPSFireTestPacket", map_type::priv },
-    { "GevGVSPExtendedIDMode", map_type::priv },
+    // 23G camera properties (for whatever reason)
+    { "PayloadPerPacket", map_type::blacklist },
+    { "PacketsPerFrame", map_type::blacklist },
+    { "TotalPacketSize", map_type::blacklist },
+    { "PacketTimeUS", map_type::blacklist },
 
-    { "TimestampReset", map_type::priv },
-    { "TimestampLatch", map_type::priv },
-    { "TimestampLatchValue", map_type::priv },
-    { "TimestampLatchString", map_type::blacklist }, // blacklist because this is StringReg
+    { "GevGVSPExtendedIDMode", map_type::priv },    // This should be controlled by aravis
 
+    // ChunkMode stuff, currently just blacklist
     { "ChunkModeActive", map_type::priv },
     { "ChunkImage", map_type::blacklist },  // is Register
-    { "ChunkBlockId", map_type::priv },
+    { "ChunkBlockId", map_type::blacklist },
+    { "ChunkIMX174FrameSet", map_type::blacklist },
+    { "ChunkIMX174FrameId", map_type::blacklist },
 
-    { "ActionDeviceKey", map_type::priv },
-    { "ActionSelector", map_type::priv },
-    { "ActionGroupMask", map_type::priv },
-    { "ActionGroupKey", map_type::priv },
-
-    
     // GigEVision stuff?
     { "DeviceVendorName", map_type::blacklist },
     { "DeviceType", map_type::blacklist },
@@ -114,20 +107,11 @@ static const aravis_property_name_map aravis_property_name_mapping_list[] =
     { "DeviceEventChannelCount", map_type::blacklist },
     { "DeviceScanType", map_type::priv },
 
-    { "DeviceReset", map_type::blacklist },
-    { "DeviceFactoryReset", map_type::blacklist },
-    
-    // Multi-frameset stuff?
-    { "IMX174HardwareWDRShutterMode", map_type::pub },
-    { "IMX174HardwareWDREnable", map_type::pub },
-    { "IMX174WDRShutter2", map_type::pub },
-    // Chunk stuff
-    { "ChunkIMX174FrameSet", map_type::blacklist },
-    { "ChunkIMX174FrameId", map_type::blacklist },
+    // These should be private
+    { "DeviceReset", map_type::priv },
+    { "DeviceFactoryReset", map_type::priv },
 
-    // AcquisitionControl
-    { "SensorPixelHeight", map_type::priv },
-    { "SensorPixelWidth", map_type::priv },
+    // aravis stuff, should not be accessible
     { "AcquisitionStart", map_type::priv },
     { "AcquisitionStop", map_type::priv },
     { "AcquisitionMode", map_type::priv },
@@ -146,14 +130,9 @@ static const aravis_property_name_map aravis_property_name_mapping_list[] =
     { "DecimationHorizontal", map_type::priv },
     { "DecimationVertical", map_type::priv },
 
-    { "LUTSelector", map_type::priv },
-    { "LUTControl", map_type::priv },
-    { "LUTEnable", map_type::priv },
-    { "LUTIndex", map_type::priv },
-    { "LUTValue", map_type::priv },
     { "LUTValueAll", map_type::blacklist },
 
-    // these don't nicely map to an actual interface, so just blacklist
+    // These generate aravis error messages, so just blacklist
     { "WidthMax", map_type::blacklist },
     { "HeightMax", map_type::blacklist },
 
@@ -162,24 +141,12 @@ static const aravis_property_name_map aravis_property_name_mapping_list[] =
     { "IRCutFilterEnableElement", "IRCutFilterEnable", map_type::pub },
     { "ExposureAutoHighlighReduction", "ExposureAutoHighlightReduction", map_type::pub }, // This should already be there??
 
-    // Hide BalanceRatio controls
+    // Hide BalanceRatio controls, these are private because we overwrite them
     { "BalanceRatioSelector", map_type::priv },
     { "BalanceRatio", map_type::priv },
     { "BalanceRatioRaw", map_type::priv },
 
-    // #TODO properties to maybe add
-    { "ColorTransformationSelector", map_type::priv },  // Enum, RGBtoRGB
-    { "ColorTransformationValueSelector", map_type::priv },
-    { "ColorTransformationValue", map_type::priv },
-
-    { "SensorWidth", map_type::priv },
-    { "SensorHeight", map_type::priv },
-    { "DeviceTemperatureSelector", map_type::priv },
-    { "DeviceTemperature", map_type::priv },
-    { "PtpClockAccuracy", map_type::priv },
-    { "PtpEnable", map_type::priv },
-    { "PtpStatus", map_type::priv },
-        
+    // private/blacklisted because of potential problems with e.g. Width
     { "UserSetSelector", map_type::priv },
     { "UserSetLoad", map_type::priv },
     { "UserSetSave", map_type::priv },
@@ -252,11 +219,17 @@ auto build_property_from_node(std::string_view name,
     {
         prop = std::make_shared<AravisPropertyCommandImpl>(prop_name, category, node, backend);
     }
+    else if (ARV_IS_GC_STRING(node))
+    {
+        SPDLOG_DEBUG("Property '{}' node-name '{}' not implemented.",
+                     prop_name,
+                     arv_dom_node_get_node_name(ARV_DOM_NODE(node)));
+    }
     else
     {
-        std::string_view dom_node_name = arv_dom_node_get_node_name(ARV_DOM_NODE(node));
-
-        SPDLOG_INFO("Property '{}' node-name '{}' not implemented.", prop_name, dom_node_name);
+        SPDLOG_INFO("Property '{}' node-name '{}' not implemented.",
+                    prop_name,
+                    arv_dom_node_get_node_name(ARV_DOM_NODE(node)));
     }
     return prop;
 }
@@ -284,14 +257,22 @@ void tcam::AravisDevice::index_properties(const char* category, const char* name
     {
         auto features = arv_gc_category_get_features(ARV_GC_CATEGORY(node));
 
+        // #TODO This does not work currently
+        auto category_display_name =
+            arv_gc_feature_node_get_display_name(ARV_GC_FEATURE_NODE(node));
+        if (!category_display_name)
+        {
+            category_display_name = name;
+        }
+
         for (auto iter = features; iter != NULL; iter = iter->next)
         {
-            index_properties(name, (char*)iter->data);
+            index_properties(category_display_name, (char*)iter->data);
         }
         return;
     }
 
-    std::string prop_name = arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node));
+    std::string_view prop_name = arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node));
     auto map_info = find_map_info(prop_name);
     if (map_info.type == map_type::blacklist)
     {

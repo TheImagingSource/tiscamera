@@ -39,7 +39,7 @@ tcamprop1::prop_static_info_str get_static_feature_node_info(ArvGcFeatureNode* n
     rval.display_name = to_stdstring(arv_gc_feature_node_get_display_name(node));
     rval.description = to_stdstring(arv_gc_feature_node_get_description(node));
     rval.visibility = to_Visibility(arv_gc_feature_node_get_visibility(node));
-    rval.access = to_Access(arv_gc_feature_node_get_actual_access_mode(node));
+    rval.access = to_Access(arv_gc_feature_node_get_imposed_access_mode(node));
     return rval;
 }
 
@@ -77,29 +77,31 @@ void update_with_tcamprop1_static_info(std::string_view tcamprop1_name,
                                        tcamprop1::prop_type gc_node_type)
 {
     auto static_info = tcamprop1::find_prop_static_info(tcamprop1_name);
-    if (static_info)
+    if (!static_info)
     {
-        gc_node_info.iccategory = static_info.info_ptr->iccategory;
-
-        if (gc_node_info.description.empty())
-            gc_node_info.description = static_info.info_ptr->description;
-        if (gc_node_info.display_name.empty())
-            gc_node_info.display_name = static_info.info_ptr->display_name;
-
-        if (static_info.type != gc_node_type)
-        {
-            SPDLOG_WARN("{} '{}' type != tcamprop1 type of '{}'.",
-                        tcamprop1::to_string(gc_node_type),
-                        tcamprop1_name,
-                        tcamprop1::to_string(static_info.type));
-        }
+        // This is not an error anymore, many GenICam properties might not have a entry in the prop_list
+        // SPDLOG_DEBUG("tcamprop1 information for '{}' not found!", tcamprop1_name);
+        return;
     }
-    else
+
+    SPDLOG_DEBUG("tcamprop1 information for '{}' found. Overwriting category of '{}' with '{}'.",
+                 tcamprop1_name,
+                 gc_node_info.iccategory,
+                 static_info.info_ptr->iccategory);
+                 
+    gc_node_info.iccategory = static_info.info_ptr->iccategory;
+
+    if (gc_node_info.description.empty())
+        gc_node_info.description = static_info.info_ptr->description;
+    if (gc_node_info.display_name.empty())
+        gc_node_info.display_name = static_info.info_ptr->display_name;
+
+    if (static_info.type != gc_node_type)
     {
-        if (!tcam::aravis::is_private_setting(tcamprop1_name))
-        {
-            SPDLOG_WARN("tcamprop1 information for '{}' not found!", tcamprop1_name);
-        }
+        SPDLOG_WARN("{} '{}' type != tcamprop1 type of '{}'.",
+                    tcamprop1::to_string(gc_node_type),
+                    tcamprop1_name,
+                    tcamprop1::to_string(static_info.type));
     }
 }
 
@@ -147,7 +149,7 @@ auto to_FloatRepresentation(ArvGcRepresentation rep) noexcept
 }
 
 
-tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node) noexcept
+tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node, tcamprop1::Access_t access_mode) noexcept
 {
     tcam::property::PropertyFlags flags = tcam::property::PropertyFlags::None;
 
@@ -156,8 +158,7 @@ tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node) noex
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
-        g_error_free(err);
-        err = nullptr;
+        g_clear_error(&err);
     }
     else
     {
@@ -171,8 +172,7 @@ tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node) noex
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
-        g_error_free(err);
-        err = nullptr;
+        g_clear_error(&err);
     }
     else
     {
@@ -182,20 +182,23 @@ tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node) noex
         }
     }
 
-    bool ret_locked = arv_gc_feature_node_is_locked(node, &err);
-    if (err)
-    {
-        SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
-        g_error_free(err);
-        err = nullptr;
+    if (access_mode == tcamprop1::Access_t::RO) {
+        flags |= tcam::property::PropertyFlags::Locked;
     }
     else
     {
-        auto access_mode =
-            to_Access(arv_gc_feature_node_get_actual_access_mode(ARV_GC_FEATURE_NODE(node)));
-        if (ret_locked || access_mode == tcamprop1::Access_t::RO)
+        bool ret_locked = arv_gc_feature_node_is_locked(node, &err);
+        if (err)
         {
-            flags |= tcam::property::PropertyFlags::Locked;
+            SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
+            g_clear_error(&err);
+        }
+        else
+        {
+            if (ret_locked)
+            {
+                flags |= tcam::property::PropertyFlags::Locked;
+            }
         }
     }
 
@@ -244,11 +247,8 @@ tcam::property::PropertyFlags prop_base_impl::get_flags_impl() const
     {
         return tcam::property::PropertyFlags::None;
     }
-    if (!feature_node_)
-    {
-        return tcam::property::PropertyFlags::None;
-    }
-    return arv_gc_get_tcam_flags(feature_node_);
+    assert(feature_node_);
+    return arv_gc_get_tcam_flags(feature_node_, access_mode_);
 }
 
 aravis_backend_guard prop_base_impl::acquire_backend_guard() const noexcept
@@ -265,6 +265,13 @@ tcamprop1::prop_static_info_str prop_base_impl::build_static_info(
         res.name = name_override;
     res.iccategory = category;
     return res;
+}
+
+prop_base_impl::prop_base_impl(const std::shared_ptr<AravisPropertyBackend>& cam,
+                               ArvGcFeatureNode* feature_node)
+    : backend_ { cam }, feature_node_ { feature_node }
+{
+    access_mode_ = to_Access(arv_gc_feature_node_get_imposed_access_mode(feature_node_));
 }
 
 AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(
@@ -369,7 +376,7 @@ AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(
     m_default = arv_gc_float_get_value(arv_gc_node_, &err);
     if (err)
     {
-        SPDLOG_ERROR("arv_gc_integer_get_value for '{}': {}", name, err->message);
+        SPDLOG_ERROR("arv_gc_float_get_value for '{}': {}", name, err->message);
         g_clear_error(&err);
     }
 
@@ -436,7 +443,7 @@ tcamprop1::prop_range_float AravisPropertyDoubleImpl::get_range() const
     range.stp = arv_gc_float_get_inc(arv_gc_node_, &err);
     if (err)
     {
-        SPDLOG_WARN("arv_gc_float_get_inc for '{}': {}", get_name(), err->message);
+        SPDLOG_TRACE("arv_gc_float_get_inc for '{}': {}", get_name(), err->message);
         g_clear_error(&err);
     }
     return range;

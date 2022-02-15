@@ -39,10 +39,7 @@ class prop_base_impl
 {
 public:
     prop_base_impl(const std::shared_ptr<AravisPropertyBackend>& cam,
-                   ArvGcFeatureNode* feature_node)
-        : backend_ { cam }, feature_node_ { feature_node }
-    {
-    }
+                   ArvGcFeatureNode* feature_node);
 
 protected:
     PropertyFlags get_flags_impl() const;
@@ -53,9 +50,15 @@ protected:
         std::string_view category,
         std::string_view name_override) const noexcept;
 
+    auto get_access_mode() const noexcept
+    {
+        return access_mode_;
+    }
 private:
     std::weak_ptr<AravisPropertyBackend> backend_;
     ArvGcFeatureNode* feature_node_ = nullptr;
+
+    tcamprop1::Access_t access_mode_ = tcamprop1::Access_t::RW;
 };
 
 class AravisPropertyIntegerImpl : public prop_base_impl, public IPropertyInteger
