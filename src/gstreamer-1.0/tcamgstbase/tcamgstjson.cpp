@@ -68,6 +68,11 @@ std::string tcam::gst::create_device_settings(TcamPropertyProvider* tcam)
             continue;
         }
 
+        if (tcam_property_base_get_access(prop_base) == TCAM_PROPERTY_ACCESS_WO)
+            continue;
+        if (!tcam_property_base_is_available(prop_base, nullptr))
+            continue;
+
         switch (tcam_property_base_get_property_type(prop_base))
         {
             case TCAM_PROPERTY_TYPE_INTEGER:
@@ -118,6 +123,18 @@ std::string tcam::gst::create_device_settings(TcamPropertyProvider* tcam)
                 // Nothing to do here
                 break;
             }
+            case TCAM_PROPERTY_TYPE_STRING:
+            {
+                GError* err = nullptr;
+                auto value =
+                    tcam_property_string_get_value(TCAM_PROPERTY_STRING(prop_base), &err);
+                if (!is_prop_error_consume(err, prop_name))
+                {
+                    write_obj.push_back(json::object_t::value_type(prop_name, value));
+                }
+                g_free(value);
+                break;
+            }
         }
 
         g_object_unref(prop_base);
@@ -153,6 +170,12 @@ static auto apply_single_json_entry(
             g_error_free(err);
             return apply_single_json_entry_rval::error;
         }
+        
+        if (tcam_property_base_get_access(prop_base) == TCAM_PROPERTY_ACCESS_RO)
+            return apply_single_json_entry_rval::error;
+        if (!tcam_property_base_is_available(prop_base, nullptr))
+            return apply_single_json_entry_rval::locked_error;
+
 
         switch (tcam_property_base_get_property_type(prop_base))
         {
@@ -204,6 +227,20 @@ static auto apply_single_json_entry(
             case TCAM_PROPERTY_TYPE_COMMAND:
             {
                 tcam_property_command_set_command(TCAM_PROPERTY_COMMAND(prop_base), &err);
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_STRING:
+            {
+                if (!iter.value().is_string())
+                {
+                    report_error_func(
+                        property_name,
+                        fmt::format("Value '{}' is not a string", iter.value().dump()));
+                    break;
+                }
+
+                tcam_property_string_set_value(
+                    TCAM_PROPERTY_STRING(prop_base), iter.value().get<std::string>().c_str(), &err);
                 break;
             }
         }
