@@ -324,3 +324,40 @@ auto tcamprop1_consumer::impl::prop_consumer_command::execute_command( [[maybe_u
     }
     return {};
 }
+
+tcamprop1_consumer::impl::prop_consumer_string::prop_consumer_string(
+    gobject_helper::gobject_ptr<TcamPropertyString>&& ptr)
+    : ptr_(std::move(ptr))
+{
+    init(get_derived_node());
+}
+
+auto tcamprop1_consumer::impl::prop_consumer_string::get_property_value( [[maybe_unused]] uint32_t flags /*= 0*/)
+    -> outcome::result<std::string>
+{
+    GError* err = nullptr;
+    auto str = tcam_property_string_get_value(ptr_.get(), &err);
+    if (err)
+    {
+        return convert_GError_to_error_code_consumer(err);
+    }
+    if (str)
+    {
+        auto ret = std::string{str};
+        g_free(str);
+        return ret;
+    }
+    return std::string{};
+}
+
+auto tcamprop1_consumer::impl::prop_consumer_string::set_property_value(std::string_view new_value, [[maybe_unused]] uint32_t flags /*= 0*/) -> std::error_code
+{
+    std::string tmp { new_value };
+    GError* err = nullptr;
+    tcam_property_string_set_value(ptr_.get(), tmp.c_str(), &err);
+    if (err)
+    {
+        return convert_GError_to_error_code_consumer(err);
+    }
+    return {};
+}

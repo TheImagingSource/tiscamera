@@ -17,6 +17,7 @@ auto tcamprop1_consumer::convert_prop_type( tcamprop1::prop_type t ) -> TcamProp
     case tcamprop1::prop_type::Float: return TCAM_PROPERTY_TYPE_FLOAT;
     case tcamprop1::prop_type::Enumeration: return TCAM_PROPERTY_TYPE_ENUMERATION;
     case tcamprop1::prop_type::Command: return TCAM_PROPERTY_TYPE_COMMAND;
+    case tcamprop1::prop_type::String: return TCAM_PROPERTY_TYPE_STRING;
     }
     return TCAM_PROPERTY_TYPE_INTEGER;
 }
@@ -119,6 +120,9 @@ static auto to_derived_ptr( const gobject_helper::gobject_ptr<TcamPropertyBase>&
     else if constexpr( std::is_same_v<TItf, TcamPropertyCommand> ) {
         return gobject_helper::make_addref_ptr( TCAM_PROPERTY_COMMAND( base_ptr.get() ) );
     }
+    else if constexpr (std::is_same_v<TItf, TcamPropertyString>) {
+        return gobject_helper::make_addref_ptr(TCAM_PROPERTY_STRING(base_ptr.get()));
+    }
     else
     {
         static_assert(!std::is_same_v<TItf, TcamPropertyInteger>, "Invalid type argument" );
@@ -141,6 +145,7 @@ auto tcamprop1_consumer::get_property_interface( TcamPropertyProvider* elem, con
     case TCAM_PROPERTY_TYPE_FLOAT:          return std::make_unique<impl::prop_consumer_float>( to_derived_ptr<TcamPropertyFloat>( node_ptr ) );
     case TCAM_PROPERTY_TYPE_ENUMERATION:    return std::make_unique<impl::prop_consumer_enumeration>( to_derived_ptr<TcamPropertyEnumeration>( node_ptr ) );
     case TCAM_PROPERTY_TYPE_COMMAND:        return std::make_unique<impl::prop_consumer_command>( to_derived_ptr<TcamPropertyCommand>( node_ptr ) );
+    case TCAM_PROPERTY_TYPE_STRING:         return std::make_unique<impl::prop_consumer_string>( to_derived_ptr<TcamPropertyString>( node_ptr ) );
     }
     return tcamprop1::status::parameter_type_incompatible;
 }

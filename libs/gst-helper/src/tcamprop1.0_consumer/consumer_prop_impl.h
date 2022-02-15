@@ -120,5 +120,25 @@ namespace tcamprop1_consumer::impl
     private:
         gobject_helper::gobject_ptr<TcamPropertyCommand>    ptr_;
     };
-}
+
+    class prop_consumer_string :
+        public consumer_prop_node_base<prop_consumer_string, tcamprop1::property_interface_string>
+    {
+    public:
+        // CRTP stuff
+        TcamPropertyBase* get_derived_node() noexcept
+        {
+            return TCAM_PROPERTY_BASE(ptr_.get());
+        }
+
+    public:
+        prop_consumer_string(gobject_helper::gobject_ptr<TcamPropertyString>&& ptr);
+
+        auto get_property_value(uint32_t flags = 0) -> outcome::result<std::string> final;
+        auto set_property_value(std::string_view new_value, uint32_t flags = 0)
+            -> std::error_code final;
+    private:
+        gobject_helper::gobject_ptr<TcamPropertyString> ptr_;
+    };
+    }
 
