@@ -39,7 +39,7 @@ tcamprop1::prop_static_info_str get_static_feature_node_info(ArvGcFeatureNode* n
     rval.display_name = to_stdstring(arv_gc_feature_node_get_display_name(node));
     rval.description = to_stdstring(arv_gc_feature_node_get_description(node));
     rval.visibility = to_Visibility(arv_gc_feature_node_get_visibility(node));
-    rval.access = to_Access(arv_gc_feature_node_get_imposed_access_mode(node));
+    rval.access = to_Access(arv_gc_feature_node_get_actual_access_mode(node));
     return rval;
 }
 
@@ -88,7 +88,7 @@ void update_with_tcamprop1_static_info(std::string_view tcamprop1_name,
                  tcamprop1_name,
                  gc_node_info.iccategory,
                  static_info.info_ptr->iccategory);
-                 
+
     gc_node_info.iccategory = static_info.info_ptr->iccategory;
 
     if (gc_node_info.description.empty())
@@ -149,7 +149,8 @@ auto to_FloatRepresentation(ArvGcRepresentation rep) noexcept
 }
 
 
-tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node, tcamprop1::Access_t access_mode) noexcept
+tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node,
+                                                    tcamprop1::Access_t access_mode) noexcept
 {
     tcam::property::PropertyFlags flags = tcam::property::PropertyFlags::None;
 
@@ -182,7 +183,8 @@ tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node, tcam
         }
     }
 
-    if (access_mode == tcamprop1::Access_t::RO) {
+    if (access_mode == tcamprop1::Access_t::RO)
+    {
         flags |= tcam::property::PropertyFlags::Locked;
     }
     else
@@ -270,7 +272,7 @@ prop_base_impl::prop_base_impl(const std::shared_ptr<AravisPropertyBackend>& cam
                                ArvGcFeatureNode* feature_node)
     : backend_ { cam }, feature_node_ { feature_node }
 {
-    access_mode_ = to_Access(arv_gc_feature_node_get_imposed_access_mode(feature_node_));
+    access_mode_ = to_Access(arv_gc_feature_node_get_actual_access_mode(feature_node_));
 }
 
 AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(
@@ -616,7 +618,7 @@ outcome::result<std::string_view> AravisPropertyEnumImpl::get_value() const
     return tcam::status::PropertyValueDoesNotExist;
 }
 
- AravisPropertyStringImpl::AravisPropertyStringImpl(
+AravisPropertyStringImpl::AravisPropertyStringImpl(
     std::string_view name,
     std::string_view category,
     ArvGcNode* node,
@@ -627,7 +629,7 @@ outcome::result<std::string_view> AravisPropertyEnumImpl::get_value() const
 
     update_with_tcamprop1_static_info(name, static_info_, tcamprop1::prop_type::String);
 }
- 
+
 std::error_code AravisPropertyStringImpl::set_value(std::string_view new_value)
 {
     auto lck = acquire_backend_guard();

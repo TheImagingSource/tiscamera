@@ -54,6 +54,7 @@ protected:
     {
         return access_mode_;
     }
+
 private:
     std::weak_ptr<AravisPropertyBackend> backend_;
     ArvGcFeatureNode* feature_node_ = nullptr;
@@ -263,9 +264,9 @@ class AravisPropertyStringImpl : public prop_base_impl, public IPropertyString
 {
 public:
     AravisPropertyStringImpl(std::string_view name,
-                           std::string_view category,
-                           ArvGcNode* node,
-                           const std::shared_ptr<AravisPropertyBackend>& backend);
+                             std::string_view category,
+                             ArvGcNode* node,
+                             const std::shared_ptr<AravisPropertyBackend>& backend);
 
     tcamprop1::prop_static_info get_static_info() const final
     {
