@@ -142,6 +142,20 @@ public:
     virtual std::vector<std::string> get_entries() const = 0;
 };
 
+class IPropertyString : public IPropertyBase
+{
+public:
+    static const constexpr auto property_type = tcam::TCAM_PROPERTY_TYPE_STRING;
+
+    TCAM_PROPERTY_TYPE get_type() const final
+    {
+        return tcam::TCAM_PROPERTY_TYPE_STRING;
+    }
+
+    virtual std::error_code set_value(std::string_view new_value) = 0;
+    virtual outcome::result<std::string> get_value() const = 0;
+};
+
 
 template<class Tprop_type>
 inline std::shared_ptr<Tprop_type> find_property(

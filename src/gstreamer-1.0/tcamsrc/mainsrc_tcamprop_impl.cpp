@@ -30,17 +30,16 @@ template<class TBase> struct TcamPropertyBase : TBase
 
     std::shared_ptr<tcam::property::IPropertyBase> m_prop;
 
-    virtual auto get_property_name() const noexcept -> std::string_view final
+    auto get_property_name() const noexcept -> std::string_view final
     {
         return m_prop->get_name();
     }
-    virtual auto get_property_info() const noexcept -> tcamprop1::prop_static_info final
+    auto get_property_info() const noexcept -> tcamprop1::prop_static_info final
     {
         return m_prop->get_static_info();
     }
 
-    virtual auto get_property_state(uint32_t /*flags = 0*/)
-        -> outcome::result<tcamprop1::prop_state> final
+    auto get_property_state(uint32_t /*flags = 0*/) -> outcome::result<tcamprop1::prop_state> final
     {
         auto flags = m_prop->get_flags();
 
@@ -61,7 +60,7 @@ struct TcamPropertyInteger : TcamPropertyBase<tcamprop1::property_interface_inte
     {
     }
 
-    virtual auto get_property_range(uint32_t /* flags = 0 */)
+    auto get_property_range(uint32_t /* flags = 0 */)
         -> outcome::result<tcamprop1::prop_range_integer> final
     {
         auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
@@ -69,20 +68,20 @@ struct TcamPropertyInteger : TcamPropertyBase<tcamprop1::property_interface_inte
         return tmp->get_range();
     }
 
-    virtual auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<int64_t> final
+    auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<int64_t> final
     {
         auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
 
         return tmp->get_default();
     }
 
-    virtual auto get_property_value(uint32_t /*flags*/) -> outcome::result<int64_t> final
+    auto get_property_value(uint32_t /*flags*/) -> outcome::result<int64_t> final
     {
         auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
 
         return tmp->get_value();
     }
-    virtual auto set_property_value(int64_t value, uint32_t /*flags*/) -> std::error_code final
+    auto set_property_value(int64_t value, uint32_t /*flags*/) -> std::error_code final
     {
         auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
 
@@ -94,13 +93,13 @@ struct TcamPropertyInteger : TcamPropertyBase<tcamprop1::property_interface_inte
         return ret.error();
     }
 
-    virtual auto get_representation() const noexcept -> tcamprop1::IntRepresentation_t final
+    auto get_representation() const noexcept -> tcamprop1::IntRepresentation_t final
     {
         auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
         return tmp->get_representation();
     }
 
-    virtual auto get_unit() const noexcept -> std::string_view final
+    auto get_unit() const noexcept -> std::string_view final
     {
         auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
         return tmp->get_unit();
@@ -115,7 +114,7 @@ struct TcamPropertyFloat : TcamPropertyBase<tcamprop1::property_interface_float>
     {
     }
 
-    virtual auto get_property_range(uint32_t /* flags = 0 */)
+    auto get_property_range(uint32_t /* flags = 0 */)
         -> outcome::result<tcamprop1::prop_range_float> final
     {
         auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
@@ -123,21 +122,21 @@ struct TcamPropertyFloat : TcamPropertyBase<tcamprop1::property_interface_float>
         return tmp->get_range();
     }
 
-    virtual auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<double> final
+    auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<double> final
     {
         auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
 
         return tmp->get_default();
     }
 
-    virtual auto get_property_value(uint32_t /*flags*/) -> outcome::result<double> final
+    auto get_property_value(uint32_t /*flags*/) -> outcome::result<double> final
     {
         auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
 
         return tmp->get_value();
     }
 
-    virtual auto set_property_value(double value, uint32_t /*flags*/) -> std::error_code final
+    auto set_property_value(double value, uint32_t /*flags*/) -> std::error_code final
     {
         auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
 
@@ -150,13 +149,13 @@ struct TcamPropertyFloat : TcamPropertyBase<tcamprop1::property_interface_float>
         return ret.error();
     }
 
-    virtual auto get_representation() const noexcept -> tcamprop1::FloatRepresentation_t final
+    auto get_representation() const noexcept -> tcamprop1::FloatRepresentation_t final
     {
         auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
         return tmp->get_representation();
     }
 
-    virtual auto get_unit() const noexcept -> std::string_view final
+    auto get_unit() const noexcept -> std::string_view final
     {
         auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
         return tmp->get_unit();
@@ -171,21 +170,21 @@ struct TcamPropertyBoolean : TcamPropertyBase<tcamprop1::property_interface_bool
     {
     }
 
-    virtual auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<bool> final
+    auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<bool> final
     {
         auto tmp = static_cast<tcam::property::IPropertyBool*>(m_prop.get());
 
         return tmp->get_default();
     }
 
-    virtual auto get_property_value(uint32_t /*flags*/) -> outcome::result<bool> final
+    auto get_property_value(uint32_t /*flags*/) -> outcome::result<bool> final
     {
         auto tmp = static_cast<tcam::property::IPropertyBool*>(m_prop.get());
 
         return tmp->get_value();
     }
 
-    virtual auto set_property_value(bool value, uint32_t /*flags*/) -> std::error_code final
+    auto set_property_value(bool value, uint32_t /*flags*/) -> std::error_code final
     {
         auto tmp = static_cast<tcam::property::IPropertyBool*>(m_prop.get());
 
@@ -207,7 +206,7 @@ struct TcamPropertyEnumeration : TcamPropertyBase<tcamprop1::property_interface_
     {
     }
 
-    virtual auto get_property_range(uint32_t /* flags = 0 */)
+    auto get_property_range(uint32_t /* flags = 0 */)
         -> outcome::result<tcamprop1::prop_range_enumeration> final
     {
         auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
@@ -215,8 +214,7 @@ struct TcamPropertyEnumeration : TcamPropertyBase<tcamprop1::property_interface_
         return tcamprop1::prop_range_enumeration { tmp->get_entries() };
     }
 
-    virtual auto get_property_default(uint32_t /*flags = 0 */)
-        -> outcome::result<std::string_view> final
+    auto get_property_default(uint32_t /*flags = 0 */) -> outcome::result<std::string_view> final
     {
         auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
 
@@ -233,15 +231,14 @@ struct TcamPropertyEnumeration : TcamPropertyBase<tcamprop1::property_interface_
         return entries.at(index);
     }
 
-    virtual auto get_property_value(uint32_t /*flags*/) -> outcome::result<std::string_view> final
+    auto get_property_value(uint32_t /*flags*/) -> outcome::result<std::string_view> final
     {
         auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
 
         return tmp->get_value();
     }
 
-    virtual auto set_property_value(std::string_view value, uint32_t /*flags*/)
-        -> std::error_code final
+    auto set_property_value(std::string_view value, uint32_t /*flags*/) -> std::error_code final
     {
         auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
 
@@ -273,6 +270,34 @@ struct TcamPropertyCommand : TcamPropertyBase<tcamprop1::property_interface_comm
         return ret.error();
     }
 };
+
+struct TcamPropertyString : TcamPropertyBase<tcamprop1::property_interface_string>
+{
+    TcamPropertyString(std::shared_ptr<tcam::property::IPropertyBase> prop)
+        : TcamPropertyBase { prop }
+    {
+    }
+
+
+    auto get_property_value(uint32_t /*flags*/) -> outcome::result<std::string> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyString*>(m_prop.get());
+
+        return tmp->get_value();
+    }
+
+    auto set_property_value(std::string_view value, uint32_t /*flags*/) -> std::error_code final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyString*>(m_prop.get());
+
+        auto err = tmp->set_value(value);
+        if (err)
+        {
+            return err;
+        }
+        return {};
+    }
+};
 } // namespace tcam::mainsrc
 
 auto tcam::mainsrc::make_wrapper_instance(
@@ -302,9 +327,9 @@ auto tcam::mainsrc::make_wrapper_instance(
             return std::make_unique<tcam::mainsrc::TcamPropertyCommand>(prop);
         }
         case tcam::TCAM_PROPERTY_TYPE_STRING:
-            return nullptr;
-        case tcam::TCAM_PROPERTY_TYPE_UNKNOWN:
-            return nullptr;
+        {
+            return std::make_unique<tcam::mainsrc::TcamPropertyString>(prop);
+        }
     }
     return nullptr;
 }
