@@ -72,6 +72,19 @@ namespace tcamprop1_gobj::impl
             }
             return TCAM_PROPERTY_VISIBILITY_INVISIBLE;
         }
+        TcamPropertyAccess get_access() const noexcept
+        {
+            switch (static_info_.access)
+            {
+            case tcamprop1::Access_t::RW:
+                return TCAM_PROPERTY_ACCESS_RW;
+            case tcamprop1::Access_t::RO:
+                return TCAM_PROPERTY_ACCESS_RO;
+            case tcamprop1::Access_t::WO:
+                return TCAM_PROPERTY_ACCESS_WO;
+            }
+            return TCAM_PROPERTY_ACCESS_RW;
+        }
         bool        get_is_available( GError** err ) noexcept
         {
             auto guard = make_raii_guard();
@@ -112,6 +125,7 @@ namespace tcamprop1_gobj::impl
             iface->get_category = []( TcamPropertyBase* self ) -> const char* { return TImplStruct::fetch_PropImpl( self ).get_category(); };
 
             iface->get_visibility = []( TcamPropertyBase* self ) -> TcamPropertyVisibility { return TImplStruct::fetch_PropImpl( self ).get_visibility(); };
+            iface->get_access = []( TcamPropertyBase* self ) -> TcamPropertyAccess { return TImplStruct::fetch_PropImpl( self ).get_access(); };
             iface->get_property_type = []( TcamPropertyBase* ) { return Tprop_type; };
 
             iface->is_available = []( TcamPropertyBase* self, GError** err ) -> gboolean { return TImplStruct::fetch_PropImpl( self ).get_is_available( err ); };
