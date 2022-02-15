@@ -16,9 +16,9 @@
 
 #include "propertywidget.h"
 
-#include <gst/gst.h>
-
 #include <QTimer>
+#include <cassert>
+#include <gst/gst.h>
 
 QString Property::get_name() const
 {
@@ -107,6 +107,25 @@ void EnumWidget::update()
         p_combobox->setCurrentIndex(-1); // this shows the placeholder text
         p_combobox->blockSignals(false);
     }
+    else if (is_readonly_)
+    {
+        QString value = tcam_property_enumeration_get_value(p_prop, &err);
+        HANDLE_ERROR(err, return );
+
+        p_combobox->blockSignals(true);
+        p_combobox->setEnabled(false);
+
+        for (int index = 0; index < p_combobox->count(); index++)
+        {
+            if (p_combobox->itemText(index) == value)
+            {
+                p_combobox->setCurrentIndex(index);
+                break;
+            }
+        }
+
+        p_combobox->blockSignals(false);
+    }
     else
     {
         QString value = tcam_property_enumeration_get_value(p_prop, &err);
@@ -131,11 +150,9 @@ void EnumWidget::update()
 
         if (value == "Once")
         {
-            QTimer::singleShot(500, [this]() 
-            {
-                emit this->update_category(get_category().c_str()); 
-            } );
-        }        
+            QTimer::singleShot(500,
+                               [this]() { emit this->update_category(get_category().c_str()); });
+        }
 
         p_combobox->blockSignals(false);
     }
@@ -150,10 +167,7 @@ void EnumWidget::drop_down_changed(const QString& entry)
     // update the category until the property has a different value
     if (entry == "Once")
     {
-        QTimer::singleShot(500, [this]() 
-        {
-             emit this->update_category(get_category().c_str()); 
-        } );
+        QTimer::singleShot(500, [this]() { emit this->update_category(get_category().c_str()); });
     }
     emit value_changed(this);
 }
@@ -173,6 +187,10 @@ void EnumWidget::setup_ui()
     auto p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
+
+    TcamPropertyAccess access = tcam_property_base_get_access(TCAM_PROPERTY_BASE(p_prop));
+    if (access == TCAM_PROPERTY_ACCESS_RO)
+        is_readonly_ = true;
 
     GError* err = nullptr;
     GSList* entries = tcam_property_enumeration_get_enum_entries(p_prop, &err);
@@ -214,24 +232,45 @@ void IntWidget::update()
         if (p_box)
             p_box->setDisabled(true);
     }
+    else if (is_readonly_)
+    {
+        gint64 value = tcam_property_integer_get_value(p_prop, &err);
+        HANDLE_ERROR(err, return );
+
+        assert(p_slider == nullptr);
+        assert(p_box != nullptr);
+
+        p_box->blockSignals(true);
+        p_box->setDisabled(false);
+
+        p_box->setRange(value - 1, value);
+        p_box->setSingleStep(1);
+
+        p_box->setValue(value);
+        p_box->setReadOnly(true);
+
+        p_box->blockSignals(false);
+    }
     else
     {
-        gint64 min;
-        gint64 max;
-        gint64 step;
+        // !read-only && available
+
+        gint64 min = INT_MIN;
+        gint64 max = INT_MAX;
+        gint64 step = 1;
         tcam_property_integer_get_range(p_prop, &min, &max, &step, &err);
         HANDLE_ERROR(err, return );
 
         gint64 value = tcam_property_integer_get_value(p_prop, &err);
         HANDLE_ERROR(err, return );
 
-        // fix behaviour of QSlider/QBox to only show 0, when the range is extremly large
+        // fix behavior of QSlider/QBox to only show 0, when the range is extremely large
         if (min <= INT_MIN && max >= INT_MAX)
         {
             min = value - 1;
             max = value;
         }
-        else if (std::abs(max - min) == 0) // Fix Qt behaviour when range is 0
+        else if (std::abs(max - min) == 0) // Fix Qt behavior when range is 0
         {
             min = value - 1;
             max = value;
@@ -297,25 +336,34 @@ void IntWidget::setup_ui()
 
     setLayout(p_layout);
 
+    TcamPropertyAccess access = tcam_property_base_get_access(TCAM_PROPERTY_BASE(p_prop));
+    if (access == TCAM_PROPERTY_ACCESS_RO)
+        is_readonly_ = true;
+
     TcamPropertyIntRepresentation representation = tcam_property_integer_get_representation(p_prop);
-    if (representation != TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER)
+    if (!is_readonly_)
     {
-        if (representation == TCAM_PROPERTY_INTREPRESENTATION_LINEAR)
+        if (representation != TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER)
         {
-            p_slider = new TcamSlider();
-        }
-        else if (representation == TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC)
-        {
-            p_slider = new TcamSlider(TcamSliderScale::Logarithmic);
-        }
-        else if (representation == TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER)
-        {
-            auto name = tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-            qWarning("Property '%s', TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER not implemented.", name);
-        }
-        else
-        {
-            qWarning("representation not implemented.");
+            if (representation == TCAM_PROPERTY_INTREPRESENTATION_LINEAR)
+            {
+                p_slider = new TcamSlider();
+            }
+            else if (representation == TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC)
+            {
+                p_slider = new TcamSlider(TcamSliderScale::Logarithmic);
+            }
+            else if (representation == TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER)
+            {
+                auto name = tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+                qWarning(
+                    "Property '%s', TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER not implemented.",
+                    name);
+            }
+            else
+            {
+                qWarning("representation not implemented.");
+            }
         }
     }
 
@@ -379,6 +427,25 @@ void DoubleWidget::update()
             p_slider->setDisabled(true);
         if (p_box)
             p_box->setDisabled(true);
+    }
+    else if (is_readonly_)
+    {
+        gdouble value = tcam_property_float_get_value(p_prop, &err);
+        HANDLE_ERROR(err, return );
+
+        assert(p_slider == nullptr);
+        assert(p_box != nullptr);
+
+        p_box->blockSignals(true);
+        p_box->setDisabled(false);
+
+        p_box->setRange(value - 1, value);
+        p_box->setSingleStep(1);
+
+        p_box->setValue(value);
+        p_box->setReadOnly(true);
+
+        p_box->blockSignals(false);
     }
     else
     {
@@ -445,21 +512,28 @@ void DoubleWidget::setup_ui()
 
     setLayout(p_layout);
 
+    TcamPropertyAccess access = tcam_property_base_get_access(TCAM_PROPERTY_BASE(p_prop));
+    if (access == TCAM_PROPERTY_ACCESS_RO)
+        is_readonly_ = true;
+
     auto representation = tcam_property_float_get_representation(p_prop);
 
-    if (representation != TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER)
+    if (!is_readonly_)
     {
-        if (representation == TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR)
+        if (representation != TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER)
         {
-            p_slider = new TcamSlider();
-        }
-        else if (representation == TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC)
-        {
-            p_slider = new TcamSlider(TcamSliderScale::Logarithmic);
-        }
-        else
-        {
-            throw std::runtime_error("representation not implemented.");
+            if (representation == TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR)
+            {
+                p_slider = new TcamSlider();
+            }
+            else if (representation == TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC)
+            {
+                p_slider = new TcamSlider(TcamSliderScale::Logarithmic);
+            }
+            else
+            {
+                throw std::runtime_error("representation not implemented.");
+            }
         }
     }
 
@@ -525,6 +599,16 @@ void BoolWidget::update()
     {
         p_checkbox->setEnabled(false);
     }
+    else if (is_readonly_)
+    {
+        bool value = tcam_property_boolean_get_value(p_prop, &err);
+        HANDLE_ERROR(err, return );
+
+        p_checkbox->blockSignals(true);
+        p_checkbox->toggled(value);
+        p_checkbox->setEnabled(false);
+        p_checkbox->blockSignals(false);
+    }
     else
     {
         bool value = tcam_property_boolean_get_value(p_prop, &err);
@@ -550,6 +634,10 @@ void BoolWidget::setup_ui()
     auto p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
+
+    TcamPropertyAccess access = tcam_property_base_get_access(TCAM_PROPERTY_BASE(p_prop));
+    if (access == TCAM_PROPERTY_ACCESS_RO)
+        is_readonly_ = true;
 
     p_checkbox = new QCheckBox();
 

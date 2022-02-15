@@ -79,6 +79,7 @@ private:
     QComboBox* p_combobox = nullptr;
 
     TcamPropertyEnumeration* p_prop = nullptr;
+    bool is_readonly_ = false;
 };
 
 class IntWidget : public QWidget, public Property
@@ -114,6 +115,7 @@ private:
     QSpinBox* p_box = nullptr;
 
     TcamPropertyInteger* p_prop = nullptr;
+    bool is_readonly_ = false;
 };
 
 
@@ -150,6 +152,8 @@ private:
     QDoubleSpinBox* p_box = nullptr;
 
     TcamPropertyFloat* p_prop = nullptr;
+
+    bool is_readonly_ = false;
 };
 
 
@@ -183,6 +187,7 @@ private:
     QCheckBox* p_checkbox = nullptr;
 
     TcamPropertyBoolean* p_prop = nullptr;
+    bool is_readonly_ = false;
 };
 
 
