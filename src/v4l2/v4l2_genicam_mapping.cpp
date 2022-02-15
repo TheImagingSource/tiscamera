@@ -16,6 +16,7 @@
 
 #include "v4l2_genicam_mapping.h"
 
+#include "../logging.h"
 #include "sensor_id_33u.h"
 #include "v4l2_property_impl.h"
 
@@ -781,6 +782,11 @@ auto tcam::v4l2::create_mapped_prop(
                 p_property_backend,
                 static_cast<const tcamprop1::prop_static_info_enumeration*>(mapping.info_),
                 mapping.fetch_menu_entries_);
+        }
+        case tcamprop1::prop_type::String:
+        {
+            SPDLOG_ERROR("Currently no string property support implemented in v4l2.");
+            return nullptr;
         }
     }
     return nullptr;
