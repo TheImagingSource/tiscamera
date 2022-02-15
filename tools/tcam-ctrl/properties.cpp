@@ -358,18 +358,33 @@ void print_properties(const std::string& serial)
                     break;
 
                 }
-                default:
+                case TCAM_PROPERTY_TYPE_STRING:
                 {
-                    break;
-                }
-                std::cout << std::endl << "\n" << std::endl;
+                    TcamPropertyString* b = TCAM_PROPERTY_STRING(base_property);
+                    char* value = tcam_property_string_get_value(b, &err);
 
-                if (base_property)
-                {
-                    g_object_unref(base_property);
+                    std::string_view tmp_value = value == nullptr ? std::string_view{} : std::string_view{value};
+
+                    std::cout << std::setw(20) << std::left << name << "\ttype: String\t"
+                              << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
+                              << "Category: " << tcam_property_base_get_category(base_property) << std::endl
+                              << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
+                              << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
+                              << "" << std::endl
+                              << "\t\t\tValue: '" << tmp_value << "'"
+                              << std::endl << std::endl;
+
+                    g_free( value );
+
+                    break;
+
                 }
             }
 
+            if (base_property)
+            {
+                g_object_unref(base_property);
+            }
         }
 
     } // ElementStateGuard
