@@ -17,27 +17,29 @@
 #pragma once
 
 #include <gst/gst.h>
+#include <string>
 #include <tcam-property-1.0.h>
 #include <vector>
-#include <map>
-#include <string>
 
 class TcamCollection
 {
 private:
     std::vector<GstElement*> m_elements;
 
-    std::map<std::string, GstElement*> m_prop_origin;
+    struct entry
+    {
+        std::string prop_name;
+        GstElement* elem = nullptr;
+    };
 
+    std::vector<entry> m_prop_origin;
 public:
     TcamCollection() = default;
+    ~TcamCollection();
 
     explicit TcamCollection(GstBin* pipeline);
 
     std::vector<std::string> get_names() const;
 
     TcamPropertyBase* get_property(const std::string& name);
-
-    GstElement* origin_of_property(const std::string& name);
-
 };
