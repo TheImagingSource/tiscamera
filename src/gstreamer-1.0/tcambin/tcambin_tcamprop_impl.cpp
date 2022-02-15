@@ -16,6 +16,7 @@
 
 #include "tcambin_tcamprop_impl.h"
 
+#include "../../logging.h"
 #include "tcambin_data.h"
 
 #include <algorithm>
@@ -57,14 +58,23 @@ static GSList* gst_tcambin_get_tcam_property_names(TcamPropertyProvider* iface, 
         return gst_helper::gst_string_vector_to_GSList(src_prop_list_res.value());
     }
 
-    auto& merged_prop_list = src_prop_list_res.value();
-    merged_prop_list.insert(
-        merged_prop_list.end(), convert_name_list.begin(), convert_name_list.end());
+    auto merged_prop_list = src_prop_list_res.value();
 
-    std::sort(merged_prop_list.begin(), merged_prop_list.end());
-    merged_prop_list.erase(std::unique(merged_prop_list.begin(), merged_prop_list.end()),
-                           merged_prop_list.end());
+    for (const auto& convert_name : convert_name_list)
+    {
+        auto found = std::any_of(merged_prop_list.begin(),
+                    merged_prop_list.end(),
+                    [&convert_name](const auto& name) { return name == convert_name; });
 
+        if (found) {
+            SPDLOG_WARN("Property '{}' is exported by the source and the conversion element.",
+                        convert_name);
+        }
+        else
+        {
+            merged_prop_list.push_back(convert_name);
+        }
+    }
     return gst_helper::gst_string_vector_to_GSList(merged_prop_list);
 }
 
