@@ -28,13 +28,15 @@ GType   tcam_property_visibility_get_type( void );
 GType   tcam_property_intrepresentation_get_type( void );
 GType   tcam_property_floatrepresentation_get_type( void );
 GType   tcam_property_type_get_type( void );
+GType	tcam_property_access_get_type(void);
 
 const gchar*            tcam_property_base_get_name( TcamPropertyBase* self );
+TcamPropertyType        tcam_property_base_get_property_type( TcamPropertyBase* self );
 const gchar*            tcam_property_base_get_display_name( TcamPropertyBase* self );
 const gchar*            tcam_property_base_get_description( TcamPropertyBase* self );
 const gchar*            tcam_property_base_get_category( TcamPropertyBase* self );
 TcamPropertyVisibility  tcam_property_base_get_visibility( TcamPropertyBase* self );
-TcamPropertyType        tcam_property_base_get_property_type( TcamPropertyBase* self );
+TcamPropertyAccess		tcam_property_base_get_access(TcamPropertyBase* self);
 gboolean                tcam_property_base_is_available( TcamPropertyBase* self, GError** err );
 gboolean                tcam_property_base_is_locked( TcamPropertyBase* self, GError** err );
 

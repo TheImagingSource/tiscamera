@@ -52,6 +52,13 @@ typedef enum {
     TCAM_PROPERTY_VISIBILITY_INVISIBLE = 3,
 } TcamPropertyVisibility;
 
+typedef enum
+{
+    TCAM_PROPERTY_ACCESS_RW = 0,
+    TCAM_PROPERTY_ACCESS_RO = 1,
+    TCAM_PROPERTY_ACCESS_WO = 2,
+} TcamPropertyAccess;
+
 typedef enum  {
     TCAM_PROPERTY_INTREPRESENTATION_LINEAR = 0,
     TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC = 1,
@@ -84,7 +91,9 @@ struct _TcamPropertyBaseInterface
     gboolean (*is_available)(TcamPropertyBase* self, GError** err );
     gboolean (*is_locked)(TcamPropertyBase* self, GError** err);
 
-    gpointer    padding[12];
+    TcamPropertyAccess (*get_access)(TcamPropertyBase* self);
+    
+    gpointer    padding[11];
 };
 
 #define TCAM_TYPE_PROPERTY_BOOLEAN tcam_property_boolean_get_type()

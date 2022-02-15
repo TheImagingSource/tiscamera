@@ -69,6 +69,24 @@ GType tcam_property_visibility_get_type( void )
     return type;
 }
 
+static const GEnumValue _tcamprop_property_access_values[] = {
+    { TCAM_PROPERTY_ACCESS_RW, "TCAM_PROPERTY_ACCESS_RW", "rw" },
+    { TCAM_PROPERTY_ACCESS_RO, "TCAM_PROPERTY_ACCESS_RO", "ro" },
+    { TCAM_PROPERTY_ACCESS_WO, "TCAM_PROPERTY_ACCESS_WO", "wo" },
+    { 0, NULL, NULL }
+};
+
+
+GType tcam_property_access_get_type(void)
+{
+    static GType type = 0;
+    if (!type)
+    {
+        type = g_enum_register_static("TcamPropertyAccess", _tcamprop_property_access_values);
+    }
+    return type;
+}
+
 static const GEnumValue _tcamprop_property_intrepresentation_values[] = {
     {TCAM_PROPERTY_INTREPRESENTATION_LINEAR, "TCAM_INTREPRESENTATION_LINEAR", "Linear"},
     {TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC, "TCAM_INTREPRESENTATION_LOGARITHMIC", "Logarithmic"},
@@ -228,6 +246,25 @@ TcamPropertyVisibility tcam_property_base_get_visibility( TcamPropertyBase* self
         return iface->get_visibility( self );
     }
     return TCAM_PROPERTY_VISIBILITY_INVISIBLE;
+}
+
+/**
+ * tcam_property_base_get_access:
+ * @self: A #TcamPropertyBase
+ *
+ * Returns: Return the #TcamPropertyAccess for this property.
+ */
+TcamPropertyAccess tcam_property_base_get_access(TcamPropertyBase* self) 
+{
+    g_return_val_if_fail(self != NULL, 0);
+    g_return_val_if_fail(TCAM_IS_PROPERTY_BASE(self), 0);
+
+    TcamPropertyBaseInterface* iface = TCAM_PROPERTY_BASE_GET_IFACE(self);
+    if (iface->get_access( self ))
+    {
+        return iface->get_access(self);
+    }
+    return TCAM_PROPERTY_ACCESS_RW;
 }
 
 /**
