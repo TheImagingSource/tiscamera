@@ -206,10 +206,8 @@ tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node, tcam
 }
 } // namespace
 
-
 namespace tcam::aravis
 {
-
 struct aravis_backend_guard
 {
     explicit aravis_backend_guard(std::weak_ptr<AravisPropertyBackend> cam)
@@ -239,6 +237,7 @@ private:
     std::shared_ptr<AravisPropertyBackend> owner_;
     std::recursive_mutex* backend_mtx_ = nullptr;
 };
+} // namespace tcam::aravis
 
 tcam::property::PropertyFlags prop_base_impl::get_flags_impl() const
 {
@@ -617,4 +616,45 @@ outcome::result<std::string_view> AravisPropertyEnumImpl::get_value() const
     return tcam::status::PropertyValueDoesNotExist;
 }
 
-} // namespace tcam::aravis
+ AravisPropertyStringImpl::AravisPropertyStringImpl(
+    std::string_view name,
+    std::string_view category,
+    ArvGcNode* node,
+    const std::shared_ptr<AravisPropertyBackend>& backend)
+    : prop_base_impl(backend, ARV_GC_FEATURE_NODE(node)), arv_gc_node_(ARV_GC_STRING(node))
+{
+    static_info_ = build_static_info(category, name);
+
+    update_with_tcamprop1_static_info(name, static_info_, tcamprop1::prop_type::String);
+}
+ 
+std::error_code AravisPropertyStringImpl::set_value(std::string_view new_value)
+{
+    auto lck = acquire_backend_guard();
+    if (!lck)
+    {
+        SPDLOG_ERROR("Unable to lock backend.");
+        return tcam::status::ResourceNotLockable;
+    }
+    GError* err = nullptr;
+    arv_gc_string_set_value(arv_gc_node_, std::string { new_value }.c_str(), &err);
+    if (err)
+        return consume_GError(err);
+    return {};
+}
+
+outcome::result<std::string> AravisPropertyStringImpl::get_value() const
+{
+    auto lck = acquire_backend_guard();
+    if (!lck)
+    {
+        SPDLOG_ERROR("Unable to lock backend.");
+        return tcam::status::ResourceNotLockable;
+    }
+    GError* err = nullptr;
+    auto current_value = arv_gc_string_get_value(arv_gc_node_, &err);
+    if (err)
+        return consume_GError(err);
+
+    return std::string { current_value };
+}

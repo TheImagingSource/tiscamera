@@ -79,25 +79,18 @@ static const aravis_property_name_map aravis_property_name_mapping_list[] =
     { "ChunkIMX174FrameId", map_type::blacklist },
 
     // GigEVision stuff?
-    { "DeviceVendorName", map_type::blacklist },
     { "DeviceType", map_type::blacklist },
-    { "DeviceModelType", map_type::blacklist },
-    { "DeviceVersion", map_type::blacklist },
-    { "DeviceSerialNumber", map_type::blacklist },
-    { "DeviceUserID", map_type::blacklist },
     { "DeviceSFNCVersionMajor", map_type::blacklist },
     { "DeviceSFNCVersionMinor", map_type::blacklist },
+    { "DeviceSFNCVersionSubMinor", map_type::blacklist },
     { "DeviceTLType", map_type::blacklist },
     { "DeviceTLTypeMajor", map_type::blacklist },
     { "DeviceTLTypeMinor", map_type::blacklist },
     { "DeviceTLTypeSubMinor", map_type::blacklist },
-    { "DeviceLinkSelector", map_type::blacklist },
-    { "DeviceModelName", map_type::blacklist },
-    { "DeviceSFNCVersionSubMinor", map_type::blacklist },
     { "DeviceTLVersionMajor", map_type::blacklist },
     { "DeviceTLVersionMinor", map_type::blacklist },
     { "DeviceTLVersionSubMinor", map_type::blacklist },
-    { "DeviceLinkHeartbeatTimeout", map_type::blacklist },
+    { "DeviceLinkSelector", map_type::blacklist },
     { "DeviceStreamChannelCount", map_type::blacklist },
     { "DeviceStreamChannelSelector", map_type::blacklist },
     { "DeviceStreamChannelType", map_type::blacklist },
@@ -105,7 +98,6 @@ static const aravis_property_name_map aravis_property_name_mapping_list[] =
     { "DeviceStreamChannelEndianness", map_type::blacklist },
     { "DeviceStreamChannelPacketSize", map_type::blacklist },
     { "DeviceEventChannelCount", map_type::blacklist },
-    { "DeviceScanType", map_type::priv },
 
     // These should be private
     { "DeviceReset", map_type::priv },
@@ -221,9 +213,7 @@ auto build_property_from_node(std::string_view name,
     }
     else if (ARV_IS_GC_STRING(node))
     {
-        SPDLOG_DEBUG("Property '{}' node-name '{}' not implemented.",
-                     prop_name,
-                     arv_dom_node_get_node_name(ARV_DOM_NODE(node)));
+        prop = std::make_shared<AravisPropertyStringImpl>(prop_name, category, node, backend);
     }
     else
     {

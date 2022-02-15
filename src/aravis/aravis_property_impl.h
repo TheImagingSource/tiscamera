@@ -210,7 +210,6 @@ private:
     ArvGcCommand* arv_gc_node_ = nullptr;
 };
 
-
 class AravisPropertyEnumImpl : public prop_base_impl, public IPropertyEnum
 {
 public:
@@ -258,6 +257,35 @@ private:
 
     std::string m_default;
 };
+
+
+class AravisPropertyStringImpl : public prop_base_impl, public IPropertyString
+{
+public:
+    AravisPropertyStringImpl(std::string_view name,
+                           std::string_view category,
+                           ArvGcNode* node,
+                           const std::shared_ptr<AravisPropertyBackend>& backend);
+
+    tcamprop1::prop_static_info get_static_info() const final
+    {
+        return static_info_.to_prop_static_info();
+    }
+
+    PropertyFlags get_flags() const final
+    {
+        return get_flags_impl();
+    }
+
+    outcome::result<std::string> get_value() const final;
+
+    std::error_code set_value(std::string_view value) final;
+
+private:
+    ArvGcString* arv_gc_node_ = nullptr;
+    tcamprop1::prop_static_info_str static_info_;
+};
+
 
 class balance_ratio_raw_to_wb_channel : public IPropertyFloat2
 {
