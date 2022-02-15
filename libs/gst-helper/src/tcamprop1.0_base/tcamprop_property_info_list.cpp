@@ -537,6 +537,13 @@ const prop_static_info_integer lst::AcquisitionBurstFrameCount = make_Integer(
     "Number of frames to acquire for each trigger."
 );
 
+const prop_static_info_integer lst::AcquisitionBurstInterval =
+    make_Integer("AcquisitionBurstInterval",
+                 "Special",
+                 "Acquisition Burst Interval",
+                 "Minimum interval between frames in an acquisition burst.",
+                 "µs");
+
 /* Disable these, because this is a device-specific property, and should always come out of the GenICam document of the device itself.
 const prop_static_info_integer lst::ActionQueueSize = make_Integer(
     "ActionQueueSize",

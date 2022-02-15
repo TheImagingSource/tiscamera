@@ -146,6 +146,7 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_enumeration TriggerOperation;
     extern const prop_static_info_enumeration TriggerOverlap;
     extern const prop_static_info_integer AcquisitionBurstFrameCount; // seems to be the same as TriggerBurstCount, rename?
+    extern const prop_static_info_integer AcquisitionBurstInterval;
 
     extern const prop_static_info_float TriggerMask;
     extern const prop_static_info_float TriggerDenoise;

@@ -110,6 +110,8 @@ static const constexpr tcamprop1::prop_static_info_find_result static_prop_list[
     to_( lst::GPIO ),
 
     to_( lst::AcquisitionBurstFrameCount ),
+    to_(lst::AcquisitionBurstInterval),
+
     //to_( lst::ActionQueueSize ),
     //to_( lst::ActionSchedulerCancel ),
     //to_( lst::ActionSchedulerCommit ),
