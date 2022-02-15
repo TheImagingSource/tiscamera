@@ -36,6 +36,11 @@ namespace
         }
         assert( ptr != nullptr );
 
+        if (tcam_property_base_get_access(ptr.get()) == TCAM_PROPERTY_ACCESS_RO)
+            return apply_entry_result::failure;
+        if (!tcam_property_base_is_available(ptr.get(), nullptr))
+            return apply_entry_result::failure_because_locked;
+
         switch( tcam_property_base_get_property_type( ptr.get() ) )
         {
         case TCAM_PROPERTY_TYPE_BOOLEAN:
@@ -109,6 +114,19 @@ namespace
         case TCAM_PROPERTY_TYPE_COMMAND:
         {
             tcam_property_command_set_command( TCAM_PROPERTY_COMMAND( ptr.get() ), &err );
+            break;
+        }
+        case TCAM_PROPERTY_TYPE_STRING:
+        {
+            if (auto actual_val = entry.val.fetch_typed<std::string>(); actual_val)
+            {
+                tcam_property_string_set_value(
+                    TCAM_PROPERTY_STRING(ptr.get()), actual_val.value().c_str(), &err);
+            }
+            else
+            {
+                tcamprop1_gobj::set_gerror(&err, tcamprop1::status::parameter_type_incompatible);
+            }
             break;
         }
         }
@@ -206,6 +224,11 @@ void tcamprop1_gobj::serialize_properties( TcamPropertyProvider* prop_provider, 
             continue;
         }
 
+        if (tcam_property_base_get_access(ptr.get()) == TCAM_PROPERTY_ACCESS_WO)
+            continue;
+        if (!tcam_property_base_is_available(ptr.get(), nullptr))
+            continue;
+
         switch( tcam_property_base_get_property_type( ptr.get() ) )
         {
         case TCAM_PROPERTY_TYPE_BOOLEAN:
@@ -262,6 +285,22 @@ void tcamprop1_gobj::serialize_properties( TcamPropertyProvider* prop_provider, 
         }
         case TCAM_PROPERTY_TYPE_COMMAND:        // we can skip this, nothing to serialize here
             break;
+        case TCAM_PROPERTY_TYPE_STRING:
+        {
+            GError* err = nullptr;
+            char* tmp = tcam_property_string_get_value(TCAM_PROPERTY_STRING(ptr.get()), &err);
+            if (!err)
+            {
+                auto val = gvalue::gvalue_wrapper::make_value(tmp);
+                gst_structure_set_value(&data_struct, entry_name.c_str(), val.get());
+                g_free(tmp);
+            }
+            else
+            {
+                g_error_free(err);
+            }
+            break;
+        }
         };
     }
 }

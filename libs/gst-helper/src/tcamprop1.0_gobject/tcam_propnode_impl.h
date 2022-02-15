@@ -14,6 +14,7 @@ namespace tcamprop1_gobj::impl
     TcamPropertyBase* create_boolean( tcamprop1::property_interface_boolean* prop_itf_ptr, const guard_state_handle& handle );
     TcamPropertyBase* create_enumeration( tcamprop1::property_interface_enumeration* prop_itf_ptr, const guard_state_handle& handle );
     TcamPropertyBase* create_command( tcamprop1::property_interface_command* prop_itf_ptr, const guard_state_handle& handle );
+    TcamPropertyBase* create_string(tcamprop1::property_interface_string* prop_itf_ptr, const guard_state_handle& handle);
 
     void    fill_GError( GError** gerr_loc, tcamprop1::status errc );
 

@@ -19,6 +19,7 @@ add_library( tcamprop1_provider_gobject STATIC
 	"tcam_propfloat_impl.cpp"
 	"tcam_propenumeration_impl.cpp"
 	"tcam_propcommand_impl.cpp"
+	"tcam_propstring.cpp"
 	"tcam_propnode_impl.cpp"
 
 	"guard_state.h"

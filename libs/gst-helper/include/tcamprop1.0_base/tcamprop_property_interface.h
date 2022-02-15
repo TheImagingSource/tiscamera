@@ -159,6 +159,23 @@ public:
     virtual auto execute_command( uint32_t flags = 0 )->std::error_code = 0;
 };
 
+/**
+ * Reference: http://gitlab.theimagingsource.com/bv/genicam_lib/-/blob/master/include/genicam/genicam_interfaces.h#L123
+ */
+class property_interface_string : public property_interface
+{
+public:
+    static constexpr auto itf_type = prop_type::String;
+
+    auto get_property_type() const noexcept -> tcamprop1::prop_type final
+    {
+        return prop_type::String;
+    }
+
+    virtual auto get_property_value(uint32_t flags = 0) -> outcome::result<std::string> = 0;
+    virtual auto set_property_value(std::string_view new_value, uint32_t flags = 0) -> std::error_code = 0;
+};
+
 class property_list_interface
 {
 public:

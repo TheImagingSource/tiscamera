@@ -44,6 +44,8 @@ static TcamPropertyBase* tcamprop_impl_create_node( tcamprop1::property_list_int
         return tcamprop1_gobj::impl::create_enumeration( static_cast<tcamprop1::property_interface_enumeration*>(prop_itf_ptr), guard_handle );
     case tcamprop1::prop_type::Command:
         return tcamprop1_gobj::impl::create_command( static_cast<tcamprop1::property_interface_command*>(prop_itf_ptr), guard_handle );
+    case tcamprop1::prop_type::String:
+        return tcamprop1_gobj::impl::create_string( static_cast<tcamprop1::property_interface_string*>(prop_itf_ptr), guard_handle );
     }
 
     tcamprop1_gobj::set_gerror( err, tcamprop1::status::property_is_not_implemented );

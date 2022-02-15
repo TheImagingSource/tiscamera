@@ -15,7 +15,8 @@ namespace tcamprop1
         Integer,
         Float,
         Command,
-        Enumeration
+        Enumeration,
+        String,
     };
     enum class Visibility_t {
         Beginner,
@@ -141,6 +142,7 @@ namespace tcamprop1
         case prop_type::Float:          return "Float";
         case prop_type::Command:        return "Command";
         case prop_type::Enumeration:    return "Enumeration";
+        case prop_type::String:         return "String";
         };
         return nullptr;
     }
