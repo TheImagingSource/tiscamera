@@ -130,7 +130,8 @@ static const GEnumValue _tcam_property_type_values[] = {
     {TCAM_PROPERTY_TYPE_ENUMERATION  , "TCAM_PROPERTY_TYPE_ENUMERATION", "Enumeration"},
     {TCAM_PROPERTY_TYPE_BOOLEAN  , "TCAM_PROPERTY_TYPE_BOOLEAN", "Boolean"},
     {TCAM_PROPERTY_TYPE_COMMAND, "TCAM_PROPERTY_TYPE_COMMAND", "Command"},
-    { 0, NULL, NULL}
+    { TCAM_PROPERTY_TYPE_STRING, "TCAM_PROPERTY_TYPE_STRING", "String" },
+    { 0, NULL, NULL }
 };
 
 GType tcam_property_type_get_type (void)
@@ -742,6 +743,54 @@ void tcam_property_command_set_command( TcamPropertyCommand* self, GError** err 
     if( iface->set_command )
     {
         iface->set_command( self, err );
+    }
+}
+
+
+G_DEFINE_INTERFACE(TcamPropertyString, tcam_property_string, TCAM_TYPE_PROPERTY_BASE)
+
+static void tcam_property_string_default_init(__attribute__((unused))
+                                               TcamPropertyStringInterface* instance)
+{
+}
+
+/**
+ * tcam_property_string_get_value:
+ * @self: A #TcamPropertyString
+ * @err: return location for a GError, or NULL
+ *
+ * Returns: (transfer full)(type utf8): The current value of the property
+ */
+char* tcam_property_string_get_value(TcamPropertyString* self, GError** err)
+{
+    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(err == NULL || *err == NULL, NULL);
+    g_return_val_if_fail(TCAM_IS_PROPERTY_STRING(self), NULL);
+
+    TcamPropertyStringInterface* iface = TCAM_PROPERTY_STRING_GET_IFACE(self);
+    if (iface->get_value)
+    {
+        return iface->get_value(self, err);
+    }
+    return NULL;
+}
+
+/**
+ * tcam_property_boolean_set_value:
+ * @self: A #TcamPropertyBoolean
+ * @value: The new value to set
+ * @err: return location for a GError, or NULL
+ */
+void tcam_property_string_set_value(TcamPropertyString* self, const char* value, GError** err)
+{
+    g_return_if_fail(self != NULL);
+    g_return_if_fail(err == NULL || *err == NULL);
+    g_return_if_fail(TCAM_IS_PROPERTY_STRING(self));
+
+    TcamPropertyStringInterface* iface = TCAM_PROPERTY_STRING_GET_IFACE(self);
+    if (iface->set_value)
+    {
+        iface->set_value(self, value, err);
     }
 }
 

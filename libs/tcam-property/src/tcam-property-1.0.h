@@ -65,6 +65,9 @@ const gchar*    tcam_property_enumeration_get_default( TcamPropertyEnumeration* 
 
 void            tcam_property_command_set_command( TcamPropertyCommand* self, GError** err );
 
+char*                       tcam_property_string_get_value( TcamPropertyString* self, GError** err );
+void                        tcam_property_string_set_value( TcamPropertyString* self, const char* value, GError** err );
+
 GSList*             tcam_property_provider_get_tcam_property_names( TcamPropertyProvider* self, GError** err );
 TcamPropertyBase*   tcam_property_provider_get_tcam_property( TcamPropertyProvider* self, const gchar* name, GError** err );
 

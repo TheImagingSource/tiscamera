@@ -43,6 +43,7 @@ typedef enum {
     TCAM_PROPERTY_TYPE_FLOAT        = 2,
     TCAM_PROPERTY_TYPE_ENUMERATION  = 3,
     TCAM_PROPERTY_TYPE_COMMAND      = 4,
+    TCAM_PROPERTY_TYPE_STRING       = 5,
 } TcamPropertyType;
 
 typedef enum {
@@ -176,6 +177,19 @@ struct _TcamPropertyCommandInterface
     GTypeInterface parent_interface;
 
     void        (*set_command)(TcamPropertyCommand* self, GError** err);
+
+    gpointer    padding[3];
+};
+
+#define TCAM_TYPE_PROPERTY_STRING tcam_property_string_get_type()
+G_DECLARE_INTERFACE( TcamPropertyString, tcam_property_string, TCAM, PROPERTY_STRING, TcamPropertyBase )
+
+struct _TcamPropertyStringInterface
+{
+    GTypeInterface parent_interface;
+
+    char*       (*get_value)(TcamPropertyString* self, GError** err);
+    void        (*set_value)(TcamPropertyString* self, const char* value, GError** err);
 
     gpointer    padding[3];
 };
