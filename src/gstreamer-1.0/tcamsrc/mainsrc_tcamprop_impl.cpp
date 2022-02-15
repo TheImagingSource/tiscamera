@@ -306,27 +306,27 @@ auto tcam::mainsrc::make_wrapper_instance(
 {
     switch (prop->get_type())
     {
-        case tcam::TCAM_PROPERTY_TYPE_INTEGER:
+        case tcamprop1::prop_type::Integer:
         {
             return std::make_unique<tcam::mainsrc::TcamPropertyInteger>(prop);
         }
-        case tcam::TCAM_PROPERTY_TYPE_DOUBLE:
+        case tcamprop1::prop_type::Float:
         {
             return std::make_unique<tcam::mainsrc::TcamPropertyFloat>(prop);
         }
-        case tcam::TCAM_PROPERTY_TYPE_BOOLEAN:
+        case tcamprop1::prop_type::Boolean:
         {
             return std::make_unique<tcam::mainsrc::TcamPropertyBoolean>(prop);
         }
-        case tcam::TCAM_PROPERTY_TYPE_ENUMERATION:
+        case tcamprop1::prop_type::Enumeration:
         {
             return std::make_unique<tcam::mainsrc::TcamPropertyEnumeration>(prop);
         }
-        case tcam::TCAM_PROPERTY_TYPE_BUTTON:
+        case tcamprop1::prop_type::Command:
         {
             return std::make_unique<tcam::mainsrc::TcamPropertyCommand>(prop);
         }
-        case tcam::TCAM_PROPERTY_TYPE_STRING:
+        case tcamprop1::prop_type::String:
         {
             return std::make_unique<tcam::mainsrc::TcamPropertyString>(prop);
         }

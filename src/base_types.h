@@ -258,31 +258,6 @@ struct tcam_stream_statistics
         is_damaged; /**< flag indicating if the associated buffer had lost packages or other problems */
 };
 
-/**
- * @enum TCAM_PROPERTY_TYPE
- * Available property types
-*/
-enum TCAM_PROPERTY_TYPE
-{
-    TCAM_PROPERTY_TYPE_BOOLEAN = 1,
-    TCAM_PROPERTY_TYPE_INTEGER = 2,
-    TCAM_PROPERTY_TYPE_DOUBLE = 3,
-    TCAM_PROPERTY_TYPE_STRING = 4,
-    TCAM_PROPERTY_TYPE_ENUMERATION = 5,
-    TCAM_PROPERTY_TYPE_BUTTON = 6, /**< the button type is just a command
-                                            to trigger some functionality
-                                            which doesn't care about parameters
-                                            because that is actually not necessary.
-                                            For instance, "adjusting white balance"
-                                            button in digital camera could
-                                            be a good example which is performing
-                                            adjustment of white balance for
-                                            one time and no need for any kind of
-                                            parameter for this but needs to
-                                            be triggered. */
-};
-
-
 }
 
 #endif /* TCAM_BASE_TYPES_H */

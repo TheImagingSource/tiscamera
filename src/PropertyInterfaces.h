@@ -42,7 +42,7 @@ public:
         return get_static_info().name;
     }
 
-    virtual TCAM_PROPERTY_TYPE get_type() const = 0;
+    virtual tcamprop1::prop_type get_type() const = 0;
     virtual PropertyFlags get_flags() const = 0;
 };
 
@@ -55,11 +55,11 @@ std::shared_ptr<tcam::property::IPropertyBase> find_property(
 class IPropertyInteger : public IPropertyBase
 {
 public:
-    static const constexpr auto property_type = TCAM_PROPERTY_TYPE_INTEGER;
+    static const constexpr auto property_type = tcamprop1::prop_type::Integer;
 
-    TCAM_PROPERTY_TYPE get_type() const final
+    tcamprop1::prop_type get_type() const final
     {
-        return TCAM_PROPERTY_TYPE_INTEGER;
+        return tcamprop1::prop_type::Integer;
     }
 
     virtual std::string_view get_unit() const = 0;
@@ -75,11 +75,11 @@ public:
 class IPropertyFloat : public IPropertyBase
 {
 public:
-    static const constexpr auto property_type = tcam::TCAM_PROPERTY_TYPE_DOUBLE;
+    static const constexpr auto property_type = tcamprop1::prop_type::Float;
 
-    TCAM_PROPERTY_TYPE get_type() const final
+    tcamprop1::prop_type get_type() const final
     {
-        return TCAM_PROPERTY_TYPE_DOUBLE;
+        return tcamprop1::prop_type::Float;
     }
 
     virtual std::string_view get_unit() const = 0;
@@ -96,11 +96,11 @@ public:
 class IPropertyBool : public IPropertyBase
 {
 public:
-    static const constexpr auto property_type = TCAM_PROPERTY_TYPE_BOOLEAN;
+    static const constexpr auto property_type = tcamprop1::prop_type::Boolean;
 
-    TCAM_PROPERTY_TYPE get_type() const final
+    tcamprop1::prop_type get_type() const final
     {
-        return TCAM_PROPERTY_TYPE_BOOLEAN;
+        return tcamprop1::prop_type::Boolean;
     }
 
     virtual bool get_default() const = 0;
@@ -112,11 +112,11 @@ public:
 class IPropertyCommand : public IPropertyBase
 {
 public:
-    static const constexpr auto property_type = TCAM_PROPERTY_TYPE_BUTTON;
+    static const constexpr auto property_type = tcamprop1::prop_type::Command;
 
-    TCAM_PROPERTY_TYPE get_type() const final
+    tcamprop1::prop_type get_type() const final
     {
-        return TCAM_PROPERTY_TYPE_BUTTON;
+        return tcamprop1::prop_type::Command;
     }
 
     virtual outcome::result<void> execute() = 0;
@@ -126,11 +126,11 @@ public:
 class IPropertyEnum : public IPropertyBase
 {
 public:
-    static const constexpr auto property_type = TCAM_PROPERTY_TYPE_ENUMERATION;
+    static const constexpr auto property_type = tcamprop1::prop_type::Enumeration;
 
-    TCAM_PROPERTY_TYPE get_type() const final
+    tcamprop1::prop_type get_type() const final
     {
-        return TCAM_PROPERTY_TYPE_ENUMERATION;
+        return tcamprop1::prop_type::Enumeration;
     }
 
     virtual outcome::result<void> set_value_str(const std::string_view& new_value) = 0;
@@ -145,11 +145,11 @@ public:
 class IPropertyString : public IPropertyBase
 {
 public:
-    static const constexpr auto property_type = tcam::TCAM_PROPERTY_TYPE_STRING;
+    static const constexpr auto property_type = tcamprop1::prop_type::String;
 
-    TCAM_PROPERTY_TYPE get_type() const final
+    tcamprop1::prop_type get_type() const final
     {
-        return tcam::TCAM_PROPERTY_TYPE_STRING;
+        return tcamprop1::prop_type::String;
     }
 
     virtual std::error_code set_value(std::string_view new_value) = 0;
