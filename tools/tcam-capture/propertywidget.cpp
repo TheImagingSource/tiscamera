@@ -312,6 +312,12 @@ void IntWidget::slider_changed(int new_value)
     p_box->setValue(new_value);
     p_box->blockSignals(false);
 
+    p_slider->blockSignals(true);
+
+    QTimer::singleShot(200, [this]() 
+    { 
+        p_slider->blockSignals(false);
+    });
     emit value_changed(this);
 }
 
@@ -490,6 +496,13 @@ void DoubleWidget::slider_changed(double new_value)
     p_box->setValue(new_value);
     p_box->blockSignals(false);
 
+    p_slider->blockSignals(true);
+
+    QTimer::singleShot(200, [this]() 
+    { 
+        p_slider->blockSignals(false);
+    });
+    
     emit value_changed(this);
 }
 
