@@ -38,9 +38,10 @@ static const GEnumValue _tcam_error_values[] =
 GType tcam_error_get_type( void )
 {
     static GType type = 0;
-    if( !type )
+    if (g_once_init_enter(&type))
     {
-        type = g_enum_register_static( "TcamError", _tcam_error_values );
+        GType tmp = g_enum_register_static( "TcamError", _tcam_error_values );
+        g_once_init_leave(&type, tmp);
     }
     return type;
 }
@@ -51,10 +52,10 @@ GQuark tcam_error_quark( void )
 }
 
 static const GEnumValue _tcamprop_property_visibility_values[] = {
-     {TCAM_PROPERTY_VISIBILITY_BEGINNER,    "TCAM_VISIBILITY_BEGINNER", "beginner"},
-     {TCAM_PROPERTY_VISIBILITY_EXPERT,      "TCAM_VISIBILITY_EXPERT", "expert"},
-     {TCAM_PROPERTY_VISIBILITY_GURU,        "TCAM_VISIBILITY_GURU", "guru"},
-     {TCAM_PROPERTY_VISIBILITY_INVISIBLE,   "TCAM_VISIBILITY_INVISIBLE", "invisible" },
+     { TCAM_PROPERTY_VISIBILITY_BEGINNER,    "TCAM_VISIBILITY_BEGINNER", "beginner" },
+     { TCAM_PROPERTY_VISIBILITY_EXPERT,      "TCAM_VISIBILITY_EXPERT", "expert" },
+     { TCAM_PROPERTY_VISIBILITY_GURU,        "TCAM_VISIBILITY_GURU", "guru" },
+     { TCAM_PROPERTY_VISIBILITY_INVISIBLE,   "TCAM_VISIBILITY_INVISIBLE", "invisible" },
      { 0, NULL, NULL }
 };
 
@@ -62,9 +63,10 @@ static const GEnumValue _tcamprop_property_visibility_values[] = {
 GType tcam_property_visibility_get_type( void )
 {
     static GType type = 0;
-    if( !type )
+    if (g_once_init_enter(&type))
     {
-        type = g_enum_register_static( "TcamPropertyVisibility", _tcamprop_property_visibility_values );
+        GType tmp = g_enum_register_static( "TcamPropertyVisibility", _tcamprop_property_visibility_values );
+        g_once_init_leave(&type, tmp);
     }
     return type;
 }
@@ -80,18 +82,19 @@ static const GEnumValue _tcamprop_property_access_values[] = {
 GType tcam_property_access_get_type(void)
 {
     static GType type = 0;
-    if (!type)
+    if (g_once_init_enter(&type))
     {
-        type = g_enum_register_static("TcamPropertyAccess", _tcamprop_property_access_values);
+        GType tmp = g_enum_register_static("TcamPropertyAccess", _tcamprop_property_access_values);
+        g_once_init_leave(&type, tmp);
     }
     return type;
 }
 
 static const GEnumValue _tcamprop_property_intrepresentation_values[] = {
-    {TCAM_PROPERTY_INTREPRESENTATION_LINEAR, "TCAM_INTREPRESENTATION_LINEAR", "Linear"},
-    {TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC, "TCAM_INTREPRESENTATION_LOGARITHMIC", "Logarithmic"},
-    {TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER, "TCAM_INTREPRESENTATION_PURENUMBER", "PureNumber"},
-    {TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER, "TCAM_INTREPRESENTATION_HEXNUMBER", "HexNumber" },
+    { TCAM_PROPERTY_INTREPRESENTATION_LINEAR, "TCAM_INTREPRESENTATION_LINEAR", "linear" },
+    { TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC, "TCAM_INTREPRESENTATION_LOGARITHMIC", "logarithmic" },
+    { TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER, "TCAM_INTREPRESENTATION_PURENUMBER", "purenumber" },
+    { TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER, "TCAM_INTREPRESENTATION_HEXNUMBER", "hexnumber" },
     { 0, NULL, NULL }
 };
 
@@ -99,17 +102,18 @@ static const GEnumValue _tcamprop_property_intrepresentation_values[] = {
 GType tcam_property_intrepresentation_get_type( void )
 {
     static GType type = 0;
-    if( !type )
+    if (g_once_init_enter(&type))
     {
-        type = g_enum_register_static( "TcamPropertyIntRepresentation", _tcamprop_property_intrepresentation_values );
+        GType tmp = g_enum_register_static( "TcamPropertyIntRepresentation", _tcamprop_property_intrepresentation_values );
+        g_once_init_leave(&type, tmp);
     }
     return type;
 }
 
 static const GEnumValue _tcamprop_property_floatrepresentation_values[] = {
-    {TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR,      "TCAM_FLOATREPRESENTATION_LINEAR", "Linear"},
-    {TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC, "TCAM_FLOATREPRESENTATION_LOGARITHMIC", "Logarithmic"},
-    {TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER,  "TCAM_FLOATREPRESENTATION_PURENUMBER", "PureNumber"},
+    { TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR,      "TCAM_FLOATREPRESENTATION_LINEAR", "linear" },
+    { TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC, "TCAM_FLOATREPRESENTATION_LOGARITHMIC", "logarithmic" },
+    { TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER,  "TCAM_FLOATREPRESENTATION_PURENUMBER", "purenumber" },
     { 0, NULL, NULL }
 };
 
@@ -117,29 +121,31 @@ static const GEnumValue _tcamprop_property_floatrepresentation_values[] = {
 GType tcam_property_floatrepresentation_get_type( void )
 {
     static GType type = 0;
-    if( !type )
+    if (g_once_init_enter(&type))
     {
-        type = g_enum_register_static( "TcamPropertyFloatRepresentation", _tcamprop_property_floatrepresentation_values );
+        GType tmp = g_enum_register_static( "TcamPropertyFloatRepresentation", _tcamprop_property_floatrepresentation_values );
+        g_once_init_leave(&type, tmp);
     }
     return type;
 }
 
 static const GEnumValue _tcam_property_type_values[] = {
-    {TCAM_PROPERTY_TYPE_INTEGER   , "TCAM_PROPERTY_TYPE_INTEGER", "Integer"},
-    {TCAM_PROPERTY_TYPE_FLOAT, "TCAM_PROPERTY_TYPE_FLOAT", "Float"},
-    {TCAM_PROPERTY_TYPE_ENUMERATION  , "TCAM_PROPERTY_TYPE_ENUMERATION", "Enumeration"},
-    {TCAM_PROPERTY_TYPE_BOOLEAN  , "TCAM_PROPERTY_TYPE_BOOLEAN", "Boolean"},
-    {TCAM_PROPERTY_TYPE_COMMAND, "TCAM_PROPERTY_TYPE_COMMAND", "Command"},
-    { TCAM_PROPERTY_TYPE_STRING, "TCAM_PROPERTY_TYPE_STRING", "String" },
+    { TCAM_PROPERTY_TYPE_INTEGER   , "TCAM_PROPERTY_TYPE_INTEGER", "integer" },
+    { TCAM_PROPERTY_TYPE_FLOAT, "TCAM_PROPERTY_TYPE_FLOAT", "float" },
+    { TCAM_PROPERTY_TYPE_ENUMERATION  , "TCAM_PROPERTY_TYPE_ENUMERATION", "enumeration" },
+    { TCAM_PROPERTY_TYPE_BOOLEAN  , "TCAM_PROPERTY_TYPE_BOOLEAN", "boolean" },
+    { TCAM_PROPERTY_TYPE_COMMAND, "TCAM_PROPERTY_TYPE_COMMAND", "command" },
+    { TCAM_PROPERTY_TYPE_STRING, "TCAM_PROPERTY_TYPE_STRING", "string" },
     { 0, NULL, NULL }
 };
 
 GType tcam_property_type_get_type (void)
 {
     static GType type = 0;
-    if (!type)
+    if (g_once_init_enter(&type))
     {
-        type = g_enum_register_static ("TcamPropertyType", _tcam_property_type_values);
+        GType tmp = g_enum_register_static("TcamPropertyType", _tcam_property_type_values);
+        g_once_init_leave(&type, tmp);
     }
     return type;
 }
@@ -776,8 +782,8 @@ char* tcam_property_string_get_value(TcamPropertyString* self, GError** err)
 }
 
 /**
- * tcam_property_boolean_set_value:
- * @self: A #TcamPropertyBoolean
+ * tcam_property_string_set_value:
+ * @self: A #TcamPropertyString
  * @value: The new value to set
  * @err: return location for a GError, or NULL
  */
