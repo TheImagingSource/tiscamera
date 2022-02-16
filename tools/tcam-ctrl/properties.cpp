@@ -33,6 +33,22 @@ static const size_t name_width = 40;
 namespace
 {
 
+const char* access_mode_to_nick(TcamPropertyAccess access)
+{
+    GTypeClass* type_class = (GTypeClass*)g_type_class_ref (tcam_property_access_get_type());
+    
+    auto value = g_enum_get_value(G_ENUM_CLASS(type_class), access);
+
+    g_type_class_unref(type_class);
+
+    if (!value)
+    {
+        return nullptr;
+    }
+
+    return value->value_nick;
+}
+
 std::string get_flag_desc_string(TcamPropertyBase* prop)
 {
     std::string ret = "Available: ";
@@ -59,7 +75,92 @@ std::string get_flag_desc_string(TcamPropertyBase* prop)
     {
         ret += "no";
     }
+
+    const char* access = access_mode_to_nick(tcam_property_base_get_access(prop));
+
+    if (access)
+    {
+        ret += "\tAccess: ";
+        ret += access;
+    }
+
     return ret;
+}
+
+const char* property_type_to_nick(TcamPropertyType type)
+{
+    GTypeClass* type_class = (GTypeClass*)g_type_class_ref (tcam_property_type_get_type());
+    
+    auto value = g_enum_get_value(G_ENUM_CLASS(type_class), type);
+
+    g_type_class_unref(type_class);
+
+    if (!value)
+    {
+        return nullptr;
+    }
+
+    return value->value_nick;
+}
+
+const char* visibility_to_nick(TcamPropertyVisibility visibility)
+{
+    GTypeClass* type_class = (GTypeClass*)g_type_class_ref (tcam_property_visibility_get_type());
+    
+    auto value = g_enum_get_value(G_ENUM_CLASS(type_class), visibility);
+
+    g_type_class_unref(type_class);
+
+    if (!value)
+    {
+        return nullptr;
+    }
+
+    return value->value_nick;
+}
+
+const char* intrepresentation_to_nick(TcamPropertyIntRepresentation representation)
+{
+    GTypeClass* type_class = (GTypeClass*)g_type_class_ref (tcam_property_intrepresentation_get_type());
+    
+    auto value = g_enum_get_value(G_ENUM_CLASS(type_class), representation);
+
+    g_type_class_unref(type_class);
+
+    if (!value)
+    {
+        return nullptr;
+    }
+
+    return value->value_nick;
+}
+
+const char* floatrepresentation_to_nick(TcamPropertyFloatRepresentation representation)
+{
+    GTypeClass* type_class = (GTypeClass*)g_type_class_ref (tcam_property_floatrepresentation_get_type());
+    
+    auto value = g_enum_get_value(G_ENUM_CLASS(type_class), representation);
+
+    g_type_class_unref(type_class);
+
+    if (!value)
+    {
+        return nullptr;
+    }
+
+    return value->value_nick;
+}
+
+void print_base_description(TcamPropertyBase& base)
+{
+
+    std::cout << std::setw(20) << std::left 
+              << tcam_property_base_get_name(&base) << "\ttype: " << property_type_to_nick(tcam_property_base_get_property_type(&base)) << "\t"
+              << "Display Name: \"" << tcam_property_base_get_display_name(&base) << "\"\t"
+              << "Category: \"" << tcam_property_base_get_category(&base) << "\"" << std::endl
+              << "\t\t\tDescription: \"" << tcam_property_base_get_description(&base) << "\"" << std::endl
+              << "\t\t\tVisibility: " << visibility_to_nick(tcam_property_base_get_visibility(&base)) << std::endl
+              << "\t\t\t" << get_flag_desc_string(&base) << std::endl;
 }
 
 } // namespace
@@ -176,15 +277,9 @@ void print_properties(const std::string& serial)
                         unit = tmp_unit;
                     }
 
-                    std::cout << std::setw(20) << std::left << name << "\ttype: Integer\t"
-                              << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
-                              << "Category: " << tcam_property_base_get_category(base_property) << std::endl
-                              << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
-                              << "\t\t\tUnit: " << unit << std::endl
-                              << "\t\t\tVisibility: " << tcam_property_base_get_visibility(base_property) << std::endl
-                              << "\t\t\tPresentation: " << g_enum_to_string(tcam_property_intrepresentation_get_type(),
-                                                                            tcam_property_integer_get_representation(integer)) << std::endl
-                              << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
+                    print_base_description(*base_property);
+                    std::cout << "\t\t\tUnit: " << unit << std::endl
+                              << "\t\t\tRepresentation: " << intrepresentation_to_nick(tcam_property_integer_get_representation(integer)) << std::endl
                               << "" << std::endl
                               << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step << std::endl
                               << "\t\t\tDefault: " << def << std::endl
@@ -230,21 +325,15 @@ void print_properties(const std::string& serial)
                         unit = tmp_unit;
                     }
 
-                    std::cout << std::setw(20) << std::left << std::setprecision(3) << std::fixed
-                              << name << "\ttype: Float\t"
-                              << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
-                              << "Category: " << tcam_property_base_get_category(base_property) << std::endl
-                              << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
-                              << "\t\t\tUnit: " << unit << std::endl
-                              << "\t\t\tVisibility: " << tcam_property_base_get_visibility(base_property) << std::endl
-                              << "\t\t\tPresentation: " << g_enum_to_string(tcam_property_floatrepresentation_get_type(),
-                                                                            tcam_property_float_get_representation(f)) << std::endl
-                              << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
+                    print_base_description(*base_property);
+                    std::cout << "\t\t\tUnit: " << unit << std::endl
+                              << "\t\t\tRepresentation: " << floatrepresentation_to_nick(tcam_property_float_get_representation(f)) << std::endl
                               << "" << std::endl
-                              << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step << std::endl
+                              << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step
+                              << std::endl
                               << "\t\t\tDefault: " << def << std::endl
-                              << "\t\t\tValue: " << value
-                              << std::endl << std::endl;
+                              << "\t\t\tValue: " << value << std::endl
+                              << std::endl;
 
                     break;
                 }
@@ -272,8 +361,6 @@ void print_properties(const std::string& serial)
                         break;
                     }
 
-                    std::string entries;
-
                     GSList* enum_entries = tcam_property_enumeration_get_enum_entries(e, &err);
 
                     if (err)
@@ -284,28 +371,28 @@ void print_properties(const std::string& serial)
                         break;
                     }
 
+                    std::string entries;
                     if (enum_entries)
                     {
                         for (GSList* entry = enum_entries; entry != nullptr; entry = entry->next)
                         {
-                            entries += " ";
+                            entries += " \"";
                             entries += (const char*)entry->data;
+                            entries += "\"";
+                            if (entry->next)
+                            {
+                                entries += ",";
+                            }
                         }
 
                         g_slist_free_full(enum_entries, g_free);
                     }
 
-
-                    std::cout << std::setw(20) << std::left << name << "\ttype: Enumeration\t"
-                              << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
-                              << "Category: " << tcam_property_base_get_category(base_property) << std::endl
-                              << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
-                              << "\t\t\tVisibility: " << tcam_property_base_get_visibility(base_property) << std::endl
-                              << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
-                              << "" << std::endl
+                    print_base_description(*base_property);
+                    std::cout << "" << std::endl
                               << "\t\t\tEntries:" << entries << std::endl
-                              << "\t\t\tDefault: " << def << std::endl
-                              << "\t\t\tValue: " << value
+                              << "\t\t\tDefault: \"" << def << "\"" << std::endl
+                              << "\t\t\tValue: \"" << value << "\""
                               << std::endl << std::endl;
 
                     break;
@@ -333,12 +420,8 @@ void print_properties(const std::string& serial)
                         return "false";
                     };
 
-                    std::cout << std::setw(20) << std::left << name << "\ttype: Boolean\t"
-                              << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
-                              << "Category: " << tcam_property_base_get_category(base_property) << std::endl
-                              << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
-                              << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
-                              << "" << std::endl
+                    print_base_description(*base_property);
+                    std::cout << "" << std::endl
                               << "\t\t\tDefault: " << bool_string(def) << std::endl
                               << "\t\t\tValue: " << bool_string(value)
                               << std::endl << std::endl;
@@ -348,12 +431,8 @@ void print_properties(const std::string& serial)
                 }
                 case TCAM_PROPERTY_TYPE_COMMAND:
                 {
-                    std::cout << std::setw(20) << std::left << name << "\ttype: Command\t"
-                              << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
-                              << "Category: " << tcam_property_base_get_category(base_property) << std::endl
-                              << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
-                              << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
-                              << std::endl << std::endl;
+                    print_base_description(*base_property);
+                    std::cout << std::endl;
 
                     break;
 
@@ -365,13 +444,8 @@ void print_properties(const std::string& serial)
 
                     std::string_view tmp_value = value == nullptr ? std::string_view{} : std::string_view{value};
 
-                    std::cout << std::setw(20) << std::left << name << "\ttype: String\t"
-                              << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
-                              << "Category: " << tcam_property_base_get_category(base_property) << std::endl
-                              << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
-                              << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
-                              << "" << std::endl
-                              << "\t\t\tValue: '" << tmp_value << "'"
+                    print_base_description(*base_property);
+                    std::cout << "\t\t\tValue: '" << tmp_value << "'"
                               << std::endl << std::endl;
 
                     g_free( value );
