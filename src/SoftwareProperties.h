@@ -20,7 +20,9 @@ class SoftwareProperties :
     public emulated::SoftwarePropertyBackend
 {
 public:
-    SoftwareProperties( const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties );
+    SoftwareProperties(
+        const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties);
+
 public:
     static std::shared_ptr<SoftwareProperties> create(
         const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties,
@@ -54,8 +56,9 @@ private:
 
     void generate_balance_white_auto();
 
-    outcome::result<double> get_device_wb(emulated::software_prop prop_id);
-    outcome::result<void> set_device_wb(emulated::software_prop prop_id, double new_value);
+    outcome::result<double> get_whitebalance_channel(emulated::software_prop prop_id);
+    outcome::result<void> set_whitebalance_channel(emulated::software_prop prop_id,
+                                                   double new_value);
 
     void generate_color_transformation();
 
@@ -64,32 +67,21 @@ private:
     outcome::result<void> set_device_color_transform(emulated::software_prop prop_id,
                                                      double new_value_tmp);
 
-    // properties the actual camera has
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_device_properties;
+    using prop_ptr_vec = std::vector<std::shared_ptr<tcam::property::IPropertyBase>>;
 
-    // properties the user has
+    // property-list
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
 
     mutable std::mutex m_property_mtx;
 
     std::shared_ptr<tcam::property::IPropertyFloat> m_dev_exposure = nullptr;
 
-    bool m_exposure_upper_auto = true;
+    bool m_exposure_auto_upper_limit_auto = true;
     double m_exposure_auto_upper_limit = 0;
 
     std::shared_ptr<tcam::property::IPropertyFloat> m_dev_gain = nullptr;
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_iris = nullptr;
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_focus = nullptr;
-
-    bool m_is_software_auto_wb = false;
-    bool m_wb_is_claimed = false;
-
-    enum class wb_type
-    {
-        None,
-        DevChannel,
-        Emulation,
-    };
 
     struct wb_setter
     {
@@ -97,20 +89,12 @@ private:
         std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_g = nullptr;
         std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_b = nullptr;
 
-        bool m_emulated_wb = false;
-
-        auto get_type() const
-        {
-            if (m_dev_wb_r)
-                return wb_type::DevChannel;
-            if (m_emulated_wb)
-                return wb_type::Emulation;
-            return wb_type::None;
-        }
+        bool m_wb_is_claimed = false;
+        bool m_is_software_auto_wb = false;
 
         bool is_dev_wb() const
         {
-            return get_type() == wb_type::DevChannel;
+            return m_dev_wb_r != nullptr;
         }
     };
     wb_setter m_wb;
@@ -129,40 +113,54 @@ private:
 
     int64_t m_frame_counter = 0;
 
+
     template<class Tprop_info_type, typename... Tparams>
-    void add_prop_entry(emulated::software_prop id,
-                        const Tprop_info_type* prop_info,
-                        Tparams&&... params)
+    auto make_prop_entry(emulated::software_prop id,
+                         const Tprop_info_type* prop_info,
+                         Tparams&&... params) -> std::shared_ptr<IPropertyBase>
     {
-        std::shared_ptr<IPropertyBase> prop;
         if constexpr (Tprop_info_type::property_type == tcamprop1::prop_type::Boolean)
         {
-            prop = std::make_shared<tcam::property::emulated::SoftwarePropertyBoolImpl>(
+            return std::make_shared<tcam::property::emulated::SoftwarePropertyBoolImpl>(
                 shared_from_this(), id, prop_info, std::forward<Tparams>(params)...);
         }
         else if constexpr (Tprop_info_type::property_type == tcamprop1::prop_type::Integer)
         {
-            prop = std::make_shared<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            return std::make_shared<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
                 shared_from_this(), id, prop_info, std::forward<Tparams>(params)...);
         }
         else if constexpr (Tprop_info_type::property_type == tcamprop1::prop_type::Float)
         {
-            prop = std::make_shared<tcam::property::emulated::SoftwarePropertyDoubleImpl>(
+            return std::make_shared<tcam::property::emulated::SoftwarePropertyDoubleImpl>(
                 shared_from_this(), id, prop_info, std::forward<Tparams>(params)...);
         }
         else if constexpr (Tprop_info_type::property_type == tcamprop1::prop_type::Enumeration)
         {
-            prop = std::make_shared<tcam::property::emulated::SoftwarePropertyEnumImpl>(
+            return std::make_shared<tcam::property::emulated::SoftwarePropertyEnumImpl>(
                 shared_from_this(), id, prop_info, std::forward<Tparams>(params)...);
         }
         else
         {
             static_assert(Tprop_info_type::property_type == tcamprop1::prop_type::Enumeration);
-            return;
+            return nullptr;
         }
-        m_properties.push_back(prop);
     }
 
-} ; //class SoftwareProperties
+    template<class Tprop_info_type, typename... Tparams>
+    void add_prop_entry(prop_ptr_vec& v,
+                        emulated::software_prop id,
+                        const Tprop_info_type* prop_info,
+                        Tparams&&... params)
+    {
+        v.push_back(
+            make_prop_entry<Tprop_info_type>(id, prop_info, std::forward<Tparams>(params)...));
+    }
+
+    static void add_prop_entry(prop_ptr_vec& v,
+                               std::string_view name_to_insert_after,
+                               const prop_ptr_vec& vec_to_add);
+    static void replace_entry(prop_ptr_vec& v, const std::shared_ptr<IPropertyBase>& prop);
+    static void remove_entry(prop_ptr_vec& v, std::string_view name);
+}; //class SoftwareProperties
 
 } // namespace tcam::property

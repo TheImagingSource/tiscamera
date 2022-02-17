@@ -13,18 +13,19 @@ using namespace tcam;
 
 using sp = tcam::property::emulated::software_prop;
 
+tcam::property::SoftwareProperties::SoftwareProperties(
+    const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties)
+    : m_properties(dev_properties), p_state(auto_alg::make_state_ptr())
 
-tcam::property::SoftwareProperties::SoftwareProperties( const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties )
-:     m_device_properties( dev_properties ), p_state( auto_alg::make_state_ptr() )
-
-{}
+{
+}
 
 std::shared_ptr<tcam::property::SoftwareProperties> tcam::property::SoftwareProperties::create(
     const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties,
     bool has_bayer)
 {
-    auto ptr = std::make_shared<SoftwareProperties>( dev_properties );
-    ptr->generate_public_properties( has_bayer);
+    auto ptr = std::make_shared<SoftwareProperties>(dev_properties);
+    ptr->generate_public_properties(has_bayer);
     return ptr;
 }
 
@@ -48,7 +49,6 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
         tmp_params.exposure.max = m_exposure_auto_upper_limit;
     }
 
-    // TODO: get from ImageBuffer statistics
     tmp_params.frame_number = m_frame_counter++;
     tmp_params.time_point = time_now_in_us();
 
@@ -99,31 +99,30 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
         m_auto_params.wb.channels = auto_pass_ret.wb.channels;
         m_auto_params.wb.one_push_enabled = auto_pass_ret.wb.one_push_still_running;
 
-        // SPDLOG_DEBUG("WB r: {}", auto_pass_ret.wb.channels.r * 64.0f);
-        // SPDLOG_DEBUG("WB g: {}", auto_pass_ret.wb.channels.g * 64.0f);
-        // SPDLOG_DEBUG("WB b: {}", auto_pass_ret.wb.channels.b * 64.0f);
-        // SPDLOG_DEBUG("");
+        // SPDLOG_DEBUG("WB r: {}", auto_pass_ret.wb.channels.r);
+        // SPDLOG_DEBUG("WB g: {}", auto_pass_ret.wb.channels.g);
+        // SPDLOG_DEBUG("WB b: {}", auto_pass_ret.wb.channels.b);
 
         if (m_wb.is_dev_wb())
         {
-            auto res = set_device_wb(emulated::software_prop::BalanceWhiteRed,
-                                     auto_pass_ret.wb.channels.r);
+            auto res = set_whitebalance_channel(emulated::software_prop::BalanceWhiteRed,
+                                                auto_pass_ret.wb.channels.r);
 
             if (!res)
             {
                 SPDLOG_DEBUG("Setting whitebalance caused an error: {}",
                              res.as_failure().error().message());
             }
-            res = set_device_wb(emulated::software_prop::BalanceWhiteGreen,
-                                auto_pass_ret.wb.channels.g);
+            res = set_whitebalance_channel(emulated::software_prop::BalanceWhiteGreen,
+                                           auto_pass_ret.wb.channels.g);
             if (!res)
             {
                 SPDLOG_DEBUG("Setting whitebalance caused an error: {}",
                              res.as_failure().error().message());
             }
 
-            res = set_device_wb(emulated::software_prop::BalanceWhiteBlue,
-                                auto_pass_ret.wb.channels.b);
+            res = set_whitebalance_channel(emulated::software_prop::BalanceWhiteBlue,
+                                           auto_pass_ret.wb.channels.b);
             if (!res)
             {
                 SPDLOG_DEBUG("Setting whitebalance caused an error: {}",
@@ -131,127 +130,29 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
             }
         }
     }
-    else
-    {
-        // SPDLOG_DEBUG("WB not active");
-    }
 }
-
 
 void tcam::property::SoftwareProperties::generate_public_properties(bool has_bayer)
 {
     m_auto_params = {};
 
-    auto has_exposure_auto = find_property(m_device_properties, "ExposureAuto") != nullptr;
-    if (!has_exposure_auto)
-    {
-        generate_exposure_auto();
-    }
+    generate_exposure_auto();
+    generate_gain_auto();
+    generate_iris_auto();
 
-    auto has_gain_auto = find_property(m_device_properties, "GainAuto") != nullptr;
-    if (!has_gain_auto)
-    {
-        generate_gain_auto();
-    }
-
-    auto has_iris = find_property(m_device_properties, "Iris") != nullptr;
-    auto has_iris_auto = find_property(m_device_properties, "IrisAuto") != nullptr;
-    if (has_iris && !has_iris_auto)
-    {
-        // cameras can has Iris behavior that prohibits IrisAuto
-        // example would be the AFU420
-        // the iris on that camera is either open or closed
-        // check for that before adding IrisAuto
-        auto valid_iris_range = [=] ()
-        {
-            m_dev_iris = tcam::property::find_property<IPropertyInteger>(m_device_properties, "Iris");
-            if (!m_dev_iris)
-            {
-                return false;
-            }
-
-            auto min = m_dev_iris->get_range().min;
-            auto max = m_dev_iris->get_range().max;
-
-            if (min == 0 && max == 1)
-            {
-                return false;
-            }
-            return true;
-        };
-
-        if (valid_iris_range())
-        {
-            generate_iris_auto();
-        }
-    }
-
-    auto has_foucs = find_property(m_device_properties, "Focus") != nullptr;
-    auto has_focus_auto = find_property(m_device_properties, "FocusAuto") != nullptr;
-    if (has_foucs && !has_focus_auto)
-    {
-        generate_focus_auto();
-    }
+    generate_focus_auto();
 
     { // BalanceWhite stuff
         if (has_bayer)
         {
-            bool has_wb_auto = find_property(m_device_properties, "BalanceWhiteAuto") != nullptr;
-            if (!has_wb_auto)
-            {
-                generate_balance_white_auto();
-            }
+            generate_balance_white_auto();
         }
     }
 
-    { // ColorTransformation stuff
-        auto enable = tcam::property::find_property(m_device_properties, "ColorTransformationEnable");
+    generate_color_transformation();
 
-        auto selector = tcam::property::find_property(m_device_properties, "ColorTransformationSelector");
-        auto value = tcam::property::find_property(m_device_properties, "ColorTransformationValue");
-        auto value_selector = tcam::property::find_property(m_device_properties, "ColorTransformationValueSelector");
-
-        if (enable && value && value_selector)
-        {
-            generate_color_transformation();
-        }
-    }
-
-    // as a final step compare generated properties to device properties
-    // pass along everything we do not need to intercept
-    // some may not be intercepted but replaced with a different interface
-    // those are typically only identified by name
-
-    auto contains = [](const auto& props, const std::shared_ptr<IPropertyBase>& elem)
-    {
-        return std::any_of(props.begin(),
-                           props.end(),
-                           [&](const auto& ptr) { return ptr->get_name() == elem->get_name(); });
-    };
-
-    auto contains2 = [](const auto& props, const std::shared_ptr<IPropertyBase>& elem)
-    {
-        return std::any_of(
-            props.begin(), props.end(), [&](auto name) { return name == elem->get_name(); });
-    };
-
-    std::array<std::string_view, 5> prop_black_list = {
-        "BalanceRatioRaw",
-        "BalanceRatioSelector",
-        "BalanceRatio",
-        "ColorTransformationValue",
-        "ColorTransformationValueSelector",
-    };
-
-    for (auto& p : m_device_properties)
-    {
-        if (!contains(m_properties, p) && !contains2(prop_black_list, p))
-        {
-            m_properties.push_back(p);
-        }
-    }
+    m_properties = m_properties;
 }
-
 
 outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
     emulated::software_prop prop_id)
@@ -284,7 +185,7 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
         case emulated::software_prop::ExposureAuto:
             return m_auto_params.exposure.auto_enabled ? 1 : 0;
         case emulated::software_prop::ExposureAutoUpperLimitAuto:
-            return m_exposure_upper_auto;
+            return m_exposure_auto_upper_limit_auto;
         case emulated::software_prop::ExposureAutoReference:
             return m_auto_params.exposure_reference.val;
         case emulated::software_prop::ExposureAutoHighlightReduction:
@@ -314,7 +215,7 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
             return 0;
         }
         case emulated::software_prop::ClaimBalanceWhiteSoftware:
-            return m_wb_is_claimed;
+            return m_wb.m_wb_is_claimed;
         case emulated::software_prop::ColorTransformEnable:
         {
             auto res = m_dev_color_transform_enable->get_value();
@@ -363,9 +264,9 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         }
         case emulated::software_prop::ExposureAutoUpperLimitAuto:
         {
-            m_exposure_upper_auto = new_val;
+            m_exposure_auto_upper_limit_auto = new_val;
 
-            if (m_exposure_upper_auto)
+            if (m_exposure_auto_upper_limit_auto)
             {
                 if (m_format.get_framerate() != 0)
                 {
@@ -430,13 +331,12 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         }
         case emulated::software_prop::ClaimBalanceWhiteSoftware:
         {
-            m_wb_is_claimed = new_val;
+            m_wb.m_wb_is_claimed = new_val;
             return outcome::success();
         }
         case emulated::software_prop::ColorTransformEnable:
         {
             return m_dev_color_transform_enable->set_value(new_val);
-
         }
     }
     SPDLOG_WARN("Not implemented. ID: {} value: {}", prop_id, new_val);
@@ -499,27 +399,15 @@ outcome::result<double> tcam::property::SoftwareProperties::get_double(
         }
         case emulated::software_prop::BalanceWhiteRed:
         {
-            if (m_wb.is_dev_wb())
-            {
-                return get_device_wb(emulated::software_prop::BalanceWhiteRed);
-            }
-            return m_auto_params.wb.channels.r;
+            return get_whitebalance_channel(emulated::software_prop::BalanceWhiteRed);
         }
         case emulated::software_prop::BalanceWhiteGreen:
         {
-            if (m_wb.is_dev_wb())
-            {
-                return get_device_wb(emulated::software_prop::BalanceWhiteGreen);
-            }
-            return m_auto_params.wb.channels.g;
+            return get_whitebalance_channel(emulated::software_prop::BalanceWhiteGreen);
         }
         case emulated::software_prop::BalanceWhiteBlue:
         {
-            if (m_wb.is_dev_wb())
-            {
-                return get_device_wb(emulated::software_prop::BalanceWhiteBlue);
-            }
-            return m_auto_params.wb.channels.b;
+            return get_whitebalance_channel(emulated::software_prop::BalanceWhiteBlue);
         }
         case emulated::software_prop::ColorTransformRedToRed:
         case emulated::software_prop::ColorTransformGreenToRed:
@@ -576,7 +464,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
         }
         case emulated::software_prop::ExposureAutoUpperLimit:
         {
-            if (m_exposure_upper_auto)
+            if (m_exposure_auto_upper_limit_auto)
             {
                 return tcam::status::PropertyIsLocked;
             }
@@ -604,30 +492,15 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
         }
         case emulated::software_prop::BalanceWhiteRed:
         {
-            m_auto_params.wb.channels.r = new_val;
-            if (m_wb.is_dev_wb())
-            {
-                return set_device_wb(prop_id, new_val);
-            }
-            return outcome::success();
+            return set_whitebalance_channel(prop_id, new_val);
         }
         case emulated::software_prop::BalanceWhiteGreen:
         {
-            m_auto_params.wb.channels.g = new_val;
-            if (m_wb.is_dev_wb())
-            {
-                return set_device_wb(prop_id, new_val);
-            }
-            return outcome::success();
+            return set_whitebalance_channel(prop_id, new_val);
         }
         case emulated::software_prop::BalanceWhiteBlue:
         {
-            m_auto_params.wb.channels.b = new_val;
-            if (m_wb.is_dev_wb())
-            {
-                return set_device_wb(prop_id, new_val);
-            }
-            return outcome::success();
+            return set_whitebalance_channel(prop_id, new_val);
         }
         case emulated::software_prop::ColorTransformRedToRed:
         case emulated::software_prop::ColorTransformGreenToRed:
@@ -647,7 +520,8 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
 }
 
 
-tcam::property::PropertyFlags tcam::property::SoftwareProperties::get_flags (tcam::property::emulated::software_prop id) const
+tcam::property::PropertyFlags tcam::property::SoftwareProperties::get_flags(
+    tcam::property::emulated::software_prop id) const
 {
     std::scoped_lock lock(m_property_mtx);
 
@@ -670,7 +544,7 @@ tcam::property::PropertyFlags tcam::property::SoftwareProperties::get_flags (tca
         case emulated::software_prop::ExposureAutoLowerLimit:
             return default_flags;
         case emulated::software_prop::ExposureAutoUpperLimit:
-            return add_locked(m_exposure_upper_auto);
+            return add_locked(m_exposure_auto_upper_limit_auto);
         case emulated::software_prop::ExposureAutoUpperLimitAuto:
             return default_flags;
         case emulated::software_prop::ExposureAutoHighlightReduction:
@@ -696,7 +570,7 @@ tcam::property::PropertyFlags tcam::property::SoftwareProperties::get_flags (tca
 
         case emulated::software_prop::BalanceWhiteAuto:
         {
-            if (m_wb_is_claimed)
+            if (m_wb.m_wb_is_claimed)
             {
                 return default_flags;
             }
@@ -706,12 +580,11 @@ tcam::property::PropertyFlags tcam::property::SoftwareProperties::get_flags (tca
         case emulated::software_prop::BalanceWhiteGreen:
         case emulated::software_prop::BalanceWhiteBlue:
         {
-            if(m_is_software_auto_wb)
+            if (m_wb.m_is_software_auto_wb)
             {
                 return add_locked(m_auto_params.wb.auto_enabled);
             }
 
-            assert( m_is_software_auto_wb );
             // this should not occur
             return add_locked(m_auto_params.wb.auto_enabled);
         }
@@ -752,34 +625,43 @@ void tcam::property::SoftwareProperties::update_to_new_format(const tcam::VideoF
     }
 }
 
-void tcam::property::SoftwareProperties::generate_focus_auto()
+void property::SoftwareProperties::add_prop_entry(prop_ptr_vec& v,
+                                                  std::string_view name_to_insert_after,
+                                                  const prop_ptr_vec& vec_to_add)
 {
-    m_dev_focus = tcam::property::find_property<IPropertyInteger>(m_device_properties, "Focus");
-    if (!m_dev_focus)
+    auto f = std::find_if(v.begin(),
+                          v.end(),
+                          [name_to_insert_after](const auto& ptr)
+                          { return ptr->get_name() == name_to_insert_after; });
+    if (f != v.end())
+    {
+        ++f; // insert after this
+    }
+    v.insert(f, vec_to_add.begin(), vec_to_add.end());
+}
+
+void property::SoftwareProperties::remove_entry(prop_ptr_vec& v, std::string_view name)
+{
+    auto f = std::find_if(
+        v.begin(), v.end(), [name](const auto& ptr) { return ptr->get_name() == name; });
+    if (f == v.end())
     {
         return;
     }
+    v.erase(f);
+}
 
-    if (auto val = m_dev_focus->get_value(); val)
+void property::SoftwareProperties::replace_entry(prop_ptr_vec& v,
+                                                 const std::shared_ptr<IPropertyBase>& prop)
+{
+    auto f = std::find_if(v.begin(),
+                          v.end(),
+                          [name = prop->get_name()](const auto& ptr)
+                          { return ptr->get_name() == name; });
+    if (f == v.end())
     {
-        m_auto_params.focus_onepush_params.device_focus_val = val.value();
+        v.push_back(prop);
+        return;
     }
-    else
-    {
-        SPDLOG_ERROR("Unable to retrieve value: {}", val.error().message());
-    }
-
-    SPDLOG_INFO("Adding Software FocusAuto.");
-
-    m_auto_params.focus_onepush_params.enable_focus = true;
-    m_auto_params.focus_onepush_params.run_cmd_params.focus_range_min =
-        m_dev_focus->get_range().min;
-    m_auto_params.focus_onepush_params.run_cmd_params.focus_range_max =
-        m_dev_focus->get_range().max;
-
-    add_prop_entry(sp::FocusAuto,
-                   &tcamprop1::prop_list::FocusAuto,
-                   emulated::to_range(tcamprop1::prop_list::enum_entries_off_once),
-                   0);
-    add_prop_entry(sp::Focus, &tcamprop1::prop_list::Focus, emulated::to_range(*m_dev_focus));
+    *f = prop;
 }

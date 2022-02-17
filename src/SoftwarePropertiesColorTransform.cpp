@@ -2,6 +2,7 @@
 #include "SoftwarePropertiesBase.h"
 #include "SoftwarePropertiesImpl.h"
 #include "logging.h"
+
 #include <tcamprop1.0_base/tcamprop_property_info_list.h>
 
 using namespace tcam;
@@ -51,7 +52,8 @@ static std::string_view to_transform_name(tcam::property::emulated::software_pro
 }
 
 
-outcome::result<double> tcam::property::SoftwareProperties::get_device_color_transform (emulated::software_prop prop_id)
+outcome::result<double> tcam::property::SoftwareProperties::get_device_color_transform(
+    emulated::software_prop prop_id)
 {
     auto channel = to_transform_name(prop_id);
 
@@ -66,8 +68,9 @@ outcome::result<double> tcam::property::SoftwareProperties::get_device_color_tra
 }
 
 
-outcome::result<void> tcam::property::SoftwareProperties::set_device_color_transform (emulated::software_prop prop_id,
-                                                                                      double new_value_tmp)
+outcome::result<void> tcam::property::SoftwareProperties::set_device_color_transform(
+    emulated::software_prop prop_id,
+    double new_value_tmp)
 {
     auto channel = to_transform_name(prop_id);
 
@@ -84,47 +87,88 @@ outcome::result<void> tcam::property::SoftwareProperties::set_device_color_trans
 
 void tcam::property::SoftwareProperties::generate_color_transformation()
 {
-    m_dev_color_transform_enable = tcam::property::find_property<IPropertyBool>(m_device_properties, "ColorTransformationEnable");
-    m_dev_color_transform_value = tcam::property::find_property<IPropertyFloat>(m_device_properties, "ColorTransformationValue");
-    m_dev_color_transform_value_selector = tcam::property::find_property<IPropertyEnum>(m_device_properties, "ColorTransformationValueSelector");
+    auto enable =
+        tcam::property::find_property<IPropertyBool>(m_properties, "ColorTransformationEnable");
+    auto value =
+        tcam::property::find_property<IPropertyFloat>(m_properties, "ColorTransformationValue");
+    auto value_selector = tcam::property::find_property<IPropertyEnum>(
+        m_properties, "ColorTransformationValueSelector");
 
-    add_prop_entry(sp::ColorTransformEnable,
-                   &tcamprop1::prop_list::ColorTransformationEnable,
-                   false);
+    if (!enable || !value || !value_selector)
+    {
+        return;
+    }
 
-    add_prop_entry(sp::ColorTransformRedToRed,
+#if 0 // currently not necessary
+    auto color_transform_type =
+        tcam::property::find_property<IPropertyEnum>(m_device_properties, "ColorTransformationSelector");
+    if (color_transform_type) {
+        if (auto res = color_transform_type->get_value(); res.has_value()) {
+            if (res.value() != "RGBtoRGB") {
+                return;
+            }
+        }
+    }
+#endif
+
+    m_dev_color_transform_enable = enable;
+    m_dev_color_transform_value = value;
+    m_dev_color_transform_value_selector = value_selector;
+
+    auto range = emulated::to_range(*m_dev_color_transform_value);
+
+    prop_ptr_vec new_list;
+
+    auto new_enable_item = make_prop_entry(
+        sp::ColorTransformEnable, &tcamprop1::prop_list::ColorTransformationEnable, false);
+
+    add_prop_entry(new_list,
+                   sp::ColorTransformRedToRed,
                    &tcamprop1::prop_list::ColorTransformation_Value_Gain00,
-                   emulated::to_range(*m_dev_color_transform_value));
+                   range);
 
-    add_prop_entry(sp::ColorTransformBlueToRed,
+    add_prop_entry(new_list,
+                   sp::ColorTransformBlueToRed,
                    &tcamprop1::prop_list::ColorTransformation_Value_Gain01,
-                   emulated::to_range(*m_dev_color_transform_value));
+                   range);
 
-    add_prop_entry(sp::ColorTransformGreenToRed,
+    add_prop_entry(new_list,
+                   sp::ColorTransformGreenToRed,
                    &tcamprop1::prop_list::ColorTransformation_Value_Gain02,
-                   emulated::to_range(*m_dev_color_transform_value));
+                   range);
 
-    add_prop_entry(sp::ColorTransformRedToGreen,
+    add_prop_entry(new_list,
+                   sp::ColorTransformRedToGreen,
                    &tcamprop1::prop_list::ColorTransformation_Value_Gain10,
-                   emulated::to_range(*m_dev_color_transform_value));
+                   range);
 
-    add_prop_entry(sp::ColorTransformGreenToGreen,
+    add_prop_entry(new_list,
+                   sp::ColorTransformGreenToGreen,
                    &tcamprop1::prop_list::ColorTransformation_Value_Gain11,
-                   emulated::to_range(*m_dev_color_transform_value));
+                   range);
 
-    add_prop_entry(sp::ColorTransformBlueToGreen,
+    add_prop_entry(new_list,
+                   sp::ColorTransformBlueToGreen,
                    &tcamprop1::prop_list::ColorTransformation_Value_Gain12,
-                   emulated::to_range(*m_dev_color_transform_value));
+                   range);
 
-    add_prop_entry(sp::ColorTransformRedToBlue,
+    add_prop_entry(new_list,
+                   sp::ColorTransformRedToBlue,
                    &tcamprop1::prop_list::ColorTransformation_Value_Gain20,
-                   emulated::to_range(*m_dev_color_transform_value));
+                   range);
 
-    add_prop_entry(sp::ColorTransformGreenToBlue,
+    add_prop_entry(new_list,
+                   sp::ColorTransformGreenToBlue,
                    &tcamprop1::prop_list::ColorTransformation_Value_Gain21,
-                   emulated::to_range(*m_dev_color_transform_value));
+                   range);
 
-    add_prop_entry(sp::ColorTransformBlueToBlue,
+    add_prop_entry(new_list,
+                   sp::ColorTransformBlueToBlue,
                    &tcamprop1::prop_list::ColorTransformation_Value_Gain22,
-                   emulated::to_range(*m_dev_color_transform_value));
+                   range);
+
+    remove_entry(m_properties, "ColorTransformationValue");
+    remove_entry(m_properties, "ColorTransformationValueSelector");
+    replace_entry(m_properties, new_enable_item);
+    add_prop_entry(m_properties, "ColorTransformationEnable", new_list);
 }

@@ -18,8 +18,7 @@
 
 #include "logging.h"
 
-namespace tcam::property::emulated
-{
+using namespace tcam::property::emulated;
 
 SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
     const std::shared_ptr<SoftwarePropertyBackend>& backend,
@@ -209,11 +208,9 @@ outcome::result<std::string_view> SoftwarePropertyEnumImpl::get_value() const
 std::vector<std::string> SoftwarePropertyEnumImpl::get_entries() const
 {
     std::vector<std::string> v;
-    for (auto it = m_entries.begin(); it != m_entries.end(); ++it)
+    for (auto&& e : m_entries)
     {
-        v.push_back(std::string(*it));
+        v.push_back(std::string(e));
     }
     return v;
 }
-
-} // namespace tcam::property::emulated
