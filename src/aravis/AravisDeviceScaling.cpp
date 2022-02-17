@@ -122,15 +122,15 @@ void AravisDevice::generate_scaling_information()
 
                 for (const auto& entry : entries)
                 {
-                    if (entry == "X1")
+                    if (entry == "Off")
                     {
                         scale_.scaling_info_list.push_back({ 1, 1 });
                     }
-                    else if (entry == "X2")
+                    else if (entry == "2x")
                     {
                         scale_.scaling_info_list.push_back({ 2, 2 });
                     }
-                    else if (entry == "X4")
+                    else if (entry == "4x")
                     {
                         scale_.scaling_info_list.push_back({ 4, 4 });
                     }
@@ -140,23 +140,8 @@ void AravisDevice::generate_scaling_information()
                     }
                 }
 
-                // for (int i = binning->get_range().min; i <= binning->get_range().max; i++)
-                // {
-                //     if (!legal_value(i))
-                //     {
-                //         continue;
-                //     }
-
-                //     image_scaling new_scale = {};
-
-                //     new_scale.binning_h = i;
-                //     new_scale.binning_v = i;
-
-                //     // SPDLOG_INFO("New binning: {}x{}", i, i);
-                //     //SPDLOG_ERROR("new", bh->);
-
-                //     m_scale.scales.push_back(new_scale);
-                // }
+                // ensure scaling info are always in the order 1x1, 2x2, 4x4
+                std::sort(scale_.scaling_info_list.begin(), scale_.scaling_info_list.end());
             }
         }
     }
@@ -317,15 +302,15 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
             // in legacy cameras that only offer Binning
             if (scale.binning_h == 1)
             {
-                value = "X1";
+                value = "Off";
             }
             else if (scale.binning_h == 2)
             {
-                value = "x2";
+                value = "2x";
             }
             else if (scale.binning_h == 4)
             {
-                value = "X4";
+                value = "4x";
             }
             else
             {
@@ -424,17 +409,17 @@ image_scaling AravisDevice::get_current_scaling()
                 return {};
             }
 
-            if (value.value() == "X1")
+            if (value.value() == "Off")
             {
                 ret.binning_h = 1;
                 ret.binning_v = 1;
             }
-            else if (value.value() == "X2")
+            else if (value.value() == "2x")
             {
                 ret.binning_h = 2;
                 ret.binning_v = 2;
             }
-            else if (value.value() == "X4")
+            else if (value.value() == "4x")
             {
                 ret.binning_h = 4;
                 ret.binning_v = 4;
@@ -489,7 +474,7 @@ image_scaling AravisDevice::get_current_scaling()
         {
             ret.skipping_h = res.value();
         }
-        
+
         if (auto res = sk_v->get_value(); !res)
         {
             SPDLOG_ERROR("Unable to retrieve value for SkippingVertical: {}",

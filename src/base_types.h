@@ -127,6 +127,17 @@ struct image_scaling
     int32_t skipping_h = 1;
     int32_t skipping_v = 1;
 
+    bool operator<(const image_scaling& other) const
+    {
+        auto us = binning_v + binning_h + skipping_v + skipping_h;
+        auto them = other.binning_v + other.binning_h + other.skipping_v + other.skipping_h;
+        if (us < them)
+        {
+            return true;
+        }
+        return false;
+    }
+
     bool operator==(const image_scaling& other) const
     {
         if (binning_h == other.binning_h
