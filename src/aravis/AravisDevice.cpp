@@ -56,8 +56,7 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc)
         auto_set_control_lifetime();
     }
 
-    backend_ =
-        std::make_shared<tcam::aravis::AravisPropertyBackend>(*this);
+    backend_ = std::make_shared<tcam::aravis::AravisPropertyBackend>(*this);
 
     genicam_ = arv_device_get_genicam(arv_camera_get_device(this->arv_camera_));
 
@@ -393,7 +392,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
     }
 
     SPDLOG_DEBUG("Setting format to '{}'", new_format.to_string());
-    
+
     GError* err = nullptr;
 
     // // arv_camera_set_frame_rate overwrites TriggerSelector and TriggerMode
@@ -844,7 +843,11 @@ void AravisDevice::generate_video_formats()
         }
 
         std::vector<framerate_mapping> res_vec;
-        res_vec.push_back(rf);
+
+        // Do not add rf here
+        // we will already add this information
+        // later with the appropriate scaling
+        //res_vec.push_back(rf);
 
         SPDLOG_DEBUG("Adding format desc: {} ({:x}) ", desc.description, desc.fourcc);
 
@@ -871,8 +874,10 @@ void AravisDevice::generate_video_formats()
                 binned_max_size.height -= binned_max_size.height % height_step;
 
                 tcam_resolution_description res = {
-                    TCAM_RESOLUTION_TYPE_RANGE, min_resolution,        binned_max_size,
-                    (unsigned)width_step,       (unsigned)height_step, scaling_info
+                    TCAM_RESOLUTION_TYPE_RANGE,
+                    min_resolution, binned_max_size,
+                    (unsigned)width_step, (unsigned)height_step,
+                    scaling_info
                 };
                 // SPDLOG_ERROR("{}x{} max:{}x{} =>",
                 //              new_rf.resolution.min_size.width, new_rf.resolution.min_size.height,
