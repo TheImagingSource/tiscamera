@@ -139,8 +139,6 @@ bool CaptureDeviceImpl::start_stream(const std::shared_ptr<ImageSink>& sink)
 
     device_->initialize_buffers(buffer_list);
 
-    stream_start_ = std::chrono::steady_clock::now();
-
     sink_ = sink;
 
     if (!device_->start_stream(shared_from_this()))
@@ -169,18 +167,6 @@ void CaptureDeviceImpl::set_drop_incomplete_frames(bool b)
 void CaptureDeviceImpl::push_image(const std::shared_ptr<ImageBuffer>& buffer)
 {
     property_filter_.apply(*buffer);
-
-    auto stats = buffer->get_statistics();
-    auto end = std::chrono::steady_clock::now();
-    auto elapsed = end - stream_start_;
-
-    if (stats.frame_count > 0 && std::chrono::duration_cast<std::chrono::seconds>(elapsed).count())
-    {
-        stats.framerate =
-            (double)stats.frame_count
-            / (double)std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
-    }
-    buffer->set_statistics(stats);
 
     sink_->push_image(buffer);
 }

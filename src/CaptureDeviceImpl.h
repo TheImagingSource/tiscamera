@@ -27,7 +27,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <chrono>
 
 VISIBILITY_INTERNAL
 
@@ -70,7 +69,6 @@ public:
     // property related:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties();
-    std::shared_ptr<tcam::property::IPropertyBase> get_property(const std::string& name);
 
     /**
      * @return vector containing all available video format settings
@@ -125,8 +123,6 @@ private:
     tcam::DeviceIndex index_;
 
     std::vector<VideoFormatDescription> available_output_formats_;
-
-    std::chrono::time_point<std::chrono::steady_clock> stream_start_;
 
     std::shared_ptr<IImageBufferSink> sink_;
 

@@ -557,9 +557,6 @@ static void statistics_to_gst_structure(const tcam::tcam_stream_statistics* stat
                       "camera_time_ns",
                       G_TYPE_UINT64,
                       statistics->camera_time_ns,
-                      "framerate",
-                      G_TYPE_DOUBLE,
-                      statistics->framerate,
                       "is_damaged",
                       G_TYPE_BOOLEAN,
                       statistics->is_damaged,
@@ -670,14 +667,12 @@ static GstFlowReturn gst_tcam_mainsrc_create(GstPushSrc* push_src, GstBuffer** b
                                         "frames_dropped {}\n"
                                         "capture_time_ns: {}\n"
                                         "camera_time_ns: {}\n"
-                                        "framerate: {}\n"
                                         "is_damaged: {}\n",
                                         gst_frame_count,
                                         stat.frame_count,
                                         stat.frames_dropped,
                                         stat.capture_time_ns,
                                         stat.camera_time_ns,
-                                        stat.framerate,
                                         damaged);
 
                 //GST_TRACE_OBJECT(self, "%s", test.c_str());
