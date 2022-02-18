@@ -59,8 +59,6 @@ public:
 
     bool set_video_format(const VideoFormat&) final;
 
-    tcam::VideoFormat read_camera_current_video_format();
-
     VideoFormat get_active_video_format() const final
     {
         return active_video_format_;
@@ -83,6 +81,8 @@ public:
     outcome::result<tcam::framerate_info> get_framerate_info(const VideoFormat& fmt) final;
 
 private:
+    tcam::VideoFormat read_camera_current_video_format();
+
     // helper function to set lifetime of control channel
     // depending on env and auto negotiation
     void auto_set_control_lifetime();
@@ -95,7 +95,7 @@ private:
 
     static void device_lost(ArvGvDevice* device, void* user_data);
 
-    std::recursive_mutex arv_camera_access_;
+    std::recursive_mutex arv_camera_access_mutex_;
 
     ArvCamera* arv_camera_ = nullptr;
     ArvStream* stream_ = nullptr;

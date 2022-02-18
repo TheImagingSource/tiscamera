@@ -33,6 +33,8 @@ void tcam::AravisDevice::clear_buffer_info_arb_buffer(buffer_info& info)
 
 bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> new_list)
 {
+    std::scoped_lock lck { arv_camera_access_mutex_ };
+
     GError* err = nullptr;
 
     this->buffer_list_.clear();
@@ -64,6 +66,8 @@ bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> 
 
 bool AravisDevice::release_buffers()
 {
+    std::scoped_lock lck { arv_camera_access_mutex_ };
+
     // this should not be taken here, because the g_object_unref triggers the
     // destroy notify of the arv_buffer which in turn takes the mutex
     //std::scoped_lock lck { buffer_list_mtx_ };
@@ -83,6 +87,8 @@ bool AravisDevice::release_buffers()
 
 void AravisDevice::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
 {
+    std::scoped_lock lck0 { arv_camera_access_mutex_ };
+
     std::scoped_lock lck { buffer_list_mtx_ };
     for (auto& b : buffer_list_)
     {
@@ -266,6 +272,8 @@ static bool set_stream_options(ArvStream* stream)
 
 bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 {
+    std::scoped_lock lck0 { arv_camera_access_mutex_ };
+
     if (arv_camera_ == nullptr)
     {
         SPDLOG_ERROR("ArvCamera missing!");
@@ -373,6 +381,8 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
 void AravisDevice::stop_stream()
 {
+    std::scoped_lock lck0 { arv_camera_access_mutex_ };
+
     if (arv_camera_ == NULL)
     {
         return;
@@ -456,6 +466,10 @@ void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((u
         SPDLOG_ERROR("Callback camera instance is NULL.");
         return;
     }
+    // Maybe we could elide this mutex lock, because stop stream guards against this by killing all callbacks before removing the stream variable
+    std::scoped_lock lck0 {
+        self->arv_camera_access_mutex_
+    }; // Note: complete_aravis_stream_buffer can be recursive calls to lock arv_camera_access_
     if (self->stream_ == NULL)
     {
         return;

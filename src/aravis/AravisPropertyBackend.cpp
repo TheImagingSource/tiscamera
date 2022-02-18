@@ -31,7 +31,7 @@ AravisPropertyBackend::AravisPropertyBackend(tcam::AravisDevice& parent)
 
 std::recursive_mutex& AravisPropertyBackend::get_mutex() noexcept
 {
-    return parent_.arv_camera_access_;
+    return parent_.arv_camera_access_mutex_;
 }
 
 tcamprop1::Visibility_t tcam::aravis::to_Visibility(ArvGcVisibility v) noexcept

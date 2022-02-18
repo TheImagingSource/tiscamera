@@ -81,8 +81,6 @@ AravisDevice::~AravisDevice()
 auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
     -> outcome::result<tcam::framerate_info>
 {
-    std::scoped_lock lck { arv_camera_access_ };
-
     auto dev = arv_camera_get_device(arv_camera_);
     if (dev == nullptr)
     {
@@ -289,6 +287,8 @@ static void restore_data_reapply(ArvCamera* camera, data_to_restore_active_forma
 
 outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(const VideoFormat& fmt)
 {
+    std::scoped_lock lck0 { arv_camera_access_mutex_ };
+
     if (has_test_format_interface_)
     {
         return fetch_test_itf_framerates(fmt);
@@ -386,6 +386,8 @@ outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(con
 
 bool AravisDevice::set_video_format(const VideoFormat& new_format)
 {
+    std::scoped_lock lck { arv_camera_access_mutex_ };
+
     if (is_lost_)
     {
         return false;
