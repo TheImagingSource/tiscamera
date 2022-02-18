@@ -53,13 +53,19 @@ bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> 
         clear_buffer_info_arb_buffer(info);
     };
 
+    size_t buffer_size = new_list.front()->get_image_buffer_size();
+    if( buffer_size < payload)
+    {
+        SPDLOG_WARN("Aravis payload-size ({}) > image_buffer_size ({})", payload, buffer_size);
+    }
+
     // we build the according items in a 2 step process, so we are able to pass &info to arv_buffer_new_full
     for (auto&& buffer : new_list) { this->buffer_list_.push_back(buffer_info { this, buffer }); }
 
     for (auto& info : buffer_list_)
     {
         info.arv_buffer = arv_buffer_new_full(
-            payload, info.buffer->get_image_buffer_ptr(), &info, buffer_destroy_notfiy);
+            buffer_size, info.buffer->get_image_buffer_ptr(), &info, buffer_destroy_notfiy);
     }
     return true;
 }
@@ -316,6 +322,8 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
             }
         }
     };
+
+    disable_chunk_mode();
 
     GError* err = nullptr;
 

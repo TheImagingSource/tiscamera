@@ -187,6 +187,7 @@ private:
         return tcam::property::find_property<TItf>(internal_properties_, name);
     }
 
+    void disable_chunk_mode();
 
 }; /* class GigeCapture */
 

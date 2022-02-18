@@ -384,6 +384,30 @@ outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(con
 }
 
 
+void AravisDevice::disable_chunk_mode()
+{
+    GError* err = nullptr;
+    arv_camera_set_chunk_mode(arv_camera_, false, &err);
+    if (err)
+    {
+        SPDLOG_WARN("Failed to set 'ChunkModeActive' to false. Ignoring for now. Err: {}",
+                    err->message);
+        g_clear_error(&err);
+    }
+
+    auto prop_GevGVSPExtendedIDMode =
+        find_cam_property<tcam::property::IPropertyEnum>("GevGVSPExtendedIDMode");
+    if (prop_GevGVSPExtendedIDMode)
+    {
+        auto res = prop_GevGVSPExtendedIDMode->set_value("Off");
+        if (res.has_failure())
+        {
+            SPDLOG_WARN("Failed to set 'GevGVSPExtendedIDMode' to Off. Ignoring for now. Err: {}",
+                        res.error().message());
+        }
+    }
+}
+
 bool AravisDevice::set_video_format(const VideoFormat& new_format)
 {
     std::scoped_lock lck { arv_camera_access_mutex_ };
@@ -394,6 +418,8 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
     }
 
     SPDLOG_DEBUG("Setting format to '{}'", new_format.to_string());
+
+    disable_chunk_mode();
 
     GError* err = nullptr;
 
