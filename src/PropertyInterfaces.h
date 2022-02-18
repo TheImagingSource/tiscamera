@@ -66,7 +66,7 @@ public:
     virtual tcamprop1::IntRepresentation_t get_representation() const = 0;
 
     virtual tcamprop1::prop_range_integer get_range() const = 0;
-    virtual int64_t get_default() const = 0;
+    virtual outcome::result<int64_t> get_default() const = 0;
 
     virtual outcome::result<int64_t> get_value() const = 0;
     virtual outcome::result<void> set_value(int64_t new_value) = 0;
@@ -87,7 +87,7 @@ public:
 
     virtual tcamprop1::prop_range_float get_range() const = 0;
 
-    virtual double get_default() const = 0;
+    virtual outcome::result<double> get_default() const = 0;
 
     virtual outcome::result<double> get_value() const = 0;
     virtual outcome::result<void> set_value(double new_value) = 0;
@@ -103,7 +103,7 @@ public:
         return tcamprop1::prop_type::Boolean;
     }
 
-    virtual bool get_default() const = 0;
+    virtual outcome::result<bool> get_default() const = 0;
 
     virtual outcome::result<bool> get_value() const = 0;
     virtual outcome::result<void> set_value(bool new_value) = 0;
@@ -137,7 +137,7 @@ public:
 
     virtual outcome::result<std::string_view> get_value() const = 0;
 
-    virtual std::string get_default() const = 0;
+    virtual outcome::result<std::string_view> get_default() const = 0;
 
     virtual std::vector<std::string> get_entries() const = 0;
 };

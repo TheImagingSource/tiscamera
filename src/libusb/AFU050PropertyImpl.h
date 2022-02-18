@@ -83,7 +83,7 @@ public:
     {
         return { m_min, m_max, m_step };
     }
-    virtual int64_t get_default() const final
+    virtual outcome::result<int64_t> get_default() const final
     {
         return m_default;
     }
@@ -147,7 +147,7 @@ public:
         return { m_min, m_max, m_step };
     }
 
-    virtual double get_default() const final
+    virtual outcome::result<double> get_default() const final
     {
         return m_default;
     }
@@ -217,7 +217,7 @@ public:
     virtual outcome::result<std::string_view> get_value() const final;
     virtual outcome::result<int64_t> get_value_int() const final;
 
-    virtual std::string get_default() const final
+    virtual outcome::result<std::string_view> get_default() const final
     {
         return m_default;
     }

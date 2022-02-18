@@ -69,6 +69,10 @@ constexpr status_code_entry to_entry(int in) noexcept
         {
             return { "Property is locked", std::errc::operation_not_permitted };
         }
+        case tcam::status::PropertyNoDefaultAvailable:
+        {
+            return { "Property has no default defined", std::errc::invalid_seek };
+        }
         case tcam::status::FormatInvalid:
         {
             return { "Invalid video format", std::errc::invalid_argument };
@@ -97,9 +101,8 @@ constexpr status_code_entry to_entry(int in) noexcept
         {
             return { "Invalid parameter", std::errc::invalid_argument };
         }
-        default:
-            return {};
     };
+    return {};
 }
 
 

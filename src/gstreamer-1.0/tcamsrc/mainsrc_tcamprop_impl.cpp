@@ -218,17 +218,7 @@ struct TcamPropertyEnumeration : TcamPropertyBase<tcamprop1::property_interface_
     {
         auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
 
-        auto entries = tmp->get_entries();
-
-        auto it = std::find(entries.begin(), entries.end(), tmp->get_default());
-
-        size_t index = 0;
-
-        if (it != entries.end())
-        {
-            index = std::distance(entries.begin(), it);
-        }
-        return entries.at(index);
+        return tmp->get_default();
     }
 
     auto get_property_value(uint32_t /*flags*/) -> outcome::result<std::string_view> final

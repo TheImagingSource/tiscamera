@@ -164,7 +164,7 @@ public:
     {
         return range_;
     }
-    int64_t get_default() const final
+    outcome::result<int64_t> get_default() const final
     {
         return default_;
     }
@@ -197,7 +197,7 @@ public:
         return range_;
     }
 
-    double get_default() const final
+    outcome::result<double> get_default() const final
     {
         return default_;
     }
@@ -223,7 +223,7 @@ public:
                          const std::shared_ptr<V4L2PropertyBackend>& backend,
                          const tcamprop1::prop_static_info_boolean* static_info);
 
-    bool get_default() const final
+    outcome::result<bool> get_default() const final
     {
         return m_default;
     }
@@ -267,7 +267,7 @@ public:
     outcome::result<void> set_value_str(const std::string_view& new_value) override;
     outcome::result<std::string_view> get_value() const override;
 
-    std::string get_default() const override
+    outcome::result<std::string_view> get_default() const final
     {
         return m_default;
     }
@@ -318,7 +318,7 @@ public:
     {
         return { value_, value_, 1 };
     }
-    int64_t get_default() const final
+    outcome::result<int64_t> get_default() const final
     {
         return value_;
     }
@@ -362,7 +362,7 @@ public:
         return enabled_ ? "On" : "Off";
     }
 
-    std::string get_default() const final
+    outcome::result<std::string_view> get_default() const final
     {
         return "On";
     }

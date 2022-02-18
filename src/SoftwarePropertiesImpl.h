@@ -78,9 +78,11 @@ public:
         return range_;
     }
 
-    int64_t get_default() const final
+    outcome::result<int64_t> get_default() const final
     {
-        return m_default;
+        if (m_default)
+            return m_default.value();
+        return tcam::status::PropertyNoDefaultAvailable;
     }
 
     outcome::result<int64_t> get_value() const final;
@@ -89,7 +91,7 @@ public:
 private:
     tcamprop1::prop_range_integer range_;
 
-    int64_t m_default = 0;
+    std::optional<int64_t> m_default;
 
     const tcamprop1::prop_static_info_integer* static_info_integer_ = nullptr;
 };
@@ -111,9 +113,11 @@ public:
     {
         return range_;
     }
-    double get_default() const final
+    outcome::result<double> get_default() const final
     {
-        return m_default;
+        if (m_default)
+            return m_default.value();
+        return tcam::status::PropertyNoDefaultAvailable;
     }
     outcome::result<double> get_value() const final;
     outcome::result<void> set_value(double new_value) final;
@@ -121,7 +125,7 @@ public:
 private:
     tcamprop1::prop_range_float range_;
 
-    double m_default = 0;
+    std::optional<double> m_default;
 
     const tcamprop1::prop_static_info_float* static_info_float_ = nullptr;
 };
@@ -134,7 +138,7 @@ public:
                              software_prop id,
                              const tcamprop1::prop_static_info_boolean* info,
                              bool def);
-    bool get_default() const final
+    outcome::result<bool> get_default() const final
     {
         return m_default;
     }
@@ -171,9 +175,9 @@ public:
     outcome::result<void> set_value_str(const std::string_view& new_value) final;
     outcome::result<std::string_view> get_value() const final;
 
-    std::string get_default() const final
+    outcome::result<std::string_view> get_default() const final
     {
-        return std::string { m_default };
+        return m_default;
     }
 
     std::vector<std::string> get_entries() const final;

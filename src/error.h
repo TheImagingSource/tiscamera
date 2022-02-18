@@ -35,6 +35,7 @@ enum class status : int
     PropertyOutOfBounds,
     PropertyValueDoesNotExist,
     PropertyIsLocked,
+    PropertyNoDefaultAvailable,
     FormatInvalid,
     ResourceNotLockable,
     Timeout,

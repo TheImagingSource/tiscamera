@@ -2,6 +2,7 @@
 
 #include "PropertyInterfaces.h"
 
+#include <optional>
 #include <string_view>
 #include <tcamprop1.0_base/tcamprop_base.h>
 #include <vector>
@@ -44,28 +45,41 @@ enum class software_prop
     ColorTransformRedToBlue,
     ColorTransformGreenToBlue,
     ColorTransformBlueToBlue,
-
 };
 
 struct prop_range_integer_def
 {
     tcamprop1::prop_range_integer range;
-    int64_t def = 0;
+    std::optional<int64_t> def = 0;
 };
 
 struct prop_range_float_def
 {
     tcamprop1::prop_range_float range;
-    double def = 0;
+    std::optional<double> def = 0;
 };
 
 inline auto to_range(IPropertyFloat& prop)
 {
-    return prop_range_float_def { prop.get_range(), prop.get_default() };
+    prop_range_float_def rval {
+        prop.get_range(),
+    };
+    if (auto val = prop.get_default(); val.has_value())
+    {
+        rval.def = val.value();
+    }
+    return rval;
 }
 inline auto to_range(IPropertyInteger& prop)
 {
-    return prop_range_integer_def { prop.get_range(), prop.get_default() };
+    prop_range_integer_def rval {
+        prop.get_range(),
+    };
+    if (auto val = prop.get_default(); val.has_value())
+    {
+        rval.def = val.value();
+    }
+    return rval;
 }
 
 template<size_t N> inline auto to_range(const std::array<std::string_view, N>& arr)

@@ -90,7 +90,7 @@ public:
 
     tcamprop1::prop_range_integer get_range() const final;
 
-    int64_t get_default() const final
+    outcome::result<int64_t> get_default() const final
     {
         return m_default;
     }
@@ -134,7 +134,7 @@ public:
         return float_rep_;
     }
     tcamprop1::prop_range_float get_range() const final;
-    double get_default() const final
+    outcome::result<double> get_default() const final
     {
         return m_default;
     }
@@ -170,7 +170,7 @@ public:
         return get_flags_impl();
     }
 
-    bool get_default() const final
+    outcome::result<bool> get_default() const final
     {
         return m_default;
     }
@@ -232,10 +232,7 @@ public:
     outcome::result<void> set_value_str(const std::string_view& new_value) final;
     outcome::result<std::string_view> get_value() const final;
 
-    std::string get_default() const final
-    {
-        return m_default;
-    }
+    outcome::result<std::string_view> get_default() const final;
 
     std::vector<std::string> get_entries() const final
     {
@@ -255,8 +252,6 @@ private:
     };
 
     std::vector<enum_entry> entries_;
-
-    std::string m_default;
 };
 
 
@@ -313,7 +308,7 @@ public:
     {
         return { 0., 4., 1. / 64. };
     }
-    double get_default() const final
+    outcome::result<double> get_default() const final
     {
         return 1.0;
     }
@@ -383,7 +378,7 @@ public:
         }
         return value_->get_range();
     }
-    double get_default() const final
+    outcome::result<double> get_default() const final
     {
         if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
         {

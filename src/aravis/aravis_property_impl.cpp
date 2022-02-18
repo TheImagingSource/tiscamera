@@ -239,6 +239,7 @@ private:
     std::shared_ptr<AravisPropertyBackend> owner_;
     std::recursive_mutex* backend_mtx_ = nullptr;
 };
+
 } // namespace tcam::aravis
 
 tcam::property::PropertyFlags prop_base_impl::get_flags_impl() const
@@ -560,19 +561,12 @@ AravisPropertyEnumImpl::AravisPropertyEnumImpl(
         entries_.push_back(enum_entry { entry_name, value });
     }
 
-    auto current_value = arv_gc_enumeration_get_int_value(arv_gc_node_, &err);
-    if (err)
-    {
-        g_clear_error(&err);
-    }
-
-    for (auto& e : entries_)
-    {
-        if (e.value == current_value)
-            m_default = e.display_name;
-    }
-
     update_with_tcamprop1_static_info(name, static_info_, tcamprop1::prop_type::Enumeration);
+}
+
+outcome::result<std::string_view> AravisPropertyEnumImpl::get_default() const
+{
+    return tcam::status::PropertyNoDefaultAvailable;
 }
 
 outcome::result<void> AravisPropertyEnumImpl::set_value_str(const std::string_view& new_value)
