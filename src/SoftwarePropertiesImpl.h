@@ -172,7 +172,7 @@ public:
                              std::vector<std::string_view>&& entries,
                              int default_entry);
 
-    outcome::result<void> set_value_str(const std::string_view& new_value) final;
+    outcome::result<void> set_value(std::string_view new_value) final;
     outcome::result<std::string_view> get_value() const final;
 
     outcome::result<std::string_view> get_default() const final

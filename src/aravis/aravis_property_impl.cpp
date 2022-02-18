@@ -551,7 +551,7 @@ outcome::result<std::string_view> AravisPropertyEnumImpl::get_default() const
     return tcam::status::PropertyNoDefaultAvailable;
 }
 
-outcome::result<void> AravisPropertyEnumImpl::set_value_str(const std::string_view& new_value)
+outcome::result<void> AravisPropertyEnumImpl::set_value(std::string_view new_value)
 {
     auto lck = acquire_backend_guard();
     if (!lck)

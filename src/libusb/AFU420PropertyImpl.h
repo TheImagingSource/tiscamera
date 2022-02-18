@@ -221,13 +221,13 @@ public:
         lock(m_flags, new_locked_state);
     }
 
-    virtual outcome::result<void> set_value_str(const std::string_view& new_value) final;
-    virtual outcome::result<void> set_value(int64_t new_value) final;
+    outcome::result<void> set_value(std::string_view new_value) final;
+    outcome::result<void> set_value_int(int64_t new_value);
 
-    virtual outcome::result<std::string_view> get_value() const final;
-    virtual outcome::result<int64_t> get_value_int() const final;
+    outcome::result<std::string_view> get_value() const final;
+    outcome::result<int64_t> get_value_int() const;
 
-    virtual outcome::result<std::string_view> get_default() const final
+    outcome::result<std::string_view> get_default() const final
     {
         return m_default;
     }

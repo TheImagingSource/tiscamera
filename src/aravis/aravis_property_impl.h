@@ -220,7 +220,7 @@ public:
         return get_flags_impl();
     }
 
-    outcome::result<void> set_value_str(const std::string_view& new_value) final;
+    outcome::result<void> set_value(std::string_view new_value) final;
     outcome::result<std::string_view> get_value() const final;
 
     outcome::result<std::string_view> get_default() const final;
@@ -305,7 +305,7 @@ public:
     }
     outcome::result<double> get_value() const final
     {
-        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
         {
             return sel_res.error();
         }
@@ -318,7 +318,7 @@ public:
     }
     outcome::result<void> set_value(double new_value) final
     {
-        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
         {
             return sel_res.error();
         }
@@ -352,7 +352,7 @@ public:
 
     PropertyFlags get_flags() const final
     {
-        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
         {
             // do nothing
             //return sel_res.error();
@@ -362,7 +362,7 @@ public:
 
     tcamprop1::prop_range_float get_range() const final
     {
-        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
         {
             // do nothing
             //return sel_res.error();
@@ -375,7 +375,7 @@ public:
     }
     outcome::result<double> get_value() const final
     {
-        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
         {
             return sel_res.error();
         }
@@ -388,7 +388,7 @@ public:
     }
     outcome::result<void> set_value(double new_value) final
     {
-        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
+        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
         {
             return sel_res.error();
         }

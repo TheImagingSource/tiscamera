@@ -361,20 +361,20 @@ AFU050PropertyEnumImpl::AFU050PropertyEnumImpl(const std::string& name,
     }
 }
 
-outcome::result<void> AFU050PropertyEnumImpl::set_value_str(const std::string_view& new_value)
+outcome::result<void> AFU050PropertyEnumImpl::set_value(std::string_view new_value)
 {
     for (auto it = m_entries.begin(); it != m_entries.end(); ++it)
     {
         if (it->second == new_value)
         {
-            return set_value(it->first);
+            return set_value_int(it->first);
         }
     }
     return tcam::status::PropertyValueDoesNotExist;
 }
 
 
-outcome::result<void> AFU050PropertyEnumImpl::set_value(int64_t new_value)
+outcome::result<void> AFU050PropertyEnumImpl::set_value_int(int64_t new_value)
 {
     if (!valid_value(new_value))
     {

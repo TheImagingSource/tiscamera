@@ -232,7 +232,7 @@ struct TcamPropertyEnumeration : TcamPropertyBase<tcamprop1::property_interface_
     {
         auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
 
-        auto ret = tmp->set_value_str(value);
+        auto ret = tmp->set_value(value);
         if (ret)
         {
             return tcam::status::Success;

@@ -317,7 +317,7 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
                 SPDLOG_ERROR("Binning type not implemented");
             }
 
-            auto ret = binning->set_value_str(value);
+            auto ret = binning->set_value(value);
 
             if (!ret)
             {

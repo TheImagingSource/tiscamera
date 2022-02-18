@@ -57,7 +57,7 @@ outcome::result<double> tcam::property::SoftwareProperties::get_device_color_tra
 {
     auto channel = to_transform_name(prop_id);
 
-    auto res = m_dev_color_transform_value_selector->set_value_str(channel);
+    auto res = m_dev_color_transform_value_selector->set_value(channel);
 
     if (!res)
     {
@@ -74,7 +74,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_device_color_trans
 {
     auto channel = to_transform_name(prop_id);
 
-    auto res = m_dev_color_transform_value_selector->set_value_str(channel);
+    auto res = m_dev_color_transform_value_selector->set_value(channel);
 
     if (!res)
     {

@@ -133,7 +133,7 @@ public:
         return tcamprop1::prop_type::Enumeration;
     }
 
-    virtual outcome::result<void> set_value_str(const std::string_view& new_value) = 0;
+    virtual outcome::result<void> set_value(std::string_view new_value) = 0;
 
     virtual outcome::result<std::string_view> get_value() const = 0;
 

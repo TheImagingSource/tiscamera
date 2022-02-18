@@ -264,7 +264,7 @@ public:
                          const tcamprop1::prop_static_info_enumeration* static_info,
                          tcam::v4l2::fetch_menu_entries_func func);
 
-    outcome::result<void> set_value_str(const std::string_view& new_value) override;
+    outcome::result<void> set_value(std::string_view new_value) override;
     outcome::result<std::string_view> get_value() const override;
 
     outcome::result<std::string_view> get_default() const final
@@ -293,7 +293,7 @@ public:
     prop_impl_33U_balance_white_auto(const v4l2_queryctrl& queryctrl_balance_white_auto,
                                      const std::shared_ptr<V4L2PropertyBackend>& backend);
 
-    outcome::result<void> set_value_str(const std::string_view& new_value) override;
+    outcome::result<void> set_value(std::string_view new_value) override;
 };
 
 class prop_impl_sensor_dim : public IPropertyInteger2
@@ -355,7 +355,7 @@ public:
     {
         return PropertyFlags::Implemented | PropertyFlags::Available;
     }
-    outcome::result<void> set_value_str(const std::string_view& new_value) final;
+    outcome::result<void> set_value(std::string_view new_value) final;
 
     outcome::result<std::string_view> get_value() const final
     {

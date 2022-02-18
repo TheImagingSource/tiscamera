@@ -163,7 +163,7 @@ SoftwarePropertyEnumImpl::SoftwarePropertyEnumImpl(
 {
 }
 
-outcome::result<void> SoftwarePropertyEnumImpl::set_value_str(const std::string_view& new_value)
+outcome::result<void> SoftwarePropertyEnumImpl::set_value(std::string_view new_value)
 {
     for (size_t idx = 0; idx < m_entries.size(); ++idx)
     {

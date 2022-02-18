@@ -408,8 +408,8 @@ tcam::v4l2::V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(
     m_default = get_entry_name(queryctrl.default_value);
 }
 
-outcome::result<void> tcam::v4l2::V4L2PropertyEnumImpl::set_value_str(
-    const std::string_view& new_value)
+outcome::result<void> tcam::v4l2::V4L2PropertyEnumImpl::set_value(
+    std::string_view new_value)
 {
     auto value_to_set = get_entry_value(new_value);
     if (value_to_set.has_error())
@@ -510,14 +510,14 @@ tcam::v4l2::prop_impl_33U_balance_white_auto::prop_impl_33U_balance_white_auto(
 {
 }
 
-outcome::result<void> tcam::v4l2::prop_impl_33U_balance_white_auto::set_value_str(
-    const std::string_view& new_value)
+outcome::result<void> tcam::v4l2::prop_impl_33U_balance_white_auto::set_value(
+    std::string_view new_value)
 {
     if (new_value == "Once")
     {
         return backend_.set_backend_value(V4L2_CID_TIS_WHITEBALANCE_ONE_PUSH, 1);
     }
-    return V4L2PropertyEnumImpl::set_value_str(new_value);
+    return V4L2PropertyEnumImpl::set_value(new_value);
 }
 
 
@@ -559,8 +559,8 @@ void tcam::v4l2::prop_impl_offset_auto_center::set_format(const tcam::VideoForma
     update_offsets();
 }
 
-outcome::result<void> tcam::v4l2::prop_impl_offset_auto_center::set_value_str(
-    const std::string_view& new_value)
+outcome::result<void> tcam::v4l2::prop_impl_offset_auto_center::set_value(
+    std::string_view new_value)
 {
     if (new_value == "Off")
     {
