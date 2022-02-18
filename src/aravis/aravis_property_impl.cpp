@@ -240,6 +240,7 @@ private:
     std::recursive_mutex* backend_mtx_ = nullptr;
 };
 
+
 } // namespace tcam::aravis
 
 tcam::property::PropertyFlags prop_base_impl::get_flags_impl() const
@@ -284,14 +285,6 @@ AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(
     : prop_base_impl(backend, ARV_GC_FEATURE_NODE(node)), arv_gc_node_ { ARV_GC_INTEGER(node) }
 {
     static_info_ = build_static_info(category, name);
-
-    GError* err = nullptr;
-    m_default = arv_gc_integer_get_value(arv_gc_node_, &err);
-    if (err)
-    {
-        SPDLOG_ERROR("arv_gc_integer_get_value for '{}': {}", name, err->message);
-        g_clear_error(&err);
-    }
 
     unit_ = to_stdstring(arv_gc_integer_get_unit(arv_gc_node_));
     int_rep_ = to_IntRepresentation(arv_gc_integer_get_representation(arv_gc_node_));
@@ -365,6 +358,11 @@ tcamprop1::prop_range_integer AravisPropertyIntegerImpl::get_range() const
     return range;
 }
 
+outcome::result<int64_t> AravisPropertyIntegerImpl::get_default() const
+{
+    return tcam::status::PropertyNoDefaultAvailable;
+}
+
 AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(
     std::string_view name,
     std::string_view category,
@@ -373,14 +371,6 @@ AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(
     : prop_base_impl(backend, ARV_GC_FEATURE_NODE(node)), arv_gc_node_(ARV_GC_FLOAT(node))
 {
     static_info_ = build_static_info(category, name);
-
-    GError* err = nullptr;
-    m_default = arv_gc_float_get_value(arv_gc_node_, &err);
-    if (err)
-    {
-        SPDLOG_ERROR("arv_gc_float_get_value for '{}': {}", name, err->message);
-        g_clear_error(&err);
-    }
 
     unit_ = to_stdstring(arv_gc_float_get_unit(arv_gc_node_));
     float_rep_ = to_FloatRepresentation(arv_gc_float_get_representation(arv_gc_node_));
@@ -458,14 +448,6 @@ AravisPropertyBoolImpl::AravisPropertyBoolImpl(
     const std::shared_ptr<AravisPropertyBackend>& backend)
     : prop_base_impl(backend, ARV_GC_FEATURE_NODE(node)), arv_gc_node_(ARV_GC_BOOLEAN(node))
 {
-    GError* err = nullptr;
-    m_default = arv_gc_boolean_get_value(arv_gc_node_, &err);
-    if (err)
-    {
-        SPDLOG_ERROR("Unable to retrieve aravis bool: {}", err->message);
-        g_clear_error(&err);
-    }
-
     static_info_ = build_static_info(category, name);
 
     update_with_tcamprop1_static_info(name, static_info_, tcamprop1::prop_type::Boolean);

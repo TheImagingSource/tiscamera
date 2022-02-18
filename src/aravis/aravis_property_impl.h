@@ -90,10 +90,7 @@ public:
 
     tcamprop1::prop_range_integer get_range() const final;
 
-    outcome::result<int64_t> get_default() const final
-    {
-        return m_default;
-    }
+    outcome::result<int64_t> get_default() const final;
     outcome::result<int64_t> get_value() const final;
 
     outcome::result<void> set_value(int64_t new_value) final;
@@ -104,8 +101,6 @@ private:
     tcamprop1::prop_static_info_str static_info_;
     std::string unit_;
     tcamprop1::IntRepresentation_t int_rep_ = tcamprop1::IntRepresentation_t::Linear;
-
-    int64_t m_default = 0;
 };
 
 class AravisPropertyDoubleImpl : public prop_base_impl, public IPropertyFloat
@@ -136,7 +131,7 @@ public:
     tcamprop1::prop_range_float get_range() const final;
     outcome::result<double> get_default() const final
     {
-        return m_default;
+        return tcam::status::PropertyNoDefaultAvailable;
     }
     outcome::result<double> get_value() const final;
     outcome::result<void> set_value(double new_value) final;
@@ -147,8 +142,6 @@ private:
     tcamprop1::prop_static_info_str static_info_;
     std::string unit_;
     tcamprop1::FloatRepresentation_t float_rep_ = tcamprop1::FloatRepresentation_t::Linear;
-
-    double m_default = 0;
 };
 
 
@@ -172,7 +165,7 @@ public:
 
     outcome::result<bool> get_default() const final
     {
-        return m_default;
+        return tcam::status::PropertyNoDefaultAvailable;
     }
     outcome::result<bool> get_value() const final;
 
@@ -181,8 +174,6 @@ public:
 private:
     ArvGcBoolean* arv_gc_node_ = nullptr;
     tcamprop1::prop_static_info_str static_info_;
-
-    bool m_default = false;
 };
 
 
@@ -380,12 +371,7 @@ public:
     }
     outcome::result<double> get_default() const final
     {
-        if (auto sel_res = selector_->set_value_str(selector_entry_); !sel_res)
-        {
-            // do nothing
-            //return sel_res.error();
-        }
-        return value_->get_default();
+        return 1.0;
     }
     outcome::result<double> get_value() const final
     {
