@@ -18,6 +18,7 @@
 
 #include "../PropertyInterfaces.h"
 #include "../compiler_defines.h"
+#include "AravisPropertyBackend.h"
 
 #include <arv.h>
 #include <tcamprop1.0_base/tcamprop_property_info.h>
@@ -26,14 +27,42 @@ VISIBILITY_INTERNAL
 
 namespace tcam::aravis
 {
-class AravisPropertyBackend;
-}
-
-namespace tcam::aravis
-{
 using namespace tcam::property;
 
-struct aravis_backend_guard;
+struct aravis_backend_guard
+{
+    explicit aravis_backend_guard(const std::weak_ptr<AravisPropertyBackend>& cam)
+    {
+        owner_ = cam.lock();
+        if (owner_)
+        {
+            backend_mtx_ = &owner_->get_mutex();
+            backend_mtx_->lock();
+        }
+    }
+    ~aravis_backend_guard()
+    {
+        if (backend_mtx_)
+        {
+            backend_mtx_->unlock();
+        }
+        owner_.reset();
+    }
+
+    explicit operator bool() const noexcept
+    {
+        return owner_ != nullptr;
+    }
+
+    static aravis_backend_guard acquire(const std::weak_ptr<AravisPropertyBackend>& cam) noexcept
+    {
+        return aravis_backend_guard { cam };
+    }
+
+private:
+    std::shared_ptr<AravisPropertyBackend> owner_;
+    std::recursive_mutex* backend_mtx_ = nullptr;
+};
 
 class prop_base_impl
 {
@@ -280,10 +309,8 @@ public:
     balance_ratio_raw_to_wb_channel(const std::shared_ptr<IPropertyEnum>& sel,
                                     const std::shared_ptr<IPropertyInteger>& val,
                                     const std::string& sel_entry,
-                                    const tcamprop1::prop_static_info_float* info_entry)
-        : selector_(sel), value_(val), selector_entry_(sel_entry), prop_entry_(info_entry)
-    {
-    }
+                                    const tcamprop1::prop_static_info_float* info_entry,
+                                    const std::shared_ptr<AravisPropertyBackend>& backend);
 
     tcamprop1::prop_static_info_float get_static_info_ext() const final
     {
@@ -292,38 +319,19 @@ public:
 
     PropertyFlags get_flags() const final
     {
-        return value_->get_flags();
+        return value_->get_flags(); // we know the implementation, so we can directly use the flags of the value thingie
     }
 
     tcamprop1::prop_range_float get_range() const final
     {
-        return { 0., 4., 1. / 64. };
+        return { 0., 3.984375, 1. / 64. };   // we know the range
     }
     outcome::result<double> get_default() const final
     {
-        return 1.0;
+        return 1.0; // we know the range and the default
     }
-    outcome::result<double> get_value() const final
-    {
-        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
-        {
-            return sel_res.error();
-        }
-        auto res = value_->get_value();
-        if (!res)
-        {
-            return res.error();
-        }
-        return res.value() / 64.0;
-    }
-    outcome::result<void> set_value(double new_value) final
-    {
-        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
-        {
-            return sel_res.error();
-        }
-        return value_->set_value(new_value * 64.);
-    }
+    outcome::result<double> get_value() const final;
+    outcome::result<void> set_value(double new_value) final;
 
 private:
     std::shared_ptr<IPropertyEnum> selector_;
@@ -331,6 +339,8 @@ private:
     std::string selector_entry_;
 
     const tcamprop1::prop_static_info_float* prop_entry_ = nullptr;
+
+    std::weak_ptr<AravisPropertyBackend> backend_;
 };
 
 
@@ -340,60 +350,23 @@ public:
     balance_ratio_to_wb_channel(const std::shared_ptr<IPropertyEnum>& sel,
                                 const std::shared_ptr<IPropertyFloat>& val,
                                 const std::string& sel_entry,
-                                const tcamprop1::prop_static_info_float* info_entry)
-        : selector_(sel), value_(val), selector_entry_(sel_entry), prop_entry_(info_entry)
-    {
-    }
+                                const tcamprop1::prop_static_info_float* info_entry,
+                                const std::shared_ptr<AravisPropertyBackend>& backend);
 
     tcamprop1::prop_static_info_float get_static_info_ext() const final
     {
         return *prop_entry_;
     }
 
-    PropertyFlags get_flags() const final
-    {
-        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
-        {
-            // do nothing
-            //return sel_res.error();
-        }
-        return value_->get_flags();
-    }
+    PropertyFlags get_flags() const final;
 
-    tcamprop1::prop_range_float get_range() const final
-    {
-        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
-        {
-            // do nothing
-            //return sel_res.error();
-        }
-        return value_->get_range();
-    }
-    outcome::result<double> get_default() const final
+    tcamprop1::prop_range_float get_range() const final;
+    outcome::result<double> get_default() const final   // we know that the default is 1.0 here, so just use it
     {
         return 1.0;
     }
-    outcome::result<double> get_value() const final
-    {
-        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
-        {
-            return sel_res.error();
-        }
-        auto res = value_->get_value();
-        if (!res)
-        {
-            return res.error();
-        }
-        return res.value();
-    }
-    outcome::result<void> set_value(double new_value) final
-    {
-        if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
-        {
-            return sel_res.error();
-        }
-        return value_->set_value(new_value);
-    }
+    outcome::result<double> get_value() const final;
+    outcome::result<void> set_value(double new_value) final;
 
 private:
     std::shared_ptr<IPropertyEnum> selector_;
@@ -401,6 +374,8 @@ private:
     std::string selector_entry_;
 
     const tcamprop1::prop_static_info_float* prop_entry_ = nullptr;
+
+    std::weak_ptr<AravisPropertyBackend> backend_;
 };
 
 } // namespace tcam::aravis

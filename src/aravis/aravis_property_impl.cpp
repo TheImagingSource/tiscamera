@@ -208,41 +208,6 @@ tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node,
 }
 } // namespace
 
-namespace tcam::aravis
-{
-struct aravis_backend_guard
-{
-    explicit aravis_backend_guard(std::weak_ptr<AravisPropertyBackend> cam)
-    {
-        owner_ = cam.lock();
-        if (owner_)
-        {
-            backend_mtx_ = &owner_->get_mutex();
-            backend_mtx_->lock();
-        }
-    }
-    ~aravis_backend_guard()
-    {
-        if (backend_mtx_)
-        {
-            backend_mtx_->unlock();
-        }
-        owner_.reset();
-    }
-
-    explicit operator bool() const noexcept
-    {
-        return owner_ != nullptr;
-    }
-
-private:
-    std::shared_ptr<AravisPropertyBackend> owner_;
-    std::recursive_mutex* backend_mtx_ = nullptr;
-};
-
-
-} // namespace tcam::aravis
-
 tcam::property::PropertyFlags prop_base_impl::get_flags_impl() const
 {
     aravis_backend_guard lck = acquire_backend_guard();
@@ -635,4 +600,113 @@ outcome::result<std::string> AravisPropertyStringImpl::get_value() const
         return consume_GError(err);
 
     return std::string { current_value };
+}
+
+balance_ratio_raw_to_wb_channel::balance_ratio_raw_to_wb_channel(
+    const std::shared_ptr<IPropertyEnum>& sel,
+    const std::shared_ptr<IPropertyInteger>& val,
+    const std::string& sel_entry,
+    const tcamprop1::prop_static_info_float* info_entry,
+    const std::shared_ptr<AravisPropertyBackend>& backend)
+    : selector_(sel), value_(val), selector_entry_(sel_entry), prop_entry_(info_entry),
+      backend_(backend)
+{
+}
+
+outcome::result<double> balance_ratio_raw_to_wb_channel::get_value() const
+{
+    auto guard = aravis_backend_guard::acquire(backend_);
+    if (!guard)
+        return tcam::status::ResourceNotLockable;
+
+    if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
+    {
+        return sel_res.error();
+    }
+    auto res = value_->get_value();
+    if (!res)
+    {
+        return res.error();
+    }
+    return res.value() / 64.0;
+}
+
+outcome::result<void> balance_ratio_raw_to_wb_channel::set_value(double new_value)
+{
+    auto guard = aravis_backend_guard::acquire(backend_);
+    if (!guard)
+        return tcam::status::ResourceNotLockable;
+
+    if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
+    {
+        return sel_res.error();
+    }
+    return value_->set_value(new_value * 64.);
+}
+
+balance_ratio_to_wb_channel::balance_ratio_to_wb_channel(
+    const std::shared_ptr<IPropertyEnum>& sel,
+    const std::shared_ptr<IPropertyFloat>& val,
+    const std::string& sel_entry,
+    const tcamprop1::prop_static_info_float* info_entry,
+    const std::shared_ptr<AravisPropertyBackend>& backend)
+    : selector_(sel), value_(val), selector_entry_(sel_entry), prop_entry_(info_entry),
+      backend_(backend)
+{
+}
+
+tcam::property::PropertyFlags balance_ratio_to_wb_channel::get_flags() const
+{
+    auto guard = aravis_backend_guard::acquire(backend_);
+    if (!guard)
+        return PropertyFlags::None;
+    if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
+    {
+        // do nothing
+        //return sel_res.error();
+    }
+    return value_->get_flags();
+}
+
+tcamprop1::prop_range_float balance_ratio_to_wb_channel::get_range() const
+{
+    auto guard = aravis_backend_guard::acquire(backend_);
+    if (!guard)
+        return {};
+    // We are not absolutely sure what the range is, we ask the control (e.g. cameras could provide a factor > 4.0
+    if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
+    {
+        // do nothing
+        //return sel_res.error();
+    }
+    return value_->get_range();
+}
+
+outcome::result<double> balance_ratio_to_wb_channel::get_value() const
+{
+    auto guard = aravis_backend_guard::acquire(backend_);
+    if (!guard)
+        return tcam::status::ResourceNotLockable;
+    if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
+    {
+        return sel_res.error();
+    }
+    auto res = value_->get_value();
+    if (!res)
+    {
+        return res.error();
+    }
+    return res.value();
+}
+
+outcome::result<void> balance_ratio_to_wb_channel::set_value(double new_value)
+{
+    auto guard = aravis_backend_guard::acquire(backend_);
+    if (!guard)
+        return tcam::status::ResourceNotLockable;
+    if (auto sel_res = selector_->set_value(selector_entry_); !sel_res)
+    {
+        return sel_res.error();
+    }
+    return value_->set_value(new_value);
 }

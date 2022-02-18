@@ -323,17 +323,20 @@ void tcam::AravisDevice::generate_properties_from_genicam()
                 balance_ratio_selector,
                 balance_ratio_float,
                 "Red",
-                &tcamprop1::prop_list::BalanceWhiteRed));
+                &tcamprop1::prop_list::BalanceWhiteRed,
+                backend_));
             properties_.push_back(std::make_shared<tcam::aravis::balance_ratio_to_wb_channel>(
                 balance_ratio_selector,
                 balance_ratio_float,
                 "Green",
-                &tcamprop1::prop_list::BalanceWhiteGreen));
+                &tcamprop1::prop_list::BalanceWhiteGreen,
+                backend_));
             properties_.push_back(std::make_shared<tcam::aravis::balance_ratio_to_wb_channel>(
                 balance_ratio_selector,
                 balance_ratio_float,
                 "Blue",
-                &tcamprop1::prop_list::BalanceWhiteBlue));
+                &tcamprop1::prop_list::BalanceWhiteBlue,
+                backend_));
         }
         else
         {
@@ -347,19 +350,22 @@ void tcam::AravisDevice::generate_properties_from_genicam()
                         balance_ratio_selector,
                         balance_ratio_raw,
                         "Red",
-                        &tcamprop1::prop_list::BalanceWhiteRed));
+                        &tcamprop1::prop_list::BalanceWhiteRed,
+                        backend_));
                 properties_.push_back(
                     std::make_shared<tcam::aravis::balance_ratio_raw_to_wb_channel>(
                         balance_ratio_selector,
                         balance_ratio_raw,
                         "Green",
-                        &tcamprop1::prop_list::BalanceWhiteGreen));
+                        &tcamprop1::prop_list::BalanceWhiteGreen,
+                        backend_));
                 properties_.push_back(
                     std::make_shared<tcam::aravis::balance_ratio_raw_to_wb_channel>(
                         balance_ratio_selector,
                         balance_ratio_raw,
                         "Blue",
-                        &tcamprop1::prop_list::BalanceWhiteBlue));
+                        &tcamprop1::prop_list::BalanceWhiteBlue,
+                        backend_));
             }
         }
     }
