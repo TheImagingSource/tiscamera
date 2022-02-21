@@ -58,18 +58,24 @@ auto tcamprop1_consumer::impl::convert_GError_to_error_code_consumer( GError* er
     switch( code )
     {
     case TCAM_ERROR_SUCCESS: return tcamprop1::status::success;
-    case TCAM_ERROR_UNKNOWN: return tcamprop1::status::parameter_type_incompatible;
+    case TCAM_ERROR_UNKNOWN: return tcamprop1::status::unknown;
+    case TCAM_ERROR_TIMEOUT: return tcamprop1::status::unknown;
+    case TCAM_ERROR_NOT_IMPLEMENTED: return tcamprop1::status::property_is_not_implemented;
+
+    case TCAM_ERROR_PARAMETER_INVALID: return tcamprop1::status::parameter_null;
+
     case TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED: return tcamprop1::status::property_is_not_implemented;
     case TCAM_ERROR_PROPERTY_NOT_AVAILABLE: return tcamprop1::status::property_is_not_available;
     case TCAM_ERROR_PROPERTY_NOT_WRITEABLE: return tcamprop1::status::property_is_locked;
     case TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE: return tcamprop1::status::parameter_type_incompatible;
     case TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE: return tcamprop1::status::parameter_out_ot_range;
-    case TCAM_ERROR_NO_DEVICE_OPEN: return tcamprop1::status::device_not_opened;
-    case TCAM_ERROR_DEVICE_LOST: return tcamprop1::status::device_closed;
-    case TCAM_ERROR_PARAMETER_NULL: return tcamprop1::status::parameter_null;
     case TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE: return tcamprop1::status::property_default_not_available;
+
+    case TCAM_ERROR_DEVICE_NOT_OPENED: return tcamprop1::status::device_not_opened;
+    case TCAM_ERROR_DEVICE_LOST: return tcamprop1::status::device_closed;
+    case TCAM_ERROR_DEVICE_NOT_ACCESSIBLE: return tcamprop1::status::device_closed;
     }
-    return tcamprop1::status::parameter_out_ot_range;
+    return tcamprop1::status::unknown;
 }
 
 auto tcamprop1_consumer::impl::fetch_prop_static_info_str( TcamPropertyBase* node ) -> tcamprop1::prop_static_info_str

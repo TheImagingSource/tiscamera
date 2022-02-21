@@ -17,6 +17,7 @@ namespace
         switch( code )
         {
         case status::success:                                   return { "Success" };
+        case status::unknown:                                   return { "Unknown", std ::errc::not_supported };
         case status::property_is_not_implemented:               return { "Property is not implemented", std::errc::no_such_file_or_directory };
         case status::property_is_not_available:                 return { "Property is not available", std::errc::no_such_file_or_directory };
         case status::property_is_locked:                        return { "Property is locked", std::errc::no_such_file_or_directory };

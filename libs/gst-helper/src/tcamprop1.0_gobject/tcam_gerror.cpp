@@ -11,18 +11,21 @@ static auto map_error( tcamprop1::status err ) -> TcamError
     switch( err )
     {
     case tcamprop1::status::success:                            return TCAM_ERROR_SUCCESS;
-        // TCAM_ERROR_UNKNOWN missing
+    case tcamprop1::status::unknown:                            return TCAM_ERROR_UNKNOWN;
+    case tcamprop1::status::parameter_null:                     return TCAM_ERROR_PARAMETER_INVALID;
+
     case tcamprop1::status::property_is_not_implemented:        return TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED;
     case tcamprop1::status::property_is_not_available:          return TCAM_ERROR_PROPERTY_NOT_AVAILABLE;
     case tcamprop1::status::property_is_locked:                 return TCAM_ERROR_PROPERTY_NOT_WRITEABLE;
     case tcamprop1::status::parameter_out_ot_range:             return TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE;
     case tcamprop1::status::parameter_type_incompatible:        return TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE;
-    case tcamprop1::status::device_not_opened:                  return TCAM_ERROR_NO_DEVICE_OPEN;
-    case tcamprop1::status::device_closed:                      return TCAM_ERROR_DEVICE_LOST;
-    case tcamprop1::status::parameter_null:                     return TCAM_ERROR_PARAMETER_NULL;
+
     case tcamprop1::status::property_is_readonly:               return TCAM_ERROR_PROPERTY_NOT_WRITEABLE;
     case tcamprop1::status::property_default_not_available:     return TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE;
-    case tcamprop1::status::enumeration_property_list_error:    return TCAM_ERROR_UNKNOWN;
+    
+    case tcamprop1::status::enumeration_property_list_error:    return TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE;
+    case tcamprop1::status::device_not_opened:                  return TCAM_ERROR_DEVICE_NOT_OPENED;
+    case tcamprop1::status::device_closed:                      return TCAM_ERROR_DEVICE_LOST;
     }
     return TCAM_ERROR_UNKNOWN;
 }

@@ -8,18 +8,21 @@ namespace tcamprop1
     {
         success = 0x0,	        // generic success
 
-        // unknown
+        unknown,
+
         property_is_not_implemented,
         property_is_not_available,
         property_is_locked,
         parameter_type_incompatible,
         parameter_out_ot_range,
-        device_not_opened,
-        device_closed,
-        parameter_null,
         property_is_readonly,
         property_default_not_available,
-        enumeration_property_list_error,        // failed to match an enum_entry name to an property_range_enumeration entry
+        enumeration_property_list_error, // failed to match an enum_entry name to an property_range_enumeration entry
+
+        device_not_opened,
+        device_closed,
+        
+        parameter_null,
     };
 
     std::error_code         make_error_code( tcamprop1::status e );
