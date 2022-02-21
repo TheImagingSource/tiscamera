@@ -273,7 +273,7 @@ TcamPropertyAccess tcam_property_base_get_access(TcamPropertyBase* self)
     g_return_val_if_fail(TCAM_IS_PROPERTY_BASE(self), 0);
 
     TcamPropertyBaseInterface* iface = TCAM_PROPERTY_BASE_GET_IFACE(self);
-    if (iface->get_access( self ))
+    if (iface->get_access)
     {
         return iface->get_access(self);
     }
