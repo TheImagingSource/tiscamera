@@ -276,6 +276,10 @@ void print_properties(const std::string& serial)
                     {
                         unit = tmp_unit;
                     }
+                    else
+                    {
+                        unit = "n/a";
+                    }
 
                     print_base_description(*base_property);
                     std::cout << "\t\t\tUnit: " << unit << std::endl
@@ -323,6 +327,10 @@ void print_properties(const std::string& serial)
                     if (tmp_unit)
                     {
                         unit = tmp_unit;
+                    }
+                    else
+                    {
+                        unit = "n/a";
                     }
 
                     print_base_description(*base_property);
