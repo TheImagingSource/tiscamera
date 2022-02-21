@@ -246,7 +246,6 @@ void print_properties(const std::string& serial)
 
                     gint64 min;
                     gint64 max;
-                    gint64 def = tcam_property_integer_get_default(integer, &err);
                     gint64 step;
                     tcam_property_integer_get_range(integer, &min, &max, &step, &err);
 
@@ -258,6 +257,28 @@ void print_properties(const std::string& serial)
                         break;
                     }
 
+                    gint64 def = tcam_property_integer_get_default(integer, &err);
+                    std::string def_string = "";
+                    if (err)
+                    {
+                        if (err->code == TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE)
+                        {
+                            def_string = "n/a";
+                            g_error_free(err);
+                            err = nullptr;
+                        }
+                        else
+                        {
+                            std::cerr << err->message << " " << err->code << std::endl;
+                            g_error_free(err);
+                            err = nullptr;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        def_string = std::to_string(def);
+                    }
 
                     gint64 value = tcam_property_integer_get_value(integer, &err);
 
@@ -285,10 +306,11 @@ void print_properties(const std::string& serial)
                     std::cout << "\t\t\tUnit: " << unit << std::endl
                               << "\t\t\tRepresentation: " << intrepresentation_to_nick(tcam_property_integer_get_representation(integer)) << std::endl
                               << "" << std::endl
-                              << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step << std::endl
-                              << "\t\t\tDefault: " << def << std::endl
-                              << "\t\t\tValue: " << value
-                              << std::endl << std::endl;
+                              << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step
+                              << std::endl
+                              << "\t\t\tDefault: " << def_string << std::endl
+                              << "\t\t\tValue: " << value << std::endl
+                              << std::endl;
 
                     break;
 
@@ -299,7 +321,6 @@ void print_properties(const std::string& serial)
 
                     gdouble min;
                     gdouble max;
-                    gdouble def = tcam_property_float_get_default(f, &err);
                     gdouble step;
                     tcam_property_float_get_range(f, &min, &max, &step, &err);
 
@@ -309,6 +330,29 @@ void print_properties(const std::string& serial)
                         g_error_free(err);
                         err = nullptr;
                         break;
+                    }
+
+                    gdouble def = tcam_property_float_get_default(f, &err);
+                    std::string def_string;
+                    if (err)
+                    {
+                        if (err->code == TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE)
+                        {
+                            def_string = "n/a";
+                            g_error_free(err);
+                            err = nullptr;
+                        }
+                        else
+                        {
+                            std::cerr << err->message << std::endl;
+                            g_error_free(err);
+                            err = nullptr;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        def_string = std::to_string(def);
                     }
 
                     gdouble value = tcam_property_float_get_value(f, &err);
@@ -339,7 +383,7 @@ void print_properties(const std::string& serial)
                               << "" << std::endl
                               << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step
                               << std::endl
-                              << "\t\t\tDefault: " << def << std::endl
+                              << "\t\t\tDefault: " << def_string << std::endl
                               << "\t\t\tValue: " << value << std::endl
                               << std::endl;
 
@@ -360,13 +404,29 @@ void print_properties(const std::string& serial)
                     }
 
                     const char* def = tcam_property_enumeration_get_default(e, &err);
+                    std::string def_string;
 
                     if (err)
                     {
-                        std::cerr << name << ": " << err->message << std::endl;
-                        g_error_free(err);
-                        err = nullptr;
-                        break;
+                        if (err->code == TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE)
+                        {
+                            def_string = "n/a";
+                            g_error_free(err);
+                            err = nullptr;
+                        }
+                        else
+                        {
+                            std::cerr << err->message << std::endl;
+                            g_error_free(err);
+                            err = nullptr;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        def_string = "\"";
+                        def_string += def;
+                        def_string += "\"";
                     }
 
                     GSList* enum_entries = tcam_property_enumeration_get_enum_entries(e, &err);
@@ -399,27 +459,15 @@ void print_properties(const std::string& serial)
                     print_base_description(*base_property);
                     std::cout << "" << std::endl
                               << "\t\t\tEntries:" << entries << std::endl
-                              << "\t\t\tDefault: \"" << def << "\"" << std::endl
-                              << "\t\t\tValue: \"" << value << "\""
-                              << std::endl << std::endl;
+                              << "\t\t\tDefault: " << def_string << std::endl
+                              << "\t\t\tValue: \"" << value << "\"" << std::endl
+                              << std::endl;
 
                     break;
                 }
                 case TCAM_PROPERTY_TYPE_BOOLEAN:
                 {
-                    TcamPropertyBoolean* b = TCAM_PROPERTY_BOOLEAN(base_property);
-                    gboolean value = tcam_property_boolean_get_value(b, &err);
-                    gboolean def = tcam_property_boolean_get_default(b, &err);
-
-                    if (err)
-                    {
-                        std::cerr << err->message << std::endl;
-                        g_error_free(err);
-                        err = nullptr;
-                        break;
-                    }
-
-                    auto bool_string = [] (bool bv)
+                    auto bool_string = [](bool bv)
                     {
                         if (bv)
                         {
@@ -428,14 +476,40 @@ void print_properties(const std::string& serial)
                         return "false";
                     };
 
+                    TcamPropertyBoolean* b = TCAM_PROPERTY_BOOLEAN(base_property);
+                    gboolean value = tcam_property_boolean_get_value(b, &err);
+
+                    gboolean def = tcam_property_boolean_get_default(b, &err);
+                    std::string def_string = "";
+
+                    if (err)
+                    {
+                        if (err->code == TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE)
+                        {
+                            def_string = "Not available";
+                            g_error_free(err);
+                            err = nullptr;
+                        }
+                        else
+                        {
+                            std::cerr << err->message << std::endl;
+                            g_error_free(err);
+                            err = nullptr;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        def_string = bool_string(def);
+                    }
+
                     print_base_description(*base_property);
                     std::cout << "" << std::endl
-                              << "\t\t\tDefault: " << bool_string(def) << std::endl
-                              << "\t\t\tValue: " << bool_string(value)
-                              << std::endl << std::endl;
+                              << "\t\t\tDefault: " << def_string << std::endl
+                              << "\t\t\tValue: " << bool_string(value) << std::endl
+                              << std::endl;
 
                     break;
-
                 }
                 case TCAM_PROPERTY_TYPE_COMMAND:
                 {
