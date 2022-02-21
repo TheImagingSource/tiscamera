@@ -153,13 +153,12 @@ auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
     return tcam::framerate_info { min, max };
 }
 
-static auto fetch_FPS_enum_framerates([[maybe_unused]] ArvDevice* dev)
+static auto fetch_FPS_enum_framerates(ArvDevice* dev)
     -> outcome::result<tcam::framerate_info>
 {
     // 2022/02/02 Christopher: I think this is only used for very old cameras, so we can skip this
     // Another Note, this is not complete, I think there were excludes defined somewhere
-#if 0
-
+    GError* error = nullptr;
     // this means either the camera is broken or we have a FPS enum
     // hope for the second and try it
     guint n_fps_values = 0;
@@ -171,7 +170,7 @@ static auto fetch_FPS_enum_framerates([[maybe_unused]] ArvDevice* dev)
         // alternative failed
         // return empty vector and let format handle it
         SPDLOG_ERROR("Unable to determine what framerate settings are used.");
-        return {};
+        return tcam::status::DeviceCouldNotBeOpened;
     }
 
     std::vector<double> ret;
@@ -188,12 +187,7 @@ static auto fetch_FPS_enum_framerates([[maybe_unused]] ArvDevice* dev)
     {
         g_free(fps_values);
     }
-    return tcam::framerate_info{ lst };
-#else
-    SPDLOG_ERROR("Failed to fetch FPS list, because support for cameras with a FPS enumeration are "
-                 "not supported anymore.");
-    return tcam::status::NotImplemented;
-#endif
+    return tcam::framerate_info{ ret };
 }
 
 namespace
@@ -879,42 +873,49 @@ void AravisDevice::generate_video_formats()
 
         SPDLOG_DEBUG("Adding format desc: {} ({:x}) ", desc.description, desc.fourcc);
 
-        for (const auto& scaling_info : scale_.scaling_info_list)
+        if(scale_.scaling_info_list.empty())
         {
-            if (rf.resolution.type == TCAM_RESOLUTION_TYPE_FIXED)
+            res_vec.push_back(rf);
+        }
+        else
+        {
+            for (const auto& scaling_info : scale_.scaling_info_list)
             {
-                if (scaling_info.legal_resolution(sensor_size, rf.resolution.max_size))
+                if (rf.resolution.type == TCAM_RESOLUTION_TYPE_FIXED)
                 {
-                    auto new_rf = rf;
+                    if (scaling_info.legal_resolution(sensor_size, rf.resolution.max_size))
+                    {
+                        auto new_rf = rf;
 
-                    new_rf.resolution.scaling = scaling_info;
+                        new_rf.resolution.scaling = scaling_info;
 
-                    res_vec.push_back(new_rf);
+                        res_vec.push_back(new_rf);
+                    }
                 }
-            }
-            else
-            {
-                // TODO: use TestBinning etc to have values calculated via genicam
-                auto binned_max_size = scaling_info.allowed_max(sensor_size);
-
-                // ensure max is divisible by step
-                binned_max_size.width -= binned_max_size.width % width_step;
-                binned_max_size.height -= binned_max_size.height % height_step;
-
-                tcam_resolution_description res = {
-                    TCAM_RESOLUTION_TYPE_RANGE,
-                    min_resolution, binned_max_size,
-                    (unsigned)width_step, (unsigned)height_step,
-                    scaling_info
-                };
-                // SPDLOG_ERROR("{}x{} max:{}x{} =>",
-                //              new_rf.resolution.min_size.width, new_rf.resolution.min_size.height,
-                //              new_rf.resolution.max_size.width, new_rf.resolution.max_size.height);
-
-                VideoFormat fmt { fcc, binned_max_size, scaling_info, 0 };
-                if (auto framerate_res = get_framerate_info(fmt); !framerate_res.has_error())
+                else
                 {
-                    res_vec.push_back({ res, framerate_res.value().to_list() });
+                    // TODO: use TestBinning etc to have values calculated via genicam
+                    auto binned_max_size = scaling_info.allowed_max(sensor_size);
+
+                    // ensure max is divisible by step
+                    binned_max_size.width -= binned_max_size.width % width_step;
+                    binned_max_size.height -= binned_max_size.height % height_step;
+
+                    tcam_resolution_description res = {
+                        TCAM_RESOLUTION_TYPE_RANGE,
+                        min_resolution, binned_max_size,
+                        (unsigned)width_step, (unsigned)height_step,
+                        scaling_info
+                    };
+                    // SPDLOG_ERROR("{}x{} max:{}x{} =>",
+                    //              new_rf.resolution.min_size.width, new_rf.resolution.min_size.height,
+                    //              new_rf.resolution.max_size.width, new_rf.resolution.max_size.height);
+
+                    VideoFormat fmt { fcc, binned_max_size, scaling_info, 0 };
+                    if (auto framerate_res = get_framerate_info(fmt); !framerate_res.has_error())
+                    {
+                        res_vec.push_back({ res, framerate_res.value().to_list() });
+                    }
                 }
             }
         }
