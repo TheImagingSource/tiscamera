@@ -301,7 +301,7 @@ void print_properties(const std::string& serial)
                               << "\t\t\tRepresentation: " << enum_entry_to_nick(tcam_property_integer_get_representation(integer)) << std::endl
                               << "" << std::endl
                               << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step
-                              << std::endl
+                              << std::endl << std::fixed
                               << "\t\t\tDefault: " << def_string << std::endl
                               << "\t\t\tValue: " << value << std::endl
                               << std::endl;
@@ -376,7 +376,7 @@ void print_properties(const std::string& serial)
                               << "\t\t\tRepresentation: " << enum_entry_to_nick(tcam_property_float_get_representation(f)) << std::endl
                               << "" << std::endl
                               << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step
-                              << std::endl
+                              << std::endl << std::fixed
                               << "\t\t\tDefault: " << def_string << std::endl
                               << "\t\t\tValue: " << value << std::endl
                               << std::endl;
