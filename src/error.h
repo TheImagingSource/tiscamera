@@ -29,22 +29,23 @@ namespace tcam
 enum class status : int
 {
     Success = 0,
+    UndefinedError,
+    Timeout,
+    NotImplemented,
+    InvalidParameter,
+
     DeviceCouldNotBeOpened,
-    DeviceDoesNotExist,
-    DeviceBlocked,
+    DeviceAccessBlocked,
     DeviceLost,
-    PropertyDoesNotExist,
-    PropertyOutOfBounds,
-    PropertyValueDoesNotExist,
-    PropertyIsLocked,
+
+    PropertyNotImplemented,
+    //PropertyNotAvailable,
+    PropertyNotWriteable,
+    PropertyValueOutOfBounds,
     PropertyNoDefaultAvailable,
+
     FormatInvalid,
     ResourceNotLockable,
-    Timeout,
-    UndefinedError,
-    NotImplemented,
-    NotSupported,
-    InvalidParameter,
 };
 
 VISIBILITY_DEFAULT

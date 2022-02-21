@@ -297,7 +297,7 @@ outcome::result<void> AFU050PropertyDoubleImpl::valid_value(double value)
 {
     if (m_min > value || value > m_max)
     {
-        return tcam::status::PropertyOutOfBounds;
+        return tcam::status::PropertyValueOutOfBounds;
     }
 
     return outcome::success();
@@ -370,7 +370,7 @@ outcome::result<void> AFU050PropertyEnumImpl::set_value(std::string_view new_val
             return set_value_int(it->first);
         }
     }
-    return tcam::status::PropertyValueDoesNotExist;
+    return tcam::status::PropertyValueOutOfBounds;
 }
 
 
@@ -378,7 +378,7 @@ outcome::result<void> AFU050PropertyEnumImpl::set_value_int(int64_t new_value)
 {
     if (!valid_value(new_value))
     {
-        return tcam::status::PropertyValueDoesNotExist;
+        return tcam::status::PropertyValueOutOfBounds;
     }
 
     if (auto ptr = m_cam.lock())

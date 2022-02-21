@@ -149,7 +149,7 @@ SoftwarePropertyCommandImpl::SoftwarePropertyCommandImpl(
 outcome::result<void> SoftwarePropertyCommandImpl::execute()
 {
     SPDLOG_WARN("Not implemented. {}", get_internal_name());
-    return tcam::status::NotImplemented;
+    return tcam::status::PropertyNotImplemented;
 }
 
 SoftwarePropertyEnumImpl::SoftwarePropertyEnumImpl(
@@ -181,7 +181,7 @@ outcome::result<void> SoftwarePropertyEnumImpl::set_value(std::string_view new_v
             }
         }
     }
-    return tcam::status::PropertyValueDoesNotExist;
+    return tcam::status::PropertyValueOutOfBounds;
 }
 
 outcome::result<std::string_view> SoftwarePropertyEnumImpl::get_value() const
@@ -192,7 +192,7 @@ outcome::result<std::string_view> SoftwarePropertyEnumImpl::get_value() const
 
         if (value < 0 || value >= static_cast<int64_t>(m_entries.size()))
         {
-            return tcam::status::PropertyOutOfBounds;
+            return tcam::status::PropertyValueOutOfBounds;
         }
 
         return m_entries[value];

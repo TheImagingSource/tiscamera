@@ -535,7 +535,7 @@ outcome::result<void> AravisPropertyEnumImpl::set_value(std::string_view new_val
             return outcome::success();
         }
     }
-    return tcam::status::PropertyValueDoesNotExist;
+    return tcam::status::PropertyValueOutOfBounds;
 }
 
 outcome::result<std::string_view> AravisPropertyEnumImpl::get_value() const
@@ -556,7 +556,7 @@ outcome::result<std::string_view> AravisPropertyEnumImpl::get_value() const
         if (e.value == current_value)
             return e.display_name;
     }
-    return tcam::status::PropertyValueDoesNotExist;
+    return tcam::status::PropertyValueOutOfBounds;
 }
 
 AravisPropertyStringImpl::AravisPropertyStringImpl(

@@ -220,7 +220,7 @@ outcome::result<void> tcam::v4l2::V4L2PropertyIntegerImpl::set_value(int64_t new
                      new_value,
                      range_.min,
                      range_.max);
-        return tcam::status::PropertyOutOfBounds;
+        return tcam::status::PropertyValueOutOfBounds;
     }
     if ((new_value % range_.stp) != 0)
     {
@@ -228,7 +228,7 @@ outcome::result<void> tcam::v4l2::V4L2PropertyIntegerImpl::set_value(int64_t new
                      get_internal_name(),
                      new_value,
                      range_.stp);
-        return tcam::status::PropertyOutOfBounds;
+        return tcam::status::PropertyValueOutOfBounds;
     }
 
     auto tmp = m_converter.to_device(new_value);
@@ -320,7 +320,7 @@ outcome::result<void> tcam::v4l2::V4L2PropertyDoubleImpl::set_value(double new_v
                          new_value,
                          range_.min,
                          range_.max);
-            return tcam::status::PropertyOutOfBounds;
+            return tcam::status::PropertyValueOutOfBounds;
         }
     }
 
@@ -441,7 +441,7 @@ outcome::result<std::string_view> tcam::v4l2::V4L2PropertyEnumImpl::get_value() 
             return entry_name;
         }
     }
-    return tcam::status::PropertyOutOfBounds;
+    return tcam::status::PropertyValueOutOfBounds;
 }
 
 std::vector<std::string> tcam::v4l2::V4L2PropertyEnumImpl::get_entries() const
@@ -474,7 +474,7 @@ outcome::result<int64_t> tcam::v4l2::V4L2PropertyEnumImpl::get_entry_value(
             return entry_value;
         }
     }
-    return tcam::status::PropertyOutOfBounds;
+    return tcam::status::PropertyValueOutOfBounds;
 }
 
 bool tcam::v4l2::V4L2PropertyEnumImpl::should_set_dependent_locked() const
@@ -579,7 +579,7 @@ outcome::result<void> tcam::v4l2::prop_impl_offset_auto_center::set_value(
 
         return outcome::success();
     }
-    return tcam::status::PropertyOutOfBounds;
+    return tcam::status::PropertyValueOutOfBounds;
 }
 
 void tcam::v4l2::prop_impl_offset_auto_center::update_offsets()

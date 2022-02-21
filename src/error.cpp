@@ -41,11 +41,7 @@ constexpr status_code_entry to_entry(int in) noexcept
         {
             return { "Unable to open the device", std::errc::device_or_resource_busy };
         }
-        case tcam::status::DeviceDoesNotExist:
-        {
-            return { "Device does not exist", std::errc::no_such_device };
-        }
-        case tcam::status::DeviceBlocked:
+        case tcam::status::DeviceAccessBlocked:
         {
             return { "Device is in use by another process/user", std::errc::permission_denied };
         }
@@ -53,19 +49,15 @@ constexpr status_code_entry to_entry(int in) noexcept
         {
             return { "Device has been lost", std::errc::owner_dead };
         }
-        case tcam::status::PropertyDoesNotExist:
+        case tcam::status::PropertyNotImplemented:
         {
             return { "Property does not exist", std::errc::invalid_seek };
         }
-        case tcam::status::PropertyOutOfBounds:
+        case tcam::status::PropertyValueOutOfBounds:
         {
             return { "Property value is out of bounds ", std::errc::result_out_of_range };
         }
-        case tcam::status::PropertyValueDoesNotExist:
-        {
-            return { "Not a legal property value", std::errc::invalid_argument };
-        }
-        case tcam::status::PropertyIsLocked:
+        case tcam::status::PropertyNotWriteable:
         {
             return { "Property is locked", std::errc::operation_not_permitted };
         }
@@ -92,10 +84,6 @@ constexpr status_code_entry to_entry(int in) noexcept
         case tcam::status::NotImplemented:
         {
             return { "Not implemented", std::errc::bad_message };
-        }
-        case tcam::status::NotSupported:
-        {
-            return { "Not supported", std::errc::not_supported };
         }
         case tcam::status::InvalidParameter:
         {

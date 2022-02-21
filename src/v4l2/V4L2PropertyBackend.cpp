@@ -45,25 +45,22 @@ static outcome::result<int64_t> v4l2_control_ioctl(int fd, unsigned int request,
     {
         case EBUSY:
         {
-            return tcam::status::DeviceBlocked;
+            return tcam::status::DeviceAccessBlocked;
         }
         case EINTR:
         {
-            return tcam::status::PropertyValueDoesNotExist;
+            return tcam::status::UndefinedError;
         }
         case ERANGE:
         {
-            return tcam::status::PropertyOutOfBounds;
+            return tcam::status::PropertyValueOutOfBounds;
         }
         case ETIMEDOUT:
         {
             return tcam::status::Timeout;
         }
-        default:
-        {
-            return tcam::status::UndefinedError;
-        }
     }
+    return tcam::status::UndefinedError;
 }
 
 

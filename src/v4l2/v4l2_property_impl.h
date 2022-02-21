@@ -328,7 +328,7 @@ public:
     }
     outcome::result<void> set_value(int64_t /*new_value*/) final
     {
-        return tcam::status::PropertyIsLocked;
+        return tcam::status::PropertyNotWriteable;
     }
 
 private:

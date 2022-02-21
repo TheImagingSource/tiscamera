@@ -341,11 +341,11 @@ tcam::status tcam::aravis::translate_error(ArvDeviceError err)
     switch (err)
     {
         case ARV_DEVICE_ERROR_WRONG_FEATURE:
-            return tcam ::status::PropertyValueDoesNotExist;
+            return tcam ::status::PropertyNotImplemented;
         case ARV_DEVICE_ERROR_FEATURE_NOT_FOUND:
-            return tcam ::status::PropertyDoesNotExist;
+            return tcam ::status::PropertyNotImplemented;
         case ARV_DEVICE_ERROR_NOT_CONNECTED:
-            return tcam ::status::DeviceBlocked;
+            return tcam ::status::DeviceAccessBlocked;
         case ARV_DEVICE_ERROR_PROTOCOL_ERROR:
             return tcam ::status::UndefinedError;
         case ARV_DEVICE_ERROR_TRANSFER_ERROR:
@@ -353,15 +353,15 @@ tcam::status tcam::aravis::translate_error(ArvDeviceError err)
         case ARV_DEVICE_ERROR_TIMEOUT:
             return tcam ::status::Timeout;
         case ARV_DEVICE_ERROR_NOT_FOUND:
-            return tcam ::status::DeviceDoesNotExist;
+            return tcam ::status::UndefinedError;
         case ARV_DEVICE_ERROR_INVALID_PARAMETER:
             return tcam::status::InvalidParameter;
         case ARV_DEVICE_ERROR_GENICAM_NOT_FOUND:
             return tcam::status::DeviceCouldNotBeOpened;
         case ARV_DEVICE_ERROR_NO_STREAM_CHANNEL:
-            return tcam::status::DeviceBlocked;
+            return tcam::status::DeviceCouldNotBeOpened;
         case ARV_DEVICE_ERROR_NOT_CONTROLLER:
-            return tcam::status::DeviceBlocked;
+            return tcam::status::DeviceAccessBlocked;
         case ARV_DEVICE_ERROR_UNKNOWN:
             return tcam::status::UndefinedError;
     }
@@ -373,27 +373,27 @@ tcam::status tcam::aravis::translate_error(ArvGcError err)
     switch (err)
     {
         case ARV_GC_ERROR_PROPERTY_NOT_DEFINED:
-            return tcam ::status::PropertyValueDoesNotExist;
+            return tcam ::status::PropertyNotImplemented;
         case ARV_GC_ERROR_PVALUE_NOT_DEFINED:
-            return tcam ::status::PropertyValueDoesNotExist;
+            return tcam ::status::PropertyNotImplemented;
         case ARV_GC_ERROR_INVALID_PVALUE:
-            return tcam ::status::PropertyValueDoesNotExist;
+            return tcam ::status::PropertyNotImplemented;
         case ARV_GC_ERROR_EMPTY_ENUMERATION:
             return tcam ::status::UndefinedError;
         case ARV_GC_ERROR_OUT_OF_RANGE:
-            return tcam ::status::PropertyOutOfBounds;
+            return tcam ::status::PropertyValueOutOfBounds;
         case ARV_GC_ERROR_NO_DEVICE_SET:
             return tcam ::status::DeviceCouldNotBeOpened;
         case ARV_GC_ERROR_NO_EVENT_IMPLEMENTATION:
             return tcam ::status::UndefinedError;
         case ARV_GC_ERROR_NODE_NOT_FOUND:
-            return tcam ::status::PropertyDoesNotExist;
+            return tcam ::status::PropertyNotImplemented;
         case ARV_GC_ERROR_ENUM_ENTRY_NOT_FOUND:
-            return tcam ::status::PropertyValueDoesNotExist;
+            return tcam ::status::PropertyValueOutOfBounds;
         case ARV_GC_ERROR_INVALID_LENGTH:
             return tcam ::status::InvalidParameter;
         case ARV_GC_ERROR_READ_ONLY:
-            return tcam ::status::PropertyIsLocked;
+            return tcam ::status::PropertyNotWriteable;
         case ARV_GC_ERROR_SET_FROM_STRING_UNDEFINED:
             return tcam::status::UndefinedError;
         case ARV_GC_ERROR_GET_AS_STRING_UNDEFINED:

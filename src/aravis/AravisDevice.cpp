@@ -102,39 +102,39 @@ auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
     if (auto res = set_int("TestPixelFormat", fourcc2aravis(fmt.get_fourcc()));
         res != tcam::status::Success)
     {
-        return tcam::status::UndefinedError;
+        return res;
     }
     if (auto res = set_int("TestWidth", fmt.get_size().width); res != status::Success)
     {
-        return tcam::status::UndefinedError;
+        return res;
     }
     if (auto res = set_int("TestHeight", fmt.get_size().height); res != status::Success)
     {
-        return tcam::status::UndefinedError;
+        return res;
     }
     if (has_test_binning_h_)
     {
         if (auto res = set_int("TestBinningHorizontal", fmt.get_scaling().binning_h);
             res != status::Success)
-            return tcam::status::UndefinedError;
+            return res;
     }
     if (has_test_binning_v_)
     {
         if (auto res = set_int("TestBinningVertical", fmt.get_scaling().binning_v);
             res != status::Success)
-            return tcam::status::UndefinedError;
+            return res;
     }
     if (has_test_skipping_h_)
     {
         if (auto res = set_int("TestDecimationHorizontal", fmt.get_scaling().skipping_h);
             res != status::Success)
-            return tcam::status::UndefinedError;
+            return res;
     }
     if (has_test_skipping_v_)
     {
         if (auto res = set_int("TestDecimationVertical", fmt.get_scaling().skipping_v);
             res != status::Success)
-            return tcam::status::UndefinedError;
+            return res;
     }
 
     GError* error = nullptr;
@@ -192,7 +192,7 @@ static auto fetch_FPS_enum_framerates([[maybe_unused]] ArvDevice* dev)
 #else
     SPDLOG_ERROR("Failed to fetch FPS list, because support for cameras with a FPS enumeration are "
                  "not supported anymore.");
-    return tcam::status::NotSupported;
+    return tcam::status::NotImplemented;
 #endif
 }
 
@@ -305,13 +305,13 @@ outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(con
         // this means a stream is active do not touch settings
         SPDLOG_ERROR("Failed to fetch FPS list because the camera is currently open and it does "
                      "not have 'TestPixelFormat'.");
-        return tcam::status::DeviceBlocked;
+        return tcam::status::InvalidParameter;
     }
 
     auto restore_data = restore_data_fetch(arv_camera_, has_offset_);
     if (!restore_data)
     {
-        return tcam::status::DeviceBlocked;
+        return tcam::status::InvalidParameter;
     }
 
     auto s = fmt.get_size();

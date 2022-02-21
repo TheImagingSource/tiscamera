@@ -180,7 +180,7 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
         case emulated::software_prop::ColorTransformGreenToBlue:
         case emulated::software_prop::ColorTransformBlueToBlue:
 
-            return tcam::status::NotImplemented;
+            return tcam::status::PropertyNotImplemented;
 
         case emulated::software_prop::ExposureAuto:
             return m_auto_params.exposure.auto_enabled ? 1 : 0;
@@ -227,7 +227,7 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
         }
     }
     SPDLOG_WARN("Not implemented. ID: {}", prop_id);
-    return tcam::status::NotImplemented;
+    return tcam::status::PropertyNotImplemented;
 }
 
 outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::software_prop prop_id,
@@ -255,7 +255,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         case emulated::software_prop::ColorTransformRedToBlue:
         case emulated::software_prop::ColorTransformGreenToBlue:
         case emulated::software_prop::ColorTransformBlueToBlue:
-            return tcam::status::NotImplemented;
+            return tcam::status::PropertyNotImplemented;
 
         case emulated::software_prop::ExposureAuto:
         {
@@ -294,7 +294,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         {
             if (m_auto_params.iris.auto_enabled)
             {
-                return tcam::status::PropertyIsLocked;
+                return tcam::status::PropertyNotWriteable;
             }
             m_auto_params.iris.val = new_val;
             return m_dev_iris->set_value(new_val);
@@ -340,7 +340,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         }
     }
     SPDLOG_WARN("Not implemented. ID: {} value: {}", prop_id, new_val);
-    return tcam::status::NotImplemented;
+    return tcam::status::PropertyNotImplemented;
 }
 
 
@@ -363,7 +363,7 @@ outcome::result<double> tcam::property::SoftwareProperties::get_double(
         case emulated::software_prop::BalanceWhiteAuto:
         case emulated::software_prop::ClaimBalanceWhiteSoftware:
         case emulated::software_prop::ColorTransformEnable:
-            return tcam::status::NotImplemented;
+            return tcam::status::PropertyNotImplemented;
 
         case emulated::software_prop::ExposureTime:
         {
@@ -422,7 +422,7 @@ outcome::result<double> tcam::property::SoftwareProperties::get_double(
     }
 
     SPDLOG_WARN("not implemented {}", prop_id);
-    return tcam::status::NotImplemented;
+    return tcam::status::PropertyNotImplemented;
 }
 
 
@@ -446,13 +446,13 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
         case emulated::software_prop::BalanceWhiteAuto:
         case emulated::software_prop::ClaimBalanceWhiteSoftware:
         case emulated::software_prop::ColorTransformEnable:
-            return tcam::status::NotImplemented;
+            return tcam::status::PropertyNotImplemented;
 
         case emulated::software_prop::ExposureTime:
         {
             if (m_auto_params.exposure.auto_enabled)
             {
-                return tcam::status::PropertyIsLocked;
+                return tcam::status::PropertyNotWriteable;
             }
             m_auto_params.exposure.val = new_val;
             return m_dev_exposure->set_value(new_val);
@@ -466,7 +466,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
         {
             if (m_exposure_auto_upper_limit_auto)
             {
-                return tcam::status::PropertyIsLocked;
+                return tcam::status::PropertyNotWriteable;
             }
             m_exposure_auto_upper_limit = new_val;
             return outcome::success();
@@ -475,7 +475,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
         {
             if (m_auto_params.gain.auto_enabled)
             {
-                return tcam::status::PropertyIsLocked;
+                return tcam::status::PropertyNotWriteable;
             }
             m_auto_params.gain.value = new_val;
             return m_dev_gain->set_value(new_val);
@@ -516,7 +516,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
         }
     }
     SPDLOG_WARN("not implemented {}", prop_id);
-    return tcam::status::NotImplemented;
+    return tcam::status::PropertyNotImplemented;
 }
 
 

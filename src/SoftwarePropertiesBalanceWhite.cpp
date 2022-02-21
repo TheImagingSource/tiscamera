@@ -130,7 +130,7 @@ outcome::result<double> SoftwareProperties::get_whitebalance_channel(
     }
 
     SPDLOG_ERROR("Not a whitebalance property");
-    return tcam::status::NotSupported;
+    return tcam::status::PropertyNotImplemented;
 }
 
 outcome::result<void> SoftwareProperties::set_whitebalance_channel(emulated::software_prop prop_id,
@@ -159,5 +159,5 @@ outcome::result<void> SoftwareProperties::set_whitebalance_channel(emulated::sof
     }
 
     SPDLOG_ERROR("Not a whitebalance property");
-    return tcam::status::NotSupported;
+    return tcam::status::PropertyNotImplemented;
 }

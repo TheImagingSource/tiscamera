@@ -17,37 +17,34 @@ static TcamError to_TcamError(tcam::status status)
     {
         case tcam::status::Success:
             return TCAM_ERROR_SUCCESS;
+        case tcam::status::UndefinedError:
+            return TCAM_ERROR_UNKNOWN;
+        case tcam::status::Timeout:
+            return TCAM_ERROR_TIMEOUT;
+        case tcam::status::NotImplemented:
+            return TCAM_ERROR_NOT_IMPLEMENTED;
+        case tcam::status::InvalidParameter:
+            return TCAM_ERROR_PARAMETER_INVALID;
+
         case tcam::status::DeviceCouldNotBeOpened:
             return TCAM_ERROR_DEVICE_NOT_OPENED;
         case tcam::status::DeviceLost:
             return TCAM_ERROR_DEVICE_LOST;
-        case tcam::status::PropertyDoesNotExist:
+        case tcam::status::ResourceNotLockable:
+            return TCAM_ERROR_DEVICE_LOST;
+        case tcam::status::DeviceAccessBlocked:
+            return TCAM_ERROR_DEVICE_NOT_ACCESSIBLE;
+
+        case tcam::status::PropertyNotImplemented:
             return TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED;
-        case tcam::status::PropertyOutOfBounds:
+        case tcam::status::PropertyValueOutOfBounds:
             return TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE;
-        case tcam::status::PropertyIsLocked:
+        case tcam::status::PropertyNotWriteable:
             return TCAM_ERROR_PROPERTY_NOT_WRITEABLE;
         case tcam::status::PropertyNoDefaultAvailable:
             return TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE;
-        case tcam::status::ResourceNotLockable:
-            return TCAM_ERROR_DEVICE_LOST;
-        case tcam::status::UndefinedError:
-            return TCAM_ERROR_UNKNOWN;
-        case tcam::status::InvalidParameter:
-            return TCAM_ERROR_PARAMETER_INVALID;
+
         case tcam::status::FormatInvalid:
-            break;
-        case tcam::status::Timeout:
-            break;
-        case tcam::status::NotImplemented:
-            break;
-        case tcam::status::NotSupported:
-            break;
-        case tcam::status::DeviceDoesNotExist:
-            break;
-        case tcam::status::DeviceBlocked:
-            break;
-        case tcam::status::PropertyValueDoesNotExist:
             break;
     }
     return TCAM_ERROR_UNKNOWN;

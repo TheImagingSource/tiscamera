@@ -96,7 +96,7 @@ outcome::result<int64_t> AFU420DeviceBackend::get_int(tcam::afu420::AFU420Proper
         }
         default:
         {
-            return tcam::status::PropertyDoesNotExist;
+            return tcam::status::PropertyNotImplemented;
         }
     }
 }
@@ -237,7 +237,7 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
         }
         default:
         {
-            return tcam::status::PropertyDoesNotExist;
+            return tcam::status::PropertyNotImplemented;
         }
     }
 }
@@ -275,7 +275,7 @@ outcome::result<double> AFU420DeviceBackend::get_float(tcam::afu420::AFU420Prope
         }
         default:
         {
-            return tcam::status::PropertyDoesNotExist;
+            return tcam::status::PropertyNotImplemented;
         }
     }
 }
@@ -328,7 +328,7 @@ outcome::result<void> AFU420DeviceBackend::set_float(tcam::afu420::AFU420Propert
         }
         default:
         {
-            return tcam::status::PropertyDoesNotExist;
+            return tcam::status::PropertyNotImplemented;
         }
     }
 }
