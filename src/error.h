@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "compiler_defines.h"
+
 #include <outcome/outcome.hpp>
 #include <system_error>
 
@@ -45,9 +47,13 @@ enum class status : int
     InvalidParameter,
 };
 
+VISIBILITY_DEFAULT
+
 std::error_code make_error_code(tcam::status e);
 
 std::error_category& error_category();
+
+VISIBILITY_POP
 
 } // namespace tcam
 
