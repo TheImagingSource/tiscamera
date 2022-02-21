@@ -17,29 +17,83 @@
 #include "properties.h"
 
 #include "general.h"
-#include <regex>
 
+#include <algorithm>
 #include <gst/gst.h>
 #include <iomanip>
 #include <iostream>
-#include <vector>
-#include <algorithm>
+#include <memory>
+#include <regex>
 #include <string>
-
 #include <tcam-property-1.0.h>
+#include <vector>
 
 static const size_t name_width = 40;
 
 namespace
 {
 
-const char* access_mode_to_nick(TcamPropertyAccess access)
+const char* bool_string (bool value)
 {
-    GTypeClass* type_class = (GTypeClass*)g_type_class_ref (tcam_property_access_get_type());
-    
-    auto value = g_enum_get_value(G_ENUM_CLASS(type_class), access);
+    if (value)
+    {
+        return "true";
+    }
+    return "false";
+}
 
-    g_type_class_unref(type_class);
+
+template<class T> GType get_GType_for_enum()
+{
+    if constexpr (std::is_same_v<T, TcamPropertyVisibility>)
+    {
+        return tcam_property_visibility_get_type();
+    }
+    else if constexpr (std::is_same_v<T, TcamPropertyAccess>)
+    {
+        return tcam_property_access_get_type();
+    }
+    else if constexpr (std::is_same_v<T, TcamPropertyType>)
+    {
+        return tcam_property_type_get_type();
+    }
+    else if constexpr (std::is_same_v<T, TcamPropertyIntRepresentation>)
+    {
+        return tcam_property_intrepresentation_get_type();
+    }
+    else if constexpr (std::is_same_v<T, TcamPropertyFloatRepresentation>)
+    {
+        return tcam_property_floatrepresentation_get_type();
+    }
+    else
+    {
+        static_assert(
+            (std::is_same_v<
+                 T,
+                 TcamPropertyAccess> || std::is_same_v<T, TcamPropertyVisibility> || std::is_same_v<T, TcamPropertyType> || std::is_same_v<T, TcamPropertyIntRepresentation> || std::is_same_v<T, TcamPropertyFloatRepresentation>),
+            "Failed to find enum type");
+        return -1;
+    }
+}
+
+
+template<class T> std::shared_ptr<GTypeClass> get_GEnumClass_for_enum()
+{
+    std::shared_ptr<GTypeClass> cl;
+    cl.reset((GTypeClass*)g_type_class_ref(get_GType_for_enum<T>()),
+             [](GTypeClass* obj) { g_type_class_unref(obj); });
+
+    if (!cl)
+    {
+        return nullptr;
+    }
+    return cl;
+}
+
+
+template<class T> const char* enum_entry_to_nick(T val)
+{
+    auto value = g_enum_get_value(G_ENUM_CLASS(get_GEnumClass_for_enum<T>().get()), val);
 
     if (!value)
     {
@@ -49,6 +103,7 @@ const char* access_mode_to_nick(TcamPropertyAccess access)
     return value->value_nick;
 }
 
+
 std::string get_flag_desc_string(TcamPropertyBase* prop)
 {
     std::string ret = "Available: ";
@@ -56,11 +111,11 @@ std::string get_flag_desc_string(TcamPropertyBase* prop)
     bool av = tcam_property_base_is_available(prop, &err);
     if (av)
     {
-        ret += "yes";
+        ret += "true";
     }
     else
     {
-        ret += "no";
+        ret += "false";
     }
 
     ret += "\tLocked: ";
@@ -69,14 +124,14 @@ std::string get_flag_desc_string(TcamPropertyBase* prop)
 
     if (lo)
     {
-        ret += "yes";
+        ret += "true";
     }
     else
     {
-        ret += "no";
+        ret += "false";
     }
 
-    const char* access = access_mode_to_nick(tcam_property_base_get_access(prop));
+    const char* access = enum_entry_to_nick(tcam_property_base_get_access(prop));
 
     if (access)
     {
@@ -87,79 +142,18 @@ std::string get_flag_desc_string(TcamPropertyBase* prop)
     return ret;
 }
 
-const char* property_type_to_nick(TcamPropertyType type)
-{
-    GTypeClass* type_class = (GTypeClass*)g_type_class_ref (tcam_property_type_get_type());
-    
-    auto value = g_enum_get_value(G_ENUM_CLASS(type_class), type);
-
-    g_type_class_unref(type_class);
-
-    if (!value)
-    {
-        return nullptr;
-    }
-
-    return value->value_nick;
-}
-
-const char* visibility_to_nick(TcamPropertyVisibility visibility)
-{
-    GTypeClass* type_class = (GTypeClass*)g_type_class_ref (tcam_property_visibility_get_type());
-    
-    auto value = g_enum_get_value(G_ENUM_CLASS(type_class), visibility);
-
-    g_type_class_unref(type_class);
-
-    if (!value)
-    {
-        return nullptr;
-    }
-
-    return value->value_nick;
-}
-
-const char* intrepresentation_to_nick(TcamPropertyIntRepresentation representation)
-{
-    GTypeClass* type_class = (GTypeClass*)g_type_class_ref (tcam_property_intrepresentation_get_type());
-    
-    auto value = g_enum_get_value(G_ENUM_CLASS(type_class), representation);
-
-    g_type_class_unref(type_class);
-
-    if (!value)
-    {
-        return nullptr;
-    }
-
-    return value->value_nick;
-}
-
-const char* floatrepresentation_to_nick(TcamPropertyFloatRepresentation representation)
-{
-    GTypeClass* type_class = (GTypeClass*)g_type_class_ref (tcam_property_floatrepresentation_get_type());
-    
-    auto value = g_enum_get_value(G_ENUM_CLASS(type_class), representation);
-
-    g_type_class_unref(type_class);
-
-    if (!value)
-    {
-        return nullptr;
-    }
-
-    return value->value_nick;
-}
 
 void print_base_description(TcamPropertyBase& base)
 {
-
-    std::cout << std::setw(20) << std::left 
-              << tcam_property_base_get_name(&base) << "\ttype: " << property_type_to_nick(tcam_property_base_get_property_type(&base)) << "\t"
+    std::cout << std::setw(20) << std::left << tcam_property_base_get_name(&base)
+              << "\ttype: " << enum_entry_to_nick(tcam_property_base_get_property_type(&base))
+              << "\t"
               << "Display Name: \"" << tcam_property_base_get_display_name(&base) << "\"\t"
               << "Category: \"" << tcam_property_base_get_category(&base) << "\"" << std::endl
-              << "\t\t\tDescription: \"" << tcam_property_base_get_description(&base) << "\"" << std::endl
-              << "\t\t\tVisibility: " << visibility_to_nick(tcam_property_base_get_visibility(&base)) << std::endl
+              << "\t\t\tDescription: \"" << tcam_property_base_get_description(&base) << "\""
+              << std::endl
+              << "\t\t\tVisibility: "
+              << enum_entry_to_nick(tcam_property_base_get_visibility(&base)) << std::endl
               << "\t\t\t" << get_flag_desc_string(&base) << std::endl;
 }
 
@@ -238,7 +232,7 @@ void print_properties(const std::string& serial)
 
             TcamPropertyType type = tcam_property_base_get_property_type(base_property);
 
-            switch(type)
+            switch (type)
             {
                 case TCAM_PROPERTY_TYPE_INTEGER:
                 {
@@ -304,7 +298,7 @@ void print_properties(const std::string& serial)
 
                     print_base_description(*base_property);
                     std::cout << "\t\t\tUnit: " << unit << std::endl
-                              << "\t\t\tRepresentation: " << intrepresentation_to_nick(tcam_property_integer_get_representation(integer)) << std::endl
+                              << "\t\t\tRepresentation: " << enum_entry_to_nick(tcam_property_integer_get_representation(integer)) << std::endl
                               << "" << std::endl
                               << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step
                               << std::endl
@@ -379,7 +373,7 @@ void print_properties(const std::string& serial)
 
                     print_base_description(*base_property);
                     std::cout << "\t\t\tUnit: " << unit << std::endl
-                              << "\t\t\tRepresentation: " << floatrepresentation_to_nick(tcam_property_float_get_representation(f)) << std::endl
+                              << "\t\t\tRepresentation: " << enum_entry_to_nick(tcam_property_float_get_representation(f)) << std::endl
                               << "" << std::endl
                               << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step
                               << std::endl
@@ -467,15 +461,6 @@ void print_properties(const std::string& serial)
                 }
                 case TCAM_PROPERTY_TYPE_BOOLEAN:
                 {
-                    auto bool_string = [](bool bv)
-                    {
-                        if (bv)
-                        {
-                            return "true";
-                        }
-                        return "false";
-                    };
-
                     TcamPropertyBoolean* b = TCAM_PROPERTY_BOOLEAN(base_property);
                     gboolean value = tcam_property_boolean_get_value(b, &err);
 
