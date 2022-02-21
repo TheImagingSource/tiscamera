@@ -618,7 +618,7 @@ void BoolWidget::update()
         HANDLE_ERROR(err, return );
 
         p_checkbox->blockSignals(true);
-        p_checkbox->toggled(value);
+        p_checkbox->setChecked(value);
         p_checkbox->setEnabled(false);
         p_checkbox->blockSignals(false);
     }
@@ -631,7 +631,7 @@ void BoolWidget::update()
         HANDLE_ERROR(err, return );
 
         p_checkbox->blockSignals(true);
-        p_checkbox->toggled(value);
+        p_checkbox->setChecked(value);
         p_checkbox->setEnabled(!lock);
         p_checkbox->blockSignals(false);
     }
