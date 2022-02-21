@@ -23,15 +23,21 @@ static const GEnumValue _tcam_error_values[] =
 {
     { TCAM_ERROR_SUCCESS,                       "TCAM_ERROR_SUCCESS", "no-error" },
     { TCAM_ERROR_UNKNOWN,                       "TCAM_ERROR_UNKNOWN", "unknown-error" },
+    { TCAM_ERROR_TIMEOUT,                       "TCAM_ERROR_TIMEOUT", "timeout" },
+    { TCAM_ERROR_NOT_IMPLEMENTED,               "TCAM_ERROR_NOT_IMPLEMENTED", "not-implemented" },
+    { TCAM_ERROR_PARAMETER_INVALID,             "TCAM_ERROR_PARAMETER_INVALID", "parameter-invalid" },
+
     { TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED,      "TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED", "property-not-found" },
     { TCAM_ERROR_PROPERTY_NOT_AVAILABLE,        "TCAM_ERROR_PROPERTY_NOT_AVAILABLE", "not-available" },
     { TCAM_ERROR_PROPERTY_NOT_WRITEABLE,        "TCAM_ERROR_PROPERTY_NOT_WRITEABLE", "not-write-able" },
-    { TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE,    "TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE", "incompatible-type" },
     { TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE,   "TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE", "property-value-out-of-range" },
-    { TCAM_ERROR_NO_DEVICE_OPEN,                "TCAM_ERROR_NO_DEVICE_OPEN", "no-device-opened" },
-    { TCAM_ERROR_DEVICE_LOST,                   "TCAM_ERROR_DEVICE_LOST", "device-lost" },
-    { TCAM_ERROR_PARAMETER_NULL,                "TCAM_ERROR_PARAMETER_NULL", "parameter-null" },
     { TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE,"TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE", "property-default-not-available" },
+    { TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE,    "TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE", "incompatible-type" },
+    
+    { TCAM_ERROR_DEVICE_NOT_OPENED,             "TCAM_ERROR_DEVICE_NOT_OPENED", "device-not-opened" },
+    { TCAM_ERROR_DEVICE_LOST,                   "TCAM_ERROR_DEVICE_LOST", "device-lost" },
+    { TCAM_ERROR_DEVICE_NOT_ACCESSIBLE,         "TCAM_ERROR_DEVICE_NOT_ACCESSIBLE", "device-not-accessible" },
+
     { 0, NULL, NULL }
 };
 
