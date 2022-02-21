@@ -18,11 +18,11 @@ static TcamError to_TcamError(tcam::status status)
         case tcam::status::Success:
             return TCAM_ERROR_SUCCESS;
         case tcam::status::DeviceCouldNotBeOpened:
-            return TCAM_ERROR_NO_DEVICE_OPEN;
+            return TCAM_ERROR_DEVICE_NOT_OPENED;
         case tcam::status::DeviceLost:
             return TCAM_ERROR_DEVICE_LOST;
         case tcam::status::PropertyDoesNotExist:
-            return TCAM_ERROR_NO_DEVICE_OPEN;
+            return TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED;
         case tcam::status::PropertyOutOfBounds:
             return TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE;
         case tcam::status::PropertyIsLocked:
@@ -34,7 +34,7 @@ static TcamError to_TcamError(tcam::status status)
         case tcam::status::UndefinedError:
             return TCAM_ERROR_UNKNOWN;
         case tcam::status::InvalidParameter:
-            return TCAM_ERROR_PARAMETER_NULL;
+            return TCAM_ERROR_PARAMETER_INVALID;
         case tcam::status::FormatInvalid:
             break;
         case tcam::status::Timeout:

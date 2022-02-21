@@ -30,7 +30,7 @@ static GSList* gst_tcamsrc_get_tcam_property_names(TcamPropertyProvider* iface, 
         return tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(src), err);
     }
 
-    tcamprop1_gobj::set_gerror(err, TCAM_ERROR_NO_DEVICE_OPEN);
+    tcamprop1_gobj::set_gerror(err, TCAM_ERROR_DEVICE_NOT_OPENED);
 
     return nullptr;
 }
@@ -47,7 +47,7 @@ static TcamPropertyBase* gst_tcamsrc_get_tcam_property(TcamPropertyProvider* ifa
         return tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(src), name, err);
     }
 
-    tcamprop1_gobj::set_gerror(err, TCAM_ERROR_NO_DEVICE_OPEN);
+    tcamprop1_gobj::set_gerror(err, TCAM_ERROR_DEVICE_NOT_OPENED);
 
     return nullptr;
 }
