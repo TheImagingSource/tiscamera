@@ -1,4 +1,5 @@
 
+#include "../../error.h"
 #include "../../libtcam_base.h"
 #include "../../version.h"
 #include "../tcamgstbase/spdlog_gst_sink.h"
@@ -6,10 +7,67 @@
 #include "gsttcamsrc.h"
 #include "mainsrc_gst_device_provider.h"
 
+#include <tcamprop1.0_gobject/tcam_gerror.h>
+
 GST_DEBUG_CATEGORY_STATIC(libtcam_category);
+
+static TcamError to_TcamError(tcam::status status)
+{
+    switch (status)
+    {
+        case tcam::status::Success:
+            return TCAM_ERROR_SUCCESS;
+        case tcam::status::DeviceCouldNotBeOpened:
+            return TCAM_ERROR_NO_DEVICE_OPEN;
+        case tcam::status::DeviceLost:
+            return TCAM_ERROR_DEVICE_LOST;
+        case tcam::status::PropertyDoesNotExist:
+            return TCAM_ERROR_NO_DEVICE_OPEN;
+        case tcam::status::PropertyOutOfBounds:
+            return TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE;
+        case tcam::status::PropertyIsLocked:
+            return TCAM_ERROR_PROPERTY_NOT_WRITEABLE;
+        case tcam::status::PropertyNoDefaultAvailable:
+            return TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE;
+        case tcam::status::ResourceNotLockable:
+            return TCAM_ERROR_DEVICE_LOST;
+        case tcam::status::UndefinedError:
+            return TCAM_ERROR_UNKNOWN;
+        case tcam::status::InvalidParameter:
+            return TCAM_ERROR_PARAMETER_NULL;
+        case tcam::status::FormatInvalid:
+            break;
+        case tcam::status::Timeout:
+            break;
+        case tcam::status::NotImplemented:
+            break;
+        case tcam::status::NotSupported:
+            break;
+        case tcam::status::DeviceDoesNotExist:
+            break;
+        case tcam::status::DeviceBlocked:
+            break;
+        case tcam::status::PropertyValueDoesNotExist:
+            break;
+    }
+    return TCAM_ERROR_UNKNOWN;
+}
+
+static bool error_translator(GError** err, const std::error_code& errc)
+{
+    if (errc.category() != tcam::error_category())
+    {
+        return false;
+    }
+
+    auto err_id = to_TcamError(static_cast<tcam::status>(errc.value()));
+    tcamprop1_gobj::set_gerror(err, err_id, errc.message());
+    return true;
+}
 
 static void init_libtcam_spdlog_binding()
 {
+    tcamprop1_gobj::register_translator(&error_translator);
     libtcam::setup_default_logger();
 
     auto default_sink = tcam::gst::log::create_gst_sink(libtcam_category);
