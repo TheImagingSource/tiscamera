@@ -122,7 +122,7 @@ static const aravis_property_name_map aravis_property_name_mapping_list[] =
     { "DecimationHorizontal", map_type::priv },
     { "DecimationVertical", map_type::priv },
 
-    { "LUTValueAll", map_type::blacklist },
+    { "LUTValueAll", map_type::blacklist }, // blacklisted because this is a unsupported 'Register' GenICam node
 
     // These generate aravis error messages, so just blacklist
     { "WidthMax", map_type::blacklist },
@@ -139,10 +139,18 @@ static const aravis_property_name_map aravis_property_name_mapping_list[] =
     { "BalanceRatioRaw", map_type::priv },
 
     // private/blacklisted because of potential problems with e.g. Width
-    { "UserSetSelector", map_type::priv },
-    { "UserSetLoad", map_type::priv },
-    { "UserSetSave", map_type::priv },
-    { "UserSetDefault", map_type::priv },
+    { "UserSetSelector", map_type::blacklist },
+    { "UserSetLoad", map_type::blacklist },
+    { "UserSetSave", map_type::blacklist },
+    { "UserSetDefault", map_type::blacklist },
+
+    // blacklisted due to problems with serialization
+    { "DeviceUserID", map_type::blacklist },
+    { "LUTEnable", map_type::blacklist },
+    { "LUTIndex", map_type::blacklist },
+    { "LUTSelector", map_type::blacklist },
+    { "LUTValue", map_type::blacklist },
+    // LUTValueAll is already blacklisted
 };
 
 static const aravis_property_name_map unlinked_property_map[] =
