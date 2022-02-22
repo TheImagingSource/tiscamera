@@ -44,7 +44,6 @@ target_link_libraries(tcam-gige-daemon
 PRIVATE
     "${LIBXML2_LIBRARIES}"
     "${GIO_LIBRARIES}"
-    "${PCAP_LIBRARIES}"
     tcam
     tcam-network
     dl

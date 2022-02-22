@@ -47,8 +47,7 @@ Sample output:
    
 .. code-block:: sh
 
-   libzip4 (>= 1.0.1), libglib2.0-0 (>= 2.48.2), libgirepository-1.0-1 (>= 1.46.0), libusb-1.0-0 (>= 2:1.0.20), libuuid1 (>= 2.27), libudev1 (>= 229), libgstreamer1.0-0 (>= 1.8.3), gstreamer1.0-plugins-base (>= 1.8.0), gstreamer1.0-plugins-good (>= 1.8.0), gstreamer1.0-plugins-bad (>= 1.8.0), gstreamer1.0-plugins-ugly (>= 1.8.3), libxml2 (>= 2.9.3), libpcap0.8 (>= 1.7.4-2), python3-pyqt5 (>= 5.5.1), python3-gi (>= 3.20.0)
-
+   libzip5 (>= 1.0.1), libglib2.0-0 (>= 2.48.2), libgirepository-1.0-1 (>= 1.46.0), libusb-1.0-0 (>= 2:1.0.20), libuuid1 (>= 2.27), libudev1 (>= 229), libgstreamer1.0-0 (>= 1.8.3), gstreamer1.0-plugins-base (>= 1.8.0), gstreamer1.0-plugins-good (>= 1.8.0), gstreamer1.0-plugins-bad (>= 1.8.0), gstreamer1.0-plugins-ugly (>= 1.8.3), libxml2 (>= 2.9.3), libqt5widgets5 (>= 5.9.5), libqt5gui5 (>= 5.9.5)
 
 .. list-table:: list arguments
    :header-rows: 1

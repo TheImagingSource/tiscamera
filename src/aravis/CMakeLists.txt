@@ -42,7 +42,6 @@ if (TCAM_BUILD_ARAVIS)
   if (TCAM_INTERNAL_ARAVIS)
 
     find_package(LibXml2 REQUIRED QUIET)
-    find_package(PCAP REQUIRED QUIET)
 
     find_package(GObject REQUIRED QUIET)
     find_package(GIO     REQUIRED QUIET)
@@ -59,7 +58,6 @@ if (TCAM_BUILD_ARAVIS)
 
     target_link_libraries(tcam-backend-aravis PRIVATE "${LIBXML2_LIBRARIES}")
     target_link_libraries(tcam-backend-aravis PRIVATE "${GIO_LIBRARIES}")
-    target_link_libraries(tcam-backend-aravis PRIVATE "${PCAP_LIBRARIES}")
 
   else (TCAM_INTERNAL_ARAVIS)
 
