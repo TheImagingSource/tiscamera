@@ -136,16 +136,16 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_command TriggerSoftware;
 
     extern const prop_static_info_enumeration TriggerActivation;
-    //extern const prop_static_info_enumeration TriggerPolarity;    // Same as TriggerActivation
+    //extern const prop_static_info_enumeration TriggerPolarity;        // replaced with TriggerActivation
 
     extern const prop_static_info_enumeration TriggerSource;
 
-    extern const prop_static_info_enumeration TriggerSelector;    // same as TriggerExposureMode
-    //extern const prop_static_info_enumeration TriggerExposureMode;    // same as TriggerSelector?
-    extern const prop_static_info_integer TriggerBurstCount;
+    extern const prop_static_info_enumeration TriggerSelector;
+    //extern const prop_static_info_enumeration TriggerExposureMode;    // replaced with TriggerSelector?
+    //extern const prop_static_info_integer TriggerBurstCount;          // replaced with AcquisitionBurstFrameCount
     extern const prop_static_info_enumeration TriggerOperation;
     extern const prop_static_info_enumeration TriggerOverlap;
-    extern const prop_static_info_integer AcquisitionBurstFrameCount; // seems to be the same as TriggerBurstCount, rename?
+    extern const prop_static_info_integer AcquisitionBurstFrameCount;
     extern const prop_static_info_integer AcquisitionBurstInterval;
 
     extern const prop_static_info_float TriggerMask;

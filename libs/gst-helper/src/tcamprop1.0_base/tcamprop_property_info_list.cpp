@@ -454,12 +454,12 @@ const prop_static_info_enumeration lst::TriggerSelector = make_Enumeration(
 //    "#TODO"
 //);
 
-const prop_static_info_integer lst::TriggerBurstCount = make_Integer(
-    "TriggerBurstCount",
-    "Special",
-    "Trigger Burst Count",
-    "Controls the count of frames to generate per trigger pulse."
-);
+//const prop_static_info_integer lst::TriggerBurstCount = make_Integer(
+//    "TriggerBurstCount",
+//    "Special",
+//    "Trigger Burst Count",
+//    "Controls the count of frames to generate per trigger pulse."
+//);
 
 const prop_static_info_enumeration lst::TriggerOperation = make_Enumeration(
     "TriggerOperation",

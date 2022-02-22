@@ -95,7 +95,7 @@ static const constexpr tcamprop1::prop_static_info_find_result static_prop_list[
     to_( lst::TriggerSource ),
     //to_( lst::TriggerPolarity ),
     //to_( lst::TriggerExposureMode ),
-    to_( lst::TriggerBurstCount ),
+    //to_( lst::TriggerBurstCount ),
     to_( lst::TriggerOperation ),
     to_( lst::TriggerActivation ),
     to_( lst::TriggerSelector ),
@@ -110,7 +110,7 @@ static const constexpr tcamprop1::prop_static_info_find_result static_prop_list[
     to_( lst::GPIO ),
 
     to_( lst::AcquisitionBurstFrameCount ),
-    to_(lst::AcquisitionBurstInterval),
+    to_( lst::AcquisitionBurstInterval ),
 
     //to_( lst::ActionQueueSize ),
     //to_( lst::ActionSchedulerCancel ),
