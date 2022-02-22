@@ -20,7 +20,7 @@ inline int semaphore_create(const key_t sem_id)
 
     /* create a semaphore set with ID 250, with one semaphore   */
     /* in it, with access only to the owner.                    */
-    int sem_set_id = semget(sem_id, 1, IPC_CREAT | 0600);
+    int sem_set_id = semget(sem_id, 1, IPC_CREAT | 0666);
 
     if (sem_set_id == -1)
     {
