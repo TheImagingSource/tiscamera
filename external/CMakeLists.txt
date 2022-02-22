@@ -46,12 +46,13 @@ if (TCAM_BUILD_ARAVIS)
         OUTPUT_VARIABLE TCAM_MESON_VERSION
         )
 
-      if (TCAM_MESON_VERSION VERSION_LESS 0.53.0)
+      set(TCAM_MESON_MINIMAL_VERSION 0.56.0)
 
-        message(FATAL_ERROR "aravis requires meson => 0.53.0. Set -DTCAM_DOWNLOAD_MESON=ON to have tiscamera download a more recent version.")
+      if (TCAM_MESON_VERSION VERSION_LESS TCAM_MESON_MINIMAL_VERSION)
 
+        message(FATAL_ERROR "aravis requires meson >= ${TCAM_MESON_MINIMAL_VERSION}. Set -DTCAM_DOWNLOAD_MESON=ON to have tiscamera download a more recent version.")
 
-      endif (TCAM_MESON_VERSION VERSION_LESS 0.53.0)
+      endif (TCAM_MESON_VERSION VERSION_LESS TCAM_MESON_MINIMAL_VERSION)
 
       set(TCAM_MESON_CMD meson CACHE INTERNAL "meson build tool executable")
     endif ()
