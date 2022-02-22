@@ -474,10 +474,8 @@ void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((u
         SPDLOG_ERROR("Callback camera instance is NULL.");
         return;
     }
-    // Maybe we could elide this mutex lock, because stop stream guards against this by killing all callbacks before removing the stream variable
-    std::scoped_lock lck0 {
-        self->arv_camera_access_mutex_
-    }; // Note: complete_aravis_stream_buffer can be recursive calls to lock arv_camera_access_
+    // This should not be a problem, because stop stream guards against this by killing all callbacks before removing the stream variable
+    // std::scoped_lock lck0 { self->arv_camera_access_mutex_ }; // disable this becase we call into SoftwareProperties which may lock this mutex and its own mutex too
     if (self->stream_ == NULL)
     {
         return;
