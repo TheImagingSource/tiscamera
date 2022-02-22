@@ -76,6 +76,9 @@ struct TcamPropHelperInteger
         if( !self_ref ) {
             return nullptr;
         }
+        if( self_ref.parent.unit_cache_.empty() ) {
+            return nullptr;
+        }
         return self_ref.parent.unit_cache_.c_str();
     }
     static auto get_representation( TcamPropertyInteger* self ) -> TcamPropertyIntRepresentation {
