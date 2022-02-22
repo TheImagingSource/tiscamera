@@ -378,6 +378,54 @@ private:
     std::weak_ptr<AravisPropertyBackend> backend_;
 };
 
+class focus_auto_enum_override : public IPropertyEnum
+{
+public:
+    focus_auto_enum_override(const std::shared_ptr<IPropertyCommand>& property_to_override,
+                                const std::shared_ptr<AravisPropertyBackend>& backend);
+
+    
+    tcamprop1::prop_static_info get_static_info() const final;
+
+    PropertyFlags get_flags() const final;
+
+    outcome::result<void> set_value(std::string_view new_value) final;
+    outcome::result<std::string_view> get_value() const final
+    {
+        return "Off";
+    }
+    outcome::result<std::string_view> get_default() const final
+    {
+        return "Off";
+    }
+    std::vector<std::string> get_entries() const final
+    {
+        return std::vector<std::string> { "Off", "Once" };
+    }
+private:
+    std::shared_ptr<IPropertyCommand> property_to_override_;
+};
+
+class iris_auto_enum_override : public IPropertyEnum
+{
+public:
+    iris_auto_enum_override(const std::shared_ptr<IPropertyBool>& property_to_override,
+                             const std::shared_ptr<AravisPropertyBackend>& backend);
+
+
+    tcamprop1::prop_static_info get_static_info() const final;
+
+    PropertyFlags get_flags() const final;
+
+    outcome::result<void> set_value(std::string_view new_value) final;
+    outcome::result<std::string_view> get_value() const final;
+    outcome::result<std::string_view> get_default() const final;
+    std::vector<std::string> get_entries() const final;
+
+private:
+    std::shared_ptr<IPropertyBool> property_to_override_;
+};
+
 } // namespace tcam::aravis
 
 VISIBILITY_POP

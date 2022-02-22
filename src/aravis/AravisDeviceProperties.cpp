@@ -22,6 +22,10 @@
 #include "aravis_property_impl.h"
 #include "aravis_utils.h"
 
+
+using namespace tcam::property;
+
+
 namespace
 {
 enum class map_type
@@ -133,10 +137,12 @@ static const aravis_property_name_map aravis_property_name_mapping_list[] =
     { "IRCutFilterEnableElement", "IRCutFilterEnable", map_type::pub },
     { "ExposureAutoHighlighReduction", "ExposureAutoHighlightReduction", map_type::pub }, // This should already be there??
 
-    // Hide BalanceRatio controls, these are private because we overwrite them
+    // These controls get overridden by hand build implementations to either fix type issues or to flatten properties
     { "BalanceRatioSelector", map_type::priv },
     { "BalanceRatio", map_type::priv },
     { "BalanceRatioRaw", map_type::priv },
+    { "FocusAuto", map_type::priv },
+    { "IrisAuto", map_type::priv },
 
     // private/blacklisted because of potential problems with e.g. Width
     { "UserSetSelector", map_type::blacklist },
@@ -291,6 +297,23 @@ void tcam::AravisDevice::index_properties(const char* category, const char* name
     }
 }
 
+static void add_property_after(
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& prop_list,
+    std::string_view name,
+    std::shared_ptr<tcam::property::IPropertyBase> prop)
+{
+    auto f = std::find_if(prop_list.begin(),
+                          prop_list.end(),
+                          [name](const auto& p) { return p->get_name() == name; });
+    if (f != prop_list.end())
+    {
+        prop_list.insert(f + 1, prop);
+    }
+    else
+    {
+        prop_list.push_back(prop);
+    }
+}
 
 void tcam::AravisDevice::generate_properties_from_genicam()
 {
@@ -376,5 +399,22 @@ void tcam::AravisDevice::generate_properties_from_genicam()
                         backend_));
             }
         }
+    }
+
+    auto focus_auto = find_cam_property<tcam::property::IPropertyCommand>("FocusAuto");
+    if (focus_auto)
+    {
+        add_property_after(
+            properties_,
+            "Focus",
+            std::make_shared<tcam::aravis::focus_auto_enum_override>(focus_auto, backend_));
+    }
+    auto iris_auto = find_cam_property<tcam::property::IPropertyBool>("IrisAuto");
+    if (iris_auto)
+    {
+        add_property_after(
+            properties_,
+            "Iris",
+            std::make_shared<tcam::aravis::iris_auto_enum_override>(iris_auto, backend_));
     }
 }

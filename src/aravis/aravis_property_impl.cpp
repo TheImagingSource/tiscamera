@@ -20,6 +20,8 @@
 #include "AravisPropertyBackend.h"
 #include "aravis_utils.h"
 
+#include <tcamprop1.0_base/tcamprop_property_info_list.h>
+
 using namespace tcam::aravis;
 
 namespace
@@ -98,10 +100,14 @@ void update_with_tcamprop1_static_info(std::string_view tcamprop1_name,
 
     if (static_info.type != gc_node_type)
     {
-        SPDLOG_WARN("{} '{}' type != tcamprop1 type of '{}'.",
-                    tcamprop1::to_string(gc_node_type),
-                    tcamprop1_name,
-                    tcamprop1::to_string(static_info.type));
+        if (tcamprop1_name != "FocusAuto" && tcamprop1_name != "IrisAuto")  // skip these properties from warning about the type difference
+        {
+
+            SPDLOG_WARN("{} '{}' type != tcamprop1 type of '{}'.",
+                        tcamprop1::to_string(gc_node_type),
+                        tcamprop1_name,
+                        tcamprop1::to_string(static_info.type));
+        }
     }
 }
 
@@ -709,4 +715,80 @@ outcome::result<void> balance_ratio_to_wb_channel::set_value(double new_value)
         return sel_res.error();
     }
     return value_->set_value(new_value);
+}
+
+focus_auto_enum_override::focus_auto_enum_override(
+    const std::shared_ptr<IPropertyCommand>& property_to_override,
+    const std::shared_ptr<AravisPropertyBackend>& /*backend*/)
+    : property_to_override_(property_to_override)
+{
+}
+
+tcamprop1::prop_static_info focus_auto_enum_override::get_static_info() const
+{
+    return tcamprop1::prop_list::FocusAuto;
+}
+
+tcam::property::PropertyFlags focus_auto_enum_override::get_flags() const
+{
+    return property_to_override_->get_flags();
+}
+
+outcome::result<void> focus_auto_enum_override::set_value(std::string_view new_value)
+{
+    if (new_value == "Once")
+        return property_to_override_->execute();
+    return outcome::success();
+}
+
+iris_auto_enum_override::iris_auto_enum_override(
+    const std::shared_ptr<IPropertyBool>& property_to_override,
+    const std::shared_ptr<AravisPropertyBackend>& /*backend*/)
+    : property_to_override_(property_to_override)
+{
+}
+
+tcamprop1::prop_static_info iris_auto_enum_override::get_static_info() const
+{
+    return property_to_override_->get_static_info();
+}
+
+tcam::property::PropertyFlags iris_auto_enum_override::get_flags() const
+{
+    return property_to_override_->get_flags();
+}
+
+outcome::result<void> iris_auto_enum_override::set_value(std::string_view new_value)
+{
+    if (new_value == "Off") {
+        return property_to_override_->set_value(false);
+    }
+    else if (new_value == "Continuous")
+    {
+        return property_to_override_->set_value(true);
+    }
+    return tcam::status::PropertyValueOutOfBounds;
+}
+
+outcome::result<std::string_view> iris_auto_enum_override::get_value() const
+{
+    auto rval = property_to_override_->get_value();
+    if (!rval.has_value())
+        return rval.error();
+    
+    auto val = rval.value();
+    if (val)
+        return "Continuous";
+    else
+        return "Off";
+}
+
+outcome::result<std::string_view> iris_auto_enum_override::get_default() const
+{
+    return "Off";
+}
+
+std::vector<std::string> iris_auto_enum_override::get_entries() const
+{
+    return std::vector<std::string> { "Off", "Continuous" };
 }
