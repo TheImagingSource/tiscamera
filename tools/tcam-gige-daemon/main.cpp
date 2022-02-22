@@ -38,7 +38,19 @@ std::vector<struct tcam_device_info> get_camera_list()
     key_t shmkey = ftok(LOCK_FILE, 'G');
     key_t sem_key = ftok(LOCK_FILE, 'S');
 
+    if (sem_key < 0)
+    {
+        perror("Unable to get semaphore key.");
+        return {};
+    }
+
     int sem_id = tcam::semaphore_create(sem_key);
+
+    if (sem_id < 0)
+    {
+        perror("Cannot create semaphore");
+        return {};
+    }
 
     int shmid;
     if ((shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644 | IPC_CREAT)) == -1)
