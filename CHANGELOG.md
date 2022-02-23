@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deprecated
+
+- property api tcamprop
+  replacement name tcam-property
+  initial version is 1.0
+- tcamautoexposure gstreamer element - functionality now in tcammainsrc
+- tcamwhitebalance gstreamer element - functionality now in tcammainsrc,
+  application in tcamconvert/tcamdutils
+- tcamautofocus gstreamer element - functionality now in tcammainsrc
+- TCAM_LOG environment variable
+
 ### Added
 
 - Module configuration string to log and version info
@@ -22,58 +33,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcambin property `conversion-element`
   Used to select the internal conversion elements.
   Available options are `tcamconvert`, `tcamdutils`, `tcamdutils-cuda` and `auto`.
-- TCAM_ARV_STREAM_OPTIONS, allows setting of ArvStream options
+- environment variable `TCAM_ARV_STREAM_OPTIONS`, allows setting of ArvStream options
+- environment variable `TCAM_GIGE_HEARTBEAT_MS`, allows setting the heartbeat timeout
 - support for tcamdutils-cuda
 - gstreamer property `tcam-properties`. GstStructure like description of properties.
   See documentation for more details.
+- tiscamera threads now have names for easier identification during debugging.
 
 ### Changed
 
-- gobject introspection API version 1.0
-- gobject introspection API tcamprop renamed to tcam-property
 - aravis API version is now 0.8.
 - output directory for binaries/libraries to <build-dir>/bin and <build-dir>/lib
 - logging now uses spdlog
 - gstreamer buffers are now marked as "live"
 - installation variables are now all defined in CmakeInstall.cmake
-- usage of tcamprop now requires the element to be in GST_STATE_READY or higher.
+- usage of tcamprop now requires the element to be in `GST_STATE_READY` or higher.
 - renamed gige-daemon to tcam-gige-daemon for consistency.
 - tcam-gige-daemon maximum for devices increased to 50.
 - tcammainsrc 'do-timestamp' default changed to false.
-- cmake flag BUILD_ARAVIS now defaults to ON
-- cmake flag BUILD_DOCUMENTATION now defaults to ON
+- cmake flag `TCAM_BUILD_ARAVIS` now defaults to `ON`
+- cmake flag `TCAM_BUILD_DOCUMENTATION` now defaults to `ON`
 - tcam-gigetool rewrite. Now a full C++ implementation.
   Output has changed.
 - tcam-capture rewrite. Now a full C++ implementation.
   Aimed to be as simple as possible.
   For more complex use cases use tis-measure.
+- tcambin version checks do not check for parity anymore,
+  but for minimum version to ensure compatability.
 
 ### Fixed
 
 - "device-lost" notifications could take over 3 minutes for aravis cameras.
   Should now appear within 5 seconds.
+- generated debian packages are now installable when no systemd exists.
+  This is only relevant when compiling with aravis.
 
 ### Removed
 
-- tcamautoexposure gstreamer element - functionality now in tcammainsrc
-- tcamwhitebalance gstreamer element - functionality now in tcammainsrc,
-  application in tcamconvert/tcamdutils
-- tcamautofocus gstreamer element - functionality now in tcammainsrc
+- gstreamer elements tcamautoexposure, tcamwhitebalance, tcamautofocus
 - tcamprop 0.1 API
 - firmware-update
   Moved to a separate repository: https://github.com/theimagingsource/tcam-firmware-update
 - camera-ip-conf
-  Use tcam-gigetool instead
+  Use tcam-gigetool instead.
 - tcambin property `use-dutils`
+  Use tcambin property `conversion-element` instead.
 - environment variable TCAM_ARV_PACKET_REQUEST_RATIO, replaced with TCAM_ARV_STREAM_OPTIONS
 - environment variable TCAM_LOG, replaced with gstreamer logging category `tcam-libtcam`
 - unmaintained unit tests
+- TCAM_LOG environment variable.
+  Use GST_DEBUG category `tcam-libtcam` instead.
 
 ### Known Issues
 
 - Auto Function ROI emulation is missing
 - In camera Auto Functions ROI may not correctly lock properties
-- AFU050: image/jpeg,width=1280,height=960 may cause segfault when used
+- AFU050: image/jpeg,width=1280,height=960 may cause segfault when used.
   Cause is in external library.
 
 ## [0.14.0] - 2021.07.05
