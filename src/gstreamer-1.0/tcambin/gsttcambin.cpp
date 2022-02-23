@@ -18,6 +18,7 @@
 
 #include "../../../libs/tcam-property/src/tcam-property-1.0.h"
 #include "../../version.h"
+#include "../tcamgstbase/version_check.h"
 #include "../tcamgstbase/tcamgstbase.h"
 #include "../tcamgstbase/tcamgstjson.h"
 #include "tcambin_data.h"
@@ -58,29 +59,6 @@ enum
 
 static GstStaticPadTemplate src_template =
     GST_STATIC_PAD_TEMPLATE("src", GST_PAD_SRC, GST_PAD_ALWAYS, GST_STATIC_CAPS_ANY);
-
-
-static bool has_version_parity_with_tiscamera(const std::string& element_name)
-{
-    std::string version = tcam::gst::get_plugin_version(element_name.c_str());
-
-    std::string tcam_version = get_version_major();
-    tcam_version += ".";
-    tcam_version += get_version_minor();
-
-    // Only check major.minor
-    // everything else is potential bugfix
-    if (version.find(tcam_version) == std::string::npos)
-    {
-        // do not post any messages here
-        // element is not yet fully initialized
-        // messages will _not_ be correctly propagated
-
-        return false;
-    }
-
-    return true;
-}
 
 
 static gst_helper::gst_ptr<GstCaps> tcambin_filter_unsupported_caps(const GstCaps& source_caps)
@@ -475,7 +453,7 @@ static void check_and_notify_version_missmatch(GstTcamBin* self)
 
     if (self->data->conversion_info.selected_conversion == TCAM_BIN_CONVERSION_DUTILS)
     {
-        if (has_version_parity_with_tiscamera("tcamdutils"))
+        if (tcam::gst::is_version_compatible_with_tiscamera("tcamdutils"))
         {
             return;
         }
@@ -483,7 +461,7 @@ static void check_and_notify_version_missmatch(GstTcamBin* self)
     }
     else if (self->data->conversion_info.selected_conversion == TCAM_BIN_CONVERSION_CUDA)
     {
-        if (has_version_parity_with_tiscamera("tcamdutils-cuda"))
+        if (tcam::gst::is_version_compatible_with_tiscamera("tcamdutils-cuda"))
         {
             return;
         }
@@ -1067,7 +1045,7 @@ static void gst_tcambin_init(GstTcamBin* self)
     if (factory != nullptr)
     {
         data.conversion_info.have_tcamdutils = true;
-        if (has_version_parity_with_tiscamera("tcamdutils"))
+        if (tcam::gst::is_version_compatible_with_tiscamera("tcamdutils"))
         {
             data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_DUTILS;
         }
@@ -1078,7 +1056,7 @@ static void gst_tcambin_init(GstTcamBin* self)
     if (factory_cuda != nullptr)
     {
         data.conversion_info.have_tcamdutils_cuda = true;
-        if (has_version_parity_with_tiscamera("tcamdutils-cuda"))
+        if (tcam::gst::is_version_compatible_with_tiscamera("tcamdutils-cuda"))
         {
             data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CUDA;
         }
