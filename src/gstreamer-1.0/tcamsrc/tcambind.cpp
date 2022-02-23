@@ -36,19 +36,19 @@ std::pair<std::string, std::string> tcambind::separate_serial_and_type(const std
 static void fill_structure_fixed_resolution(tcam::CaptureDevice& device,
                                             GstStructure* structure,
                                             const tcam::VideoFormatDescription& format,
-                                            const tcam::tcam_resolution_description& res)
+                                            tcam::tcam_image_size max_size,
+                                            const tcam::image_scaling& scaling)
 {
-    GValue fps_list = G_VALUE_INIT;
-    g_value_init(&fps_list, GST_TYPE_LIST);
-
-    //assert(res.max_size == res.min_size);
 
     auto framerate_info_res =
-        device.get_framerate_info(tcam::VideoFormat { format.get_fourcc(), res.max_size });
+        device.get_framerate_info(tcam::VideoFormat { format.get_fourcc(), max_size });
     if (framerate_info_res.has_error())
     {
         return;
     }
+
+    GValue fps_list = G_VALUE_INIT;
+    g_value_init(&fps_list, GST_TYPE_LIST);
 
     for (auto rate : framerate_info_res.value().to_list())
     {
@@ -66,25 +66,25 @@ static void fill_structure_fixed_resolution(tcam::CaptureDevice& device,
     gst_structure_set(structure,
                       "width",
                       G_TYPE_INT,
-                      res.max_size.width,
+                      max_size.width,
                       "height",
                       G_TYPE_INT,
-                      res.max_size.height,
+                      max_size.height,
                       NULL);
 
-    if (!res.scaling.is_default())
+    if (!scaling.is_default())
     {
-        if (res.scaling.binning_h != 1 || res.scaling.binning_v != 1)
+        if (scaling.binning_h != 1 || scaling.binning_v != 1)
         {
             std::string binning =
-                std::to_string(res.scaling.binning_h) + "x" + std::to_string(res.scaling.binning_v);
+                std::to_string(scaling.binning_h) + "x" + std::to_string(scaling.binning_v);
 
             gst_structure_set(structure, "binning", G_TYPE_STRING, binning.c_str(), nullptr);
         }
-        if (res.scaling.skipping_h != 1 || res.scaling.skipping_v != 1)
+        if (scaling.skipping_h != 1 || scaling.skipping_v != 1)
         {
-            std::string skipping = std::to_string(res.scaling.skipping_h) + "x"
-                                   + std::to_string(res.scaling.skipping_v);
+            std::string skipping = std::to_string(scaling.skipping_h) + "x"
+                                   + std::to_string(scaling.skipping_v);
 
             gst_structure_set(structure, "skipping", G_TYPE_STRING, skipping.c_str(), nullptr);
         }
@@ -257,6 +257,33 @@ static void append_gst_structs_for_res_type_range(
     gst_caps_append_structure(caps, structure); // add the structure to the caps
 }
 
+static bool is_totally_ordered_less(const tcam::image_scaling& lhs, const tcam::image_scaling& rhs)
+{
+    if (lhs.binning_h == rhs.binning_h)
+    {
+        if (lhs.binning_v == rhs.binning_v)
+        {
+            if (lhs.skipping_h == rhs.skipping_h)
+            {
+                return lhs.skipping_v < rhs.skipping_v;
+            }
+            return lhs.skipping_h < rhs.skipping_h;
+        }
+        return lhs.binning_v < rhs.binning_v;
+    }
+    return lhs.binning_h < rhs.binning_h;
+}
+
+
+static bool is_totally_ordered_less(const tcam::tcam_image_size& lhs, const tcam::tcam_image_size& rhs)
+{
+    if (lhs.width == rhs.width)
+    {
+        return lhs.height < rhs.height;
+    }
+    return lhs.width < rhs.width;
+}
+
 gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
     tcam::CaptureDevice& device,
     const std::vector<tcam::VideoFormatDescription>& descriptions)
@@ -283,6 +310,20 @@ gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
 
         auto res = desc.get_resolutions();
 
+        std::sort(res.begin(),
+                  res.end(),
+                  [](const tcam::tcam_resolution_description& lhs,
+                     const tcam::tcam_resolution_description& rhs)
+                  {
+                      if (lhs.scaling == rhs.scaling)
+                      {
+                          return is_totally_ordered_less(lhs.max_size,rhs.max_size);
+                      }
+                      if (lhs.scaling.is_default())
+                          return true;
+                      return is_totally_ordered_less(lhs.scaling, rhs.scaling);
+                  });
+
         for (const auto& r : res)
         {
             if (r.type == tcam::TCAM_RESOLUTION_TYPE_RANGE)
@@ -293,7 +334,7 @@ gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
             {
                 GstStructure* structure = gst_structure_from_string(caps_string, NULL);
 
-                fill_structure_fixed_resolution(device, structure, desc, r);
+                fill_structure_fixed_resolution(device, structure, desc, r.max_size, r.scaling);
                 gst_caps_append_structure(caps, structure);
             }
         }
