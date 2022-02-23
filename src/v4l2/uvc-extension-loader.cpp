@@ -198,28 +198,31 @@ std::string tcam::uvc::determine_extension_file(const std::string& pid_in)
     // interpret nuber as hex
     int pid = strtol(pid_in.c_str(), NULL, 16);
 
-    if ((pid & 0x8300) == 0x8300)
-    {
-        filename = "usb2.json";
-    }
-    else if ((pid & 0x8400) == 0x8400
-             || (pid & 0x8500) == 0x8500
-             || (pid & 0x8600) == 0x8600
-             || (pid & 0x8700) == 0x8700)
-    {
-        // usb 23
-        filename = "usb23.json";
-    }
-    else if ((pid & 0x9000) == 0x9000
-             || (pid & 0x9800) == 0x9800)
+    const int PID_BASE_MASK_33U = 0xFC00;
+    const int PID_BASE_MASK_LEGACY = 0xFF00;
+
+    if ((pid & PID_BASE_MASK_33U) == 0x9000
+        || (pid & PID_BASE_MASK_33U) == 0x9800)
     {
         // usb 33/38
         filename = "usb33.json";
     }
-    else if ((pid & 0x9400) == 0x9400)
+    else if ((pid & PID_BASE_MASK_33U) == 0x9400)
     {
         // usb 37
         filename = "usb37.json";
+    }
+    else if ((pid & PID_BASE_MASK_LEGACY) == 0x8300)
+    {
+        filename = "usb2.json";
+    }
+    else if ((pid & PID_BASE_MASK_LEGACY) == 0x8400
+             || (pid & PID_BASE_MASK_LEGACY) == 0x8500
+             || (pid & PID_BASE_MASK_LEGACY) == 0x8600
+             || (pid & PID_BASE_MASK_LEGACY) == 0x8700)
+    {
+        // usb 23
+        filename = "usb23.json";
     }
 
     if (filename.empty())
