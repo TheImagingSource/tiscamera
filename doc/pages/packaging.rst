@@ -86,6 +86,6 @@ To deinstall the package, execute:
 Provides/Conflicts/Replaces
 ===========================
 
-`tiscamera` serves as a drop in replacement for the package `tiscamera-tcamprop`.
+`tiscamera` serves as a drop in replacement for the package `tiscamera-tcamproperty`.
 
-`tiscamera-tcamprop` is a library that only contains the gobject introduction interface that is already contained in tiscamera.
+`tiscamera-tcamproperty` is a library that only contains the gobject introduction interface that is already contained in tiscamera.
