@@ -109,10 +109,6 @@ Arguments
    Load the JSON string and set the properties to the specified values.
    Alternatively a file path to a file containing the JSON description can be used.
 
-   .. todo::
-
-      fix link
-   
    See :ref:`tcam-properties-json` for a JSON description.
 
    .. code-block:: sh

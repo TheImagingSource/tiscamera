@@ -82,10 +82,8 @@ gst_element_set_state() will return a GstStateChangeReturn value.
 tcam-property
 #############
 
-.. todo:: add link to tcamerror
-
 tcam-property handles error by returning a GError to the user.
-All possible error types are defined in the enum TcamError
+All possible error types are defined in the enum :ref:`tcamerror`
 
 .. tabs::
 
