@@ -709,7 +709,17 @@ void MainWindow::fps_tick(double new_fps)
         // if you need the associated caps
         // GstCaps* c = gst_sample_get_caps(sample);
 
-        GstMeta* meta = gst_buffer_get_meta(buffer, g_type_from_name("TcamStatisticsMetaApi"));
+        auto meta_api = g_type_from_name("TcamStatisticsMetaApi");
+
+        if (meta_api == 0)
+        {
+            // this means TcamStatistics is not a registered type
+            // tegrasrc or similar might cause this
+            gst_sample_unref(sample);
+            return;
+        }
+
+        GstMeta* meta = gst_buffer_get_meta(buffer, meta_api);
 
         if (meta)
         {
