@@ -58,6 +58,17 @@ void AravisDevice::determine_scaling_type()
 }
 
 
+static bool image_scaling_comparator(const image_scaling& lhs,const image_scaling& other)
+{
+    auto us = lhs.binning_v + lhs.binning_h + lhs.skipping_v + lhs.skipping_h;
+    auto them = other.binning_v + other.binning_h + other.skipping_v + other.skipping_h;
+    if (us < them)
+    {
+        return true;
+    }
+    return false;
+}
+
 void AravisDevice::generate_scaling_information()
 {
     determine_scaling_type();
@@ -141,7 +152,7 @@ void AravisDevice::generate_scaling_information()
                 }
 
                 // ensure scaling info are always in the order 1x1, 2x2, 4x4
-                std::sort(scale_.scaling_info_list.begin(), scale_.scaling_info_list.end());
+                std::sort(scale_.scaling_info_list.begin(), scale_.scaling_info_list.end(),&image_scaling_comparator);
             }
         }
     }

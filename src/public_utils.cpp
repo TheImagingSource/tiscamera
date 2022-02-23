@@ -100,8 +100,8 @@ std::vector<tcam_image_size> tcam::get_standard_resolutions(const tcam_image_siz
                                                             const tcam_image_size& max)
 {
     static const tcam_image_size resolutions[] = {
-        { 128, 96 },    { 320, 240 },   { 360, 280 },   { 544, 480 },   { 640, 480 },
-        { 352, 288 },   { 576, 480 },   { 720, 480 },   { 960, 720 },   { 1280, 720 },
+        { 128, 96 },    { 320, 240 },   { 352, 288 },   { 360, 280 },   { 544, 480 },
+        { 640, 480 },   { 576, 480 },   { 720, 480 },   { 960, 720 },   { 1280, 720 },
         { 1440, 1080 }, { 1920, 1080 }, { 1920, 1200 }, { 2048, 1152 }, { 2048, 1536 },
         { 2560, 1440 }, { 3840, 2160 }, { 4096, 3072 }, { 7680, 4320 }, { 7680, 4800 },
     };
@@ -110,7 +110,7 @@ std::vector<tcam_image_size> tcam::get_standard_resolutions(const tcam_image_siz
     ret.reserve(std::size(resolutions));
     for (const auto& r : resolutions)
     {
-        if ((min < r) && (r < max))
+        if (tcam::is_inside_dim_range(min,max,r))
         {
             ret.push_back(r);
         }

@@ -74,15 +74,6 @@ struct tcam_image_size
     uint32_t width;
     uint32_t height;
 
-    bool operator<(const struct tcam_image_size& other) const
-    {
-        if (height <= other.height && width <= other.width)
-        {
-            return true;
-        }
-        return false;
-    }
-
     bool operator==(const struct tcam_image_size& other) const
     {
         if (height == other.height && width == other.width)
@@ -98,6 +89,14 @@ struct tcam_image_size
     }
 };
 
+inline bool is_inside_dim_range(tcam_image_size min, tcam_image_size max, tcam_image_size check) noexcept
+{
+    if( min.width > check.width || max.width < check.width )
+        return false;
+    if( min.height > check.height || max.height < check.height )
+        return false;
+    return true;
+}
 
 enum ImageScalingType
 {
@@ -126,17 +125,6 @@ struct image_scaling
 
     int32_t skipping_h = 1;
     int32_t skipping_v = 1;
-
-    bool operator<(const image_scaling& other) const
-    {
-        auto us = binning_v + binning_h + skipping_v + skipping_h;
-        auto them = other.binning_v + other.binning_h + other.skipping_v + other.skipping_h;
-        if (us < them)
-        {
-            return true;
-        }
-        return false;
-    }
 
     bool operator==(const image_scaling& other) const
     {

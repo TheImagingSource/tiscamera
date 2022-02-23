@@ -82,7 +82,7 @@ std::vector<double> VideoFormatDescription::get_framerates(const VideoFormat& fm
         }
         else
         {
-            if ((r.resolution.min_size < s) && (s < r.resolution.max_size))
+            if (tcam::is_inside_dim_range(r.resolution.min_size, r.resolution.max_size, s))
             {
                 return r.framerates;
             }

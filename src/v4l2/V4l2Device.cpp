@@ -914,19 +914,15 @@ void V4l2Device::index_formats()
         std::vector<struct framerate_mapping> rf;
 
         // needed for binning/skipping later on
-        tcam_image_size largest_res = {};
+        tcam_image_size sensor_size = {};
 
         // iterate all framesizes to find largest
         for (frms.index = 0; !tcam_xioctl(m_fd, VIDIOC_ENUM_FRAMESIZES, &frms); frms.index++)
         {
             if (frms.type == V4L2_FRMSIZE_TYPE_DISCRETE)
             {
-                tcam_image_size tmp = {frms.discrete.width, frms.discrete.height};
-                if (largest_res < tmp)
-                {
-                    largest_res.width = frms.discrete.width;
-                    largest_res.height = frms.discrete.height;
-                }
+                sensor_size.width = std::max(frms.discrete.width,sensor_size.width);
+                sensor_size.height = std::max(frms.discrete.height,sensor_size.height);
             }
         }
 
@@ -950,7 +946,7 @@ void V4l2Device::index_formats()
 
                 for (auto s : m_scale.scales)
                 {
-                    if (s.legal_resolution(largest_res, res.max_size))
+                    if (s.legal_resolution(sensor_size, res.max_size))
                     {
                         // being here we have a valid resolution/scaling combo
                         // copy resolution desc and add scaling
