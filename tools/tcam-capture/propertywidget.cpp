@@ -728,3 +728,51 @@ void ButtonWidget::setup_ui()
 
     this->setToolTip(generate_tooltip(TCAM_PROPERTY_BASE(p_prop)));
 }
+
+
+StringWidget::StringWidget(TcamPropertyString* prop, QWidget* parent)
+    : QWidget(parent), p_prop(prop)
+{
+    setup_ui();
+}
+
+void StringWidget::update()
+{
+    GError* err = nullptr;
+
+    auto access = tcam_property_base_get_access(TCAM_PROPERTY_BASE(p_prop));
+
+    static bool issue_ro_warning;
+
+    if (access != TCAM_PROPERTY_ACCESS_RO && !issue_ro_warning)
+    {
+        qWarning("Property '%s' is not read-only. String values are not writeable from tcam-capture.", get_name().toStdString().c_str());
+        issue_ro_warning = true;
+    }
+
+    const char* value = tcam_property_string_get_value(p_prop, &err);
+
+    HANDLE_ERROR(err, return)
+    
+    p_label->setText(value);
+}
+
+void StringWidget::set_in_backend()
+{}
+
+void StringWidget::setup_ui()
+{
+    auto p_layout = new QHBoxLayout();
+
+    setLayout(p_layout);
+
+    p_label = new QLabel();
+    // values should be copyable
+    p_label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+
+    update();
+
+    p_layout->addWidget(p_label);
+
+    setToolTip(generate_tooltip(TCAM_PROPERTY_BASE(p_prop)));
+}

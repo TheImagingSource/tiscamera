@@ -225,4 +225,31 @@ private:
 };
 
 
+class StringWidget : public QWidget, public Property
+{
+    Q_OBJECT
+public:
+    explicit StringWidget(TcamPropertyString* prop, QWidget* parent = nullptr);
+
+    virtual void update() final;
+    virtual void set_in_backend() final;
+
+protected:
+    virtual TcamPropertyBase* get_property_base() const noexcept final
+    {
+        return TCAM_PROPERTY_BASE(p_prop);
+    }
+
+signals:
+
+    void device_lost(const QString& info);
+
+private:
+    void setup_ui();
+
+    QLabel* p_label = nullptr;
+
+    TcamPropertyString* p_prop = nullptr;
+};
+
 #endif // PROPERTYWIDGET_H

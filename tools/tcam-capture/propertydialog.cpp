@@ -202,6 +202,13 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
                 prop_list.push_back(ptr);
                 break;
             }
+            case TCAM_PROPERTY_TYPE_STRING:
+            {
+                auto ptr = new StringWidget(TCAM_PROPERTY_STRING(prop));
+                connect(ptr, &StringWidget::device_lost, this, &PropertyDialog::notify_device_lost);
+                prop_list.push_back(ptr);
+                break;
+            }
         }
     }
 
