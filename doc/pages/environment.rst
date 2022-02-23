@@ -41,6 +41,15 @@ For an overview over available options, please look at `the official aravis docu
 
 Enumerations use the complete enumeration value.
    
+TCAM_UVC_EXTENSION_DIR
+++++++++++++++++++++++
+
+Define additional directories where tcam-uvc-extension-loader should look to extension unit description files.
+
+.. code_block:: sh
+
+   export TCAM_UVC_EXTENSION_DIR=/home/user/share/uvc-extensions/
+
 .. _env_gstreamer:
  
 GStreamer
