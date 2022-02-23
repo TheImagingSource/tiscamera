@@ -259,12 +259,6 @@ void AravisDevice::generate_scaling_information()
                         is.skipping_h = get_value("TestDecimationHorizontal");
                         is.skipping_v = get_value("TestDecimationVertical");
 
-
-                        if (is.is_default())
-                        {
-                            continue;
-                        }
-
                         // SPDLOG_ERROR("testing: {}x{} {}x{}", bin_h, bin_v, sk_h, sk_v);
                         // SPDLOG_ERROR("scale: {}x{} {}x{}", is.binning_h, is.binning_v, is.skipping_h, is.skipping_v);
 
