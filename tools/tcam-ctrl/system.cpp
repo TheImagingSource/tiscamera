@@ -82,10 +82,11 @@ void tcam::tools::print_packages()
     }
 
     check_package("tiscamera");
-    check_package("tiscamera-tcamprop");
-    check_package("tiscamera-dutils");
-    check_package("tispimipisrc");
-    check_package("tistegrasrc");
+    check_package("tiscamera-tcamproperty");
+    check_package("tcamdutils");
+    check_package("tcamdutils-cuda");
+    check_package("tcampimipisrc");
+    check_package("tcamtegrasrc");
     check_package("ic_barcode");
 }
 
