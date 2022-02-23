@@ -26,6 +26,9 @@ add_library(tcamgstbase STATIC
 
 	spdlog_gst_sink.h
 	spdlog_gst_sink.cpp
+
+	version_check.cpp
+	version_check.h
 )
 
 set_project_warnings(tcamgstbase)
