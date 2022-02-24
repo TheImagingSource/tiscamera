@@ -283,7 +283,7 @@ tcamdutils-cuda
 
 Closed source optional transformation and interpretation filter.
 Allows the transformation of bayer 12-bit and 16-bit formats to BGRx 64-Bit.
-Optimized for NVidia Jetson platforms. Part of the package `tis-tegra-filters`.
+Optimized for NVidia Jetson platforms. Part of the package `tcamdutils-cuda`.
 
 .. note::
    When using tcamdutils-cuda with tcambin a version check is undertaken.

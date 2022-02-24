@@ -78,7 +78,7 @@ GST_STATE_NULL -> GST_STATE_READY
 Upon entering this state a device will be opened by the tcamsrc.
 If the requested device cannot be found or opened a `GST_STATE_CHANGE_FAILURE` will be returned.
 
-termagant/tcamdutils/tcamdutils-cuda will be initialized.
+tcamconvert/tcamdutils/tcamdutils-cuda will be initialized.
 
 All properties will be available.
 
