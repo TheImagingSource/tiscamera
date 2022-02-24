@@ -598,6 +598,7 @@ void MainWindow::open_property_dialog()
     window_title += " - ";
     window_title += m_selected_device.serial_long().c_str();
     p_property_dialog->setWindowTitle(window_title);
+    p_property_dialog->setWindowIcon(QIcon(":/images/logo.png"));
 
     p_property_dialog->show();
 }
@@ -629,6 +630,8 @@ void MainWindow::open_about_triggered()
 
     p_about = new AboutDialog(m_config.pipeline, this);
 
+    p_about->setWindowIcon(QIcon(":/images/logo.png"));
+
     if (p_source)
     {
         p_about->set_tcambin(p_source);
@@ -650,6 +653,8 @@ void MainWindow::open_options_triggered()
     OptionsSettings settings;
 
     auto dia = OptionsDialog(m_config, settings, this);
+
+    dia.setWindowIcon(QIcon(":/images/logo.png"));
 
     int res = dia.exec();
 
@@ -825,6 +830,7 @@ GstCaps* MainWindow::open_format_dialog()
     window_title += " - ";
     window_title += m_selected_device.serial_long().c_str();
     format_dialog.setWindowTitle(window_title);
+    format_dialog.setWindowIcon(QIcon(":/images/logo.png"));
 
     format_dialog.setMinimumSize(320, 240);
 
