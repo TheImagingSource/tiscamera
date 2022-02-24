@@ -130,7 +130,10 @@ std::string tcam::gst::create_device_settings(TcamPropertyProvider* tcam)
                     tcam_property_string_get_value(TCAM_PROPERTY_STRING(prop_base), &err);
                 if (!is_prop_error_consume(err, prop_name))
                 {
-                    write_obj.push_back(json::object_t::value_type(prop_name, value));
+                    if (value)
+                    {
+                        write_obj.push_back(json::object_t::value_type(prop_name, value));
+                    }
                 }
                 g_free(value);
                 break;
