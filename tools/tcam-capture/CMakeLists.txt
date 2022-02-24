@@ -100,3 +100,10 @@ target_link_libraries(tcam-capture PRIVATE tcamgstbase)
 install(TARGETS tcam-capture
   DESTINATION ${TCAM_INSTALL_BIN}
   COMPONENT tcam_capture)
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam-capture.desktop"
+  "${CMAKE_CURRENT_BINARY_DIR}/tcam-capture.desktop" @ONLY)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tcam-capture.desktop"
+  DESTINATION "${TCAM_INSTALL_DESKTOP_FILES}"
+  COMPONENT tcam-capture)
