@@ -127,25 +127,29 @@ bool is_blacklisted_gige(const std::string& manufacturer_info)
     {
         return false;
     }
+
     // Strings will in format:
     // @Type=1@Model=MT9P031 C T@
     // @Type=1@Model=MT9P031 C B@
     // @Type=1@Model=MT9P031 C Z12DC@
 
     // type=1 --> 23g
+    // type=2 --> 23g
     // Z --> zoom
-    // B --> zoom
+    // B --> zoom --> board camera
 
     // regex can be really cumbersome
     // blacklist devices,
-    //but allow blacklisted devices with certain properties through
+    // but allow blacklisted devices with certain properties through
 
     static const std::regex blacklist [] = {
         std::regex(".*@Type=1@.*"),
+        std::regex(".*@Type=2@.*"),
     };
 
-    static const std::regex whitelist [] = {
+    static const std::regex whitelist[] = {
         std::regex(".*\\sZ.*"),
+        std::regex(".* B.*"),
     };
 
     for (const auto& bl_entry : blacklist)
@@ -354,7 +358,9 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list()
     {
         if (is_blacklisted_gige(arv_get_device_manufacturer_info(i)))
         {
-            SPDLOG_DEBUG("{} is not a supported device type. Filtering...", arv_get_device_id(i));
+            SPDLOG_DEBUG("{} is not a supported device type. Filtering... {}",
+                         arv_get_device_id(i),
+                         arv_get_device_manufacturer_info(i));
             continue;
         }
 
