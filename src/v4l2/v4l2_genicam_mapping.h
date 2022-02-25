@@ -54,4 +54,6 @@ auto create_mapped_prop(v4l2_device_type dev_type,
                         const std::shared_ptr<tcam::v4l2::V4L2PropertyBackend>& p_property_backend)
     -> std::shared_ptr<tcam::property::IPropertyBase>;
 
+std::vector<uint32_t> get_ordered_v4l2_id_list();
+
 } /* namespace tcam::v4l2 */

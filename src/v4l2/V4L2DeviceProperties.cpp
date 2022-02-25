@@ -61,8 +61,22 @@ void tcam::V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qc
     const auto dev_type = v4l2::get_device_type(this->device);
     const auto product_id = v4l2::fetch_product_id(this->device);
 
-    for (const auto& qctrl : qctrl_list)
+    m_properties.reserve(qctrl_list.size());
+    m_internal_properties.reserve(qctrl_list.size());
+
+    auto ordered_id_list = tcam::v4l2::get_ordered_v4l2_id_list();
+
+    for (auto v4l2_id_to_test : ordered_id_list)
     {
+        auto f = std::find_if(qctrl_list.begin(),
+                              qctrl_list.end(),
+                              [v4l2_id_to_test](auto& ctrl) { return ctrl.id == v4l2_id_to_test; });
+        if (f == qctrl_list.end()) {
+            continue;
+        }
+
+        const auto& qctrl = *f;
+
         auto map_info = tcam::v4l2::find_mapping_info(dev_type, product_id, qctrl.id);
         if (map_info.preferred_v4l2_id && is_id_present(qctrl_list, map_info.preferred_v4l2_id))
         {
@@ -103,7 +117,7 @@ void tcam::V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qc
             }
             else
             {
-                m_properties.push_back(prop_ptr);
+                m_properties.push_back( prop_ptr );
             }
         }
     }
