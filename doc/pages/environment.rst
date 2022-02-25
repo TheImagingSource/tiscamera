@@ -46,9 +46,20 @@ TCAM_UVC_EXTENSION_DIR
 
 Define additional directories where tcam-uvc-extension-loader should look to extension unit description files.
 
-.. code_block:: sh
+.. code-block:: sh
 
    export TCAM_UVC_EXTENSION_DIR=/home/user/share/uvc-extensions/
+
+TCAM_DISABLE_DEVICE_BLACKLIST
++++++++++++++++++++++++++++++
+
+When set internal device filtering for legacy devices will be disabled.  
+Usage at own risk.   
+Devices enabled through this method are not tested and unsupported.
+
+.. code-block::
+
+   export TCAM_DISABLE_DEVICE_BLACKLIST=1
 
 .. _env_gstreamer:
  
