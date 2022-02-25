@@ -235,6 +235,18 @@ double tcam::map_value_ranges(double input_start,
 }
 
 
+bool tcam::is_environment_variable_set (const std::string& name)
+{
+    char* value = getenv(name.c_str());
+
+    if (!value)
+    {
+        return false;
+    }
+    return true;
+}
+
+
 std::string tcam::get_environment_variable(const std::string& name, const std::string& backup)
 {
     char* value = getenv(name.c_str());
@@ -246,6 +258,7 @@ std::string tcam::get_environment_variable(const std::string& name, const std::s
 
     return value;
 }
+
 
 std::optional<int> tcam::get_environment_variable_int(const std::string& name)
 {

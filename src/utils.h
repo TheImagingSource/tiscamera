@@ -89,6 +89,13 @@ double map_value_ranges(double input_start,
 
 
 /**
+ * @brief Check if environment variable is set
+ * @param name - string containing the name of the environment variable to check
+ * @return bool, true if environment variable is set
+ */
+bool is_environment_variable_set (const std::string& name);
+
+    /**
  * @brief retrieve environment variable
  * @param name - name of the variable that shall be retrieved
  * @param backup - value that shall be returned when name is not set
