@@ -41,6 +41,9 @@ std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
         std::regex("8221"), // DFK 73
     };
 
+    // check here to prevent multiple checks while iterating devices
+    bool disable_blacklist = tcam::is_environment_variable_set("TCAM_DISABLE_DEVICE_BLACKLIST");
+
     std::vector<tcam::DeviceInfo> device_list;
 
     /* Create a list of the devices in the 'video4linux' subsystem. */
@@ -119,8 +122,12 @@ std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
 
             if (udev_device_get_sysattr_value(parent_device, "idProduct") != NULL)
             {
-                auto is_blacklisted = [](const char* idp)
+                auto is_blacklisted = [disable_blacklist](const char* idp)
                 {
+                    if (disable_blacklist)
+                    {
+                        return false;
+                    }
                     for (const auto& bl_entry : device_blacklist)
                     {
                         if (std::regex_search(idp, bl_entry))
