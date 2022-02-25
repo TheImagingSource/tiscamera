@@ -17,11 +17,13 @@
 #include "aravis_utils.h"
 
 #include "../logging.h"
+#include "../utils.h"
 
 #include <algorithm> // std::find
 #include <arv.h>
 #include <dutils_img/image_fourcc.h>
 #include <optional>
+#include <regex>
 
 // gige-daemon communication
 
@@ -115,7 +117,54 @@ uint32_t tcam::fourcc2aravis(uint32_t fourcc)
     return 0;
 }
 
+
 static bool not_using_gige_deamon_message_reported = false;
+
+
+bool is_blacklisted_gige(const std::string& manufacturer_info)
+{
+    if (tcam::is_environment_variable_set("TCAM_DISABLE_DEVICE_BLACKLIST"))
+    {
+        return false;
+    }
+    // Strings will in format:
+    // @Type=1@Model=MT9P031 C T@
+    // @Type=1@Model=MT9P031 C B@
+    // @Type=1@Model=MT9P031 C Z12DC@
+
+    // type=1 --> 23g
+    // Z --> zoom
+    // B --> zoom
+
+    // regex can be really cumbersome
+    // blacklist devices,
+    //but allow blacklisted devices with certain properties through
+
+    static const std::regex blacklist [] = {
+        std::regex(".*@Type=1@.*"),
+    };
+
+    static const std::regex whitelist [] = {
+        std::regex(".*\\sZ.*"),
+    };
+
+    for (const auto& bl_entry : blacklist)
+    {
+        if (std::regex_match(manufacturer_info, bl_entry))
+        {
+            for (const auto& wb_entry : whitelist)
+            {
+                if (std::regex_match(manufacturer_info, wb_entry))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    return false;
+}
 
 
 static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
@@ -303,15 +352,20 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list()
     std::vector<DeviceInfo> device_list;
     for (unsigned int i = 0; i < number_devices; ++i)
     {
-        const char* device_id = arv_get_device_id(i);
-        if (device_id == nullptr)
+        if (is_blacklisted_gige(arv_get_device_manufacturer_info(i)))
         {
-            SPDLOG_WARN("Failed to fetch device_id for aravis device index #{}.", i);
+            SPDLOG_DEBUG("{} is not a supported device type. Filtering...", arv_get_device_id(i));
             continue;
         }
 
         tcam_device_info info = { TCAM_DEVICE_TYPE_ARAVIS, "", "", "", "" };
-        strncpy(info.identifier, device_id, sizeof(info.identifier) - 1);
+        auto device_id = arv_get_device_id(i);
+        if (!device_id)
+        {
+            SPDLOG_WARN("Failed to fetch device_id for aravis device index #{}.", i);
+            continue;
+        }
+        memcpy(info.identifier, device_id, sizeof(info.identifier) - 1);
 
         if (const auto device_model = arv_get_device_model(i); device_model != nullptr)
         {
