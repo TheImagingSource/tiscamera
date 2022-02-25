@@ -51,9 +51,11 @@ public:
     explicit OptionsDialog(TcamCaptureConfig& config, const OptionsSettings& settings, QWidget* parent = nullptr);
     ~OptionsDialog();
 
-    TcamCaptureConfig get_config () const;
+    TcamCaptureConfig get_config ();
 
 private:
+
+    TcamCaptureConfig app_config;
 
     Ui::OptionsDialog* ui;
 };

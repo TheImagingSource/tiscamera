@@ -23,7 +23,7 @@
 OptionsDialog::OptionsDialog(TcamCaptureConfig& config,
                              const OptionsSettings& /*settings*/,
                              QWidget* parent)
-    : QDialog(parent), ui(new Ui::OptionsDialog)
+    : QDialog(parent), app_config(config), ui(new Ui::OptionsDialog)
 {
     ui->setupUi(this);
 
@@ -42,12 +42,10 @@ OptionsDialog::~OptionsDialog()
 {}
 
 
-TcamCaptureConfig OptionsDialog::get_config () const
+TcamCaptureConfig OptionsDialog::get_config ()
 {
-    TcamCaptureConfig conf = {};
+    app_config.conversion_element = (ConversionElement)ui->combo_convert_options->currentIndex();
 
-    conf.conversion_element = (ConversionElement)ui->combo_convert_options->currentIndex();
-
-    return conf;
+    return app_config;
 
 }
