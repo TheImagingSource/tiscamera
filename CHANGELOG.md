@@ -7,59 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Deprecated
+### Added
 
-- property api tcamprop
-  replacement name tcam-property
-  initial version is 1.0
+General:
+- internal dependency to fmt
+- environment variable `TCAM_ARV_STREAM_OPTIONS`, allows setting of ArvStream options
+- environment variable `TCAM_GIGE_HEARTBEAT_MS`, allows setting the heartbeat timeout
+- tiscamera threads now have names for easier identification during debugging.
+
+CMake:
+- clang-format definition, call `make clang-format` for formatting
+- cmake flag `TCAM_DOWNLOAD_MESON` for legacy systems to allow modern aravis installations.
+  for the referenced aravis version, meson-version=0.56 is necessary
+- Module configuration string to log and version info
+
+GStreamer:
+- GstTcamDeviceProvider, see documentation for usage.
+- tcamconvert gstreamer conversion element
+  replaces tcamwhitebalance and provides color-conversion services.
+- tcambin property `conversion-element`
+  Used to select the internal conversion elements.
+  Available options are `tcamconvert`, `tcamdutils`, `tcamdutils-cuda` and `auto`.
+- tcambin property `available-caps` to fetch available device caps
+- tcambin/tcamsrc property `tcam-device` to directly set a GstDevice instance to open
+- tcambin/tcamsrc property `tcam-properties`. GstStructure like description of properties.
+  See documentation for more details.
+- tcambin/tcamsrc signals `device-open`/`device-close`
+- support for tcamdutils-cuda
+
+Tools:
+- `tcam-ctrl --packages` - list all installed 'The Imaging Source' packages and their version
+- `tcam-ctrl --version` now lists configured modules
+
+### Changed
+
+General:
+- property API changed to tcam-property-1.0 (part of tiscamera)
+- device list API changed to GstDeviceProvider
+- aravis library minimum version is now 0.8.20.
+- logging now uses spdlog and is enabled via e.g. `GST_DEBUG=tcam*:3`
+- Filter for DFG/USB2pro. Device will no longer appear in device listings.
+
+CMake:
+- output directory for binaries/libraries to <build-dir>/bin and <build-dir>/lib
+- installation variables are now all defined in CMakeInstall.cmake
+- cmake option `TCAM_BUILD_ARAVIS` now defaults to `ON`
+- cmake option `TCAM_BUILD_DOCUMENTATION` now defaults to `ON`
+
+GStreamer:
+- gstreamer buffers are now marked as "live"
+- tcamsrc/tcammainsrc 'do-timestamp' default changed to false.
+- tcambin/tcamsrc/tcammainsrc must be in `GST_STATE_READY` or higher before you can access a device
+- tcambin/tcamsrc `property-state` renamed to `tcam-properties-json`
+- tcambin version tcamdutils does not check for parity anymore,
+  but for minimum version to ensure compatability.
 - tcamautoexposure gstreamer element - functionality now in tcammainsrc
 - tcamwhitebalance gstreamer element - functionality now in tcammainsrc,
   application in tcamconvert/tcamdutils
 - tcamautofocus gstreamer element - functionality now in tcammainsrc
-- TCAM_LOG environment variable
-
-### Added
-
-- Module configuration string to log and version info
-- clang-format definition, call `make clang-format` for formatting
 - gstreamer resolution ranges now contain a step size
-- GstTcamDeviceProvider, see documentation for usage.
-- Filter for DFG/USB2pro. Device will no longer appear in device listings.
-- `tcam-ctrl --packages` - list all installed 'The Imaging Source' packages and their version
-- `tcam-ctrl --version` now lists configured modules
-- tcamconvert gstreamer conversion element
-- internal dependency to fmt
-- cmake flag `TCAM_DOWNLOAD_MESON` for legacy systems to allow modern aravis installations.
-- tcambin property `conversion-element`
-  Used to select the internal conversion elements.
-  Available options are `tcamconvert`, `tcamdutils`, `tcamdutils-cuda` and `auto`.
-- environment variable `TCAM_ARV_STREAM_OPTIONS`, allows setting of ArvStream options
-- environment variable `TCAM_GIGE_HEARTBEAT_MS`, allows setting the heartbeat timeout
-- support for tcamdutils-cuda
-- gstreamer property `tcam-properties`. GstStructure like description of properties.
-  See documentation for more details.
-- tiscamera threads now have names for easier identification during debugging.
 
-### Changed
-
-- aravis API version is now 0.8.
-- output directory for binaries/libraries to <build-dir>/bin and <build-dir>/lib
-- logging now uses spdlog
-- gstreamer buffers are now marked as "live"
-- installation variables are now all defined in CmakeInstall.cmake
-- usage of tcamprop now requires the element to be in `GST_STATE_READY` or higher.
+Tools:
 - renamed gige-daemon to tcam-gige-daemon for consistency.
-- tcam-gige-daemon maximum for devices increased to 50.
-- tcammainsrc 'do-timestamp' default changed to false.
-- cmake flag `TCAM_BUILD_ARAVIS` now defaults to `ON`
-- cmake flag `TCAM_BUILD_DOCUMENTATION` now defaults to `ON`
-- tcam-gigetool rewrite. Now a full C++ implementation.
+- tcam-gigetool rewrite. Now implemented with C++.
   Output has changed.
-- tcam-capture rewrite. Now a full C++ implementation.
+- tcam-gige-daemon maximum for devices increased to 50.
+- tcam-capture rewrite. Now implemented with C++.
   Aimed to be as simple as possible.
   For more complex use cases use tis-measure.
-- tcambin version checks do not check for parity anymore,
-  but for minimum version to ensure compatability.
 
 ### Fixed
 
