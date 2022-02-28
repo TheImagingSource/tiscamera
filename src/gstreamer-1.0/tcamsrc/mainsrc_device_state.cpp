@@ -16,6 +16,7 @@
 
 #include "mainsrc_device_state.h"
 
+#include "../../logging.h"
 #include "mainsrc_tcamprop_impl.h"
 #include "tcambind.h"
 
@@ -162,6 +163,18 @@ void device_state::populate_tcamprop_interface()
         auto prop = tcam::mainsrc::make_wrapper_instance(p);
         if (prop)
         {
+#if !NDEBUG
+            bool found = std::any_of(tcamprop_interface_.tcamprop_properties.begin(),
+                                     tcamprop_interface_.tcamprop_properties.end(),
+                                     [name = prop->get_property_name()](auto& existing_prop)
+                                     { return existing_prop->get_property_name() == name; });
+            if (found)
+            {
+                SPDLOG_WARN("Property with name='{}' already in the property list.",
+                            prop->get_property_name());
+            }
+
+#endif
             tcamprop_interface_.tcamprop_properties.push_back(std::move(prop));
         }
     }
@@ -202,7 +215,7 @@ bool device_state::open_camera()
     }
 
     auto caps =
-        tcambind::convert_videoformatsdescription_to_caps(*dev,dev->get_available_video_formats());
+        tcambind::convert_videoformatsdescription_to_caps(*dev, dev->get_available_video_formats());
     if (caps == nullptr || gst_caps_get_size(caps.get()) == 0)
     {
         GST_ELEMENT_ERROR(parent_, CORE, CAPS, ("Failed to create caps for device."), (NULL));
