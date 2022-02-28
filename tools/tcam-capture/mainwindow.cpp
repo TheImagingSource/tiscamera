@@ -519,6 +519,14 @@ void MainWindow::open_pipeline(FormatHandling handling)
     // Class queries elements automatically
     // at this point all properties have to be available
     m_tcam_collection = TcamCollection(GST_BIN(p_pipeline));
+
+    // if the property dialog is open
+    // refresh its content, so that format
+    // dependent properties are correctly displayed
+    if (p_property_dialog)
+    {
+        p_property_dialog->refresh();
+    }
 }
 
 void MainWindow::close_pipeline()
