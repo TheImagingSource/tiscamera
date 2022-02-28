@@ -118,9 +118,6 @@ The following fields are available:
    * - camera_time_ns
      - uint64
      - Timestamp when the device itself captured the image. Only useful for GigE.
-   * - framerate
-     - double
-     - framerate the backend has.
    * - is_damaged
      - bool
      - Flag noting if the buffer is damaged in any way. Only useful when drop-incomplete-buffer=false.
