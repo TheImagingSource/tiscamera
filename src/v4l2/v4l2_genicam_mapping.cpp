@@ -276,8 +276,8 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
 
     { 0x199e234, &prop_lst::TriggerActivation },                                        // usb23 usb33 "Trigger Polarity"
     { 0x199e235, &prop_lst::TriggerOperation },                                         // usb23 usb33
-    { 0x199e92a, &prop_lst::TriggerOperation, fetch_menu_entries_TriggerOperation },    // usb2 "Trigger Global Reset Shutter" boolean
-    { 0x199e261, &prop_lst::TriggerOperation, fetch_menu_entries_TriggerOperation },    // usb23 usb33 "Trigger Global Reset Release" boolean
+    { 0x199e92a, &prop_lst::TriggerOperation, fetch_menu_entries_TriggerOperation, 0x199e235 },    // usb2 "Trigger Global Reset Shutter" boolean
+    { 0x199e261, &prop_lst::TriggerOperation, fetch_menu_entries_TriggerOperation, 0x199e235 },    // usb23 usb33 "Trigger Global Reset Release" boolean
     { 0x199e236, &prop_lst::TriggerSelector },                                          // usb23 usb33 "Trigger Exposure Mode"
     { 0x199e237, &prop_lst::AcquisitionBurstFrameCount },                               // usb23 usb33 "Trigger Burst Count", we use "AcquisitionBurstFrameCount" as the name for this
     { 0x199e238, &prop_lst::TriggerDebouncer },                                         // usb23 usb33 "Trigger Debounce Time (us)",
