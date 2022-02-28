@@ -593,7 +593,7 @@ void MainWindow::open_property_dialog()
     connect(p_property_dialog, &QDialog::finished, this, &MainWindow::free_property_dialog);
     connect(p_property_dialog, &PropertyDialog::device_lost, this, &MainWindow::device_lost);
 
-    QString window_title = "tcam-capture - property dialog - ";
+    QString window_title = "tcam-capture - Properties - ";
     window_title += m_selected_device.model().c_str();
     window_title += " - ";
     window_title += m_selected_device.serial_long().c_str();
@@ -825,7 +825,7 @@ GstCaps* MainWindow::open_format_dialog()
 
     layout->addWidget(buttonBox);
 
-    QString window_title = "caps selection - ";
+    QString window_title = "Caps - ";
     window_title += m_selected_device.model().c_str();
     window_title += " - ";
     window_title += m_selected_device.serial_long().c_str();
