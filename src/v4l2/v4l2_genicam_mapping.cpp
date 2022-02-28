@@ -480,7 +480,7 @@ static const converter_scale_init_float gain_to_db_factor_P1300 = {
 static const converter_scale_init_float gain_to_db_factor_J003 = {
     [](double v) -> int64_t { return std::lround( std::pow( 10., v / 10.) * 100. ); },
     [](int64_t v) -> double { return 10. * std::log10(v / 100.); },
-    {},
+    { 0 },
     {},
     { 0.020 },
     { 0. }
