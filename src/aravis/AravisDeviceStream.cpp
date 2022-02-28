@@ -309,11 +309,11 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
             {
                 if (!arv_make_thread_high_priority(-10))
                 {
-                    SPDLOG_WARN("Unable to make aravis capture thread real time or high priority");
+                    SPDLOG_INFO("Unable to make aravis capture thread real time or high priority");
                 }
                 else
                 {
-                    SPDLOG_WARN("Aravis capture thread is running in high priority mode");
+                    SPDLOG_INFO("Aravis capture thread is running in high priority mode");
                 }
             }
             else

@@ -384,7 +384,7 @@ void AravisDevice::disable_chunk_mode()
     arv_camera_set_chunk_mode(arv_camera_, false, &err);
     if (err)
     {
-        SPDLOG_WARN("Failed to set 'ChunkModeActive' to false. Ignoring for now. Err: {}",
+        SPDLOG_DEBUG("Failed to set 'ChunkModeActive' to false. Ignoring for now. Err: {}",
                     err->message);
         g_clear_error(&err);
     }
