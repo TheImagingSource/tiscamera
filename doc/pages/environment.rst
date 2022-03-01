@@ -57,7 +57,7 @@ When set internal device filtering for legacy devices will be disabled.
 Usage at own risk.   
 Devices enabled through this method are not tested and unsupported.
 
-.. code-block::
+.. code-block:: sh
 
    export TCAM_DISABLE_DEVICE_BLACKLIST=1
 
