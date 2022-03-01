@@ -157,12 +157,6 @@
             "modules": ["aravis"]
         },
         {
-            "name": "meson",
-            "version": ">= 0.53.0",
-            "phase": "compilation",
-            "modules": ["aravis"]
-        },
-        {
             "name": "libxml2",
             "version": ">= 2.9.3",
             "phase": "runtime",
