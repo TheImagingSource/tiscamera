@@ -161,30 +161,55 @@ void CapsWidget::set_caps(GstCaps* caps)
         return;
     }
 
+    auto c = Caps(caps);
+
     GstStructure* struc = gst_caps_get_structure(caps, 0);
 
-    if (gst_structure_has_field(struc, "binning"))
+    auto format = c.get_formats().at(0);
+
+    this->combo_format_changed(format.c_str());
+
+    if (p_combo_binning && gst_structure_has_field(struc, "binning"))
     {
         const char* binning = gst_structure_get_string(struc, "binning");
-
         p_combo_binning->setCurrentText(binning);
     }
 
-    if (gst_structure_has_field(struc, "skipping"))
+    if (p_combo_skipping && gst_structure_has_field(struc, "skipping"))
     {
         const char* skipping = gst_structure_get_string(struc, "skipping");
         p_combo_skipping->setCurrentText(skipping);
     }
 
     int width, height;
-
     gst_structure_get_int(struc, "width", &width);
     gst_structure_get_int(struc, "height", &height);
 
-    int num, denom;
+    QString value = QString::number(width) + "x" + QString::number(height);
 
+    for (int i = 0; i < p_combo_resolution->count(); i++)
+    {
+        if (p_combo_resolution->itemText(i) == value)
+        {
+            p_combo_resolution->setCurrentIndex(i);
+            break;
+        }
+    }
+    combo_res_changed(value);
+
+    int num, denom;
     gst_structure_get_fraction(struc, "framerate", &num, &denom);
 
+    value = QString::number(num/denom);
+    for (int i = 0; i < p_combo_framerate->count(); i++)
+    {
+        if (p_combo_framerate->itemText(i) == value)
+        {
+            p_combo_framerate->setCurrentIndex(i);
+            break;
+        }
+    }
+    combo_fps_changed(value);
 }
 
 

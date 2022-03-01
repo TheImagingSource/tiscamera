@@ -842,11 +842,16 @@ GstCaps* MainWindow::open_format_dialog()
 
     format_dialog.setMinimumSize(320, 240);
 
+    if (!m_device_caps.isEmpty())
+    {
+        GstCaps* c = gst_caps_from_string(m_device_caps.toStdString().c_str());
+        fmt_widget->set_caps(c);
+        gst_caps_unref(c);
+    }
+
     if (format_dialog.exec() == QDialog::Accepted)
     {
         GstCaps* new_caps = fmt_widget->get_caps();
-
-        //p_selected_caps = new_caps;
         return new_caps;
     }
     return nullptr;
