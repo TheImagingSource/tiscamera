@@ -45,7 +45,7 @@ static const version_desc version_restrictions [] =
     },
     {
         "tcamdutils-cuda",
-        {1, 0, 0, ""},
+        {1, 2, 0, ""},
         {INT_MAX, INT_MAX, INT_MAX, ""},
     },
 };
