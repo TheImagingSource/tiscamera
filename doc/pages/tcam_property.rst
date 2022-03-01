@@ -21,7 +21,7 @@ This object is typically a casted gstreamer element like :ref:`tcambin`, :ref:`t
 Properties require the GStreamer element to be at least in the state `GST_STATE_READY`.
 
 | Properties will become invalid once the GStreamer element enters the state `GST_STATE_NULL`.
-| In such a case :cpp:enumerator:`TCAM_ERROR_NO_DEVICE_OPEN` will be returned.
+| In such a case :cpp:enumerator:`TCAM_ERROR_DEVICE_NOT_OPENED` will be returned.
 
 .. _tcam_property_provider_get_tcam_property_names:
    
@@ -30,16 +30,17 @@ tcam_property_provider_get_tcam_property_names
 
 Retrieve a list of all currently available properties. GstElement must be `GST_STATE_READY` or higher.
 
-:param self: a TcamPropertyProvider  
-:param err: a :c:type:`GError` pointer, may be NULL
-:returns: (element-type utf8) (transfer full): a #GSList
-:retval GSList*: a single linked list containing strings with property names
-:retval NULL: If an error occurs, NULL will be returned
-
-
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: GSList* tcam_property_provider_get_tcam_property_names (TcamPropertyProvider* self, GError** err)
+
+         :param self: :ref:`TcamPropertyProvider` instance that shall be queried
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: (element-type utf8) (transfer full): A list of property names supported by this object
+         :retval GSList*: A single linked list containing strings with property names
+         :retval NULL: If an error occurs, NULL will be returned
 
       .. code-block:: c
 
@@ -58,7 +59,13 @@ Retrieve a list of all currently available properties. GstElement must be `GST_S
          gst_object_unref(source);
 
    .. group-tab:: python
-             
+
+      .. py:method:: Tcam.PropertyProvider.get_tcam_property_names()
+         
+         :exception: May raise an `GLib.Error` when communication with a device fails
+         :returns: A list of property names supported by this object
+         :rtype: List of strings
+
       .. code-block:: python
 
          source = Gst.ElementFactory.make("tcambin", "source")
@@ -85,18 +92,19 @@ Retrieve a specific property instance.
 Property has to be unreferenced after usage.
 
 Instances will return a :ref:`GError` containing ref:`TCAM_ERROR_NO_DEVICE_OPEN` when the providing device is closed or lost.
-                
-:param self: a TcamPropertyProvider
-:param name: a string pointer, naming the property that shall be set.
-:param err: pointer for error retrieval, may be NULL
-:return: a TcamPropertyBase pointer
-:retval: a valid TcamPropertyBase instance
-:retval: NULL in case of an error. Check err.
-
 
 .. tabs::
 
    .. group-tab:: c
+
+       .. c:function:: GSList* tcam_property_provider_get_tcam_property (TcamPropertyProvider* self, const char* name, GError** err)
+
+         :param self: :ref:`TcamPropertyProvider` instance that shall be queried
+         :param name: A string pointer, naming the property which instance shall be returned.
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :return: (transfer full): A :ref:`TcamPropertyBase` object. 
+         :retval NULL: If an error occurs, NULL will be returned. Check err
+         :retval: a valid :ref:`TcamPropertyProvider` instance
 
       .. code-block:: c
 
@@ -124,6 +132,12 @@ Instances will return a :ref:`GError` containing ref:`TCAM_ERROR_NO_DEVICE_OPEN`
 
    .. group-tab:: python
 
+       .. py:method:: Tcam.PropertyProvider.get_tcam_property( name )
+         
+         :param name: Name of the property to return
+         :exception: May raise an `GLib.Error` when communication with a device fails
+         :returns: A instance of a :ref:`TcamPropertyBase` derived object
+
       .. code-block:: python
                      
          tcambin = ....
@@ -145,16 +159,17 @@ tcam_property_provider_set_tcam_boolean
 Convenience function to set the value of a boolean.
 
 For complex applications it is recommended to use a :c:type:`TcamPropertyBoolean` instance instead.
-                
-
-:param self: a TcamPropertyProvider
-:param name: a string pointer, naming the property that shall be set.
-:param value: a boolean with the value that shall be set
-:param err: pointer for error retrieval, may be NULL
 
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: void tcam_property_provider_set_tcam_boolean (TcamPropertyProvider* self, const char* name, gboolean value, GError** err)
+
+         :param self: The :ref:`TcamPropertyProvider` instance
+         :param name: A string, naming the property that shall be set.
+         :param value: The value to set.
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -170,6 +185,12 @@ For complex applications it is recommended to use a :c:type:`TcamPropertyBoolean
          }
 
    .. group-tab:: python
+      
+       .. py:method:: Tcam.PropertyProvider.set_tcam_boolean(name, value)
+         
+         :param name: Name of the property
+         :param value: New value to set
+         :exception: May raise an `GLib.Error` when setting the property fails
 
       .. code-block:: python
                   
@@ -193,15 +214,16 @@ Convenience function to set the value of an integer.
 
 For complex applications it is recommended to use a :c:type:`TcamPropertyInteger` instance instead.
 
-
-:param self: a TcamPropertyProvider
-:param name: a string pointer, naming the property that shall be set.
-:param value: an integer with the value that shall be set
-:param err: pointer for error retrieval, may be NULL
-
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: void tcam_property_provider_set_tcam_integer (TcamPropertyProvider* self, const char* name, gint64 value, GError** err)
+
+         :param self: The :ref:`TcamPropertyProvider` instance
+         :param name: A string, naming the property that shall be set.
+         :param value: The value to set.
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -217,6 +239,12 @@ For complex applications it is recommended to use a :c:type:`TcamPropertyInteger
          }
 
    .. group-tab:: python
+   
+      .. py:method:: Tcam.PropertyProvider.set_tcam_integer(name, value)
+         
+         :param name: Name of the property
+         :param value: New value to set
+         :exception: May raise an `GLib.Error` when setting the property fails
 
       .. code-block:: python
       
@@ -237,14 +265,16 @@ Convenience function to set the value of a float.
 
 For complex applications it is recommended to use a :c:type:`TcamPropertyFloat` instance instead.
                
-:param self: a TcamPropertyProvider
-:param name: a string pointer, naming the property that shall be set.
-:param value: a double with the value that shall be set
-:param err: pointer for error retrieval, may be NULL
-
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: void tcam_property_provider_set_tcam_float (TcamPropertyProvider* self, const char* name, gdouble value, GError** err)
+
+         :param self: The :ref:`TcamPropertyProvider` instance
+         :param name: A string, naming the property that shall be set.
+         :param value: The value to set.
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -261,6 +291,12 @@ For complex applications it is recommended to use a :c:type:`TcamPropertyFloat` 
 
    .. group-tab:: python
 
+       .. py:method:: Tcam.PropertyProvider.set_tcam_float(name, value)
+         
+         :param name: Name of the property
+         :param value: New value to set
+         :exception: May raise an `GLib.Error` when setting the property fails
+
       .. code-block:: python
                   
          tcambin = ....
@@ -271,8 +307,6 @@ For complex applications it is recommended to use a :c:type:`TcamPropertyFloat` 
              # error handling
 
 
-
-             
 .. _tcam_property_provider_set_tcam_enumeration:
                 
 tcam_property_provider_set_tcam_enumeration
@@ -282,15 +316,16 @@ Convenience function to set the value of an enum.
 
 For complex applications it is recommended to use a :c:type:`TcamPropertyEnumeration` instance instead.
 
-
-:param self: a TcamPropertyProvider
-:param name: a string pointer, naming the property that shall be set.
-:param value: a string with the value that shall be set
-:param err: pointer for error retrieval, may be NULL
-
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: void tcam_property_provider_set_tcam_enumeration (TcamPropertyProvider* self, const char* name, const char* value, GError** err)
+
+         :param self: The :ref:`TcamPropertyProvider` instance
+         :param name: A string, naming the property that shall be set.
+         :param value: The string of the enumeration entry to set.
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -306,6 +341,12 @@ For complex applications it is recommended to use a :c:type:`TcamPropertyEnumera
          }
 
    .. group-tab:: python
+   
+       .. py:method:: Tcam.PropertyProvider.set_tcam_enumeration(name, value)
+         
+         :param name: Name of the property
+         :param value: New value to set
+         :exception: May raise an `GLib.Error` when setting the property fails
 
       .. code-block:: python
                   
@@ -324,20 +365,20 @@ For complex applications it is recommended to use a :c:type:`TcamPropertyEnumera
                 
 tcam_property_provider_set_tcam_command
 ---------------------------------------
-                
 
 Convenience function to execute a command.
 
 For complex applications it is recommended to use a :ref:`TcamPropertyCommand` instance instead.
 
-
-:param self: a TcamPropertyProvider
-:param name: a string pointer, naming the property that shall be set.
-:param err: pointer for error retrieval, may be NULL
-                
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: void tcam_property_provider_set_tcam_command (TcamPropertyProvider* self, const char* name, GError** err)
+
+         :param self: The :ref:`TcamPropertyProvider` instance
+         :param name: A string, naming the property that shall be set.
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -352,6 +393,11 @@ For complex applications it is recommended to use a :ref:`TcamPropertyCommand` i
          }
 
    .. group-tab:: python
+      
+       .. py:method:: Tcam.PropertyProvider.set_tcam_command(name)
+         
+         :param name: Name of the property
+         :exception: May raise an `GLib.Error` when setting the property fails
 
       .. code-block:: python
                   
@@ -372,16 +418,16 @@ Convenience function to retrieve the value of a boolean property.
 
 For complex applications it is recommended to use a :ref:`TcamPropertyBoolean` instance instead.
 
-
-:param self: a TcamPropertyProvider
-:param name: a string pointer, naming the property that shall be queried.
-:param err: pointer for error retrieval, may be NULL
-:returns: value of the boolean property
-:retval: gboolean
-                
 .. tabs::
 
    .. group-tab:: c
+       
+       .. c:function:: gboolean tcam_property_provider_get_tcam_boolean (TcamPropertyProvider* self, const char* name, GError** err)
+
+         :param self: The :ref:`TcamPropertyProvider` instance
+         :param name: A string, naming the property that shall be retrieved.
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: The value of the property or on error an unspecified value.
 
       .. code-block:: c
 
@@ -396,7 +442,13 @@ For complex applications it is recommended to use a :ref:`TcamPropertyBoolean` i
          }
 
    .. group-tab:: python
-
+      
+       .. py:method:: Tcam.PropertyProvider.get_tcam_boolean(name)
+         
+         :param name: Name of the property
+         :exception: May raise an `GLib.Error` when setting the property fails
+         :returns: The value of the property
+   
       .. code-block:: python
                   
          tcambin = ....
@@ -415,16 +467,17 @@ tcam_property_provider_get_tcam_integer
 Convenience function to retrieve the value of an integer property.
 
 For complex applications it is recommended to use a :ref:`TcamPropertyInteger` instance instead.
-
-:param self: a TcamPropertyProvider
-:param name: a string pointer, naming the property that shall be queried.
-:param err: pointer for error retrieval, may be NULL
-:returns: value of the integer property
-:retval: gint64
                 
 .. tabs::
 
    .. group-tab:: c
+       
+       .. c:function:: gint64 tcam_property_provider_get_tcam_integer (TcamPropertyProvider* self, const char* name, GError** err)
+
+         :param self: The :ref:`TcamPropertyProvider` instance
+         :param name: A string, naming the property that shall be retrieved.
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: The value of the property or on error an unspecified value.
 
       .. code-block:: c
 
@@ -439,6 +492,12 @@ For complex applications it is recommended to use a :ref:`TcamPropertyInteger` i
          }
 
    .. group-tab:: python
+
+       .. py:method:: Tcam.PropertyProvider.get_tcam_integer(name)
+         
+         :param name: Name of the property
+         :exception: May raise an `GLib.Error` when setting the property fails
+         :returns: The value of the property
 
       .. code-block:: python
       
@@ -457,16 +516,17 @@ tcam_property_provider_get_tcam_float
 Convenience function to retrieve the value of a float property.
 
 For complex applications it is recommended to use a :ref:`TcamPropertyFloat` instance instead.
-                
-:param self: Pointer to the TcamPropertyProvider instance
-:param name: String containing the name of the double that shall be queried
-:param err: Pointer to a GError* variable that will filled if an error occurs. May be `NULL`.
-:returns: double containing the currently property value
-:retval: double
          
 .. tabs::
 
    .. group-tab:: c
+       
+       .. c:function:: gdouble tcam_property_provider_get_tcam_float (TcamPropertyProvider* self, const char* name, GError** err)
+
+         :param self: The :ref:`TcamPropertyProvider` instance
+         :param name: A string, naming the property that shall be retrieved.
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: The value of the property or on error an unspecified value.
 
       .. code-block:: c
 
@@ -481,6 +541,12 @@ For complex applications it is recommended to use a :ref:`TcamPropertyFloat` ins
          }
 
    .. group-tab:: python
+
+      .. py:method:: Tcam.PropertyProvider.get_tcam_float(name)
+         
+         :param name: Name of the property
+         :exception: May raise an `GLib.Error` when setting the property fails
+         :returns: The value of the property
 
       .. code-block:: python
                   
@@ -502,16 +568,17 @@ tcam_property_provider_get_tcam_enumeration
 Convenience function to retrieve the value of an enumeration property.
 
 For complex applications it is recommended to use a :ref:`TcamPropertyEnumeration` instance instead.
-
-:param self: Pointer to the TcamPropertyProvider instance
-:param name: String containing the name of the enumeration that shall be queried
-:param err: Pointer to a GError* variable that will filled if an error occurs. May be `NULL`.
-:returns: String containing the currently selected enum entry
-:retval: const char*
                 
 .. tabs::
 
    .. group-tab:: c
+       
+       .. c:function:: const char* tcam_property_provider_get_tcam_enumeration (TcamPropertyProvider* self, const char* name, GError** err)
+
+         :param self: The :ref:`TcamPropertyProvider` instance
+         :param name: A string, naming the property that shall be retrieved.
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: (transfer none): The current enumeration entry string of the property or on error an unspecified value.
 
       .. code-block:: c
 
@@ -526,6 +593,12 @@ For complex applications it is recommended to use a :ref:`TcamPropertyEnumeratio
          }
 
    .. group-tab:: python
+   
+      .. py:method:: Tcam.PropertyProvider.get_tcam_enumeration(name)
+         
+         :param name: Name of the property
+         :exception: May raise an `GLib.Error` when setting the property fails
+         :returns: The value of the property
 
       .. code-block:: python
                   
@@ -542,29 +615,29 @@ TcamPropertyBase
 ################
 
 Base class for all properties. Can be cast into different derived classes.
+
 Check the property type via :ref:`tcam_property_base_get_property_type` to ensure the correct cast will be used.
 
 Python users will have to do nothing.
 
 Retrieval of properties is done by calling :ref:`tcam_property_provider_get_tcam_property`.
 
-
-
 .. _tcam_property_base_get_name:
    
 tcam_property_base_get_name
 ---------------------------
 
-The property owns the string. It will be freed once the property is destroyed.
-
-:param self: Pointer to the property instance
-:returns: Name of the property
-:retval: const gchar*, string containing the name
-
+Fetches the name of this property.
 
 .. tabs::
 
    .. group-tab:: c
+       
+       .. c:function:: const char* tcam_property_base_get_name (TcamPropertyBase* self)
+
+         :param self: The :ref:`TcamPropertyBase` instance
+         :returns: (transfer none): The name of the property. This is valid and will not change until this property is released.
+         :retval NULL: This is only NULL if the passed in instance is not a :ref:`TcamPropertyBase`.
 
       .. code-block:: c
 
@@ -573,6 +646,10 @@ The property owns the string. It will be freed once the property is destroyed.
          const char* name = tcam_property_base_get_name(base_property);
 
    .. group-tab:: python
+      
+      .. py:method:: Tcam.PropertyBase.get_name()
+         
+         :returns: The name of this property
 
       .. code-block:: python
 
@@ -584,17 +661,17 @@ The property owns the string. It will be freed once the property is destroyed.
 tcam_property_base_get_display_name
 -----------------------------------
    
-| The property owns the string. It will be freed once the property is destroyed.
-|
-| The display name is a human readable name intended for GUIs and similar interfaces.
-
-:param self: Pointer to the property instance
-:returns: Name of the property
-:retval: const gchar*, string containing the display name
+The display name is a human readable name intended for GUIs and similar interfaces.
 
 .. tabs::
 
    .. group-tab:: c
+       
+       .. c:function:: const gchar* tcam_property_base_get_display_name (TcamPropertyBase* self)
+
+         :param self: The :ref:`TcamPropertyBase` instance
+         :returns: (transfer none): The display name of the property. This is valid and will not change until this property is released.
+         :retval NULL: Maybe NULL if no display name is available for this property.
 
       .. code-block:: c
 
@@ -603,12 +680,14 @@ tcam_property_base_get_display_name
          const char* display_name = tcam_property_base_get_display_name(base_property);
 
    .. group-tab:: python
+         
+      .. py:method:: Tcam.PropertyBase.get_display_name()
+         
+         :returns: The display name of the property. 
 
       .. code-block:: python
 
          display_name = base_property.get_display_name()
-         
-
    
 
 .. _tcam_property_base_get_description:
@@ -616,17 +695,17 @@ tcam_property_base_get_display_name
 tcam_property_base_get_description
 ----------------------------------
 
-| Description of the property purpose.
-|
-| The property owns the string. It will be freed once the property is destroyed.
-
-:param self: Pointer to the property instance
-:returns: Name of the property
-:retval: const gchar*, string containing the description
+Description of the property.
 
 .. tabs::
 
    .. group-tab:: c
+       
+       .. c:function:: const gchar* tcam_property_base_get_description (TcamPropertyBase* self)
+
+         :param self: The :ref:`TcamPropertyBase` instance
+         :returns: (transfer none): The description of the property. This is valid and will not change until this property is released.
+         :retval NULL: Maybe NULL if no description is available for this property.
 
       .. code-block:: c
 
@@ -635,6 +714,10 @@ tcam_property_base_get_description
          const char* description = tcam_property_base_get_description(base_property);
 
    .. group-tab:: python
+
+      .. py:method:: Tcam.PropertyBase.get_description()
+         
+         :returns: The description of the property. 
 
       .. code-block:: python
 
@@ -647,17 +730,17 @@ tcam_property_base_get_description
 tcam_property_base_get_category
 -------------------------------
 
-| Category string for simple property organization.
-|
-| The property owns the string. It will be freed once the property is destroyed.
-
-:param self: Pointer to the property instance
-:returns: Name of the property
-:retval: const gchar*, string containing the category
+Category string for simple property organization.
 
 .. tabs::
 
    .. group-tab:: c
+   
+      .. c:function:: const gchar* tcam_property_base_get_category (TcamPropertyBase* self)
+
+         :param self: The :ref:`TcamPropertyBase` instance
+         :returns: (transfer none): The name of the category this property is associated with. This is valid and will not change until this property is released.
+         :retval NULL: Maybe NULL if no category is available for this property.
 
       .. code-block:: c
 
@@ -666,31 +749,77 @@ tcam_property_base_get_category
          const char* category = tcam_property_base_get_category(base_property);
 
    .. group-tab:: python
+   
+      .. py:method:: Tcam.PropertyBase.get_category()
+         
+         :returns: The name of the category this property is associated with.
 
       .. code-block:: python
 
          category = base_property.get_category()
-         
+
+.. _tcam_property_base_get_access:
+   
+tcam_property_base_get_access
+---------------------------------
+   
+Specifies the :ref:`TcamPropertyAccess` for the property.
+                  
+.. tabs::
+
+   .. group-tab:: c
+
+      .. c:function:: TcamPropertyAccess tcam_property_base_get_access (TcamPropertyBase* self)
+
+         :param self: The :ref:`TcamPropertyBase` instance
+         :returns: The :ref:`TcamPropertyAccess` of the property
+
+      .. code-block:: c
+
+         TcamPropertyBase* base_property = ...
+
+         TcamPropertyAccess access = tcam_property_base_get_access(base_property);
+
+                               
+   .. group-tab:: python
+
+      .. py:method:: Tcam.TcamPropertyAccess  Tcam.PropertyBase.get_access()
+                        
+         :returns: the :ref:`TcamPropertyAccess` of the property
+
+      .. code-block:: python
+
+         access_level = base_property.get_access()
+
 
 .. _tcam_property_base_get_visibility:
    
 tcam_property_base_get_visibility
 ---------------------------------
    
-| A :ref:`TcamPropertyVisibility` showing the recommended visibility level for applications.
+Specifies a :ref:`TcamPropertyVisibility` for the property, providing a recommended visibility level for applications.
                   
 .. tabs::
 
    .. group-tab:: c
 
+      .. c:function:: TcamPropertyVisibility tcam_property_base_get_visibility (TcamPropertyBase* self)
+
+         :param self: The :ref:`TcamPropertyBase` instance
+         :returns: The :ref:`TcamPropertyVisibility` of the property
+
       .. code-block:: c
 
          TcamPropertyBase* base_property = ...
 
-         TcamPropertyVisibility = tcam_property_base_get_visibility(base_property);
+         TcamPropertyVisibility vis = tcam_property_base_get_visibility(base_property);
 
                                
    .. group-tab:: python
+
+      .. py:method:: Tcam.PropertyVisibility  Tcam.PropertyBase.get_visibility()
+                        
+         :returns: the :ref:`TcamPropertyVisibility` of the property
 
       .. code-block:: python
 
@@ -702,41 +831,32 @@ tcam_property_base_get_visibility
 tcam_property_base_get_property_type
 ------------------------------------
 
-| A :ref:`TcamPropertyType` describing the specific property type of the TcamPropertyBase instance.
-| Cast the TcamPropertyBase instance into a derived type to access more functions.
+A :ref:`TcamPropertyType` describing the specific property type of the TcamPropertyBase instance.
+
+Cast the TcamPropertyBase instance into a derived type to access more functions.
 
 .. tabs::
 
    .. group-tab:: c
 
-      .. c:function:: TcamPropertyType tcam_property_base_get_property_type (TcamPropertyBase* self);
+      .. c:function:: TcamPropertyType tcam_property_base_get_property_type (TcamPropertyBase* self)
 
-         :param self: TcamPropertyBase instance that shall be queried
-         :returns: the actual type of the property
-         :retval: a TcamPropertyType entry
-
+         :param self: The :ref:`TcamPropertyBase` instance
+         :returns: The :ref:`TcamPropertyType` of the property
                      
       .. code-block:: c
-                                  
-         if (tcam_property_base_is_locked(base_property))
-         {
-             // property is locked and cannot be changed
-         }
+
+         TcamPropertyType type = tcam_property_base_get_property_type(base_property);
 
    .. group-tab:: python
 
-      .. py:method:: Tcam.PropertyType  get_property_type()
+      .. py:method:: Tcam.PropertyType  Tcam.PropertyBase.get_property_type()
                         
-         :param self: TcamPropertyBase instance that shall be queried
-         :returns: the actual type of the property
-         :retval: a TcamPropertyType entry
+         :returns: the :ref:`TcamPropertyType` of the property
 
       .. code-block:: python
-                  
-         if base_property.is_locked():
-             # property is locked and cannot be changed
          
-
+         property_type = base_property.get_property_type()
 
 
 .. _tcam_property_base_is_available:
@@ -745,18 +865,23 @@ tcam_property_base_is_available
 -------------------------------
 
 | Check if property is currently available.
-| If the property is not available it means that a stream
-| setting is preventing usage.
+| If the property is not available it means that a stream setting is preventing usage.
 | A typical example would be BalanceWhiteAuto being not available while streaming `video/x-raw,format=GRAY8`.
 
 
 .. tabs::
       
    .. group-tab:: c
+      
+      .. c:function:: gboolean tcam_property_base_is_available (TcamPropertyBase* self, GError** err)
+
+         :param self: The :ref:`TcamPropertyBase` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: Returns :c:type:`TRUE` if the property is currently available, otherwise false.
 
       .. code-block:: c
                                   
-         if (tcam_property_base_is_locked(base_property, &err))
+         if (tcam_property_base_is_available(base_property, &err))
          {
              // property is locked and cannot be changed
          }
@@ -767,17 +892,19 @@ tcam_property_base_is_available
          }
 
    .. group-tab:: python
+   
+      .. py:method:: Tcam.PropertyBase.is_available()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns if this property is available.
 
       .. code-block:: python
                   
          try:
-             if base_property.is_locked():
+             if base_property.is_available():
                  # property is locked and cannot be changed
              except GLib.Error as err:
                  # error handling
-   
-
-
 
 
 .. _tcam_property_base_is_locked:
@@ -786,18 +913,18 @@ tcam_property_base_is_locked
 ----------------------------
                 
 | Check if property is currently locked.
-| If the property is locked it means that no write actions are possible,
-| due to another property is preventing such actions.
+| If the property is locked it means that no write actions are possible, due to another property preventing such actions.
 | A typical example would be ExposureAuto locking ExposureTime.
-
-:param self:
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: Bool describing of property is locked.
-:retval: gboolean
 
 .. tabs::
 
    .. group-tab:: c
+         
+      .. c:function:: gboolean tcam_property_base_is_locked (TcamPropertyBase* self, GError** err)
+
+         :param self: The :ref:`TcamPropertyBase` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: Returns :c:type:`TRUE` if the property is currently locked, otherwise false.
 
       .. code-block:: c
                          
@@ -812,6 +939,11 @@ tcam_property_base_is_locked
          }
 
    .. group-tab:: python
+   
+      .. py:method:: Tcam.PropertyBase.is_locked()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns if this property is locked.
 
       .. code-block:: python
                      
@@ -828,38 +960,31 @@ TcamPropertyBoolean
 ###################
 
 | Property representing a bool value.
-| An instance can be retrieved by casting a :ref:`TcamPropertyBase` pointer.
-| `TCAM_PROPERTY_BOOLEAN(TcamPropertyBase*)`
-|
+| Can be obtained by casting a :c:type:`TcamPropertyBase` with `TCAM_PROPERTY_BOOLEAN(TcamPropertyBase*)`.
+| Inherits from :ref:`TcamPropertyBase`.
 | Upon cleanup `g_object_unref` has to be called on the property.
-
-
-Inherits from :ref:`TcamPropertyBase`.
-Can be obtained by casting a :c:type:`TcamPropertyBase` with `TCAM_PROPERTY_BOOLEAN(TcamPropertyBase*)`.
 
 .. _tcam_property_boolean_get_value:
 
 tcam_property_boolean_get_value
 -------------------------------
 
-.. c:function:: gboolean tcam_property_boolean_get_value (TcamPropertyBoolean* self, GError** err);
-
-:param self:
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: Bool describing of property value.
-:retval: gboolean
-
-
 .. tabs::
 
    .. group-tab:: c
+         
+      .. c:function:: gboolean tcam_property_boolean_get_value (TcamPropertyBoolean* self, GError** err)
+
+         :param self: The :ref:`TcamPropertyBoolean` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: Returns the current value of the property.
 
       .. code-block:: c
 
          TcamPropertyBoolean* bool_property = TCAM_PROPERTY_BOOLEAN(base_property);
          GError* err = NULL;
 
-         bool current_value = tcam_property_boolean_get_value(bool_property, &err);
+         gboolean current_value = tcam_property_boolean_get_value(bool_property, &err);
 
          if (err)
          {
@@ -867,6 +992,11 @@ tcam_property_boolean_get_value
          }
                   
    .. group-tab:: python
+
+      .. py:method:: Tcam.PropertyBoolean.get_value()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the value of this property
 
       .. code-block:: python
 
@@ -880,16 +1010,15 @@ tcam_property_boolean_get_value
 tcam_property_boolean_set_value
 -------------------------------
 
-.. c:function:: void tcam_property_boolean_set_value (TcamPropertyBoolean* self, gboolean value, GError** err);
-
-:param self:
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:param value: value that shall be set.
-
-
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: void tcam_property_boolean_set_value (TcamPropertyBoolean* self, gboolean value, GError** err)
+
+         :param self: The :ref:`TcamPropertyBoolean` instance
+         :param value: The new value to set.
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -897,7 +1026,7 @@ tcam_property_boolean_set_value
          GError* err = NULL;
 
          
-         bool new_value = true;
+         gboolean new_value = TRUE;
          tcam_property_boolean_set_value(bool_property, new_value, &err);
 
          if (err)
@@ -906,6 +1035,11 @@ tcam_property_boolean_set_value
          }
                                
    .. group-tab:: python
+
+      .. py:method:: Tcam.PropertyBoolean.set_value(value)
+                        
+         :param value: The new value to set.
+         :exception: May raise an `GLib.Error` when setting the property fails
 
       .. code-block:: python
 
@@ -922,19 +1056,19 @@ tcam_property_boolean_set_value
                 
 tcam_property_boolean_get_default
 ---------------------------------                
-                
-.. c:function:: gboolean tcam_property_boolean_get_default (TcamPropertyBoolean* self, GError** err);
 
-:param self:
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: Bool describing the property default.
-:retval: gboolean
-
-
+| Query for the default value of a boolean property.
+| This might fail with `TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE` if no default value is available for this property.
 
 .. tabs::
 
    .. group-tab:: c
+         
+      .. c:function:: gboolean tcam_property_boolean_get_default (TcamPropertyBoolean* self, GError** err)
+
+         :param self: The :ref:`TcamPropertyBoolean` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: Returns the default value of the property
 
       .. code-block:: c
 
@@ -950,6 +1084,11 @@ tcam_property_boolean_get_default
                                
    .. group-tab:: python
 
+      .. py:method:: Tcam.PropertyBoolean.get_default()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the default value of the property
+
       .. code-block:: python
 
          try:
@@ -964,6 +1103,7 @@ TcamPropertyInteger
 
 
 Property representing an integer value.
+
 An instance can be retrieved by casting a :ref:`TcamPropertyBase` pointer.
 `TCAM_PROPERTY_INTEGER(TcamPropertyBase*)`
 
@@ -973,32 +1113,28 @@ Upon cleanup `g_object_unref` has to be called on the property.
 .. c:type:: TcamPropertyInteger
 
 
-
-
-
 .. _tcam_property_integer_get_value:
             
 tcam_property_integer_get_value
 -------------------------------
-            
-.. c:function:: gint64 tcam_property_integer_get_value (TcamPropertyInteger* self, GError** err);
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: int64 describing the property value.
-:retval: gint64
 
 
 .. tabs::
 
    .. group-tab:: c
 
+      .. c:function:: gint64 tcam_property_integer_get_value (TcamPropertyInteger* self, GError** err)
+
+         :param self: The :ref:`TcamPropertyInteger` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: Returns the current value of the property
+
       .. code-block:: c
 
          TcamPropertyInteger* int_property = TCAM_PROPERTY_INTEGER(base_property);
          GError* err = NULL;
 
-         int64 current_value = tcam_property_integer_get_value(int_property, &err);
+         gint64 current_value = tcam_property_integer_get_value(int_property, &err);
 
          if (err)
          {
@@ -1006,6 +1142,11 @@ tcam_property_integer_get_value
          }
                   
    .. group-tab:: python
+   
+      .. py:method:: Tcam.PropertyInteger.get_value()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the value of the property
 
       .. code-block:: python
 
@@ -1021,16 +1162,15 @@ tcam_property_integer_get_value
 tcam_property_integer_set_value
 -------------------------------
 
-.. c:function:: void tcam_property_integer_set_value (TcamPropertyInteger* self, gint64 value, GError** err);
-
-:param self: property instance
-:param value: int64 value that shall be set.
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-
-
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: void tcam_property_integer_set_value (TcamPropertyInteger* self, gint64 value, GError** err)
+
+         :param self: The :ref:`TcamPropertyInteger` instance
+         :param value: The new value to set.
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -1046,6 +1186,11 @@ tcam_property_integer_set_value
          }
                                
    .. group-tab:: python
+   
+      .. py:method:: Tcam.PropertyInteger.set_value(value)
+                        
+         :param value: The new value to set.
+         :exception: May raise an `GLib.Error` when setting the property fails
 
       .. code-block:: python
 
@@ -1061,18 +1206,17 @@ tcam_property_integer_set_value
 tcam_property_integer_get_range
 -------------------------------
 
-.. c:function:: void tcam_property_integer_get_range (TcamPropertyInteger* self, gint64* min_value, gint64* max_value, gint64* step_value, GError** err);
-
-:param self: property instance
-:param min_value: out value. pointer to a int64 that will be filled with the minimal value the property can have. May be `NULL`.
-:param max_value: out value. pointer to a int64 that will be filled with the maximum value the property can have. May be `NULL`.
-:param step_value: out value. pointer to a int64 that will be filled with the step size between values. May be `NULL`.
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-
-
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: void tcam_property_integer_get_range (TcamPropertyInteger* self, gint64* min_value, gint64* max_value, gint64* step_value, GError** err)
+
+         :param self: The :ref:`TcamPropertyInteger` instance
+         :param min_value: out value. pointer to a int64 that will be filled with the minimal value the property may have. May be `NULL`.
+         :param max_value: out value. pointer to a int64 that will be filled with the maximum value the property may have. May be `NULL`.
+         :param step_value: out value. pointer to a int64 that will be filled with the step size between values. May be `NULL`.
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -1081,7 +1225,7 @@ tcam_property_integer_get_range
          int64 min_value;
          int64 max_value;
          int64 step_value;
-         tcam_property_integer_get_representation(int_property,
+         tcam_property_integer_get_range(int_property,
                                                   &min_value,
                                                   &max_value,
                                                   &step_value,
@@ -1093,6 +1237,14 @@ tcam_property_integer_get_range
          }
                   
    .. group-tab:: python
+      
+      .. py:method:: [min,max,step] = Tcam.PropertyInteger.get_range()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the range and step of the property
+         :retval min: The minimum for this property
+         :retval max: The maximum for this property
+         :retval step: The step for this property
 
       .. code-block:: python
 
@@ -1108,17 +1260,15 @@ tcam_property_integer_get_range
 tcam_property_integer_get_default
 ---------------------------------
 
-.. c:function:: gint64 tcam_property_integer_get_default (TcamPropertyInteger* self, GError** err);
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: int64 describing the property default value.
-:retval: gint64
-
-
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: gint64 tcam_property_integer_get_default (TcamPropertyInteger* self, GError** err)
+
+         :param self: The :ref:`TcamPropertyInteger` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: Returns the default value of the property
 
       .. code-block:: c
 
@@ -1132,6 +1282,11 @@ tcam_property_integer_get_default
          }
                                
    .. group-tab:: python
+         
+      .. py:method:: Tcam.PropertyInteger.get_default()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the default value of the property
 
       .. code-block:: python
 
@@ -1147,17 +1302,15 @@ tcam_property_integer_get_default
 tcam_property_integer_get_unit
 ------------------------------
 
-.. c:function:: const gchar* tcam_property_integer_get_unit (TcamPropertyInteger* self);
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: string describing the property unit. Can be an empty string.
-:retval: const char*
-
-
 .. tabs::
 
    .. group-tab:: c
+   
+      .. c:function:: const gchar* tcam_property_integer_get_unit (TcamPropertyInteger* self);
+
+         :param self: The :ref:`TcamPropertyInteger` instance
+         :returns: (transfer none): String describing the property unit. The string is valid until the instance is released.
+         :retval NULL: If the unit is not available, NULL is returned.
 
       .. code-block:: c
 
@@ -1174,6 +1327,11 @@ tcam_property_integer_get_unit
          }
                   
    .. group-tab:: python
+            
+      .. py:method:: Tcam.PropertyInteger.get_unit()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the unit name for this property
 
       .. code-block:: python
 
@@ -1188,18 +1346,14 @@ tcam_property_integer_get_unit
 tcam_property_integer_get_representation
 ----------------------------------------
 
-.. c:function:: TcamPropertyIntRepresentation tcam_property_integer_get_representation (TcamPropertyInteger* self);
-
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: TcamPropertyIntRepresentation describing the recommended way of displaying the property.
-:retval: :ref:`TcamPropertyIntRepresentation`
-
-
 .. tabs::
 
    .. group-tab:: c
+            
+      .. c:function:: TcamPropertyIntRepresentation tcam_property_integer_get_representation (TcamPropertyInteger* self)
+
+         :param self: The :ref:`TcamPropertyInteger` instance
+         :returns: :ref:`TcamPropertyIntRepresentation` describing the recommended way of displaying the property.
 
       .. code-block:: c
 
@@ -1213,6 +1367,11 @@ tcam_property_integer_get_representation
          }
                                
    .. group-tab:: python
+
+      .. py:method:: Tcam.PropertyInteger.get_representation()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the :ref:`TcamPropertyIntRepresentation` for this property
 
       .. code-block:: python
 
@@ -1228,6 +1387,7 @@ TcamPropertyFloat
 #################
 
 Property representing a floating point value.
+
 An instance can be retrieved by casting a :ref:`TcamPropertyBase` pointer.
 `TCAM_PROPERTY_FLOAT(TcamPropertyBase*)`
 
@@ -1241,17 +1401,16 @@ Upon cleanup `g_object_unref` has to be called on the property.
             
 tcam_property_float_get_value
 -----------------------------
-            
-.. c:function:: gdouble tcam_property_float_get_value (TcamPropertyFloat* self, GError** err);
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: double describing the property value.
-:retval: double
 
 .. tabs::
 
    .. group-tab:: c
+   
+      .. c:function:: gdouble tcam_property_float_get_value (TcamPropertyFloat* self, GError** err)
+
+         :param self: The :ref:`TcamPropertyFloat` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: Returns the current value of the property
 
       .. code-block:: c
 
@@ -1267,6 +1426,11 @@ tcam_property_float_get_value
                                
    .. group-tab:: python
 
+      .. py:method:: Tcam.PropertyFloat.get_value()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the current value for this property
+
       .. code-block:: python
 
          try:
@@ -1279,17 +1443,18 @@ tcam_property_float_get_value
                 
 tcam_property_float_set_value
 -----------------------------
-                
-.. c:function:: void tcam_property_float_set_value (TcamPropertyFloat* self, gdouble value, GError** err);
-
-:param self: property instance
-:param value: double value that shall be set.
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
 
 .. tabs::
 
    .. group-tab:: c
 
+
+      .. c:function:: void tcam_property_float_set_value (TcamPropertyFloat* self, gdouble value, GError** err)
+
+         :param self: The :ref:`TcamPropertyFloat` instance
+         :param value: The new value to set.
+         :param err: A :c:type:`GError` pointer, may be NULL
+         
       .. code-block:: c
 
          TcamPropertyFloat* float_property = TCAM_PROPERTY_FLOAT(base_property);
@@ -1304,6 +1469,11 @@ tcam_property_float_set_value
          }
                       
    .. group-tab:: python
+   
+      .. py:method:: Tcam.PropertyFloat.set_value(value)
+                        
+         :param value: The new value to set.
+         :exception: May raise an `GLib.Error` when fetching the property fails
 
       .. code-block:: python
 
@@ -1319,19 +1489,18 @@ tcam_property_float_set_value
                 
 tcam_property_float_get_range
 -----------------------------
-                
-.. c:function:: void tcam_property_float_get_range (TcamPropertyFloat* self, gdouble* min_value, gdouble* max_value, gdouble* step_value, GError** err);
-
-:param self: property instance
-:param min_value: out value. pointer to a double that will be filled with the minimal value the property can have. May be `NULL`.
-:param max_value: out value. pointer to a double that will be filled with the maximum value the property can have. May be `NULL`.
-:param step_value: out value. pointer to a double that will be filled with the step size between values. May be `NULL`.
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-
 
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: void tcam_property_float_get_range (TcamPropertyFloat* self, gdouble* min_value, gdouble* max_value, gdouble* step_value, GError** err);
+
+         :param self: The :ref:`TcamPropertyFloat` instance
+         :param min_value: out value. pointer to a gdouble that will be filled with the minimal value the property may have. May be `NULL`.
+         :param max_value: out value. pointer to a gdouble that will be filled with the maximum value the property may have. May be `NULL`.
+         :param step_value: out value. pointer to a gdouble that will be filled with the step size between values. May be `NULL`.
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -1352,6 +1521,14 @@ tcam_property_float_get_range
          }
                                
    .. group-tab:: python
+         
+      .. py:method:: [min,max,step] = Tcam.PropertyFloat.get_range()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the range and step of the property
+         :retval min: The minimum for this property
+         :retval max: The maximum for this property
+         :retval step: The step for this property
 
       .. code-block:: python
 
@@ -1367,17 +1544,15 @@ tcam_property_float_get_range
 tcam_property_float_get_default
 -------------------------------
 
-.. c:function:: gdouble tcam_property_float_get_default (TcamPropertyFloat* self, GError** err);
-
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: double describing the property default value.
-:retval: double
-
 .. tabs::
 
    .. group-tab:: c
+   
+      .. c:function:: gdouble tcam_property_float_get_default (TcamPropertyFloat* self, GError** err);
+
+         :param self: The :ref:`TcamPropertyFloat` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: Returns the default value of the property
 
       .. code-block:: c
 
@@ -1392,6 +1567,11 @@ tcam_property_float_get_default
                       
    .. group-tab:: python
 
+       .. py:method:: Tcam.PropertyFloat.get_default()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the default value of the property
+
       .. code-block:: python
 
          try:
@@ -1403,18 +1583,16 @@ tcam_property_float_get_default
                 
 tcam_property_float_get_unit
 ----------------------------
-                
-.. c:function:: const gchar* tcam_property_float_get_unit (TcamPropertyFloat* self);
-
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: string describing the property unit. Can be an empty string.
-:retval: const char*
 
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: const gchar* tcam_property_float_get_unit (TcamPropertyFloat* self);
+
+         :param self: The :ref:`TcamPropertyFloat` instance
+         :returns: (transfer none): String describing the property unit. The string is valid until the instance is released.
+         :retval NULL: If the unit is not available, NULL is returned.
 
       .. code-block:: c
 
@@ -1431,6 +1609,11 @@ tcam_property_float_get_unit
          }
                                
    .. group-tab:: python
+   
+       .. py:method:: Tcam.PropertyFloat.get_unit()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the unit name of the property
 
       .. code-block:: python
 
@@ -1443,20 +1626,15 @@ tcam_property_float_get_unit
                 
 tcam_property_float_get_representation
 --------------------------------------
-                
-.. c:function:: TcamPropertyFloatRepresentation tcam_property_float_get_representation (TcamPropertyFloat* self);
-
-
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: TcamPropertyFloatRepresentation describing the recommended way of displaying the property.
-:retval: :ref:`TcamPropertyFloatRepresentation`
-                                                            
 
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: TcamPropertyFloatRepresentation tcam_property_float_get_representation (TcamPropertyFloat* self);
+      
+         :param self: The :ref:`TcamPropertyFloat` instance
+         :returns: :ref:`TcamPropertyFloatRepresentation` describing the recommended way of displaying the property.
 
       .. code-block:: c
 
@@ -1470,6 +1648,11 @@ tcam_property_float_get_representation
          }
                       
    .. group-tab:: python
+   
+       .. py:method:: Tcam.PropertyFloat.get_unit()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the :ref:`TcamPropertyFloatRepresentation` of the property
 
       .. code-block:: python
 
@@ -1484,6 +1667,7 @@ TcamPropertyEnumeration
 #######################
 
 Property representing an enumeration/menu value.
+
 An instance can be retrieved by casting a :ref:`TcamPropertyBase` pointer.
 `TCAM_PROPERTY_ENUMERATION(TcamPropertyBase*)`
 
@@ -1499,18 +1683,15 @@ Upon cleanup `g_object_unref` has to be called on the property.
 tcam_property_enumeration_get_value
 -----------------------------------
 
-.. c:function:: const gchar* tcam_property_enumeration_get_value (TcamPropertyEnumeration* self, GError** err);
-
-   The caller does **NOT** take ownership of the returned value.
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: string describing the properties current value.  `NULL` on error.
-:retval: const char*
-
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: const gchar* tcam_property_enumeration_get_value (TcamPropertyEnumeration* self, GError** err);
+
+         :param self: The :ref:`TcamPropertyEnumeration` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: (transfer none): Returns the current value of the property. `NULL` on error. The string is valid until the instance is released.
 
       .. code-block:: c
 
@@ -1527,6 +1708,11 @@ tcam_property_enumeration_get_value
          }
                       
    .. group-tab:: python
+   
+       .. py:method:: Tcam.PropertyEnumeration.get_value()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns current value of the property
 
       .. code-block:: python
 
@@ -1540,16 +1726,15 @@ tcam_property_enumeration_get_value
 tcam_property_enumeration_set_value
 -----------------------------------
 
-.. c:function:: void tcam_property_enumeration_set_value (TcamPropertyEnumeration* self, const gchar* value, GError** err);
-
-
-:param self: property instance
-:param value: entry string that shall be set.
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-
 .. tabs::
 
    .. group-tab:: c
+   
+      .. c:function:: void tcam_property_enumeration_set_value (TcamPropertyEnumeration* self, const gchar* value, GError** err);
+
+         :param self: The :ref:`TcamPropertyEnumeration` instance
+         :param value: The new value to set
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -1564,6 +1749,11 @@ tcam_property_enumeration_set_value
          }
                                
    .. group-tab:: python
+      
+       .. py:method:: Tcam.PropertyEnumeration.set_value(value)
+                        
+         :param value: The new value to set
+         :exception: May raise an `GLib.Error` when fetching the property fails
 
       .. code-block:: python
 
@@ -1578,7 +1768,7 @@ tcam_property_enumeration_set_value
 tcam_property_enumeration_get_enum_entries
 ------------------------------------------
                 
-.. c:function:: GSList* tcam_property_enumeration_get_enum_entries (TcamPropertyEnumeration* self, GError** err);
+
 
 The caller takes ownership of the returned list and its values.
 Call `g_slist_free_full(enum_entries, g_free)` when not done.
@@ -1591,6 +1781,13 @@ Call `g_slist_free_full(enum_entries, g_free)` when not done.
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: GSList* tcam_property_enumeration_get_enum_entries (TcamPropertyEnumeration* self, GError** err);
+
+         :param self: The :ref:`TcamPropertyEnumeration` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: (transfer full): A list of enumeration entries. All entries and the list itself must be freed by the caller.
+         :retval NULL: Returns NULL on error.
 
       .. code-block:: c
 
@@ -1610,6 +1807,11 @@ Call `g_slist_free_full(enum_entries, g_free)` when not done.
          g_slist_free_full(entry_list, g_free);
 
    .. group-tab:: python
+   
+       .. py:method:: Tcam.PropertyEnumeration.get_enum_entries()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns a list of strings for the enumeration entries
 
       .. code-block:: python   
 
@@ -1624,16 +1826,16 @@ Call `g_slist_free_full(enum_entries, g_free)` when not done.
 tcam_property_enumeration_get_default
 -------------------------------------
 
-.. c:function:: const gchar* tcam_property_enumeration_get_default (TcamPropertyEnumeration* self, GError** err);
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-:returns: string describing the property default value. `NULL` on error.
-:retval: const char* 
-
 .. tabs::
 
    .. group-tab:: c
+      
+      .. c:function:: const gchar* tcam_property_enumeration_get_default (TcamPropertyEnumeration* self, GError** err);
+
+         :param self: The :ref:`TcamPropertyEnumeration` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: (transfer none): The default value for this property. The string is valid until this instance is released.
+         :retval NULL: Returns `NULL` on error.
 
       .. code-block:: c
 
@@ -1650,6 +1852,11 @@ tcam_property_enumeration_get_default
          }
                       
    .. group-tab:: python
+   
+       .. py:method:: Tcam.PropertyEnumeration.get_default()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the defaulkt value for this property.
 
       .. code-block:: python
 
@@ -1665,8 +1872,8 @@ TcamPropertyCommand
 ###################
 
 Property representing a command/button value.
-An instance can be retrieved by casting a :ref:`TcamPropertyBase` pointer.
-`TCAM_PROPERTY_COMMAND(TcamPropertyBase*)`
+
+An instance can be retrieved by casting a :ref:`TcamPropertyBase` pointer. `TCAM_PROPERTY_COMMAND(TcamPropertyBase*)`
 
 Upon cleanup `g_object_unref` has to be called on the property.
 
@@ -1677,14 +1884,14 @@ tcam_property_command_set_command
 
 Execute the command.
 
-.. c:function:: void tcam_property_command_set_command (TcamPropertyCommand* self, GError** err);
-
-:param self: property instance
-:param err: Pointer to GError pointer to be used in case of error. Can be `NULL`.
-
 .. tabs::
 
    .. group-tab:: c
+
+      .. c:function:: void tcam_property_command_set_command (TcamPropertyCommand* self, GError** err);
+         
+         :param self: The :ref:`TcamPropertyInteger` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
 
       .. code-block:: c
 
@@ -1698,11 +1905,112 @@ Execute the command.
          }
 
    .. group-tab:: python
-         
+            
+       .. py:method:: Tcam.PropertyCommand.set_command()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+
       .. code-block:: python
 
          try:
              base_property.set_command()
+         except GLib.Error as err:
+             # error handling
+
+.. _TcamPropertyString:
+                
+TcamPropertyString
+##################
+
+| Property representing a string value.
+| Inherits from :ref:`TcamPropertyBase`.
+| Can be obtained by casting a :c:type:`TcamPropertyBase` with `TCAM_PROPERTY_STRING(TcamPropertyBase*)`.
+| Upon cleanup `g_object_unref` has to be called on the property.
+
+.. _tcam_property_string_get_value:
+
+tcam_property_string_get_value
+-------------------------------
+
+.. tabs::
+
+   .. group-tab:: c
+         
+      .. c:function:: char* tcam_property_string_get_value (TcamPropertyString* self, GError** err)
+
+         :param self: The :ref:`TcamPropertyString` instance
+         :param err: A :c:type:`GError` pointer, may be NULL
+         :returns: (transfer full): Returns the current value of the property. This string must be freed by the caller
+
+      .. code-block:: c
+
+         TcamPropertyString* property = TCAM_PROPERTY_STRING(base_property);
+         GError* err = NULL;
+
+         char* current_value = tcam_property_string_get_value(property, &err);
+
+         if (err)
+         {
+             // error handling
+         }
+
+         g_free(current_value);
+                  
+   .. group-tab:: python
+
+      .. py:method:: Tcam.PropertyString.get_value()
+                        
+         :exception: May raise an `GLib.Error` when fetching the property fails
+         :returns: Returns the value of this property
+
+      .. code-block:: python
+
+         try:
+             current_value = base_property.get_value()
+         except GLib.Error as err:
+             # error handling
+         
+
+.. _tcam_property_string_set_value:
+                
+tcam_property_string_set_value
+-------------------------------
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. c:function:: void tcam_property_string_set_value (TcamPropertyString* self, const char* value, GError** err)
+
+         :param self: The :ref:`TcamPropertyString` instance
+         :param value: The new value to set.
+         :param err: A :c:type:`GError` pointer, may be NULL
+
+      .. code-block:: c
+
+         TcamPropertyString* property = TCAM_PROPERTY_STRING(base_property);
+         GError* err = NULL;
+
+         const char* new_value = "test";
+         tcam_property_string_set_value(property, new_value, &err);
+
+         if (err)
+         {
+             // error handling
+         }
+                               
+   .. group-tab:: python
+
+      .. py:method:: Tcam.PropertyString.set_value(value)
+                        
+         :param value: The new value to set.
+         :exception: May raise an `GLib.Error` when setting the property fails
+
+      .. code-block:: python
+
+         try:
+             new_value = True
+             base_property.set_value(new_value)
          except GLib.Error as err:
              # error handling
 
@@ -1727,11 +2035,23 @@ Enumeration containing all possible error types tcam-property will return.
                     | Should not be encountered.
                     | Describes `no error` state.
                     
+.. cpp:enumerator:: TCAM_ERROR_TIMEOUT
+
+                    | A function failed with a timeout.
+
 .. cpp:enumerator:: TCAM_ERROR_UNKNOWN
 
                     | Catch all error code for things that do not fit other codes.
                     
-.. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED    
+.. cpp:enumerator:: TCAM_ERROR_NOT_IMPLEMENTED
+
+                    | Generic not implemented error value.
+
+.. cpp:enumerator:: TCAM_ERROR_PARAMETER_INVALID
+
+                    | A parameter was not valid.
+
+.. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED
 .. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_AVAILABLE
 
                     | Circumstances prevent this property from being usable.
@@ -1743,16 +2063,20 @@ Enumeration containing all possible error types tcam-property will return.
                     | The property is either read only or temporarily locked.
                     | Call :ref:`tcam_property_base_is_locked` for verification.
                     
-.. cpp:enumerator:: TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE
-
-                    The property is of a different type.
-                    
 .. cpp:enumerator:: TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE
 
                     | Value is out of bounds.
                     | Check the `*_get_range` function for boundaries.
-                    
-.. cpp:enumerator:: TCAM_ERROR_NO_DEVICE_OPEN
+
+.. cpp:enumerator:: TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE
+
+                    | The property has no default value.
+
+.. cpp:enumerator:: TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE
+
+                    | The property is of a different type.
+
+.. cpp:enumerator:: TCAM_ERROR_DEVICE_NOT_OPENED
                     
                     | No device has been opened that can offer properties.
                     | This typically means the GstElement is not in GST_STATE_READY or higher.
@@ -1762,15 +2086,31 @@ Enumeration containing all possible error types tcam-property will return.
                     | The device has been lost.
                     | This should be considered a fatal, unrecoverable error.
                     
-.. cpp:enumerator:: TCAM_ERROR_PARAMETER_NULL
+.. cpp:enumerator:: TCAM_ERROR_DEVICE_NOT_ACCESSIBLE
 
-                    | One of the given arguments is NULL.
-                    | Are provider/property pointer valid?
-                    | Is the name a valid string?
+                    | The property cannot query the device for data.
 
-.. cpp:enumerator:: TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE
 
-                    | Property offers no default value.
+.. _tcampropertyaccess:
+                    
+TcamPropertyAccess
+------------------
+
+Indicates a static property access mode.
+
+.. cpp:enum:: TcamPropertyAccess
+
+.. cpp:enumerator:: TCAM_PROPERTY_ACCESS_RW
+
+                    Read and write operations are available.
+
+.. cpp:enumerator:: TCAM_PROPERTY_ACCESS_RO
+
+                    Only read operations are available.
+
+.. cpp:enumerator:: TCAM_PROPERTY_ACCESS_WO
+
+                    Only write operations are available.
 
 .. _tcampropertyvisibility:
                     
@@ -1891,8 +2231,8 @@ GError
 
 GObject error reporting mechanism.
 
-A returned GError has to _always_ be freed by the user with g_error_free().
-The GError will contain a string describing the cause of the error and an error code.
-The message can be accessed through the member variable `message`.
-The error code can be accessed though the member variable `code`.
-The error code will be a :cpp:enum:`TcamError` enum entry.
+| A returned GError has to _always_ be freed by the user with g_error_free().
+| The GError will contain a string describing the cause of the error and an error code.
+| The message can be accessed through the member variable `message`.
+| The error code can be accessed though the member variable `code`.
+| The error code will be a :cpp:enum:`TcamError` enum entry.
