@@ -98,6 +98,7 @@ Tools:
 - unmaintained unit tests
 - TCAM_LOG environment variable.
   Use GST_DEBUG category `tcam-libtcam` instead.
+- Legacy uvc extension descriptions for uvcdynctrl
 
 ### Known Issues
 
@@ -351,6 +352,11 @@ Tools:
 - Issues with UVC extension units for USB 23 and 33 cameras concerning 'Trigger Polarity'
 
 ## [0.11.0] - 2019-05-13
+
+### Deprecated
+
+- XML uvc extension descriptions are no longer maintained.
+  To be removed in future release.
 
 ### Added
 
