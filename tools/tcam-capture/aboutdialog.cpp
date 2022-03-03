@@ -167,12 +167,14 @@ void AboutDialog::fill_stream()
     tmp.replace("!", "<br>!");
 
     auto pipe_label = new QLabel(tmp);
+    pipe_label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 
     layout->addRow("Pipeline: ", pipe_label);
 
     if (!p_label_device_caps)
     {
         p_label_device_caps = new QLabel();
+        p_label_device_caps->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     }
 
     layout->addRow("Device caps: ", p_label_device_caps);
