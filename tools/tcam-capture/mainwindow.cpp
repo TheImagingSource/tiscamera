@@ -122,6 +122,16 @@ void MainWindow::closeEvent(QCloseEvent* event)
     event->accept();
 }
 
+void MainWindow::on_actionQuit_triggered()
+{
+    // this and closeEvent are twins
+    // this function is a callback for keybindings/buttons
+    // closeEvent as an event for things like alt-f4
+    close_pipeline();
+    save_settings();
+    QApplication::quit();
+}
+
 
 bool MainWindow::open_device(const QString& serial)
 {
@@ -307,14 +317,6 @@ void MainWindow::on_actionOpen_Device_triggered()
     {
         qInfo("No device selected\n");
     }
-}
-
-void MainWindow::on_actionQuit_triggered()
-{
-    // qInfo("quit triggered");
-
-    close_pipeline();
-    QApplication::quit();
 }
 
 
