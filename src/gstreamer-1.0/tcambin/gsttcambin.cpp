@@ -237,6 +237,125 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
 }
 
 
+// check element existence and compatibility
+// assuming all transform elements exist the order is:
+// tcamdutils -> tcamdutils-cuda -> tcamconvert
+// manual overwrite disregards all checks and forces an element!
+// this can cause errors and non functioning pipelines!
+static void select_transform_element(TcamBinConversionElement& user_selector,
+                                     TcamBinConversionElement& internal_selector)
+{
+    static bool compatibility_checked;
+
+    static bool dutils_cuda_exists;
+    static bool dutils_cuda_is_compatible;
+
+    static bool dutils_exists;
+    static bool dutils_is_compatible;
+
+    // one time check
+    if (!compatibility_checked)
+    {
+        compatibility_checked = true;
+        auto factory_cuda = gst_element_factory_find("tcamdutils-cuda");
+        if (factory_cuda != nullptr)
+        {
+            dutils_cuda_exists = true;
+            if (tcam::gst::is_version_compatible_with_tiscamera("tcamdutils-cuda"))
+            {
+                //data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CUDA;
+                dutils_cuda_is_compatible = true;
+            }
+            else
+            {
+                GST_WARNING("tcamdutils-cuda detected. "
+                            "Versions are not compatible. "
+                            "Used only if forced.");
+            }
+            gst_object_unref(factory_cuda);
+        }
+
+        auto factory = gst_element_factory_find("tcamdutils");
+        if (factory != nullptr)
+        {
+            dutils_exists = true;
+            if (tcam::gst::is_version_compatible_with_tiscamera("tcamdutils"))
+            {
+                dutils_is_compatible = true;
+            }
+            else
+            {
+                GST_WARNING("tcamdutils detected. "
+                            "Versions are not compatible. "
+                            "Used only if forced.");
+            }
+            gst_object_unref(factory);
+        }
+    }
+
+    if (user_selector == TCAM_BIN_CONVERSION_CUDA)
+    {
+        if (dutils_cuda_exists)
+        {
+            internal_selector = TCAM_BIN_CONVERSION_CUDA;
+            GST_INFO("User selected transform element tcamdutils-cuda");
+            if (!dutils_cuda_is_compatible)
+            {
+                GST_WARNING("tcamdutils-cuda is marked as incompatible. Error may occur.");
+            }
+        }
+        else
+        {
+            GST_ERROR("Unable to use tcamconvert. Element does not seem to exist. Falling "
+                      "back to auto");
+            internal_selector = TCAM_BIN_CONVERSION_AUTO;
+        }
+    }
+    else if (user_selector == TCAM_BIN_CONVERSION_DUTILS)
+    {
+        if (dutils_exists)
+        {
+            internal_selector = TCAM_BIN_CONVERSION_DUTILS;
+            GST_INFO("User selected transform element tcamdutils");
+        }
+        else
+        {
+            GST_ERROR("Unable to use tcamdutils. Element does not seem to exist. Falling "
+                      "back to auto");
+            internal_selector = TCAM_BIN_CONVERSION_AUTO;
+        }
+    }
+    else if (user_selector == TCAM_BIN_CONVERSION_CONVERT)
+    {
+        // tcamconvert always exists and is always compatible
+        internal_selector = TCAM_BIN_CONVERSION_CONVERT;
+        GST_INFO("User selected transform element tcamconvert");
+    }
+    else // user_selector == TCAM_BIN_CONVERSION_AUTO
+    {
+        std::string selected_element = "tcamconvert";
+        if (dutils_exists && dutils_is_compatible)
+        {
+            internal_selector = TCAM_BIN_CONVERSION_DUTILS;
+            user_selector = TCAM_BIN_CONVERSION_DUTILS;
+            selected_element = "tcamdutils";
+        }
+        else if (dutils_cuda_exists && dutils_cuda_is_compatible)
+        {
+            internal_selector = TCAM_BIN_CONVERSION_CUDA;
+            user_selector = TCAM_BIN_CONVERSION_CUDA;
+            selected_element = "tcamdutils-cuda";
+        }
+        else
+        {
+            internal_selector = TCAM_BIN_CONVERSION_CONVERT;
+            user_selector = TCAM_BIN_CONVERSION_CONVERT;
+        }
+        GST_INFO("Auto selected transform element: %s", selected_element.c_str());
+    }
+}
+
+
 static gboolean create_and_add_element(GstElement** element,
                                        const char* factory_name,
                                        const char* element_name,
@@ -294,7 +413,7 @@ static bool tcambin_create_elements(GstTcamBin* self)
 
     if (gst_element_link(data.src_element.get(), data.pipeline_caps))
     {
-        pipeline_string += " ! capsfilter name=tcambin-src_caps";
+        pipeline_string += " ! capsfilter";
     }
     else
     {
@@ -386,8 +505,7 @@ static bool tcambin_create_elements(GstTcamBin* self)
             element_name = "tcamconvert";
         }
 
-        std::string bin_name = "tcambin-" + element_name;
-        if (!link_elements(data.pipeline_caps, data.tcam_converter, pipeline_string, bin_name))
+        if (!link_elements(data.pipeline_caps, data.tcam_converter, pipeline_string, element_name))
         {
             GST_ELEMENT_ERROR(self,
                               CORE,
@@ -430,72 +548,6 @@ static void set_target_pad(GstTcamBin* self)
     }
 }
 
-static void check_and_notify_version_missmatch(GstTcamBin* self)
-{
-    if (!self->data->tcam_converter)
-    {
-        // this means we either have a pipeline that does not
-        // need one of our conversion elements
-        // or that something is very, very wrong
-        // either way, do not spam the user
-        return;
-    }
-
-    if (self->data->conversion_info.user_selector != TCAM_BIN_CONVERSION_AUTO)
-    {
-        // additional anti spam check
-        // != AUTO means the user has manually selected a conversion element
-        // assume they know what they are doing
-        return;
-    }
-
-    std::string element_name;
-
-    if (self->data->conversion_info.selected_conversion == TCAM_BIN_CONVERSION_DUTILS)
-    {
-        if (tcam::gst::is_version_compatible_with_tiscamera("tcamdutils"))
-        {
-            return;
-        }
-        element_name = "tcamdutils";
-    }
-    else if (self->data->conversion_info.selected_conversion == TCAM_BIN_CONVERSION_CUDA)
-    {
-        if (tcam::gst::is_version_compatible_with_tiscamera("tcamdutils-cuda"))
-        {
-            return;
-        }
-        element_name = "tcamdutils-cuda";
-    }
-    else
-    {
-        // only other option is tcamconvert
-        // which is part of tiscamera
-        // version parity is thus guaranteed
-        return;
-    }
-
-    std::string warning =
-        element_name + " version mismatch! " + element_name
-        + " and tiscamera require identical major.minor version. "
-          "Overwrite at own risk by explicitly setting 'tcambin conversion-element="
-        + element_name
-        + "'. "
-          "Found '"
-        + tcam::gst::get_plugin_version(element_name.c_str()) + "' Required: '"
-        + get_version_major() + "." + get_version_minor() + "'";
-
-    GST_WARNING_OBJECT(self, "%s", warning.c_str());
-
-    std::string quark_str = element_name + " version mismatch";
-    GError* err =
-        g_error_new(g_quark_from_string(quark_str.c_str()), 1, "%s", GST_ELEMENT_NAME(self));
-
-    GstMessage* msg = gst_message_new_warning(GST_OBJECT(self), err, warning.c_str());
-    g_clear_error(&err);
-    gst_element_post_message(GST_ELEMENT(self), msg);
-}
-
 
 static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstStateChange trans)
 {
@@ -508,12 +560,12 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
     {
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
-            // post message about dutils(-cuda) version missmatch
-            // this only happens when we have found tcamdutils(-cuda)
-            // but the previous version check failed
-            // user can manually set use_dutils to true
-            // which overwrites this message
-            check_and_notify_version_missmatch(self);
+            // select transform element here
+            // this checks compatibilities
+            // informs the user about them
+            // and gives us the infos we need for create_elements
+            select_transform_element(self->data->conversion_info.user_selector,
+                                     self->data->conversion_info.selected_conversion);
 
             if (!tcambin_create_source(self))
             {
@@ -717,6 +769,7 @@ static bool is_state_ready_or_lower(GstTcamBin* self) noexcept
     return tcam::gst::is_gst_state_equal_or_less(GST_ELEMENT(self), GST_STATE_READY);
 }
 
+
 static void gst_tcambin_get_property(GObject* object,
                                      guint prop_id,
                                      GValue* value,
@@ -888,73 +941,8 @@ static void gst_tcambin_set_property(GObject* object,
             self->data->conversion_info.user_selector =
                 (TcamBinConversionElement)g_value_get_enum(value);
 
-            if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_CUDA)
-            {
-                if (self->data->conversion_info.have_tcamdutils_cuda)
-                {
-                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CUDA;
-                }
-                else
-                {
-                    GST_ERROR_OBJECT(
-                        self,
-                        "Unable to use tcamconvert. Element does not seem to exist. Falling "
-                        "back to auto");
-                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
-                }
-            }
-            else if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_DUTILS)
-            {
-                if (self->data->conversion_info.have_tcamdutils)
-                {
-                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_DUTILS;
-                }
-                else
-                {
-                    GST_ERROR_OBJECT(
-                        self,
-                        "Unable to use tcamdutils. Element does not seem to exist. Falling "
-                        "back to auto");
-                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
-                }
-            }
-            else
-            {
-                if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_CONVERT)
-                {
-                    if (self->data->conversion_info.have_tcamconvert)
-                    {
-                        self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CONVERT;
-                    }
-                    else
-                    {
-                        GST_ERROR_OBJECT(
-                            self,
-                            "Unable to use tcamconvert. Element does not seem to exist. Falling "
-                            "back to auto");
-                        self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
-                    }
-                }
-            }
-
-            if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_AUTO)
-            {
-                if (self->data->conversion_info.have_tcamdutils_cuda)
-                {
-                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CUDA;
-                    self->data->conversion_info.user_selector = TCAM_BIN_CONVERSION_CUDA;
-                }
-                else if (self->data->conversion_info.have_tcamdutils)
-                {
-                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_DUTILS;
-                    self->data->conversion_info.user_selector = TCAM_BIN_CONVERSION_DUTILS;
-                }
-                else
-                {
-                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CONVERT;
-                    self->data->conversion_info.user_selector = TCAM_BIN_CONVERSION_CONVERT;
-                }
-            }
+            // select_transform_element(self->data->conversion_info.user_selector,
+            //                          self->data->conversion_info.selected_conversion);
 
             break;
         }
@@ -1038,30 +1026,8 @@ static void gst_tcambin_init(GstTcamBin* self)
 
     auto& data = *self->data;
 
+    data.conversion_info.user_selector = TCAM_BIN_CONVERSION_AUTO;
     data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CONVERT;
-
-    // #TODO maybe this could be done statically. These test have to be done only once in a process
-    auto factory = gst_element_factory_find("tcamdutils");
-    if (factory != nullptr)
-    {
-        data.conversion_info.have_tcamdutils = true;
-        if (tcam::gst::is_version_compatible_with_tiscamera("tcamdutils"))
-        {
-            data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_DUTILS;
-        }
-        gst_object_unref(factory);
-    }
-
-    auto factory_cuda = gst_element_factory_find("tcamdutils-cuda");
-    if (factory_cuda != nullptr)
-    {
-        data.conversion_info.have_tcamdutils_cuda = true;
-        if (tcam::gst::is_version_compatible_with_tiscamera("tcamdutils-cuda"))
-        {
-            data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CUDA;
-        }
-        gst_object_unref(factory_cuda);
-    }
 
     // NOTE: the result of gst_ghost_pad_new_no_target is a floating reference that is consumed by gst_element_add_pad
     data.src_ghost_pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);

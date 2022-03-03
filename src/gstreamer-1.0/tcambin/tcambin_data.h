@@ -12,10 +12,6 @@
 
 struct tcambin_conversion
 {
-    bool have_tcamconvert = true;
-    bool have_tcamdutils = false;
-    bool have_tcamdutils_cuda = false;
-
     TcamBinConversionElement user_selector = TCAM_BIN_CONVERSION_AUTO;
     TcamBinConversionElement selected_conversion = TCAM_BIN_CONVERSION_AUTO;
 };
