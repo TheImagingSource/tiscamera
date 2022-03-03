@@ -38,7 +38,7 @@ _tcam-ctrl () {
 
     if [[ -n $command ]]; then
         case $command in
-            list|properties|formats|caps|-c|-p|--caps|--properties)
+            list|properties|formats|caps|-c|-p|--caps|--properties|--save|--load|--save-json|--load-json)
                 # explicitly use --gst-debug=*:0
                 # we do not want debug output for tab completion
                 COMPREPLY=( $( compgen -W "$( tcam-ctrl --list-serial-long --gst-debug=*:0)" -- "$cur" ) )
