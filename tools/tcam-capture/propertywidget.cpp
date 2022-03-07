@@ -754,7 +754,19 @@ void StringWidget::update()
 
     HANDLE_ERROR(err, return)
     
-    p_label->setText(value);
+    if (value)
+    {
+        p_label->setText(value);
+    }
+    else
+    {
+        // this prevents a segfault (yes, really)
+        // setting a long text into an empty label causes
+        // a layout change, which seems to have a library 
+        // bug (tested qt 5.15). Adding a longer empty text
+        // prevents reformatting
+        p_label->setText("                    ");
+    }
 }
 
 void StringWidget::set_in_backend()
