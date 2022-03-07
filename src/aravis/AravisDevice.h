@@ -159,7 +159,7 @@ private:
     void generate_video_formats();
 
     void generate_properties_from_genicam();
-    void index_properties(const char* category,const char* name);
+    void create_property_list_from_genicam_categories();
 
     tcam_image_size get_sensor_size() const;
 

@@ -239,20 +239,24 @@ auto build_property_from_node(std::string_view name,
 }
 
 
-} // namespace
-
-bool tcam::aravis::is_private_setting(std::string_view name)
+struct node_cat_entry
 {
-    auto info = find_map_info(name);
-    return info.type != map_type::pub;
-}
+    std::string category;
+    std::string name;
+    ArvGcFeatureNode* node;
+};
 
-void tcam::AravisDevice::index_properties(const char* category, const char* name)
+void create_ordered_property_list(std::vector<node_cat_entry>& out_lst,
+                                  ArvGc* document,
+                                  const char* category,
+                                  const char* name)
 {
-    ArvGcNode* node = arv_gc_get_node(genicam_, name);
+    ArvGcNode* node = arv_gc_get_node(document, name);
+    if (!ARV_IS_GC_FEATURE_NODE(node))
+        return;
 
-    if (!ARV_IS_GC_FEATURE_NODE(node)
-        || !arv_gc_feature_node_is_implemented(ARV_GC_FEATURE_NODE(node), NULL))
+    ArvGcFeatureNode* feature_node = ARV_GC_FEATURE_NODE(node);
+    if (!arv_gc_feature_node_is_implemented(feature_node, NULL))
     {
         return;
     }
@@ -261,9 +265,7 @@ void tcam::AravisDevice::index_properties(const char* category, const char* name
     {
         auto features = arv_gc_category_get_features(ARV_GC_CATEGORY(node));
 
-        // #TODO This does not work currently
-        auto category_display_name =
-            arv_gc_feature_node_get_display_name(ARV_GC_FEATURE_NODE(node));
+        auto category_display_name = arv_gc_feature_node_get_display_name(feature_node);
         if (!category_display_name)
         {
             category_display_name = name;
@@ -271,28 +273,63 @@ void tcam::AravisDevice::index_properties(const char* category, const char* name
 
         for (auto iter = features; iter != NULL; iter = iter->next)
         {
-            index_properties(category_display_name, (char*)iter->data);
+            create_ordered_property_list(
+                out_lst, document, category_display_name, (char*)iter->data);
         }
         return;
     }
 
-    std::string_view prop_name = arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node));
-    auto map_info = find_map_info(prop_name);
-    if (map_info.type == map_type::blacklist)
-    {
-        return;
-    }
+    out_lst.push_back(node_cat_entry { category, name, feature_node });
+}
 
-    auto prop = build_property_from_node(prop_name, category, node, backend_, map_info);
-    if (prop != nullptr)
+} // namespace
+
+bool tcam::aravis::is_private_setting(std::string_view name)
+{
+    auto info = find_map_info(name);
+    return info.type != map_type::pub;
+}
+
+void tcam::AravisDevice::create_property_list_from_genicam_categories()
+{
+    std::vector<node_cat_entry> lst;
+    create_ordered_property_list(lst, genicam_, nullptr, "Root");
+
+    auto find_node = [&](std::string_view name) -> bool
     {
-        if (map_info.type == map_type::priv)
+        return std::any_of(
+            lst.begin(), lst.end(), [name](const node_cat_entry& e) { return e.name == name; });
+    };
+
+    for (auto&& entry : lst)
+    {
+        std::string_view prop_name = arv_gc_feature_node_get_name(entry.node);
+        auto map_info = find_map_info(prop_name);
+        if (map_info.type == map_type::blacklist)
         {
-            internal_properties_.push_back(prop);
+            continue;
         }
-        else
+        if (!map_info.new_name.empty())
         {
-            properties_.push_back(prop);
+            if (find_node(
+                    map_info.new_name)) // if node with new name is already present skip this node
+            {
+                continue;
+            }
+        }
+
+        auto prop = build_property_from_node(
+            prop_name, entry.category, ARV_GC_NODE(entry.node), backend_, map_info);
+        if (prop != nullptr)
+        {
+            if (map_info.type == map_type::priv)
+            {
+                internal_properties_.push_back(prop);
+            }
+            else
+            {
+                properties_.push_back(prop);
+            }
         }
     }
 }
@@ -317,7 +354,7 @@ static void add_property_after(
 
 void tcam::AravisDevice::generate_properties_from_genicam()
 {
-    index_properties(nullptr, "Root");
+    create_property_list_from_genicam_categories();
 
     // this adds things like TestBinningVertical to the private properties
     for (auto&& e : unlinked_property_map)
