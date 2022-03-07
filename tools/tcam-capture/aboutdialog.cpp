@@ -267,9 +267,12 @@ void AboutDialog::update_state()
     }
 
     GValue state = G_VALUE_INIT;
+    g_value_init(&state, G_TYPE_STRING);
     g_object_get_property(G_OBJECT(p_tcambin), "tcam-properties-json", &state);
 
     ui->state_field->setPlainText(g_value_get_string(&state));
+
+    g_value_unset(&state);
 
     ui->state_field->setEnabled(true);
 }
