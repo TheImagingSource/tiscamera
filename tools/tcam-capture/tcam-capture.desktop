@@ -4,5 +4,5 @@ Encoding=UTF-8
 Name=Tcam-Capture
 Comment=The Imaging Source Live Stream Viewer
 Exec=@TCAM_INSTALL_BIN@/tcam-capture
-Icon=@TCAM_INSTALL_IMAGE_DIR@/images/tis_logo.jpg
+Icon=@TCAM_INSTALL_IMAGE_DIR@/images/tiscamera_logo.png
 Terminal=false
