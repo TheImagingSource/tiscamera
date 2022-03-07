@@ -73,7 +73,7 @@ if (TCAM_BUILD_ARAVIS)
     ExternalProject_Add(aravis
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
       GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
-      GIT_TAG bee16e89b66e414ef35b16efafd6465972cfb5b3
+      GIT_TAG 0.8.21
       CONFIGURE_COMMAND ${ARAVIS_CONFIG}
       BUILD_COMMAND ninja
       INSTALL_COMMAND ""        # Do not install we are statically linking
