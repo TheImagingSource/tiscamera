@@ -338,7 +338,12 @@ std::string get_camera_ident (const CLI::App& app)
 {
     if (app.remaining_size() != 1)
     {
-        std::cerr << "require camera identifier!" << std::endl;
+        std::cerr << "require camera identifier!" << std::endl
+                  << "Usage:" << std::endl
+                  << "\t tcam-gigetool <command> <identifier>" << std::endl
+                  << std::endl
+                  << "The identifier can be the serial, IP oder MAC" << std::endl;
+
         return std::string();
     }
 
@@ -349,6 +354,12 @@ std::string get_camera_ident (const CLI::App& app)
 int print_camera_information (const CLI::App& app)
 {
     auto ident = get_camera_ident(app);
+
+    if (ident.empty())
+    {
+        return 1;
+    }
+
     auto camera = findCamera(ident);
 
     if (camera == NULL)
