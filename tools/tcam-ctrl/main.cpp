@@ -330,6 +330,12 @@ int main(int argc, char* argv[])
 
         return convert(transform_element, direction, caps_str);
     }
-
+    else
+    {
+        
+        std::cerr << "Unknown command" << std::endl << std::endl
+         << app.help() << std::endl;
+        return 2;
+    }
     return 0;
 }
