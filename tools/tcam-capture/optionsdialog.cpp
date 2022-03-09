@@ -18,7 +18,8 @@
 
 #include "ui_optionsdialog.h"
 
-
+#include <QStandardItemModel>
+#include <gst/gst.h>
 
 OptionsDialog::OptionsDialog(TcamCaptureConfig& config,
                              const OptionsSettings& /*settings*/,
@@ -27,25 +28,79 @@ OptionsDialog::OptionsDialog(TcamCaptureConfig& config,
 {
     ui->setupUi(this);
 
+    // helper, checks if element really exists
+    // disables entry otherwise
+    auto verify_entry = [this](const QString& name, int index) -> bool
+    {
+        auto factory = gst_element_factory_find(name.toStdString().c_str());
+
+        if (factory)
+        {
+            gst_object_unref(factory);
+            this->enable_menu_entry(this->ui->combo_convert_options, index, true);
+            return true;
+        }
+        else
+        {
+            this->enable_menu_entry(this->ui->combo_convert_options, index, false);
+            return false;
+        }
+    };
+
+    int active_index = (int)config.conversion_element;
+
     // these should be in the same order as the enum class
     // that makes get/set easier
-    ui->combo_convert_options->addItem("Auto");
+    ui->combo_convert_options->addItem("auto");
     ui->combo_convert_options->addItem("tcamconvert");
+
+    // do not test tcamconvert
+    // it is part of tiscamera and always available
+
     ui->combo_convert_options->addItem("tcamdutils");
+
+    if (!verify_entry("tcamdutils", 2) && (int)config.conversion_element == 2)
+    {
+        // reset active index to `auto`
+        active_index = 0;
+    }
+
     ui->combo_convert_options->addItem("tcamdutils-cuda");
 
-    ui->combo_convert_options->setCurrentIndex((int)config.conversion_element);
+    if (!verify_entry("tcamdutils-cuda", 3) && (int)config.conversion_element == 3)
+    {
+        active_index = 0;
+    }
+
+    ui->combo_convert_options->setCurrentIndex(active_index);
 }
 
 
-OptionsDialog::~OptionsDialog()
-{}
+OptionsDialog::~OptionsDialog() {}
 
 
-TcamCaptureConfig OptionsDialog::get_config ()
+void OptionsDialog::enable_menu_entry(QComboBox* comboBox, int index, bool enabled)
+{
+    auto* model = qobject_cast<QStandardItemModel*>(comboBox->model());
+
+    if (!model)
+    {
+        return;
+    }
+
+    auto* item = model->item(index);
+
+    if (!item)
+    {
+        return;
+    }
+    item->setEnabled(enabled);
+}
+
+
+TcamCaptureConfig OptionsDialog::get_config()
 {
     app_config.conversion_element = (ConversionElement)ui->combo_convert_options->currentIndex();
 
     return app_config;
-
 }

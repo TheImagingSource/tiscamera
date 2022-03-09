@@ -24,6 +24,7 @@ namespace Ui
 {
 class OptionsDialog;
 }
+class QComboBox;
 
 enum class OptionsConversionElement
 {
@@ -54,6 +55,9 @@ public:
     TcamCaptureConfig get_config ();
 
 private:
+    void enable_menu_entry (QComboBox* comboBox,
+                            int index,
+                            bool enabled);
 
     TcamCaptureConfig app_config;
 
