@@ -61,15 +61,25 @@ static GstStaticPadTemplate src_template =
     GST_STATIC_PAD_TEMPLATE("src", GST_PAD_SRC, GST_PAD_ALWAYS, GST_STATIC_CAPS_ANY);
 
 
-static gst_helper::gst_ptr<GstCaps> tcambin_filter_unsupported_caps(const GstCaps& source_caps)
+static gst_helper::gst_ptr<GstCaps> tcambin_filter_unsupported_caps(GstTcamBin* self, const GstCaps& source_caps)
 {
 
-    auto filter_func =
-        [](GstCapsFeatures* features, GstStructure* structure, gpointer /*user_data*/) -> gboolean
+    bool nvmm_flag = true;
+
+    if (self->data->conversion_info.selected_conversion == TCAM_BIN_CONVERSION_CUDA)
     {
+        nvmm_flag = false;
+    }
+
+    auto filter_func = [] (GstCapsFeatures* features,
+                           GstStructure* structure,
+                           gpointer user_data) -> gboolean
+    {
+        bool filter_nvmm = *(bool*)(user_data);
+
         if (features)
         {
-            if (gst_caps_features_contains(features, "memory:NVMM"))
+            if (gst_caps_features_contains(features, "memory:NVMM") && filter_nvmm)
             {
                 return FALSE;
             }
@@ -91,7 +101,7 @@ static gst_helper::gst_ptr<GstCaps> tcambin_filter_unsupported_caps(const GstCap
 
     auto available_caps = gst_helper::gst_ptr<GstCaps>::wrap(gst_caps_copy(&source_caps));
 
-    gst_caps_filter_and_map_in_place(available_caps.get(), filter_func, nullptr);
+    gst_caps_filter_and_map_in_place(available_caps.get(), filter_func, (void*)&nvmm_flag);
 
     return available_caps;
 }
@@ -173,7 +183,7 @@ static bool tcambin_create_source(GstTcamBin* self)
 
     auto src_caps = gst_helper::query_caps(*gst_helper::get_static_pad(*data.src_element, "src"));
 
-    data.available_caps = tcambin_filter_unsupported_caps(*src_caps.get());
+    data.available_caps = tcambin_filter_unsupported_caps(self, *src_caps.get());
 
     return true;
 }
