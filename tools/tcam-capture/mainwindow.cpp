@@ -206,8 +206,8 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
             QString s = err->message;
             if (s.startsWith("Device lost ("))
             {
-                int start = s.indexOf("(")+1;
-                QString serial = s.mid(start, s.indexOf(")")-start);
+                int start = s.indexOf("(") + 1;
+                QString serial = s.mid(start, s.indexOf(")") - start);
                 ((MainWindow*)user_data)->device_lost(serial);
             }
 
@@ -407,8 +407,40 @@ void MainWindow::open_pipeline(FormatHandling handling)
     GstElementFactory* factory = gst_element_get_factory(p_source);
     GType element_type = gst_element_factory_get_element_type(factory);
 
-    gst_element_set_state(p_source, GST_STATE_READY);
+    auto src_change_ret = gst_element_set_state(p_source, GST_STATE_READY);
 
+    if (src_change_ret == GST_STATE_CHANGE_ASYNC)
+    {
+        GstState state;
+        GstState pending;
+        // wait 0.1 sec
+        GstStateChangeReturn change_ret =
+            gst_element_get_state(p_source, &state, &pending, 100000000);
+
+        if (change_ret == GST_STATE_CHANGE_SUCCESS)
+        {
+            if (state == GST_STATE_PAUSED || state == GST_STATE_PLAYING)
+            {
+                gst_element_set_state(p_source, GST_STATE_READY);
+            }
+        }
+        else
+        {
+            qWarning("Unable to start pipeline. Stopping.");
+            close_pipeline();
+            // #TODO: what now?
+            return;
+        }
+    }
+    else if (src_change_ret == GST_STATE_CHANGE_FAILURE)
+    {
+        QString err_str = "Unable to open device. Please check gstreamer log 'tcam*:5' for more information.";
+        qWarning("%s",err_str.toStdString().c_str());
+        close_pipeline();
+
+        QMessageBox::critical(this, "Unable to open device", err_str);
+        return;
+    }
     // we want the device caps
     // there are two scenarios
     // tcambin -> get subelement
