@@ -29,6 +29,11 @@
 #include <tcam-property-1.0.h>
 #include <unistd.h>
 
+using namespace tcam::tools::ctrl;
+
+namespace
+{
+
 static void print_version(size_t /*t*/)
 {
     std::cout << "Versions: " << std::endl
@@ -37,62 +42,6 @@ static void print_version(size_t /*t*/)
               << "\tModules:\t" << get_enabled_modules() << std::endl;
 }
 
-
-gboolean bus_function(GstBus* /*bus*/, GstMessage* message, gpointer /*user_data*/)
-{
-    GstDevice* device;
-    //gchar* name;
-    switch (GST_MESSAGE_TYPE(message))
-    {
-        case GST_MESSAGE_DEVICE_ADDED:
-        {
-            gst_message_parse_device_added(message, &device);
-
-            GstStructure* struc = gst_device_get_properties(device);
-
-            printf("Model: %s Serial: %s Type: %s\n",
-                   gst_structure_get_string(struc, "model"),
-                   gst_structure_get_string(struc, "serial"),
-                   gst_structure_get_string(struc, "type"));
-
-            gst_object_unref(device);
-            break;
-        }
-        case GST_MESSAGE_DEVICE_REMOVED:
-        {
-            gst_message_parse_device_removed(message, &device);
-            //name = gst_device_get_display_name(device);
-            //g_print("Device removed: %s\n", name);
-            //g_free(name);
-            //     Device dev = to_device(device);
-
-            //     self->_mutex.lock();
-
-            //     self->_device_list.erase(std::remove_if(self->_device_list.begin(),
-            //                                             self->_device_list.end(),
-            //                                             [&dev](const Device& d) {
-            //                                                 if (dev == d)
-            //                                                 {
-            //                                                     return true;
-            //                                                 }
-            //                                                 return false;
-            //                                             }),
-            //                              self->_device_list.end());
-
-            //     //        self->_device_list.remove(dev);
-            //     self->_mutex.unlock();
-            //     emit(self, &Indexer::device_lost, dev);
-            //     gst_object_unref(device);
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
-
-    return true;;
-}
 
 static void print_devices(size_t /*t*/)
 {
@@ -139,7 +88,7 @@ static void print_serials_long(size_t)
     g_list_free(devices);
     gst_object_unref(monitor);
 }
-
+}
 
 int main(int argc, char* argv[])
 {
@@ -332,7 +281,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        
+
         std::cerr << "Unknown command" << std::endl << std::endl
          << app.help() << std::endl;
         return 2;

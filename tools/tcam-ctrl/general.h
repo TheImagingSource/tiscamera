@@ -22,6 +22,8 @@
 
 #include <gst-helper/gst_ptr.h>
 
+namespace tcam::tools::ctrl
+{
 inline std::string extract_directory(const std::string& path)
 {
     return path.substr(0, path.find_last_of('/') + 1);
@@ -58,5 +60,7 @@ struct ElementStateGuard
 
     GstElement& p_element;
 };
+
+}
 
 #endif /* GENERAL_H */

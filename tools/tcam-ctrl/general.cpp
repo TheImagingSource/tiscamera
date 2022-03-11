@@ -20,7 +20,7 @@
 #include <iostream>
 
 
-bool is_valid_device_serial(const std::string& serial)
+bool tcam::tools::ctrl::is_valid_device_serial (const std::string& serial)
 {
     bool ret = false;
 
@@ -70,7 +70,7 @@ bool is_valid_device_serial(const std::string& serial)
 }
 
 
-gst_helper::gst_ptr<GstElement> open_element(const std::string& element_name)
+gst_helper::gst_ptr<GstElement> tcam::tools::ctrl::open_element (const std::string& element_name)
 {
     gst_helper::gst_ptr<GstElement> source = gst_helper::make_ptr(gst_element_factory_make(element_name.c_str(), "source"));
 
@@ -83,7 +83,8 @@ gst_helper::gst_ptr<GstElement> open_element(const std::string& element_name)
 }
 
 
-bool set_serial(gst_helper::gst_ptr<GstElement>& element, const std::string& serial)
+bool tcam::tools::ctrl::set_serial (gst_helper::gst_ptr<GstElement>& element,
+                                    const std::string& serial)
 {
     if (!is_valid_device_serial(serial))
     {
@@ -102,17 +103,14 @@ bool set_serial(gst_helper::gst_ptr<GstElement>& element, const std::string& ser
 }
 
 
+tcam::tools::ctrl::ElementStateGuard::ElementStateGuard(GstElement& element) : p_element(element) {}
 
-ElementStateGuard::ElementStateGuard(GstElement& element)
-    : p_element(element)
-{}
-
-ElementStateGuard::~ElementStateGuard()
+tcam::tools::ctrl::ElementStateGuard::~ElementStateGuard()
 {
     gst_element_set_state(&p_element, GST_STATE_NULL);
 }
 
-bool ElementStateGuard::set_state(GstState state)
+bool tcam::tools::ctrl::ElementStateGuard::set_state(GstState state)
 {
     auto change_res = gst_element_set_state(&p_element, state);
 

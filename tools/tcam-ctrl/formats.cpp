@@ -126,7 +126,7 @@ void print_conversion_table(GstBaseTransform* base)
 
 } // namespace
 
-void list_gstreamer_1_0_formats(const std::string& serial)
+void tcam::tools::ctrl::list_gstreamer_1_0_formats (const std::string& serial)
 {
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
 
@@ -178,9 +178,9 @@ void list_gstreamer_1_0_formats(const std::string& serial)
 }
 
 
-int convert (const std::string& element_name,
-             ElementPadDirection user_direction,
-             const std::string& caps_str)
+int tcam::tools::ctrl::convert(const std::string& element_name,
+                               ElementPadDirection user_direction,
+                               const std::string& caps_str)
 {
     std::cout << "Probing " << element_name << ":" << std::endl;
 

@@ -160,7 +160,7 @@ void print_base_description(TcamPropertyBase& base)
 } // namespace
 
 
-void print_properties(const std::string& serial)
+void tcam::tools::ctrl::print_properties (const std::string& serial)
 {
 
     auto source = open_element();
@@ -532,7 +532,7 @@ void print_properties(const std::string& serial)
 }
 
 
-void print_tcam_properties(const std::string& serial, OutputType print_type)
+void tcam::tools::ctrl::print_tcam_properties (const std::string& serial, OutputType print_type)
 {
     auto source = open_element();
     if (!source)
@@ -598,8 +598,8 @@ void print_tcam_properties(const std::string& serial, OutputType print_type)
 }
 
 
-void load_tcam_properties(const std::string& serial,
-                          const std::string& property_string)
+void tcam::tools::ctrl::load_tcam_properties (const std::string& serial,
+                                              const std::string& property_string)
 {
     auto source = open_element();
     if (!source)
@@ -638,7 +638,7 @@ void load_tcam_properties(const std::string& serial,
 }
 
 
-void print_state_json(const std::string& serial)
+void tcam::tools::ctrl::print_state_json (const std::string& serial)
 {
     auto source = open_element();
 
@@ -668,7 +668,7 @@ void print_state_json(const std::string& serial)
 }
 
 
-void load_state_json_string(const std::string& serial, const std::string& json_str)
+void tcam::tools::ctrl::load_state_json_string (const std::string& serial, const std::string& json_str)
 {
     auto source = open_element();
 
@@ -686,6 +686,5 @@ void load_state_json_string(const std::string& serial, const std::string& json_s
         state_guard.set_state(GST_STATE_READY);
 
         g_object_set(G_OBJECT(source.get()), "tcam-properties-json", json_str.c_str(), NULL);
-
     }
 }

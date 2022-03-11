@@ -19,6 +19,9 @@
 
 #include <string>
 
+namespace tcam::tools::ctrl
+{
+
 /**
  * @brief print function for VideoFormatDescriptions as gstreamer-1.0 caps
  * @param available_formats - format descriptions that shell be printed
@@ -33,8 +36,10 @@ enum class ElementPadDirection
     Out,
 };
 
-int convert (const std::string& element_name,
-             ElementPadDirection direction = ElementPadDirection::Both,
-             const std::string& caps_str = "");
+int convert(const std::string& element_name,
+            ElementPadDirection direction = ElementPadDirection::Both,
+            const std::string& caps_str = "");
+
+} // namespace tcam::tools::ctrl
 
 #endif /* FORMATS_H */
