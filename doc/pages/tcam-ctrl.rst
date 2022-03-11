@@ -70,13 +70,13 @@ Arguments
    
 .. option:: -p, --properties <SERIAL>
 
-   Print available properties.
+   Print available properties the device offers.
 
    *Requires the serial number of the camera to be queried.*
 
 .. option:: --save <SERIAL>
 
-   Print a string to stdout containing a GstStructure description of existing properties and their current values.
+   Print a string to stdout containing a GstStructure description of existing device properties and their current values.
 
    This string contains escape sequences that allow usage in commandline programs such as tcam-ctrl and gst-launch.
    For a default GstStructure string description use `--no-console`.
