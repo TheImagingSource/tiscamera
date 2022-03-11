@@ -311,7 +311,7 @@ void AboutDialog::open_state()
 void AboutDialog::save_state()
 {
     auto filename = QFileDialog::getSaveFileName(this,
-                                                 "Save JSON State",
+                                                 "Save Device State",
                                                  QString(),
                                                  ("*.json"));
 
