@@ -636,7 +636,7 @@ void MainWindow::open_property_dialog()
         return;
     }
 
-    p_property_dialog = new PropertyDialog(m_tcam_collection);
+    p_property_dialog = new PropertyDialog(m_tcam_collection, this);
     p_property_dialog->setAttribute(Qt::WA_DeleteOnClose, true);
     connect(p_property_dialog, &QDialog::finished, this, &MainWindow::free_property_dialog);
     connect(p_property_dialog, &PropertyDialog::device_lost, this, &MainWindow::device_lost);
