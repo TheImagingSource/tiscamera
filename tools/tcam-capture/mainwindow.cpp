@@ -486,7 +486,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
     {
         p_selected_caps = open_format_dialog();
 
-        if (p_selected_caps)
+        if (!p_selected_caps)
         {
             close_pipeline();
             return;
