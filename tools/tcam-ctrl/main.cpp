@@ -88,7 +88,7 @@ static void print_serials_long(size_t)
     g_list_free(devices);
     gst_object_unref(monitor);
 }
-}
+} // namespace
 
 int main(int argc, char* argv[])
 {
@@ -100,15 +100,17 @@ int main(int argc, char* argv[])
     auto show_version =
         app.add_flag_function("--version", print_version, "list used library versions");
     auto list_devices = app.add_flag_function("-l,--list", print_devices, "list capture devices");
-    app.add_flag_function("--list-serial-long", print_serials_long, "list capture devices");
-    app.add_flag_callback("--packages", tcam::tools::print_packages, "list installed TIS packages");
-    app.add_flag_callback(
+    auto list_serial_long =
+        app.add_flag_function("--list-serial-long", print_serials_long, "list capture devices");
+    auto packages = app.add_flag_callback(
+        "--packages", tcam::tools::print_packages, "list installed TIS packages");
+    auto system_info = app.add_flag_callback(
         "--system-info", tcam::tools::print_system_info_general, "list general system information");
-    app.add_flag_callback(
+    auto gige_info = app.add_flag_callback(
         "--gige-info", tcam::tools::print_system_info_gige, "list network system information");
-    app.add_flag_callback(
+    auto usb_info = app.add_flag_callback(
         "--usb-info", tcam::tools::print_system_info_usb, "list usb system information");
-    app.add_flag_callback(
+    auto all_info = app.add_flag_callback(
         "--all-info", tcam::tools::print_system_info, "list all system information");
 
     std::string serial;
@@ -172,7 +174,16 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if (*list_devices || *show_version)
+    // check cb options
+    if (*list_devices
+        || *show_version
+        || *list_devices
+        || *list_serial_long
+        || *packages
+        || *system_info
+        || *gige_info
+        || *usb_info
+        || *all_info)
     {
         return 0;
     }
@@ -238,7 +249,10 @@ int main(int argc, char* argv[])
         }
 
         std::vector<std::string> vec = app.remaining();
-        std::cout << "Loading:\n\n " << std::endl<< std::endl<< vec.at(0) << "\n\n\n" << std::endl;
+        std::cout << "Loading:\n\n " << std::endl
+                  << std::endl
+                  << vec.at(0) << "\n\n\n"
+                  << std::endl;
 
         // TODO: replace with std::filesystem once c++17 is
         // available on reference system
