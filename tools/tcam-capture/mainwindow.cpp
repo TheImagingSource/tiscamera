@@ -231,12 +231,6 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
         }
         case GST_MESSAGE_STREAM_STATUS:
         {
-            GstStreamStatusType type;
-            GstElement* element = nullptr;
-            gst_message_parse_stream_status(message, &type, &element);
-
-            //qInfo("STREAM status: %s: %s", GST_ELEMENT_NAME(element), type);
-
             break;
         }
         case GST_MESSAGE_STATE_CHANGED:
@@ -255,10 +249,6 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
         }
         case GST_MESSAGE_ELEMENT:
         {
-            //auto struc = gst_message_get_structure(message);
-
-            //gst_message_
-
             break;
         }
         case GST_MESSAGE_ASYNC_DONE:
@@ -881,6 +871,7 @@ GstCaps* MainWindow::open_format_dialog()
     format_dialog.setWindowIcon(QIcon(":/images/logo.png"));
 
     format_dialog.setMinimumSize(320, 240);
+    format_dialog.setMaximumSize(640, 480);
 
     if (!m_device_caps.isEmpty())
     {
