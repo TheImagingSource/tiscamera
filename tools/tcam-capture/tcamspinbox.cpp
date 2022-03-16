@@ -397,7 +397,19 @@ QString TcamSpinBoxImpl::longestAllowedString() const
         QString minStr = textFromValue(m_minimum);
         QString maxStr = textFromValue(m_maximum);
         const QFontMetrics fm(p_parent->fontMetrics());
-        if (fm.horizontalAdvance(minStr) > fm.horizontalAdvance(maxStr))
+
+        int advance_min;
+        int advance_max;
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
+        advance_min = fm.horizontalAdvance(minStr);
+        advance_max = fm.horizontalAdvance(maxStr);
+#else
+        advance_min = fontMetrics().width(minStr);
+        advance_max = fontMetrics().width(maxStr);
+#endif
+
+        if (advance_min > advance_max)
         {
             m_cached_maximum_string = minStr;
         }
@@ -422,12 +434,21 @@ QSize TcamSpinBoxImpl::sizeHint() const
         QString fixedContent = m_prefix + m_suffix + QLatin1Char(' ');
         s = longestAllowedString();
         s += fixedContent;
-        w = std::max(w, fm.horizontalAdvance(s));
+
+        int advance;
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
+        advance = fm.horizontalAdvance(s);
+#else
+        advance = fontMetrics().width(s);
+#endif
+
+        w = std::max(w, advance);
 
         if (m_special_value_text.size())
         {
             s = m_special_value_text;
-            w = std::max(w, fm.horizontalAdvance(s));
+            w = std::max(w, advance);
         }
         w += 2;
 
