@@ -28,6 +28,8 @@
 #include <QString>
 #include <QWidget>
 #include <string>
+
+#include "tcamspinbox.h"
 #include <tcam-property-1.0.h>
 
 class Property
@@ -100,7 +102,7 @@ protected:
 public slots:
 
     void slider_changed(int);
-    void spinbox_changed(int new_value);
+    void spinbox_changed(qlonglong new_value);
 
 signals:
 
@@ -112,7 +114,7 @@ private:
     void write_value(int64_t new_value);
 
     TcamSlider* p_slider = nullptr;
-    QSpinBox* p_box = nullptr;
+    tcam::tools::capture::TcamSpinBox* p_box = nullptr;
 
     TcamPropertyInteger* p_prop = nullptr;
     bool is_readonly_ = false;

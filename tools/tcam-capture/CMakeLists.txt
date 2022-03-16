@@ -57,6 +57,8 @@ set(TCAM_CAPTURE_SOURCES
   propertyworker.h
   tcamslider.cpp
   tcamslider.h
+  tcamspinbox.h
+  tcamspinbox.cpp
   caps.cpp
   caps.h
   capswidget.cpp

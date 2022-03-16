@@ -20,6 +20,8 @@
 #include <cassert>
 #include <gst/gst.h>
 
+using namespace tcam::tools::capture;
+
 QString Property::get_name() const
 {
     auto prop = get_property_base();
@@ -322,13 +324,13 @@ void IntWidget::slider_changed(int new_value)
 }
 
 
-void IntWidget::spinbox_changed(int new_value)
+void IntWidget::spinbox_changed(qlonglong new_value)
 {
     if (p_slider)
     {
-        p_slider->blockSignals(true);
+        const QSignalBlocker blocker(p_slider);
+
         p_slider->setValue(new_value);
-        p_slider->blockSignals(false);
     }
     write_value(new_value);
 
@@ -373,7 +375,7 @@ void IntWidget::setup_ui()
         }
     }
 
-    p_box = new QSpinBox();
+    p_box = new TcamSpinBox();
     p_box->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
 
     if (auto unit_ptr = tcam_property_integer_get_unit(p_prop); unit_ptr)
@@ -390,8 +392,10 @@ void IntWidget::setup_ui()
     }
     if (p_box)
     {
-        connect(
-            p_box, QOverload<int>::of(&QSpinBox::valueChanged), this, &IntWidget::spinbox_changed);
+        connect(p_box,
+                QOverload<qlonglong>::of(&TcamSpinBox::valueChanged),
+                this,
+                &IntWidget::spinbox_changed);
         p_layout->addWidget(p_box);
     }
     this->setToolTip(generate_tooltip(TCAM_PROPERTY_BASE(p_prop)));
