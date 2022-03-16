@@ -346,37 +346,39 @@ void IntWidget::setup_ui()
 
     TcamPropertyAccess access = tcam_property_base_get_access(TCAM_PROPERTY_BASE(p_prop));
     if (access == TCAM_PROPERTY_ACCESS_RO)
+    {
         is_readonly_ = true;
+    }
 
     TcamPropertyIntRepresentation representation = tcam_property_integer_get_representation(p_prop);
+
+    // TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER
+    // only box for display
+    // TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER
+    // box with different base
+    // rest box and slider but with different scale
     if (!is_readonly_)
     {
-        if (representation != TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER)
+        TcamSliderScale scale;
+        if (representation == TCAM_PROPERTY_INTREPRESENTATION_LINEAR)
         {
-            if (representation == TCAM_PROPERTY_INTREPRESENTATION_LINEAR)
-            {
-                p_slider = new TcamSlider();
-            }
-            else if (representation == TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC)
-            {
-                p_slider = new TcamSlider(TcamSliderScale::Logarithmic);
-            }
-            else if (representation == TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER)
-            {
-                auto name = tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-                qWarning(
-                    "Property '%s', TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER not implemented.",
-                    name);
-            }
-            else
-            {
-                qWarning("representation not implemented.");
-            }
+            scale = TcamSliderScale::Linear;
         }
+        else if (representation == TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC)
+        {
+            scale = TcamSliderScale::Logarithmic;
+        }
+                
+        p_slider = new TcamSlider(scale);
     }
 
     p_box = new TcamSpinBox();
     p_box->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
+
+    if (representation == TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER)
+    {
+        p_box->setDisplayIntegerBase(16);
+    }
 
     if (auto unit_ptr = tcam_property_integer_get_unit(p_prop); unit_ptr)
     {
