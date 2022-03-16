@@ -172,7 +172,7 @@ static GstCaps* transform_caps(GstCaps* caps, GstPadDirection direction)
         for (auto&& fcc : fcc_vec) { create_fmt(res_caps, structure, fcc, direction); }
     }
 
-    res_caps = gst_caps_simplify(res_caps);
+    // res_caps = gst_caps_simplify(res_caps); // This seems to simplify in a 'curious' way, so we should not use this here
 
     if (direction == GST_PAD_SRC)
     {
