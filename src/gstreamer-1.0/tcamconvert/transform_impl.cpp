@@ -52,8 +52,15 @@ struct transform_path
 
 using namespace img;
 
+
+// clang-format off
 static const constexpr transform_path transform_entries[] = {
-    { { fourcc::MONO8,
+{
+    { fourcc::MONO8 },
+    { fourcc::MONO8, fourcc::BGRA32 },
+},
+{
+    {
         fourcc::MONO16,
         fourcc::MONO10,
         fourcc::MONO10_MIPI_PACKED,
@@ -61,58 +68,79 @@ static const constexpr transform_path transform_entries[] = {
         fourcc::MONO12,
         fourcc::MONO12_MIPI_PACKED,
         fourcc::MONO12_SPACKED,
-        fourcc::MONO12_PACKED },
-      { fourcc::MONO8, fourcc::MONO16, fourcc::BGRA32 } },
-    { {
-          fourcc::BGGR8,
-          fourcc::BGGR16,
-          fourcc::BGGR10,
-          fourcc::BGGR10_SPACKED,
-          fourcc::BGGR10_MIPI_PACKED,
-          fourcc::BGGR12,
-          fourcc::BGGR12_PACKED,
-          fourcc::BGGR12_SPACKED,
-          fourcc::BGGR12_MIPI_PACKED,
+        fourcc::MONO12_PACKED
+    },
+    { fourcc::MONO8, fourcc::MONO16, fourcc::BGRA32 }
+},
+{
+    { fourcc::BGGR8, },
+    { fourcc::BGGR8, fourcc::BGRA32 }
+},
+{
+    {
+        fourcc::BGGR16,
+        fourcc::BGGR10,
+        fourcc::BGGR10_SPACKED,
+        fourcc::BGGR10_MIPI_PACKED,
+        fourcc::BGGR12,
+        fourcc::BGGR12_PACKED,
+        fourcc::BGGR12_SPACKED,
+        fourcc::BGGR12_MIPI_PACKED,
+    },
+    { fourcc::BGGR8, fourcc::BGGR16, fourcc::BGRA32 }
+},
+{
+    { fourcc::GBRG8, },
+    { fourcc::GBRG8, fourcc::BGRA32 }
+},
+{
+    {
+        fourcc::GBRG16,
+        fourcc::GBRG10,
+        fourcc::GBRG10_SPACKED,
+        fourcc::GBRG10_MIPI_PACKED,
+        fourcc::GBRG12,
+        fourcc::GBRG12_PACKED,
+        fourcc::GBRG12_SPACKED,
+        fourcc::GBRG12_MIPI_PACKED,
       },
-      { fourcc::BGGR8, fourcc::BGGR16, fourcc::BGRA32 } },
-    { {
-          fourcc::GBRG8,
-          fourcc::GBRG16,
-          fourcc::GBRG10,
-          fourcc::GBRG10_SPACKED,
-          fourcc::GBRG10_MIPI_PACKED,
-          fourcc::GBRG12,
-          fourcc::GBRG12_PACKED,
-          fourcc::GBRG12_SPACKED,
-          fourcc::GBRG12_MIPI_PACKED,
-      },
-      { fourcc::GBRG8, fourcc::GBRG16, fourcc::BGRA32 } },
-    { {
-          fourcc::RGGB8,
-          fourcc::RGGB16,
-          fourcc::RGGB10,
-          fourcc::RGGB10_SPACKED,
-          fourcc::RGGB10_MIPI_PACKED,
-          fourcc::RGGB12,
-          fourcc::RGGB12_PACKED,
-          fourcc::RGGB12_SPACKED,
-          fourcc::RGGB12_MIPI_PACKED,
-      },
-      { fourcc::RGGB8, fourcc::RGGB16, fourcc::BGRA32 } },
-    { {
-          fourcc::GRBG8,
-          fourcc::GRBG16,
-          fourcc::GRBG10,
-          fourcc::GRBG10_SPACKED,
-          fourcc::GRBG10_MIPI_PACKED,
-          fourcc::GRBG12,
-          fourcc::GRBG12_PACKED,
-          fourcc::GRBG12_SPACKED,
-          fourcc::GRBG12_MIPI_PACKED,
-      },
-      { fourcc::GRBG8, fourcc::GRBG16, fourcc::BGRA32 } },
+      { fourcc::GBRG8, fourcc::GBRG16, fourcc::BGRA32 }
+},
+{
+    { fourcc::RGGB8, },
+    { fourcc::RGGB8, fourcc::BGRA32 }
+},
+{
+    {
+        fourcc::RGGB16,
+        fourcc::RGGB10,
+        fourcc::RGGB10_SPACKED,
+        fourcc::RGGB10_MIPI_PACKED,
+        fourcc::RGGB12,
+        fourcc::RGGB12_PACKED,
+        fourcc::RGGB12_SPACKED,
+        fourcc::RGGB12_MIPI_PACKED,
+    },
+    { fourcc::RGGB8, fourcc::RGGB16, fourcc::BGRA32 }
+},
+{
+    { fourcc::GRBG8, },
+    { fourcc::GRBG8, fourcc::BGRA32 }
+},
+{
+    {
+        fourcc::GRBG16,
+        fourcc::GRBG10,
+        fourcc::GRBG10_SPACKED,
+        fourcc::GRBG10_MIPI_PACKED,
+        fourcc::GRBG12,
+        fourcc::GRBG12_PACKED,
+        fourcc::GRBG12_SPACKED,
+        fourcc::GRBG12_MIPI_PACKED,
+    },
+    { fourcc::GRBG8, fourcc::GRBG16, fourcc::BGRA32 } },
 };
-
+// clang-format on
 
 void remove_duplicates(std::vector<img::fourcc>& vec)
 {
