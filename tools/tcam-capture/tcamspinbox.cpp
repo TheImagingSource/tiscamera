@@ -405,8 +405,8 @@ QString TcamSpinBoxImpl::longestAllowedString() const
         advance_min = fm.horizontalAdvance(minStr);
         advance_max = fm.horizontalAdvance(maxStr);
 #else
-        advance_min = fontMetrics().width(minStr);
-        advance_max = fontMetrics().width(maxStr);
+        advance_min = fm.width(minStr);
+        advance_max = fm.width(maxStr);
 #endif
 
         if (advance_min > advance_max)
@@ -440,7 +440,7 @@ QSize TcamSpinBoxImpl::sizeHint() const
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
         advance = fm.horizontalAdvance(s);
 #else
-        advance = fontMetrics().width(s);
+        advance = fm.width(s);
 #endif
 
         w = std::max(w, advance);
