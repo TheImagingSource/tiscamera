@@ -25,6 +25,9 @@ DeviceDialog::DeviceDialog(std::shared_ptr<Indexer> index, QWidget* parent)
 {
     ui->setupUi(this);
 
+    // prevent dialog maximization 
+    setWindowFlags(windowFlags() | Qt::Tool);
+
     QObject::connect(_index.get(), &Indexer::new_list, this, &DeviceDialog::update_device_listing);
     QObject::connect(_index.get(), &Indexer::new_device, this, &DeviceDialog::new_device);
     QObject::connect(_index.get(), &Indexer::device_lost, this, &DeviceDialog::lost_device);

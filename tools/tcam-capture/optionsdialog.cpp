@@ -27,6 +27,7 @@ OptionsDialog::OptionsDialog(TcamCaptureConfig& config,
     : QDialog(parent), app_config(config), ui(new Ui::OptionsDialog)
 {
     ui->setupUi(this);
+    setWindowFlags(windowFlags() | Qt::Tool);
 
     // helper, checks if element really exists
     // disables entry otherwise

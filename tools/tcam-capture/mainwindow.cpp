@@ -847,6 +847,8 @@ GstCaps* MainWindow::open_format_dialog()
 {
     auto format_dialog = QDialog();
 
+    format_dialog.setWindowFlags(format_dialog.windowFlags() | Qt::Tool);
+
     auto layout = new QVBoxLayout();
 
     format_dialog.setLayout(layout);
