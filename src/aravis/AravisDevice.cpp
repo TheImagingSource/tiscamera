@@ -435,12 +435,6 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         g_clear_error(&err);
     }
 
-    arv_camera_set_frame_rate(this->arv_camera_, new_format.get_framerate(), &err);
-    if (err)
-    {
-        SPDLOG_ERROR("Failed to set framerate. error: {}", err->message);
-        g_clear_error(&err);
-    }
     arv_device_set_string_feature_value(
         arv_camera_get_device(arv_camera_), "TriggerSelector", trig_selector, &err);
     if (err)
@@ -506,7 +500,15 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         return false;
     }
 
+    arv_camera_set_frame_rate(this->arv_camera_, new_format.get_framerate(), &err);
+    if (err)
+    {
+        SPDLOG_ERROR("Failed to set framerate. error: {}", err->message);
+        g_clear_error(&err);
+    }
+
     active_video_format_ = read_camera_current_video_format();
+    SPDLOG_DEBUG("Active format is now '{}'", active_video_format_.to_string());
 
     return true;
 }
@@ -545,8 +547,8 @@ tcam::VideoFormat AravisDevice::read_camera_current_video_format()
             return format;
         }
 
-        height = y2 - y1;
-        width = x2 - x1;
+        height = y2;
+        width = x2;
     }
     else
     {
