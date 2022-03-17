@@ -190,16 +190,27 @@ static void append_gst_structs_for_res_type_range(
 
     double min_fps = 0.;
     double max_fps = 0.;
-    if (auto framerate_info_res =
+    if (auto framerates_res_for_min_dim =
             device.get_framerate_info(tcam::VideoFormat { desc.get_fourcc(), reso_desc.min_size });
-        framerate_info_res.has_error())
+        framerates_res_for_min_dim.has_error())
     {
         return;
     }
     else
     {
-        min_fps = framerate_info_res.value().min();
-        max_fps = framerate_info_res.value().max();
+        min_fps = framerates_res_for_min_dim.value().min();
+        max_fps = framerates_res_for_min_dim.value().max();
+    }
+    if (auto framerates_res_for_max_dim =
+            device.get_framerate_info(tcam::VideoFormat { desc.get_fourcc(), reso_desc.max_size });
+        framerates_res_for_max_dim.has_error())
+    {
+        return;
+    }
+    else
+    {
+        min_fps = std::min(min_fps, framerates_res_for_max_dim.value().min());
+        max_fps = std::max(max_fps, framerates_res_for_max_dim.value().max());
     }
 
     int fps_min_num = 0;
