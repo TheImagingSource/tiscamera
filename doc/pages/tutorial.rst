@@ -168,6 +168,37 @@ To reference both APIs, add the following lines:
 
          from gi.repository import Tcam, Gst
 
+The required libraries are mostly provided by gobject introspection and gstreamer.
+The only tiscamera library that has to explicitly linked is `libtcam-property.so`.
+
+It is recommended to use helper tools such as `pkg-config` or a cmake wrapper or similar for library lookup.
+
+For real life examples, please refer to the :ref:`examples folder<examples_building>`
+
+.. tabs::
+
+   .. group-tab:: c
+
+      Makefile settings could look like this:
+
+      .. code-block:: Makefile
+
+         LIBS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-1.0 --libs)
+         LIBS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-video-1.0 --libs)
+         LIBS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gobject-introspection-1.0 --libs)
+         LIBS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config tcam --libs)
+
+         CFLAGS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-1.0 --cflags)
+         CFLAGS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-video-1.0 --cflags)
+         CFLAGS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gobject-introspection-1.0 --cflags)
+         CFLAGS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config tcam --cflags)
+
+   .. group-tab:: python
+
+      Automatically handled by gobject introspection.
+
+      For custom installations set `GI_TYPELIB_PATH` to where the file `Tcam-1.0.typelib` is installed.
+         
 .. _tutorial_discovery:
          
 Camera Discovery

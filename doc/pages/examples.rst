@@ -13,6 +13,34 @@ The standard installation path for examples is `/usr/share/theimagingsource/tisc
 It may be neccessary to install additional development packages when using pre-compiled tiscamera packages.
 See :ref:`dependencies`.
 
+.. _examples_building:
+
+Build Instructions
+==================
+
+Instructions to build applications using tiscamera.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/Makefile
+         :language: Makefile
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+                       
+      Automatically handled by gobject introspection.
+
+      For custom installations set `GI_TYPELIB_PATH` to where the file `Tcam-1.0.typelib` is installed.
+      
+
 .. _examples_list_devices:
 
 00 - list-devices
