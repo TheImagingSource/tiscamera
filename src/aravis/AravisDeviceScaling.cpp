@@ -159,8 +159,8 @@ void AravisDevice::generate_scaling_information()
 
     if (scale_.scale_type == ImageScalingType::Skipping)
     {
-        auto skipping_h = tcam::property::find_property(scale_.properties, "SkippingHorizontal");
-        auto skipping_v = tcam::property::find_property(scale_.properties, "SkippingVertical");
+        auto skipping_h = tcam::property::find_property(scale_.properties, "DecimationHorizontal");
+        auto skipping_v = tcam::property::find_property(scale_.properties, "DecimationVertical");
 
         auto bh = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_h.get());
         auto bv = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_v.get());
