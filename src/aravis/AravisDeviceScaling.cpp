@@ -247,15 +247,31 @@ void AravisDevice::generate_scaling_information()
             return true;
         };
 
+        auto is_valid = [] (int value) -> bool
+        {
+            if (value == 1
+            || value == 2
+            || value == 4
+            || value == 8)
+            {
+                return true;
+            }
+            return false;
+        };
+
         // try all possible combinations
         for (int bin_h = bh->get_range().min; bin_h <= bh->get_range().max; bin_h++)
         {
+            if (!is_valid(bin_h)) continue;
             for (int bin_v = bv->get_range().min; bin_v <= bv->get_range().max; bin_v++)
             {
+                if (!is_valid(bin_v)) continue;
                 for (int sk_h = sh->get_range().min; sk_h <= sh->get_range().max; sk_h++)
                 {
+                    if (!is_valid(sk_h)) continue;
                     for (int sk_v = sv->get_range().min; sk_v <= sv->get_range().max; sk_v++)
                     {
+                        if (!is_valid(sk_v)) continue;
                         tcam::image_scaling is;
 
                         set_value("TestBinningHorizontal", bin_h);
