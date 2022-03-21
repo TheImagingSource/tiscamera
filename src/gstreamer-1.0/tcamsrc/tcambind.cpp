@@ -116,11 +116,6 @@ static void append_gst_structs_for_res_type_range(
 
     for (const auto& fixed_resolution : resolution_list)
     {
-        if (!reso_desc.scaling.is_default())
-        {
-            continue;
-        }
-
         std::vector<double> framerates;
         if (auto framerate_info_res = device.get_framerate_info(
                 tcam::VideoFormat { desc.get_fourcc(), fixed_resolution });
