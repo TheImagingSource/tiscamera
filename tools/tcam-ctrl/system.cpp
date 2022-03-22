@@ -2,10 +2,9 @@
 #include "system.h"
 
 #include <array>
+#include <cstdio>
 #include <iostream>
 #include <string>
-
-#include <cstdio>
 
 namespace
 {
@@ -37,7 +36,7 @@ std::string exec(const std::string& cmd)
 }
 
 
-void check_package(const std::string& pckg_name)
+bool check_package(const std::string& pckg_name)
 {
     std::string cmd = "dpkg-query --showformat='${Version}' --show " + pckg_name + " 2>&1";
 
@@ -47,10 +46,12 @@ void check_package(const std::string& pckg_name)
     {
         std::cout << pckg_name << " is not installed."
                   << "\n";
+        return false;
     }
     else
     {
         std::cout << pckg_name << ": " << dpkg << "\n";
+        return true;
     }
 }
 
@@ -81,16 +82,22 @@ void tcam::tools::print_packages()
         return;
     }
 
-    check_package("tiscamera");
-    check_package("tiscamera-tcamproperty");
+    if (!check_package("tiscamera"))
+    {
+        check_package("tiscamera-tcamproperty");
+    }
+    else
+    {
+        std::cout << "tiscamera-tcampropert: Provided by tiscamera" << std::endl;
+    }
     check_package("tcamdutils");
-    
+
     check_package("tcampimipisrc");
 
     check_package("tcamtegrasrc");
     check_package("tcamdutils-cuda");
     check_package("theimagingsource-drivers");
-    
+
     check_package("ic_barcode");
 }
 
