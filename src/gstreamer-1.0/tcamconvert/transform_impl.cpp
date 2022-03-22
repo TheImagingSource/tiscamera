@@ -397,7 +397,7 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
         }
         case transform_context_mode::binary_rgb:
         {
-            if (src_type.fourcc_type() == fourcc::MONO8)
+            if (src_type.fourcc_type() == fourcc::MONO8) // MONO8 to BGRA32
             {
                 auto transform_to_bgra_func = find_transform_mono_to_bgr_func(dst_type, src_type);
                 assert(transform_to_bgra_func != nullptr);
@@ -414,12 +414,12 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
                 };
                 return transform_fccXX_to_dst_func_ != nullptr;
             }
-            else if (img::is_mono_fcc(src_type.fourcc_type())) // monoXX to BGRx
+            else if (
+                img::is_mono_fcc(
+                    src_type.fourcc_type())) // MONOXX to BGRA32, done via MONOXX -> MONO8 -> BGRA32
             {
-                auto transform_intermediate_type = img::make_img_type(
-                    img_filter::transform::fcc1x_packed::convert_packed_fcc1x_to_fcc8(
-                        src_type.fourcc_type()),
-                    src_type.dim);
+                auto transform_intermediate_type =
+                    img::make_img_type(img::fourcc::MONO8, src_type.dim);
 
                 transform_intermediate_buffer_.resize(transform_intermediate_type.buffer_length);
 
@@ -444,11 +444,11 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
 
                     transfrom_to_mono8(mono8_img_desc, src);
 
-                    transform_to_bgra_func(dst, src);
+                    transform_to_bgra_func(dst, mono8_img_desc);
                 };
                 return transform_fccXX_to_dst_func_ != nullptr;
             }
-            else if (img::is_by8_fcc(src_type.fourcc_type()))
+            else if (img::is_by8_fcc(src_type.fourcc_type())) // Bayer8 -> BGRA32
             {
                 auto wb_func =
                     find_transform_unary_wb_func(src_type); // whitebalance on src image func
@@ -469,7 +469,7 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
                 };
                 return transform_fccXX_to_dst_func_ != nullptr;
             }
-            else if (!img::is_by8_fcc(src_type.fourcc_type()))
+            else if (!img::is_by8_fcc(src_type.fourcc_type())) // bayerXX -> BGRA32, done via bayerXX -> bayer8 -> BGRA32
             {
                 auto transform_intermediate_type = img::make_img_type(
                     img::by_transform::convert_bayer_fcc_to_bayer8_fcc(src_type.fourcc_type()),
