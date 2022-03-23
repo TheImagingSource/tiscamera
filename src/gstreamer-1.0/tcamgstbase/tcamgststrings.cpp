@@ -18,6 +18,7 @@
 
 #include <cstring>
 #include <dutils_img/image_fourcc.h>
+#include <dutils_img_lib/dutils_gst_interop.h>
 
 namespace
 {
@@ -312,97 +313,6 @@ static const TcamGstMapping tcam_gst_caps_info[] = {
         "image/jpeg",
         "",
     },
-    {
-        FOURCC_POLARIZATION_BG8_90_45_135_0,
-        "video/x-bayer, format=(string)bggr_polarized_90_45_135_0",
-        "video/x-bayer",
-        "bggr_polarized_90_45_135_0",
-    },
-    {
-        FOURCC_POLARIZATION_BG12_PACKED_90_45_135_0,
-        "video/x-bayer, format=(string)bggr12p_polarized_90_45_135_0",
-        "video/x-bayer",
-        "bggr12p_polarized_90_45_135_0",
-    },
-    {
-        FOURCC_POLARIZATION_BG12_SPACKED_90_45_135_0,
-        "video/x-bayer, format=(string)bggr12sp_polarized_90_45_135_0",
-        "video/x-bayer",
-        "bggr12sp_polarized_90_45_135_0",
-    },
-    {
-        FOURCC_POLARIZATION_BG16_90_45_135_0,
-        "video/x-bayer, format=(string)bggr16_polarized_90_45_135_0",
-        "video/x-bayer",
-        "bggr16_polarized_90_45_135_0",
-    },
-    {
-        FOURCC_POLARIZATION_MONO8_90_45_135_0,
-        "video/x-raw, format=(string)GRAY8_polarized_90_45_135_0",
-        "video/x-raw",
-        "GRAY8_polarized_90_45_135_0",
-    },
-    {
-        FOURCC_POLARIZATION_MONO12_PACKED_90_45_135_0,
-        "video/x-raw, format=(string)GRAY12p_polarized_90_45_135_0",
-        "video/x-raw",
-        "GRAY12p_polarized_90_45_135_0",
-    },
-    {
-        FOURCC_POLARIZATION_MONO12_SPACKED_90_45_135_0,
-        "video/x-raw, format=(string)GRAY12sp_polarized_90_45_135_0",
-        "video/x-raw",
-        "GRAY12sp_polarized_90_45_135_0",
-    },
-    {
-        FOURCC_POLARIZATION_MONO16_90_45_135_0,
-        "video/x-raw, format=(string)GRAY16_LE_polarized_90_45_135_0",
-        "video/x-raw",
-        "GRAY16_LE_polarized_90_45_135_0",
-    },
-
-    // internal not meant for gst usage
-
-    // {
-    //     FOURCC_POLARIZATION_ADI_PLANAR_MONO8,
-    //     "",
-    //     "", ""
-    // },
-    // {
-    //     FOURCC_POLARIZATION_ADI_PLANAR_MONO16,
-    //     "",
-    //     "", ""
-    // },
-
-    { FOURCC_POLARIZATION_ADI_MONO8,
-      "video/tis,format=(string)ADI_GRAY8",
-      "video/tis",
-      "ADI_GRAY8" },
-    { FOURCC_POLARIZATION_ADI_MONO16,
-      "video/tis,format=(string)ADI_GRAY16_LE",
-      "video/tis",
-      "ADI_GRAY16_LE" },
-    { FOURCC_POLARIZATION_ADI_RGB8, "video/tis,format=(string)ADI_RGB8", "video/tis", "ADI_RGB8" },
-    { FOURCC_POLARIZATION_ADI_RGB16,
-      "video/tis,format=(string)ADI_RGB16",
-      "video/tis",
-      "ADI_RGB16" },
-    { FOURCC_POLARIZATION_PACKED8,
-      "video/x-raw,format=(string)polarized-GREY8p",
-      "video/x-raw",
-      "polarized-GREY8p" },
-    { FOURCC_POLARIZATION_PACKED16,
-      "video/x-raw,format=(string)polarized-GREY16_LEp",
-      "video/x-raw",
-      "polarized-GREY16_LEp" },
-    { FOURCC_POLARIZATION_PACKED8_BAYER_BG,
-      "video/x-bayer,format=(string)polarized-bggr8p",
-      "video/x-bayer",
-      "polarized-bggr8p" },
-    { FOURCC_POLARIZATION_PACKED16_BAYER_BG,
-      "video/x-bayer,format=(string)polarized-bggr16p",
-      "video/x-bayer",
-      "polarized-bggr16p" },
     { FOURCC_PWL_RG12_MIPI,
       "video/x-bayer,format=(string)pwl-rggb12m",
       "video/x-bayer",
@@ -418,25 +328,26 @@ static const TcamGstMapping tcam_gst_caps_info[] = {
 #define ARRAYSIZE(arr) sizeof(arr) / sizeof(arr[0])
 #endif
 
-const char* tcam::gst::tcam_fourcc_to_gst_1_0_caps_string(uint32_t fourcc)
+std::string tcam::gst::tcam_fourcc_to_gst_1_0_caps_string(uint32_t fourcc)
 {
-    unsigned int i;
-    for (i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
+    for (size_t i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
     {
         if (fourcc == tcam_gst_caps_info[i].fourcc)
         {
             return tcam_gst_caps_info[i].gst_1_0_caps_string;
         }
     }
-    return NULL;
+    auto res = img_lib::gst::fourcc_to_gst_caps_string(static_cast<img::fourcc>(fourcc));
+    if (!res.empty())
+    {
+        return res;
+    }
+    return {};
 }
 
 uint32_t tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(const char* name, const char* format)
 {
-
-    unsigned int i;
-
-    for (i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
+    for (size_t i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
     {
         if (strcmp(name, tcam_gst_caps_info[i].gst_1_0_name) == 0)
         {
@@ -452,6 +363,11 @@ uint32_t tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(const char* name, const
                 return tcam_gst_caps_info[i].fourcc;
             }
         }
+    }
+    auto fcc = img_lib::gst::gst_caps_string_to_fourcc(name, format);
+    if (fcc != img::fourcc::FCC_NULL)
+    {
+        return static_cast<uint32_t>(fcc);
     }
     return 0;
 }

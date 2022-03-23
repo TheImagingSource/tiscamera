@@ -305,9 +305,8 @@ gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
             continue;
         }
 
-        const char* caps_string = tcam::gst::tcam_fourcc_to_gst_1_0_caps_string(desc.get_fourcc());
-
-        if (caps_string == nullptr)
+        const auto caps_string = tcam::gst::tcam_fourcc_to_gst_1_0_caps_string(desc.get_fourcc());
+        if (caps_string.empty())
         {
             SPDLOG_INFO("Format has empty caps string. Ignoring {}",
                         img::fcc_to_string(desc.get_fourcc()));
@@ -330,15 +329,22 @@ gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
                       return is_totally_ordered_less(lhs.scaling, rhs.scaling);
                   });
 
+        if (res.empty())
+        {
+            SPDLOG_INFO("Format has empty resolution list. Ignoring {}",
+                        img::fcc_to_string(desc.get_fourcc()));
+            continue;
+        }
+
         for (const auto& r : res)
         {
             if (r.type == tcam::TCAM_RESOLUTION_TYPE_RANGE)
             {
-                append_gst_structs_for_res_type_range(device, caps, desc, caps_string, r);
+                append_gst_structs_for_res_type_range(device, caps, desc, caps_string.c_str(), r);
             }
             else
             {
-                GstStructure* structure = gst_structure_from_string(caps_string, NULL);
+                GstStructure* structure = gst_structure_from_string(caps_string.c_str(), NULL);
 
                 fill_structure_fixed_resolution(device, structure, desc, r.max_size, r.scaling);
                 gst_caps_append_structure(caps, structure);
