@@ -316,11 +316,11 @@ void IntWidget::slider_changed(int new_value)
 
     p_slider->blockSignals(true);
 
-    QTimer::singleShot(200, [this]() 
-    { 
-        p_slider->blockSignals(false);
-    });
-    emit value_changed(this);
+    if (!is_readonly_)
+    {
+        QTimer::singleShot(200, [this]() { p_slider->blockSignals(false); });
+        emit value_changed(this);
+    }
 }
 
 
@@ -332,9 +332,13 @@ void IntWidget::spinbox_changed(qlonglong new_value)
 
         p_slider->setValue(new_value);
     }
-    write_value(new_value);
 
-    emit value_changed(this);
+    if (!is_readonly_)
+    {
+        write_value(new_value);
+
+        emit value_changed(this);
+    }
 }
 
 
@@ -504,12 +508,12 @@ void DoubleWidget::slider_changed(double new_value)
 
     p_slider->blockSignals(true);
 
-    QTimer::singleShot(200, [this]() 
-    { 
-        p_slider->blockSignals(false);
-    });
-    
-    emit value_changed(this);
+    QTimer::singleShot(200, [this]() { p_slider->blockSignals(false); });
+
+    if (!is_readonly_)
+    {
+        emit value_changed(this);
+    }
 }
 
 void DoubleWidget::spinbox_changed(double new_value)
@@ -520,8 +524,11 @@ void DoubleWidget::spinbox_changed(double new_value)
         p_slider->setValue(new_value);
         p_slider->blockSignals(false);
     }
-
-    emit value_changed(this);
+    
+    if (!is_readonly_)
+    {
+        emit value_changed(this);
+    }
 }
 
 
@@ -645,7 +652,10 @@ void BoolWidget::update()
 
 void BoolWidget::checkbox_changed(bool /*new_value*/)
 {
-    emit value_changed(this);
+    if (!is_readonly_)
+    {
+        emit value_changed(this);
+    }
 }
 
 void BoolWidget::setup_ui()
