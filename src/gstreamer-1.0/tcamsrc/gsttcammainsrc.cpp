@@ -102,8 +102,10 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* self)
 
         GstCaps* icaps = NULL;
 
+        int caps_count = static_cast<int>(gst_caps_get_size(tmp));
+
         /* Prefer the first caps we are compatible with that the peer proposed */
-        for (guint i = 0; i <= gst_caps_get_size(tmp) - 1; i--)
+        for (int i = caps_count - 1; i >= 0; i--)
         {
             /* get intersection */
             GstCaps* ipcaps = gst_caps_copy_nth(tmp, i);
