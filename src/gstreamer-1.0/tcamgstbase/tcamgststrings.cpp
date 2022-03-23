@@ -349,6 +349,12 @@ static const TcamGstMapping tcam_gst_caps_info[] = {
         "GRAY12p_polarized_90_45_135_0",
     },
     {
+        FOURCC_POLARIZATION_MONO12_SPACKED_90_45_135_0,
+        "video/x-raw, format=(string)GRAY12sp_polarized_90_45_135_0",
+        "video/x-raw",
+        "GRAY12sp_polarized_90_45_135_0",
+    },
+    {
         FOURCC_POLARIZATION_MONO16_90_45_135_0,
         "video/x-raw, format=(string)GRAY16_LE_polarized_90_45_135_0",
         "video/x-raw",
