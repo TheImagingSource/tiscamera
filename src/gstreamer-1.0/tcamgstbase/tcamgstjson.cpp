@@ -114,7 +114,7 @@ std::string tcam::gst::create_device_settings(TcamPropertyProvider* tcam)
                     tcam_property_boolean_get_value(TCAM_PROPERTY_BOOLEAN(prop_base), &err);
                 if (!is_prop_error_consume(err, prop_name))
                 {
-                    write_obj.push_back(json::object_t::value_type(prop_name, value));
+                    write_obj.push_back(json::object_t::value_type(prop_name, (bool)value));
                 }
                 break;
             }
