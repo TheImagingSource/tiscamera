@@ -215,7 +215,7 @@ static auto apply_single_json_entry(
             }
             case TCAM_PROPERTY_TYPE_BOOLEAN:
             {
-                if (!iter.value().is_boolean())
+                if (!iter.value().is_boolean() && !iter.value().is_number_unsigned())
                 {
                     report_error_func(
                         property_name,
