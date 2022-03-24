@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     g_value_init(&state, G_TYPE_STRING);
 
     //We print the properties for a before/after comparison,
-    g_object_get_property(G_OBJECT(source), "state", &state);
+    g_object_get_property(G_OBJECT(source), "tcam-properties-json", &state);
 
     printf("State of device is:\n%s", g_value_get_string(&state));
 
@@ -112,10 +112,10 @@ int main(int argc, char* argv[])
     // not part of this example
 
     // second print for the before/after comparison
-    g_object_set_property(G_OBJECT(source), "state", &state);
+    g_object_set_property(G_OBJECT(source), "tcam-properties-json", &state);
 
     //reread state to see if anything changed
-    g_object_get_property(G_OBJECT(source), "state", &state);
+    g_object_get_property(G_OBJECT(source), "tcam-properties-json", &state);
 
     printf("State of device is:\n%s", g_value_get_string(&state));
 
