@@ -171,6 +171,7 @@ public:
 
     outcome::result<int64_t> get_value() const final;
     outcome::result<void> set_value(int64_t new_value) final;
+
 private:
     tcamprop1::prop_range_integer range_;
     int64_t default_ = 0;
@@ -311,8 +312,7 @@ public:
 
     PropertyFlags get_flags() const final
     {
-        return PropertyFlags::Implemented | PropertyFlags::Available | PropertyFlags::Locked
-               | PropertyFlags::Hidden;
+        return PropertyFlags::Implemented | PropertyFlags::Available | PropertyFlags::Locked;
     }
     tcamprop1::prop_range_integer get_range() const final
     {
@@ -399,5 +399,4 @@ private:
 
     void update_offsets();
 };
-
 } // namespace tcam::v4l2
