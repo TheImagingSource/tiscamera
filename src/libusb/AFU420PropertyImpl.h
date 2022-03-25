@@ -8,34 +8,17 @@
 #include "../property_dependencies.h"
 
 #include "ep_defines_rx.h"
+#include "../base_types.h"
 
 #include <map>
 #include <memory>
 
 VISIBILITY_INTERNAL
 
+using namespace tcam;
+
 namespace tcam::property
 {
-
-
-struct tcam_value_int
-{
-    int64_t min;
-    int64_t max;
-    int64_t step; /* 0 if steps not possible */
-    int64_t default_value;
-    int64_t value;
-};
-
-
-struct tcam_value_double
-{
-    double min;
-    double max;
-    double step; /* 0.0 if steps not possible */
-    double default_value;
-    double value;
-};
 
 
 class AFU420DeviceBackend;
