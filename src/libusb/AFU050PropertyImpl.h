@@ -49,6 +49,7 @@ private:
 class AFU050PropertyIntegerImpl : public IPropertyInteger, public AFU050PropertyLockImpl
 {
 public:
+    AFU050PropertyIntegerImpl(const std::string& name, const tcam_value_int& val_def);
     AFU050PropertyIntegerImpl(const std::string& name,
                               control_definition ctrl,
                               std::shared_ptr<tcam::property::AFU050DeviceBackend> backend);
@@ -102,10 +103,11 @@ private:
     int64_t m_max;
     int64_t m_step;
     int64_t m_default;
+    int64_t m_value = 0;
 
-    control_definition m_ctrl;
+    control_definition m_ctrl = {};
 
-    const tcamprop1::prop_static_info_integer* p_static_info;
+    const tcamprop1::prop_static_info_integer* p_static_info = nullptr;
 };
 
 

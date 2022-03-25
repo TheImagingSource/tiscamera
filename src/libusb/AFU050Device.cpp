@@ -193,6 +193,29 @@ void AFU050Device::create_properties()
     add_int("Contrast", VC_UNIT_PROCESSING_UNIT, PU_CONTRAST_CONTROL);
     add_int("Sharpness", VC_UNIT_PROCESSING_UNIT, PU_SHARPNESS_CONTROL);
 
+    // read only properties
+    // no backend etc needed
+
+    tcam_value_int width;
+    width.min = 2592;
+    width.max = 2592;
+    width.value = 2592;
+    width.default_value = 2592;
+    width.step = 0;
+
+    properties_.push_back(
+        std::make_shared<tcam::property::AFU050PropertyIntegerImpl>("SensorWidth", width));
+
+    tcam_value_int height;
+    height.min = 1944;
+    height.max = 1944;
+    height.value = 1944;
+    height.default_value = 1944;
+    height.step = 0;
+
+    properties_.push_back(
+        std::make_shared<tcam::property::AFU050PropertyIntegerImpl>("SensorHeight", height));
+
     // add_int(TCAM_PROPERTY_FOCUS_X, VC_UNIT_EXTENSION_UNIT, PU_);
     // add_int(TCAM_PROPERTY_FOCUS_Y, VC_UNIT_EXTENSION_UNIT, PU_);
 

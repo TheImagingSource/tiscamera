@@ -46,6 +46,36 @@ void tcam::property::AFU050PropertyLockImpl::set_dependent_properties(
 }
 
 
+AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(const std::string& name, const tcam_value_int& val_def)
+    : AFU050PropertyLockImpl(name), m_name(name)
+{
+    m_default = val_def.default_value;
+    m_min = val_def.min;
+    m_max = val_def.max;
+    m_step = val_def.step;
+    m_value= val_def.value;
+    
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    if (static_info.type == tcamprop1::prop_type::Integer && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
 AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(
     const std::string& name,
     control_definition ctrl,
@@ -128,6 +158,11 @@ outcome::result<int64_t> AFU050PropertyIntegerImpl::get_value() const
     }
     else
     {
+        if (m_value != 0)
+        {
+            return m_value;
+        }
+
         SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
         return tcam::status::ResourceNotLockable;
     }
