@@ -30,6 +30,14 @@ outcome::result<int64_t> AFU420DeviceBackend::get_int(tcam::afu420::AFU420Proper
 {
     switch (id)
     {
+        case tcam::afu420::AFU420Property::SensorWidth:
+        {
+            return p_device->max_sensor_dim_.width;
+        }
+        case tcam::afu420::AFU420Property::SensorHeight:
+        {
+            return p_device->max_sensor_dim_.height;
+        }
         case tcam::afu420::AFU420Property::Iris:
         {
             return p_device->get_iris();
@@ -107,6 +115,11 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
 {
     switch (id)
     {
+        case tcam::afu420::AFU420Property::SensorWidth:
+        case tcam::afu420::AFU420Property::SensorHeight:
+        {
+            return tcam::status::PropertyNotWriteable;
+        }
         case tcam::afu420::AFU420Property::Iris:
         {
             if (p_device->set_iris(new_value))

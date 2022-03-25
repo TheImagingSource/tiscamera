@@ -108,6 +108,8 @@ enum class AFU420Property
     OISMode,
     OISPosX,
     OISPosY,
+    SensorWidth,
+    SensorHeight,
 };
 
 } // namespace tcam::afu420

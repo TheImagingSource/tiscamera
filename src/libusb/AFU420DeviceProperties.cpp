@@ -355,6 +355,33 @@ bool AFU420Device::create_ois()
 }
 
 
+void AFU420Device::create_sensor_dimensions()
+{
+    tcam_value_int width = {};
+
+    width.min = max_sensor_dim_.width;
+    width.max = max_sensor_dim_.width;
+    width.step = 0;
+    width.value = max_sensor_dim_.width;
+    width.default_value = max_sensor_dim_.width;
+
+    m_properties.push_back(std::make_shared<tcam::property::AFU420PropertyIntegerImpl>(
+                               "SensorWidth", width, tcam::afu420::AFU420Property::SensorWidth, m_backend));
+
+    tcam_value_int height = {}; 
+
+    height.min = max_sensor_dim_.height;
+    height.max = max_sensor_dim_.height;
+    height.step = 0;
+    height.value = max_sensor_dim_.height;
+    height.default_value = max_sensor_dim_.height;
+
+    m_properties.push_back(std::make_shared<tcam::property::AFU420PropertyIntegerImpl>(
+                               "SensorHeight", height, tcam::afu420::AFU420Property::SensorHeight, m_backend));
+
+}
+
+
 void AFU420Device::create_properties()
 {
     create_exposure();
@@ -374,6 +401,7 @@ void AFU420Device::create_properties()
     create_color_gain();
     //create_strobe();
     create_offsets();
+    create_sensor_dimensions();
 }
 
 

@@ -360,6 +360,7 @@ private:
 
     bool create_offsets();
     bool create_ois();
+    void create_sensor_dimensions();
 
     friend class property::AFU420DeviceBackend;
 
