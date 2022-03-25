@@ -66,6 +66,7 @@ GStreamer:
   application in tcamconvert/tcamdutils
 - tcamautofocus gstreamer element - functionality now in tcammainsrc
 - gstreamer resolution ranges now contain a step size
+- polarization caps have been renamed, check caps descriptions for new ones
 
 Tools:
 - renamed gige-daemon to tcam-gige-daemon for consistency.
@@ -104,6 +105,7 @@ Tools:
 
 - Auto Function ROI emulation is missing
 - In camera Auto Functions ROI may not correctly lock properties
+- In camera Auto Functions ROI Top/Left/Width/Height may not correctly update when using preset
 - AFU050: image/jpeg,width=1280,height=960 may cause segfault when used.
   Cause is in external library.
 
