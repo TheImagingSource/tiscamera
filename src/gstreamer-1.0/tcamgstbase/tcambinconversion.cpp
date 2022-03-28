@@ -302,12 +302,11 @@ static GstCaps* get_caps_type_definition(CAPS_TYPE type)
     }
 }
 
-}
+} // namespace
 
 
 namespace tcam::gst
 {
-
 
 
 GstCaps* find_input_caps(GstCaps* available_caps,
@@ -349,18 +348,31 @@ GstCaps* find_input_caps(GstCaps* available_caps,
     // this e.g. allows disabling tcamdutils even if they are found
     // get_modules dictates the modules tcambin shall use, dependent on caps and toggles
 
-    GstCaps* used_caps = filter_by_caps_properties(available_caps, wanted_caps);
 
-    GstCaps* actual_input = tcam_gst_find_largest_caps(used_caps);
+    GstCaps* actual_input;
 
+    // tcambin device-caps have been used
+    if (gst_caps_is_fixed(available_caps))
+    {
+        actual_input = gst_caps_copy(available_caps);
+    }
+    else
+    {
+        GstCaps* used_caps = filter_by_caps_properties(available_caps, wanted_caps);
+
+        if (gst_caps_is_fixed(wanted_caps))
+        {
+            actual_input = gst_caps_intersect(used_caps, wanted_caps);
+        }
+        else
+        {
+            actual_input = tcam_gst_find_largest_caps(used_caps);
+        }
+    }
     modules = conversion.get_modules(actual_input, wanted_caps, toggles);
-
-    //SPDLOG_ERROR("Returning: {} with modules: \n {}", gst_caps_to_string(actual_input), modules.str());
 
     return actual_input;
 }
-
-
 
 
 TcamBinConversion::TcamBinConversion()
@@ -368,8 +380,8 @@ TcamBinConversion::TcamBinConversion()
     m_caps_table.reserve(std::size(ALL_CAPS_TYPES));
     for (const CAPS_TYPE t : ALL_CAPS_TYPES)
     {
-        auto ptr = gst_helper::make_ptr( get_caps_type_definition( t ) );
-        m_caps_table.push_back({t, ptr});
+        auto ptr = gst_helper::make_ptr(get_caps_type_definition(t));
+        m_caps_table.push_back({ t, ptr });
     }
 }
 
@@ -453,4 +465,4 @@ struct input_caps_required_modules TcamBinConversion::get_modules(GstCaps* caps,
 }
 
 
-}
+} // namespace tcam::gst
