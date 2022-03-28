@@ -235,8 +235,26 @@ void tcam::property::SoftwareProperties::generate_auto_functions_roi()
     add_prop_entry(
         new_list, sp::AutoFunctionsROIHeight, &tcamprop1::prop_list::AutoFunctionsROIHeight, y_def);
 
-
     add_prop_entry(m_properties, "AutoFunctionsRoiEnable", new_list);
+
+    m_prop_brightness_top =
+        std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            find_property(new_list, "AutoFunctionsROITop"));
+    m_prop_brightness_left =
+        std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            find_property(new_list, "AutoFunctionsROILeft"));
+    m_prop_brightness_width =
+        std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            find_property(new_list, "AutoFunctionsROIWidth"));
+    m_prop_brightness_height =
+        std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            find_property(new_list, "AutoFunctionsROIHeight"));
+    m_prop_brightness_preset =
+        std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyEnumImpl>(
+            find_property(new_list, "AutoFunctionsROIPreset"));
+    m_prop_brightness_enable =
+        std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyBoolImpl>(
+            find_property(new_list, "AutoFunctionsROIEnable"));
 }
 
 
@@ -356,5 +374,16 @@ void tcam::property::SoftwareProperties::generate_focus_auto()
                    new_focus_auto->get_name(),
                    { focus_roi_left, focus_roi_top, focus_roi_width, focus_roi_height });
 
-    
+    m_prop_focus_top =
+        std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            focus_roi_top);
+    m_prop_focus_left =
+        std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            focus_roi_left);
+    m_prop_focus_width =
+        std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            focus_roi_width);
+    m_prop_focus_height =
+        std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            focus_roi_height);
 }

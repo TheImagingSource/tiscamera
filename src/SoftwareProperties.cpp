@@ -802,57 +802,27 @@ void tcam::property::SoftwareProperties::update_to_new_format(const tcam::VideoF
     tcamprop1::prop_range_integer x_range = { 0, m_format.get_size().width, 1 };
     tcamprop1::prop_range_integer y_range = { 0, m_format.get_size().height, 1 };
 
+    if (m_prop_brightness_top)
     {
-        auto top = std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
-            find_property(m_properties, "AutoFunctionsROITop"));
+        m_prop_brightness_top->set_range(y_range);
+        m_prop_brightness_left->set_range(x_range);
+        m_prop_brightness_width->set_range(x_range);
+        m_prop_brightness_height->set_range(y_range);
 
-        if (top)
+        // when not using custom settings
+        // recalculate all values to adhere to the new ranges
+        if (m_brightness_roi_mode != AutoFunctionsROIPreset_Modes::custom)
         {
-            auto left =
-                std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
-                    find_property(m_properties, "AutoFunctionsROILeft"));
-            auto width =
-                std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
-                    find_property(m_properties, "AutoFunctionsROIWidth"));
-            auto height =
-                std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
-                    find_property(m_properties, "AutoFunctionsROIHeight"));
-
-            top->set_range(y_range);
-            left->set_range(x_range);
-            width->set_range(x_range);
-            height->set_range(y_range);
-
-            // when not using custom settings
-            // recalculate all values to adhere to the new ranges
-            if (m_brightness_roi_mode != AutoFunctionsROIPreset_Modes::custom)
-            {
-                set_auto_functions_preset_mode(m_brightness_roi_mode);
-            }
+            set_auto_functions_preset_mode(m_brightness_roi_mode);
         }
     }
 
+    if (m_prop_focus_top)
     {
-        auto top = std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
-            find_property(m_properties, "AutoFocusROITop"));
-
-        if (top)
-        {
-            auto left =
-                std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
-                    find_property(m_properties, "AutoFocusROILeft"));
-            auto width =
-                std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
-                    find_property(m_properties, "AutoFocusROIWidth"));
-            auto height =
-                std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
-                    find_property(m_properties, "AutoFocusROIHeight"));
-
-            top->set_range(y_range);
-            left->set_range(x_range);
-            width->set_range(x_range);
-            height->set_range(y_range);
-        }
+        m_prop_focus_top->set_range(y_range);
+        m_prop_focus_left->set_range(x_range);
+        m_prop_focus_width->set_range(x_range);
+        m_prop_focus_height->set_range(y_range);
     }
 }
 

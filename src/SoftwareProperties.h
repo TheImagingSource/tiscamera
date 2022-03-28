@@ -101,11 +101,23 @@ private:
     int m_focus_width = 0;
     int m_focus_height = 0;
 
+    std::shared_ptr<tcam::property::emulated::SoftwarePropertyIntegerImpl> m_prop_focus_left = nullptr;
+    std::shared_ptr<tcam::property::emulated::SoftwarePropertyIntegerImpl> m_prop_focus_top = nullptr;
+    std::shared_ptr<tcam::property::emulated::SoftwarePropertyIntegerImpl> m_prop_focus_width = nullptr;
+    std::shared_ptr<tcam::property::emulated::SoftwarePropertyIntegerImpl> m_prop_focus_height = nullptr;
+
     int m_brightness_top = 0;
     int m_brightness_left = 0;
     int m_brightness_width = 0;
     int m_brightness_height = 0;
     AutoFunctionsROIPreset_Modes m_brightness_roi_mode = AutoFunctionsROIPreset_Modes::full;
+
+    std::shared_ptr<tcam::property::emulated::SoftwarePropertyIntegerImpl> m_prop_brightness_left = nullptr;
+    std::shared_ptr<tcam::property::emulated::SoftwarePropertyIntegerImpl> m_prop_brightness_top = nullptr;
+    std::shared_ptr<tcam::property::emulated::SoftwarePropertyIntegerImpl> m_prop_brightness_width = nullptr;
+    std::shared_ptr<tcam::property::emulated::SoftwarePropertyIntegerImpl> m_prop_brightness_height = nullptr;
+    std::shared_ptr<tcam::property::emulated::SoftwarePropertyEnumImpl> m_prop_brightness_preset = nullptr;
+    std::shared_ptr<tcam::property::emulated::SoftwarePropertyBoolImpl> m_prop_brightness_enable = nullptr;
 
     std::shared_ptr<tcam::property::IPropertyFloat> m_dev_gain = nullptr;
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_iris = nullptr;
