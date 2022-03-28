@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <memory>
 #include <tcamprop1.0_base/tcamprop_property_info_list.h>
 
 using namespace tcam;
@@ -16,8 +17,30 @@ using sp = tcam::property::emulated::software_prop;
 tcam::property::SoftwareProperties::SoftwareProperties(
     const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties)
     : m_properties(dev_properties), p_state(auto_alg::make_state_ptr())
-
 {
+    auto ptr = find_property(m_properties, "SensorWidth");
+    if (!ptr)
+    {
+        SPDLOG_ERROR(
+            "Unable to determine sensor size. This will cause problems for some properties.");
+    }
+    else
+    {
+        sensor_dimensions_.width =
+            std::dynamic_pointer_cast<IPropertyInteger>(ptr)->get_value().value();
+    }
+
+    auto ptr2 = find_property(m_properties, "SensorHeight");
+    if (!ptr2)
+    {
+        SPDLOG_ERROR(
+            "Unable to determine sensor size. This will cause problems for some properties.");
+    }
+    else
+    {
+        sensor_dimensions_.height =
+            std::dynamic_pointer_cast<IPropertyInteger>(ptr2)->get_value().value();
+    }
 }
 
 std::shared_ptr<tcam::property::SoftwareProperties> tcam::property::SoftwareProperties::create(
@@ -47,6 +70,21 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
 
         m_auto_params.focus_onepush_params.is_run_cmd = false;
         tmp_params.exposure.max = m_exposure_auto_upper_limit;
+
+        if (m_active_brightness_roi)
+        {
+            tmp_params.brightness_roi = { m_brightness_left,
+                                          m_brightness_top,
+                                          m_brightness_left + m_brightness_width,
+                                          m_brightness_top + m_brightness_height };
+        }
+        else
+        {
+            tmp_params.brightness_roi = {};
+        }
+        tmp_params.focus_onepush_params.run_cmd_params.roi = {
+            m_focus_left, m_focus_top, m_focus_left + m_focus_width, m_focus_top + m_focus_height
+        };
     }
 
     tmp_params.frame_number = m_frame_counter++;
@@ -140,6 +178,8 @@ void tcam::property::SoftwareProperties::generate_public_properties(bool has_bay
     generate_gain_auto();
     generate_iris_auto();
 
+    generate_auto_functions_roi();
+
     generate_focus_auto();
 
     { // BalanceWhite stuff
@@ -194,6 +234,18 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
         case emulated::software_prop::GainAuto:
             return m_auto_params.gain.auto_enabled ? 1 : 0;
 
+        case emulated::software_prop::AutoFunctionsROIEnable:
+            return m_active_brightness_roi ? 1 : 0;
+        case emulated::software_prop::AutoFunctionsROIPreset:
+            return static_cast<int>(m_brightness_roi_mode);
+        case emulated::software_prop::AutoFunctionsROILeft:
+            return m_brightness_left;
+        case emulated::software_prop::AutoFunctionsROITop:
+            return m_brightness_top;
+        case emulated::software_prop::AutoFunctionsROIWidth:
+            return m_brightness_width;
+        case emulated::software_prop::AutoFunctionsROIHeight:
+            return m_brightness_height;
         case emulated::software_prop::Iris:
             return m_auto_params.iris.val;
         case emulated::software_prop::IrisAuto:
@@ -290,6 +342,52 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
             m_auto_params.gain.auto_enabled = new_val;
             return outcome::success();
         }
+        case emulated::software_prop::AutoFunctionsROIEnable:
+        {
+            m_active_brightness_roi = new_val;
+            return outcome::success();
+        }
+        case emulated::software_prop::AutoFunctionsROIPreset:
+        {
+            set_auto_functions_preset_mode(static_cast<AutoFunctionsROIPreset_Modes>(new_val));
+            return outcome::success();
+        }
+        case emulated::software_prop::AutoFunctionsROILeft:
+        {
+            m_brightness_left = new_val;
+            m_brightness_roi_mode = AutoFunctionsROIPreset_Modes::custom;
+
+            // reduce roi width to always remain within image boundaries
+            if (m_brightness_left + m_brightness_width > (int)m_format.get_size().width)
+            {
+                m_brightness_width = m_format.get_size().width - m_brightness_left;
+            }
+            return outcome::success();
+        }
+        case emulated::software_prop::AutoFunctionsROITop:
+        {
+            m_brightness_top = new_val;
+            m_brightness_roi_mode = AutoFunctionsROIPreset_Modes::custom;
+
+            // reduce roi height to always remain within image boundaries
+            if (m_brightness_top + m_brightness_height > (int)m_format.get_size().height)
+            {
+                m_brightness_height = m_format.get_size().height - m_brightness_top;
+            }
+            return outcome::success();
+        }
+        case emulated::software_prop::AutoFunctionsROIWidth:
+        {
+            m_brightness_width = new_val;
+            m_brightness_roi_mode = AutoFunctionsROIPreset_Modes::custom;
+            return outcome::success();
+        }
+        case emulated::software_prop::AutoFunctionsROIHeight:
+        {
+            m_brightness_height = new_val;
+            m_brightness_roi_mode = AutoFunctionsROIPreset_Modes::custom;
+            return outcome::success();
+        }
         case emulated::software_prop::Iris:
         {
             if (m_auto_params.iris.auto_enabled)
@@ -356,6 +454,12 @@ outcome::result<double> tcam::property::SoftwareProperties::get_double(
         case emulated::software_prop::ExposureAutoReference:
         case emulated::software_prop::ExposureAutoHighlightReduction:
         case emulated::software_prop::GainAuto:
+        case emulated::software_prop::AutoFunctionsROIEnable:
+        case emulated::software_prop::AutoFunctionsROIPreset:
+        case emulated::software_prop::AutoFunctionsROILeft:
+        case emulated::software_prop::AutoFunctionsROITop:
+        case emulated::software_prop::AutoFunctionsROIWidth:
+        case emulated::software_prop::AutoFunctionsROIHeight:
         case emulated::software_prop::Iris:
         case emulated::software_prop::IrisAuto:
         case emulated::software_prop::Focus:
@@ -439,6 +543,12 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
         case emulated::software_prop::ExposureAutoReference:
         case emulated::software_prop::ExposureAutoHighlightReduction:
         case emulated::software_prop::GainAuto:
+        case emulated::software_prop::AutoFunctionsROIEnable:
+        case emulated::software_prop::AutoFunctionsROIPreset:
+        case emulated::software_prop::AutoFunctionsROILeft:
+        case emulated::software_prop::AutoFunctionsROITop:
+        case emulated::software_prop::AutoFunctionsROIWidth:
+        case emulated::software_prop::AutoFunctionsROIHeight:
         case emulated::software_prop::Iris:
         case emulated::software_prop::IrisAuto:
         case emulated::software_prop::Focus:
@@ -558,7 +668,13 @@ tcam::property::PropertyFlags tcam::property::SoftwareProperties::get_flags(
             return default_flags;
         case emulated::software_prop::GainAutoUpperLimit:
             return default_flags;
-
+        case emulated::software_prop::AutoFunctionsROIEnable:
+        case emulated::software_prop::AutoFunctionsROIPreset:
+        case emulated::software_prop::AutoFunctionsROILeft:
+        case emulated::software_prop::AutoFunctionsROITop:
+        case emulated::software_prop::AutoFunctionsROIWidth:
+        case emulated::software_prop::AutoFunctionsROIHeight:
+            return default_flags;
         case emulated::software_prop::Iris:
             return add_locked(m_auto_params.iris.auto_enabled);
         case emulated::software_prop::IrisAuto:
@@ -622,6 +738,35 @@ void tcam::property::SoftwareProperties::update_to_new_format(const tcam::VideoF
     if (get_int(sp::ExposureAutoUpperLimitAuto))
     {
         m_exposure_auto_upper_limit = 1000000 / m_format.get_framerate();
+    }
+
+    tcamprop1::prop_range_integer x_range = { 0, m_format.get_size().width, 1 };
+    tcamprop1::prop_range_integer y_range = { 0, m_format.get_size().height, 1 };
+
+    {
+        auto top = std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            find_property(m_properties, "AutoFunctionsROITop"));
+        auto left =
+            std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+                find_property(m_properties, "AutoFunctionsROILeft"));
+        auto width =
+            std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+                find_property(m_properties, "AutoFunctionsROIWidth"));
+        auto height =
+            std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+                find_property(m_properties, "AutoFunctionsROIHeight"));
+
+        top->set_range(y_range);
+        left->set_range(x_range);
+        width->set_range(x_range);
+        height->set_range(y_range);
+
+        // when not using custom settings
+        // recalculate all values to adhere to the new ranges
+        if (m_brightness_roi_mode != AutoFunctionsROIPreset_Modes::custom)
+        {
+            set_auto_functions_preset_mode(m_brightness_roi_mode);
+        }
     }
 }
 

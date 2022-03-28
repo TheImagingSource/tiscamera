@@ -26,6 +26,14 @@ enum class software_prop
 
     Iris,
     IrisAuto,
+
+    AutoFunctionsROIEnable,
+    AutoFunctionsROIPreset,
+    AutoFunctionsROILeft,
+    AutoFunctionsROITop,
+    AutoFunctionsROIWidth,
+    AutoFunctionsROIHeight,
+
     Focus,
     FocusAuto,
 

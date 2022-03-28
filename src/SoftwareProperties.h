@@ -15,6 +15,17 @@
 namespace tcam::property
 {
 
+enum class AutoFunctionsROIPreset_Modes
+{
+    full = 0,
+    custom = 1,
+    center_50 = 2,
+    center_25 = 3,
+    bottom_half = 4,
+    top_half = 5,
+};
+
+
 class SoftwareProperties :
     public std::enable_shared_from_this<SoftwareProperties>,
     public emulated::SoftwarePropertyBackend
@@ -52,6 +63,10 @@ private:
     void generate_exposure_auto();
     void generate_gain_auto();
     void generate_iris_auto();
+
+    void generate_auto_functions_roi();
+    void set_auto_functions_preset_mode(AutoFunctionsROIPreset_Modes mode);
+
     void generate_focus_auto();
 
     void generate_balance_white_auto();
@@ -74,10 +89,18 @@ private:
 
     mutable std::mutex m_property_mtx;
 
+    tcam_image_size sensor_dimensions_ = {};
+
     std::shared_ptr<tcam::property::IPropertyFloat> m_dev_exposure = nullptr;
 
     bool m_exposure_auto_upper_limit_auto = true;
     double m_exposure_auto_upper_limit = 0;
+
+    int m_brightness_top = 0;
+    int m_brightness_left = 0;
+    int m_brightness_width = 0;
+    int m_brightness_height = 0;
+    AutoFunctionsROIPreset_Modes m_brightness_roi_mode = AutoFunctionsROIPreset_Modes::full;
 
     std::shared_ptr<tcam::property::IPropertyFloat> m_dev_gain = nullptr;
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_iris = nullptr;
@@ -108,6 +131,7 @@ private:
     // general stuff
 
     auto_alg::auto_pass_params m_auto_params;
+    bool m_active_brightness_roi = false;
     auto_alg::state_ptr p_state;
     tcam::VideoFormat m_format;
 

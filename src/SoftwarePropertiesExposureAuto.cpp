@@ -199,6 +199,106 @@ void tcam::property::SoftwareProperties::generate_iris_auto()
 }
 
 
+void tcam::property::SoftwareProperties::generate_auto_functions_roi()
+{
+    if (find_property<IPropertyInteger>(m_properties, "AutoFunctionsROITop") != nullptr)
+    {
+        return;
+    }
+    SPDLOG_INFO("Adding software AutoFunctionsROI");
+
+    prop_ptr_vec new_list;
+
+    add_prop_entry(
+        new_list, sp::AutoFunctionsROIEnable, &tcamprop1::prop_list::AutoFunctionsROIEnable, 0);
+
+    auto preset_entries = tcamprop1::prop_list::AutoFunctionsROIPreset_EnumEntries;
+    std::vector<std::string_view> entries(preset_entries.begin(), preset_entries.end());
+
+    add_prop_entry(new_list,
+                   sp::AutoFunctionsROIPreset,
+                   &tcamprop1::prop_list::AutoFunctionsROIPreset,
+                   emulated::to_range(preset_entries),
+                   0);
+
+    tcamprop1::prop_range_integer y_range = { 0, sensor_dimensions_.height, 1 };
+    tcamprop1::prop_range_integer x_range = { 0, sensor_dimensions_.width, 1 };
+    const auto x_def = emulated::prop_range_integer_def { x_range, 0 };
+    const auto y_def = emulated::prop_range_integer_def { y_range, 0 };
+
+    add_prop_entry(
+        new_list, sp::AutoFunctionsROILeft, &tcamprop1::prop_list::AutoFunctionsROILeft, x_def);
+    add_prop_entry(
+        new_list, sp::AutoFunctionsROITop, &tcamprop1::prop_list::AutoFunctionsROITop, y_def);
+    add_prop_entry(
+        new_list, sp::AutoFunctionsROIWidth, &tcamprop1::prop_list::AutoFunctionsROIWidth, x_def);
+    add_prop_entry(
+        new_list, sp::AutoFunctionsROIHeight, &tcamprop1::prop_list::AutoFunctionsROIHeight, y_def);
+
+
+    add_prop_entry(m_properties, "AutoFunctionsRoiEnable", new_list);
+}
+
+
+void tcam::property::SoftwareProperties::set_auto_functions_preset_mode(
+    AutoFunctionsROIPreset_Modes mode)
+{
+    switch (mode)
+    {
+        case AutoFunctionsROIPreset_Modes::full:
+        {
+            m_brightness_top = 0;
+            m_brightness_left = 0;
+            m_brightness_width = m_format.get_size().width;
+            m_brightness_height = m_format.get_size().height;
+            break;
+        }
+        case AutoFunctionsROIPreset_Modes::custom:
+        {
+            break;
+        }
+        case AutoFunctionsROIPreset_Modes::center_50:
+        {
+            m_brightness_top = m_format.get_size().height / 4;
+            m_brightness_left = m_format.get_size().width / 4;
+            m_brightness_height = m_format.get_size().height / 2;
+            m_brightness_width = m_format.get_size().width / 2;
+            break;
+        }
+        case AutoFunctionsROIPreset_Modes::center_25:
+        {
+            m_brightness_top = (m_format.get_size().height / 8) * 3;
+            m_brightness_left = (m_format.get_size().width / 8) * 3;
+            m_brightness_height = m_format.get_size().height / 4;
+            m_brightness_width = m_format.get_size().width / 4;
+            break;
+        }
+        case AutoFunctionsROIPreset_Modes::bottom_half:
+        {
+            m_brightness_top = m_format.get_size().height / 2;
+            m_brightness_left = 0;
+            m_brightness_width = m_format.get_size().width;
+            m_brightness_height = m_format.get_size().height / 2;
+            break;
+        }
+        case AutoFunctionsROIPreset_Modes::top_half:
+        {
+            m_brightness_top = 0;
+            m_brightness_left = 0;
+            m_brightness_height = m_format.get_size().height / 2;
+            m_brightness_width = m_format.get_size().width;
+            break;
+        }
+        default:
+        {
+            return; // when this is a bad parameter, just return and do not set variable
+        }
+    }
+
+    m_brightness_roi_mode = mode;
+}
+
+
 void tcam::property::SoftwareProperties::generate_focus_auto()
 {
     auto dev_focus = tcam::property::find_property<IPropertyInteger>(m_properties, "Focus");
