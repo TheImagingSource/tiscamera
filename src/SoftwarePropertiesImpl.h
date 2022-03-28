@@ -73,6 +73,12 @@ public:
     {
         return *static_info_integer_;
     }
+
+    void set_range(const tcamprop1::prop_range_integer& new_range)
+    {
+        range_ = new_range;
+    }
+
     tcamprop1::prop_range_integer get_range() const final
     {
         return range_;
