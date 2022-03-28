@@ -96,6 +96,11 @@ private:
     bool m_exposure_auto_upper_limit_auto = true;
     double m_exposure_auto_upper_limit = 0;
 
+    int m_focus_top = 0;
+    int m_focus_left = 0;
+    int m_focus_width = 0;
+    int m_focus_height = 0;
+
     int m_brightness_top = 0;
     int m_brightness_left = 0;
     int m_brightness_width = 0;

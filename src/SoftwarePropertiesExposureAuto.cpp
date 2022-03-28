@@ -336,4 +336,25 @@ void tcam::property::SoftwareProperties::generate_focus_auto()
 
     replace_entry(m_properties, new_focus);
     add_prop_entry(m_properties, new_focus->get_name(), { new_focus_auto });
+
+    tcamprop1::prop_range_integer top_range = { 0, sensor_dimensions_.height, 1 };
+    tcamprop1::prop_range_integer width_range = { 0, sensor_dimensions_.width, 1 };
+
+    const auto top_def = emulated::prop_range_integer_def { top_range, 0 };
+    const auto width_def = emulated::prop_range_integer_def { width_range, 0 };
+
+    auto focus_roi_top =
+        make_prop_entry(sp::FocusAutoTop, &tcamprop1::prop_list::AutoFocusROITop, top_def);
+    auto focus_roi_left =
+        make_prop_entry(sp::FocusAutoLeft, &tcamprop1::prop_list::AutoFocusROILeft, width_def);
+    auto focus_roi_height =
+        make_prop_entry(sp::FocusAutoHeight, &tcamprop1::prop_list::AutoFocusROIHeight, top_def);
+    auto focus_roi_width =
+        make_prop_entry(sp::FocusAutoWidth, &tcamprop1::prop_list::AutoFocusROIWidth, width_def);
+
+    add_prop_entry(m_properties,
+                   new_focus_auto->get_name(),
+                   { focus_roi_left, focus_roi_top, focus_roi_width, focus_roi_height });
+
+    
 }

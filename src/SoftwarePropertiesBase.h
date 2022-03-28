@@ -37,6 +37,11 @@ enum class software_prop
     Focus,
     FocusAuto,
 
+    FocusAutoTop,
+    FocusAutoLeft,
+    FocusAutoWidth,
+    FocusAutoHeight,
+
     BalanceWhiteAuto,
     BalanceWhiteRed,
     BalanceWhiteGreen,

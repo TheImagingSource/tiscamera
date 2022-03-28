@@ -254,6 +254,14 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
             return m_auto_params.focus_onepush_params.device_focus_val;
         case emulated::software_prop::FocusAuto:
             return m_auto_params.focus_onepush_params.is_run_cmd;
+        case emulated::software_prop::FocusAutoTop:
+            return m_focus_top;
+        case emulated::software_prop::FocusAutoLeft:
+            return m_focus_left;
+        case emulated::software_prop::FocusAutoHeight:
+            return m_focus_height;
+        case emulated::software_prop::FocusAutoWidth:
+            return m_focus_width;
         case emulated::software_prop::BalanceWhiteAuto:
         {
             if (m_auto_params.wb.auto_enabled)
@@ -410,7 +418,43 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         case emulated::software_prop::FocusAuto:
         {
             m_auto_params.focus_onepush_params.is_run_cmd = new_val;
+            m_auto_params.focus_onepush_params.run_cmd_params.roi = { m_focus_left,
+                                                                      m_focus_top,
+                                                                      m_focus_left + m_focus_width,
+                                                                      m_focus_top
+                                                                          + m_focus_height };
+            return outcome::success();
+        }
+        case emulated::software_prop::FocusAutoTop:
+        {
+            m_focus_top = new_val;
 
+            // reduce roi height to always remain within image boundaries
+            if (m_focus_top + m_focus_height > (int)m_format.get_size().height)
+            {
+                m_focus_height = m_format.get_size().height - m_focus_top;
+            }
+            return outcome::success();
+        }
+        case emulated::software_prop::FocusAutoLeft:
+        {
+            m_focus_left = new_val;
+
+            // reduce roi width to always remain within image boundaries
+            if (m_focus_left + m_focus_width > (int)m_format.get_size().width)
+            {
+                m_focus_width = m_format.get_size().width - m_focus_left;
+            }
+            return outcome::success();
+        }
+        case emulated::software_prop::FocusAutoWidth:
+        {
+            m_focus_width = new_val;
+            return outcome::success();
+        }
+        case emulated::software_prop::FocusAutoHeight:
+        {
+            m_focus_height = new_val;
             return outcome::success();
         }
         case emulated::software_prop::BalanceWhiteAuto:
@@ -464,6 +508,10 @@ outcome::result<double> tcam::property::SoftwareProperties::get_double(
         case emulated::software_prop::IrisAuto:
         case emulated::software_prop::Focus:
         case emulated::software_prop::FocusAuto:
+        case emulated::software_prop::FocusAutoTop:
+        case emulated::software_prop::FocusAutoLeft:
+        case emulated::software_prop::FocusAutoHeight:
+        case emulated::software_prop::FocusAutoWidth:
         case emulated::software_prop::BalanceWhiteAuto:
         case emulated::software_prop::ClaimBalanceWhiteSoftware:
         case emulated::software_prop::ColorTransformEnable:
@@ -553,6 +601,10 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
         case emulated::software_prop::IrisAuto:
         case emulated::software_prop::Focus:
         case emulated::software_prop::FocusAuto:
+        case emulated::software_prop::FocusAutoTop:
+        case emulated::software_prop::FocusAutoLeft:
+        case emulated::software_prop::FocusAutoWidth:
+        case emulated::software_prop::FocusAutoHeight:
         case emulated::software_prop::BalanceWhiteAuto:
         case emulated::software_prop::ClaimBalanceWhiteSoftware:
         case emulated::software_prop::ColorTransformEnable:
@@ -683,7 +735,14 @@ tcam::property::PropertyFlags tcam::property::SoftwareProperties::get_flags(
             return default_flags;
         case emulated::software_prop::FocusAuto:
             return default_flags;
-
+        case emulated::software_prop::FocusAutoTop:
+            return default_flags;
+        case emulated::software_prop::FocusAutoLeft:
+            return default_flags;
+        case emulated::software_prop::FocusAutoWidth:
+            return default_flags;
+        case emulated::software_prop::FocusAutoHeight:
+            return default_flags;
         case emulated::software_prop::BalanceWhiteAuto:
         {
             if (m_wb.m_wb_is_claimed)
@@ -767,6 +826,25 @@ void tcam::property::SoftwareProperties::update_to_new_format(const tcam::VideoF
         {
             set_auto_functions_preset_mode(m_brightness_roi_mode);
         }
+    }
+
+    {
+        auto top = std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+            find_property(m_properties, "AutoFocusROITop"));
+        auto left =
+            std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+                find_property(m_properties, "AutoFocusROILeft"));
+        auto width =
+            std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+                find_property(m_properties, "AutoFocusROIWidth"));
+        auto height =
+            std::dynamic_pointer_cast<tcam::property::emulated::SoftwarePropertyIntegerImpl>(
+                find_property(m_properties, "AutoFocusROIHeight"));
+
+        top->set_range(y_range);
+        left->set_range(x_range);
+        width->set_range(x_range);
+        height->set_range(y_range);
     }
 }
 
