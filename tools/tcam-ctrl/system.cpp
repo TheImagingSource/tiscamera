@@ -88,7 +88,7 @@ void tcam::tools::print_packages()
     }
     else
     {
-        std::cout << "tiscamera-tcampropert: Provided by tiscamera" << std::endl;
+        std::cout << "tiscamera-tcamproperty: Provided by tiscamera" << std::endl;
     }
     check_package("tcamdutils");
 
