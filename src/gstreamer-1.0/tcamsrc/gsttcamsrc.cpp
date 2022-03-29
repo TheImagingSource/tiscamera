@@ -133,14 +133,6 @@ static void apply_element_property(GstTcamSrc* self,
                                    const GValue* value,
                                    GParamSpec* pspec);
 
-
-static void emit_device_open(GstElement* /*object*/, void* user_data)
-{
-    // emit our own instance of 'device-open'. user-data is the tcamsrc instance
-    g_signal_emit(G_OBJECT(user_data), gst_tcamsrc_signals[SIGNAL_DEVICE_OPEN], 0);
-}
-
-
 static void emit_device_close(GstElement* /*object*/, void* user_data)
 {
     // emit our own instance of 'device-open'. user-data is the tcamsrc instance
@@ -277,8 +269,6 @@ static gboolean open_source_element(GstTcamSrc* self)
     state.device_serial = serial;
     state.device_type = type;
 
-    g_signal_connect(G_OBJECT(new_device.get()), "device-open", G_CALLBACK(emit_device_open), self);
-
     g_signal_connect(
         G_OBJECT(new_device.get()), "device-close", G_CALLBACK(emit_device_close), self);
 
@@ -351,6 +341,10 @@ static gboolean open_source_element(GstTcamSrc* self)
                     state.device_serial.c_str(),
                     tcam::tcam_device_type_to_string(state.device_type).c_str());
 
+    
+    // We emit the device-open notifications here after the device is __really__ open and we have setup everything surrounding that
+    g_signal_emit(G_OBJECT(self), gst_tcamsrc_signals[SIGNAL_DEVICE_OPEN], 0);
+    
     return TRUE;
 }
 
