@@ -6,6 +6,8 @@
 
 #include <map>
 #include <limits>
+#include <algorithm>
+
 
 std::optional<img::dim> gst_helper::get_gst_struct_image_dim(const GstStructure& structure)
 {
@@ -198,8 +200,17 @@ auto gst_helper::convert_GstCaps_to_fcc_list( const GstCaps& caps ) ->std::vecto
         if( entry == nullptr ) {
             return {};
         }
-        auto vec = convert_GstStructure_to_fcc_list( *entry );
-        rval.insert( rval.end(), vec.begin(), vec.end() );
+        for( auto&& new_fcc : convert_GstStructure_to_fcc_list( *entry ) )
+        {
+            const bool already_present = std::any_of( rval.begin(), rval.end(), [new_fcc]( auto fcc_in_rval ) { return fcc_in_rval == new_fcc; } );
+            if( !already_present )
+            {
+                rval.push_back( new_fcc );
+            }
+        }
     }
+
+
+
     return rval;
 }
