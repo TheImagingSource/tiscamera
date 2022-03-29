@@ -141,30 +141,24 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* self)
             {
                 GstStructure* s = gst_caps_get_structure(tmp, 0);
                 int best = 0;
-                int twidth, theight;
-                int width = G_MAXINT, height = G_MAXINT;
+                int width = 0, height = 0;
 
-                if (gst_structure_get_int(s, "width", &twidth)
-                    && gst_structure_get_int(s, "height", &theight))
-                {
-
-                    /* Walk the structure backwards to get the first entry of the
+                /* Walk the structure backwards to get the first entry of the
                      * smallest resolution bigger (or equal to) the preferred resolution)
                      */
-                    for (gint i = (gint)gst_caps_get_size(icaps) - 1; i >= 0; i--)
-                    {
-                        GstStructure* is = gst_caps_get_structure(icaps, i);
-                        int w, h;
+                for (gint i = (gint)gst_caps_get_size(icaps) - 1; i >= 0; i--)
+                {
+                    GstStructure* is = gst_caps_get_structure(icaps, i);
+                    int w, h;
 
-                        if (gst_structure_get_int(is, "width", &w)
-                            && gst_structure_get_int(is, "height", &h))
+                    if (gst_structure_get_int(is, "width", &w)
+                        && gst_structure_get_int(is, "height", &h))
+                    {
+                        if (w >= width && h >= height)
                         {
-                            if (w >= twidth && w <= width && h >= theight && h <= height)
-                            {
-                                width = w;
-                                height = h;
-                                best = i;
-                            }
+                            width = w;
+                            height = h;
+                            best = i;
                         }
                     }
                 }
