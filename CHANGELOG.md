@@ -486,4 +486,8 @@ Tools:
 - TCAM_PROPERTY_AUTO_REFERENCE - no handled by TCAM_PROPERTY_AUTO_EXPOSURE
 - installation of internal header files
 
-## [0.9.1]
+## [0.9.1] - 2017.09.15
+
+## [0.9.0] - 2017.07.27
+
+## [0.8.2] - 2017.06.28
