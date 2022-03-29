@@ -15,18 +15,20 @@
  */
 
 #include "aboutdialog.h"
+
 #include "ui_aboutdialog.h"
 
-#include <QProcess>
-#include <QLabel>
-#include <QPushButton>
-#include <QFormLayout>
 #include <QApplication>
 #include <QClipboard>
 #include <QFileDialog>
+#include <QFormLayout>
+#include <QLabel>
+#include <QProcess>
+#include <QPushButton>
+#include <QtConcurrent/QtConcurrent>
 
-
-namespace {
+namespace
+{
 
 struct meta_entry
 {
@@ -135,6 +137,12 @@ private:
 
     std::vector<meta_entry> m_entries;
 };
+
+
+void write_state_to_element(GstElement* ele, QString state)
+{
+    g_object_set(ele, "tcam-properties-json", state.trimmed().toStdString().c_str(), nullptr);
+}
 
 } // namespace
 
@@ -282,8 +290,8 @@ void AboutDialog::write_state()
 {
     auto str = ui->state_field->toPlainText();
 
-    g_object_set(p_tcambin, "tcam-properties-json", str.toStdString().c_str(), nullptr);
-
+    QFuture<void> future =
+        QtConcurrent::run(write_state_to_element, p_tcambin, str);
 }
 
 
