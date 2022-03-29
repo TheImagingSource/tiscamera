@@ -159,7 +159,7 @@ Paths may change when CMAKE_INSTALL_PREFIX is set.
      - 
    * - Static Data
      - TCAM_INSTALL_IMAGE_DIR
-     - /usr/share/tiscamera
+     - /usr/share/theimagingsource/tiscamera/images/
      -
    * - UDev
      - TCAM_INSTALL_UDEV
@@ -167,12 +167,12 @@ Paths may change when CMAKE_INSTALL_PREFIX is set.
      - Directory for :ref:`udev`
    * - UVC Extensions
      - TCAM_INSTALL_UVC_EXTENSION
-     - /usr/share/theimagingsource/tiscamera/
+     - /usr/share/theimagingsource/tiscamera/uvc-extension/
      - 
    * - Pkgconfig Files
      - TCAM_INSTALL_PKGCONFIG
-     - /usr/lib/pgkconfig
-     -
+     - /usr/lib/x86_64-linux-gnu/pgkconfig
+     - This path may vary
 
 ========
 Building
