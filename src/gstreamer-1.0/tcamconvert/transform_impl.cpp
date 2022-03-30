@@ -54,103 +54,105 @@ using namespace img;
 
 
 // clang-format off
-static const constexpr transform_path transform_entries[] = {
-{
-    { fourcc::MONO8 },
-    { fourcc::MONO8, fourcc::BGRA32 },
-},
+static const constexpr transform_path transform_entries[] =
 {
     {
-        fourcc::MONO16,
-        fourcc::MONO10,
-        fourcc::MONO10_MIPI_PACKED,
-        fourcc::MONO10_SPACKED,
-        fourcc::MONO12,
-        fourcc::MONO12_MIPI_PACKED,
-        fourcc::MONO12_SPACKED,
-        fourcc::MONO12_PACKED
+        { fourcc::MONO8 },
+        { fourcc::MONO8, fourcc::BGRA32 },
     },
-    { fourcc::MONO8, fourcc::MONO16, fourcc::BGRA32 }
-},
-{
-    { fourcc::BGGR8, },
-    { fourcc::BGGR8, fourcc::BGRA32 }
-},
-{
     {
-        fourcc::BGGR16,
-        fourcc::BGGR10,
-        fourcc::BGGR10_SPACKED,
-        fourcc::BGGR10_MIPI_PACKED,
-        fourcc::BGGR12,
-        fourcc::BGGR12_PACKED,
-        fourcc::BGGR12_SPACKED,
-        fourcc::BGGR12_MIPI_PACKED,
+        {
+            fourcc::MONO10,
+            fourcc::MONO10_MIPI_PACKED,
+            fourcc::MONO10_SPACKED,
+            fourcc::MONO12,
+            fourcc::MONO12_MIPI_PACKED,
+            fourcc::MONO12_SPACKED,
+            fourcc::MONO12_PACKED,
+            fourcc::MONO16,
+        },
+        { fourcc::MONO8, fourcc::MONO16, fourcc::BGRA32 }
     },
-    { fourcc::BGGR8, fourcc::BGGR16, fourcc::BGRA32 }
-},
-{
-    { fourcc::GBRG8, },
-    { fourcc::GBRG8, fourcc::BGRA32 }
-},
-{
     {
-        fourcc::GBRG16,
-        fourcc::GBRG10,
-        fourcc::GBRG10_SPACKED,
-        fourcc::GBRG10_MIPI_PACKED,
-        fourcc::GBRG12,
-        fourcc::GBRG12_PACKED,
-        fourcc::GBRG12_SPACKED,
-        fourcc::GBRG12_MIPI_PACKED,
-      },
-      { fourcc::GBRG8, fourcc::GBRG16, fourcc::BGRA32 }
-},
-{
-    { fourcc::RGGB8, },
-    { fourcc::RGGB8, fourcc::BGRA32 }
-},
-{
-    {
-        fourcc::RGGB16,
-        fourcc::RGGB10,
-        fourcc::RGGB10_SPACKED,
-        fourcc::RGGB10_MIPI_PACKED,
-        fourcc::RGGB12,
-        fourcc::RGGB12_PACKED,
-        fourcc::RGGB12_SPACKED,
-        fourcc::RGGB12_MIPI_PACKED,
+        { fourcc::BGGR8, },
+        { fourcc::BGGR8, fourcc::BGRA32 }
     },
-    { fourcc::RGGB8, fourcc::RGGB16, fourcc::BGRA32 }
-},
-{
-    { fourcc::GRBG8, },
-    { fourcc::GRBG8, fourcc::BGRA32 }
-},
-{
     {
-        fourcc::GRBG16,
-        fourcc::GRBG10,
-        fourcc::GRBG10_SPACKED,
-        fourcc::GRBG10_MIPI_PACKED,
-        fourcc::GRBG12,
-        fourcc::GRBG12_PACKED,
-        fourcc::GRBG12_SPACKED,
-        fourcc::GRBG12_MIPI_PACKED,
+        {
+            fourcc::BGGR10,
+            fourcc::BGGR10_SPACKED,
+            fourcc::BGGR10_MIPI_PACKED,
+            fourcc::BGGR12,
+            fourcc::BGGR12_PACKED,
+            fourcc::BGGR12_SPACKED,
+            fourcc::BGGR12_MIPI_PACKED,
+            fourcc::BGGR16,
+        },
+        { fourcc::BGGR8, fourcc::BGGR16, fourcc::BGRA32 }
     },
-    { fourcc::GRBG8, fourcc::GRBG16, fourcc::BGRA32 } },
+    {
+        { fourcc::GBRG8, },
+        { fourcc::GBRG8, fourcc::BGRA32 }
+    },
+    {
+        {
+            fourcc::GBRG10,
+            fourcc::GBRG10_SPACKED,
+            fourcc::GBRG10_MIPI_PACKED,
+            fourcc::GBRG12,
+            fourcc::GBRG12_PACKED,
+            fourcc::GBRG12_SPACKED,
+            fourcc::GBRG12_MIPI_PACKED,
+            fourcc::GBRG16,
+        },
+        { fourcc::GBRG8, fourcc::GBRG16, fourcc::BGRA32 }
+    },
+    {
+        { fourcc::RGGB8, },
+        { fourcc::RGGB8, fourcc::BGRA32 }
+    },
+    {
+        {
+            fourcc::RGGB10,
+            fourcc::RGGB10_SPACKED,
+            fourcc::RGGB10_MIPI_PACKED,
+            fourcc::RGGB12,
+            fourcc::RGGB12_PACKED,
+            fourcc::RGGB12_SPACKED,
+            fourcc::RGGB12_MIPI_PACKED,
+            fourcc::RGGB16,
+        },
+        { fourcc::RGGB8, fourcc::RGGB16, fourcc::BGRA32 }
+    },
+    {
+        { fourcc::GRBG8, },
+        { fourcc::GRBG8, fourcc::BGRA32 }
+    },
+    {
+        {
+            fourcc::GRBG10,
+            fourcc::GRBG10_SPACKED,
+            fourcc::GRBG10_MIPI_PACKED,
+            fourcc::GRBG12,
+            fourcc::GRBG12_PACKED,
+            fourcc::GRBG12_SPACKED,
+            fourcc::GRBG12_MIPI_PACKED,
+            fourcc::GRBG16,
+        },
+        { fourcc::GRBG8, fourcc::GRBG16, fourcc::BGRA32 }
+    },
 };
 // clang-format on
 
-void remove_duplicates(std::vector<img::fourcc>& vec)
+void append_unique(std::vector<img::fourcc>& vec, const fcc_array2& arr)
 {
-    auto f = std::unique(vec.begin(), vec.end());
-    vec.erase(f, vec.end());
-}
-
-void append(std::vector<img::fourcc>& vec, const fcc_array2& arr)
-{
-    for (auto fcc : arr) { vec.push_back(fcc); }
+    for (auto fcc : arr)
+    {
+        const bool already_present = std::any_of(
+            vec.begin(), vec.end(), [fcc](auto fcc_in_vec) { return fcc == fcc_in_vec; });
+        if (!already_present)
+            vec.push_back(fcc);
+    }
 }
 
 } // namespace
@@ -158,8 +160,7 @@ void append(std::vector<img::fourcc>& vec, const fcc_array2& arr)
 auto tcamconvert::tcamconvert_get_all_input_fccs() -> std::vector<img::fourcc>
 {
     std::vector<img::fourcc> rval;
-    for (auto e : transform_entries) { append(rval, e.src_fcc); }
-    remove_duplicates(rval);
+    for (auto e : transform_entries) { append_unique(rval, e.src_fcc); }
     return rval;
 }
 
@@ -167,8 +168,7 @@ auto tcamconvert::tcamconvert_get_all_input_fccs() -> std::vector<img::fourcc>
 auto tcamconvert::tcamconvert_get_all_output_fccs() -> std::vector<img::fourcc>
 {
     std::vector<img::fourcc> rval;
-    for (auto e : transform_entries) { append(rval, e.dst_fcc); }
-    remove_duplicates(rval);
+    for (auto e : transform_entries) { append_unique(rval, e.dst_fcc); }
     return rval;
 }
 
@@ -180,11 +180,9 @@ auto tcamconvert::tcamconvert_get_supported_input_fccs(img::fourcc dst_fcc)
     {
         if (e.dst_fcc.has_fcc(dst_fcc))
         {
-            append(rval, e.src_fcc);
+            append_unique(rval, e.src_fcc);
         }
     }
-    remove_duplicates(rval);
-
     return rval;
 }
 
@@ -196,11 +194,9 @@ auto tcamconvert::tcamconvert_get_supported_output_fccs(img::fourcc src_fcc)
     {
         if (e.src_fcc.has_fcc(src_fcc))
         {
-            append(rval, e.dst_fcc);
+            append_unique(rval, e.dst_fcc);
         }
     }
-    remove_duplicates(rval);
-
     return rval;
 }
 
