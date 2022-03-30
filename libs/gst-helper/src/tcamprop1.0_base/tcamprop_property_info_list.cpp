@@ -21,13 +21,13 @@ const prop_static_info_float lst::GainAutoLowerLimit = make_Float(
     "GainAutoLowerLimit",
     "Exposure", "Gain Auto Lower Limit",
     "Lower limit of the GainAuto function.",
-    "dB", FloatRepresentation_t::Linear
+    "dB", FloatRepresentation_t::Linear, Visibility_t::Guru
 );
 const prop_static_info_float lst::GainAutoUpperLimit = make_Float(
     "GainAutoUpperLimit",
     "Exposure", "Gain Auto Upper Limit",
     "Upper limit of the GainAuto function.",
-    "dB", FloatRepresentation_t::Linear
+    "dB", FloatRepresentation_t::Linear, Visibility_t::Expert
 );
 
 const prop_static_info_float lst::ExposureTime = make_Float(
@@ -56,7 +56,7 @@ const prop_static_info_float lst::ExposureAutoUpperLimit = make_Float(
     "ExposureAutoUpperLimit",
     "Exposure", "Exposure Auto Upper Limit",
     "Upper limit of the ExposureAuto function.",
-    "µs", FloatRepresentation_t::Logarithmic, Visibility_t::Guru
+    "µs", FloatRepresentation_t::Logarithmic, Visibility_t::Expert
 );
 const prop_static_info_boolean lst::ExposureAutoUpperLimitAuto = make_Boolean(
     "ExposureAutoUpperLimitAuto",
