@@ -360,14 +360,7 @@ GstCaps* find_input_caps(GstCaps* available_caps,
     {
         GstCaps* used_caps = filter_by_caps_properties(available_caps, wanted_caps);
 
-        if (gst_caps_is_fixed(wanted_caps))
-        {
-            actual_input = gst_caps_intersect(used_caps, wanted_caps);
-        }
-        else
-        {
-            actual_input = tcam_gst_find_largest_caps(used_caps);
-        }
+        actual_input = tcam_gst_find_largest_caps(used_caps, wanted_caps);
     }
     modules = conversion.get_modules(actual_input, wanted_caps, toggles);
 

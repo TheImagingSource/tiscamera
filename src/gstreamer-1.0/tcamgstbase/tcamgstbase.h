@@ -93,9 +93,10 @@ bool gst_caps_are_bayer_only(const GstCaps* caps);
  * Find the caps with the largest resolution and the highest framerate.
  * The format that will be selected is determined through internal ranking.
  * @param incoming - GstCaps from which to select
+ * @param filter - GstCaps from which to select
  * @return pointer to the largest caps, nullptr on error user has ownership
  */
-GstCaps* tcam_gst_find_largest_caps(const GstCaps* incoming);
+GstCaps* tcam_gst_find_largest_caps(const GstCaps* incoming, const GstCaps* filter);
 
 
 bool contains_bayer(const GstCaps* caps);

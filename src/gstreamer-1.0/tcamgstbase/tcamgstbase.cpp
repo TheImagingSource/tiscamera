@@ -747,7 +747,7 @@ static uint32_t find_preferred_format(const std::vector<uint32_t>& vec)
 }
 
 
-GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming)
+GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming, const GstCaps* filter)
 {
     /**
      * find_largest_caps tries to find the largest caps
@@ -767,6 +767,25 @@ GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming)
      * 3. for the format with the largest resolution take the highest framerate
      */
     std::vector<uint32_t> format_fourccs = index_format_fourccs(incoming);
+
+    if (gst_caps_is_fixed(filter))
+    {
+        auto fccs = index_format_fourccs(filter);
+        std::vector<uint32_t> tmp_fccs;
+
+        for (const auto& fcc : format_fourccs)
+        {
+            if (std::any_of(fccs.begin(), fccs.end(), [fcc](uint32_t v) {return v==fcc;}))
+            {
+                tmp_fccs.push_back(fcc);
+            }
+        }
+
+        if (!tmp_fccs.empty())
+        {
+            format_fourccs = tmp_fccs;
+        }
+    }
 
     uint32_t preferred_fourcc = find_preferred_format(format_fourccs);
 
