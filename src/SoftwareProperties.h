@@ -57,6 +57,9 @@ public:
     void update_to_new_format(const tcam::VideoFormat& new_format);
 
 private:
+
+    static constexpr int ROI_STEP_SIZE = 4;
+
     // encapsulation for internal property generation
     void generate_public_properties(bool has_bayer);
 

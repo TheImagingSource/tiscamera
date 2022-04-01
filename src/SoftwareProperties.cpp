@@ -799,8 +799,8 @@ void tcam::property::SoftwareProperties::update_to_new_format(const tcam::VideoF
         m_exposure_auto_upper_limit = 1000000 / m_format.get_framerate();
     }
 
-    tcamprop1::prop_range_integer x_range = { 0, m_format.get_size().width, 1 };
-    tcamprop1::prop_range_integer y_range = { 0, m_format.get_size().height, 1 };
+    tcamprop1::prop_range_integer x_range = { 0, m_format.get_size().width, ROI_STEP_SIZE };
+    tcamprop1::prop_range_integer y_range = { 0, m_format.get_size().height, ROI_STEP_SIZE };
 
     if (m_prop_brightness_top)
     {

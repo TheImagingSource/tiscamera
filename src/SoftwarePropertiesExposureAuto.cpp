@@ -221,8 +221,8 @@ void tcam::property::SoftwareProperties::generate_auto_functions_roi()
                    emulated::to_range(preset_entries),
                    0);
 
-    tcamprop1::prop_range_integer y_range = { 0, sensor_dimensions_.height, 1 };
-    tcamprop1::prop_range_integer x_range = { 0, sensor_dimensions_.width, 1 };
+    tcamprop1::prop_range_integer y_range = { 0, sensor_dimensions_.height, ROI_STEP_SIZE };
+    tcamprop1::prop_range_integer x_range = { 0, sensor_dimensions_.width, ROI_STEP_SIZE };
     const auto x_def = emulated::prop_range_integer_def { x_range, 0 };
     const auto y_def = emulated::prop_range_integer_def { y_range, 0 };
 
@@ -261,6 +261,7 @@ void tcam::property::SoftwareProperties::generate_auto_functions_roi()
 void tcam::property::SoftwareProperties::set_auto_functions_preset_mode(
     AutoFunctionsROIPreset_Modes mode)
 {
+    m_brightness_roi_mode = mode;
     switch (mode)
     {
         case AutoFunctionsROIPreset_Modes::full:
@@ -312,8 +313,11 @@ void tcam::property::SoftwareProperties::set_auto_functions_preset_mode(
             return; // when this is a bad parameter, just return and do not set variable
         }
     }
-
-    m_brightness_roi_mode = mode;
+    // ensure that all values are always legal
+    m_brightness_top -= m_brightness_top % ROI_STEP_SIZE;
+    m_brightness_left -= m_brightness_left % ROI_STEP_SIZE;
+    m_brightness_width -= m_brightness_width % ROI_STEP_SIZE;
+    m_brightness_height -= m_brightness_height % ROI_STEP_SIZE;
 }
 
 
@@ -355,8 +359,8 @@ void tcam::property::SoftwareProperties::generate_focus_auto()
     replace_entry(m_properties, new_focus);
     add_prop_entry(m_properties, new_focus->get_name(), { new_focus_auto });
 
-    tcamprop1::prop_range_integer top_range = { 0, sensor_dimensions_.height, 1 };
-    tcamprop1::prop_range_integer width_range = { 0, sensor_dimensions_.width, 1 };
+    tcamprop1::prop_range_integer top_range = { 0, sensor_dimensions_.height, ROI_STEP_SIZE };
+    tcamprop1::prop_range_integer width_range = { 0, sensor_dimensions_.width, ROI_STEP_SIZE };
 
     const auto top_def = emulated::prop_range_integer_def { top_range, 0 };
     const auto width_def = emulated::prop_range_integer_def { width_range, 0 };
