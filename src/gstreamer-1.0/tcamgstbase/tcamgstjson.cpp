@@ -320,13 +320,15 @@ bool tcam::gst::load_device_settings(TcamPropertyProvider* tcam, const std::stri
     // we need this flag to prevent us continually re-trying the same items.
     bool at_least_one_success = false;
     do {
-        std::vector<json::iterator>
-            retry_list; // this is the list of items which were blocked by a locked flag
+        at_least_one_success = false;
+        // this is the list of items which were blocked by a locked flag
+        std::vector<json::iterator> retry_list;
         for (auto&& it : prop_entry_list)
         {
             auto res = apply_single_json_entry(tcam, it, report_error);
             if (res == apply_single_json_entry_rval::locked_error)
             {
+                SPDLOG_ERROR(it.key());
                 retry_list.push_back(it);
             }
             else if (res == apply_single_json_entry_rval::success)
@@ -334,8 +336,8 @@ bool tcam::gst::load_device_settings(TcamPropertyProvider* tcam, const std::stri
                 at_least_one_success = true;
             }
         }
-        prop_entry_list = std::move(
-            retry_list); // move contents of the retry_list into the list which will be walked in the next cycle
+        // move contents of the retry_list into the list which will be walked in the next cycle
+        prop_entry_list = std::move(retry_list);
     } while (at_least_one_success && !prop_entry_list.empty());
 
     // generate the error message list for the properties we could not write due to being 'locked'
