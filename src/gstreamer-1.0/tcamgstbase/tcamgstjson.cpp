@@ -328,7 +328,6 @@ bool tcam::gst::load_device_settings(TcamPropertyProvider* tcam, const std::stri
             auto res = apply_single_json_entry(tcam, it, report_error);
             if (res == apply_single_json_entry_rval::locked_error)
             {
-                SPDLOG_ERROR(it.key());
                 retry_list.push_back(it);
             }
             else if (res == apply_single_json_entry_rval::success)
