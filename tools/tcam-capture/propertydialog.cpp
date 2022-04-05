@@ -56,7 +56,7 @@ void PropertyTree::setup_ui()
 PropertyDialog::PropertyDialog(TcamCollection& collection, QWidget* parent)
     : QDialog(parent), ui(new Ui::PropertyDialog)
 {
-    setMinimumSize(640, 480);
+    setMinimumSize(720, 640);
 
     ui->setupUi(this);
     Qt::WindowFlags flags = this->windowFlags();
