@@ -19,10 +19,10 @@
 DeviceWidget::DeviceWidget(const Device& dev, QListWidget* parent)
     : QListWidgetItem(parent), _dev(dev)
 {
-    //QListWidgetItem(parent),
     setIcon(QIcon(QString(icon_path.c_str())));
     setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     setText((_dev.model() + "\n" + _dev.serial() + "\n" + _dev.type()).c_str());
+    setSizeHint({160,120});
 }
 
 bool DeviceWidget::operator==(const Device& dev) const
@@ -37,4 +37,12 @@ bool DeviceWidget::operator==(const Device& dev) const
 Device DeviceWidget::get_device() const
 {
     return _dev;
+}
+
+
+QSize DeviceWidget::minimumSizeHint() const
+{
+    QSize s = sizeHint();
+
+    return s;
 }

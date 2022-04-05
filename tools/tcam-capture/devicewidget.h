@@ -31,6 +31,8 @@ public:
 
     Device get_device() const;
 
+    virtual QSize minimumSizeHint() const;
+
 private:
     Device _dev;
     std::string icon_path = ":/images/camera.png";
