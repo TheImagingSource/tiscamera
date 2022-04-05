@@ -75,3 +75,33 @@ TcamPropertyBase* TcamCollection::get_property(const std::string& name)
     }
     return nullptr;
 }
+
+
+bool TcamCollection::is_trigger_mode_active()
+{
+    //for (auto& p_base : m_prop_origin)
+
+    auto base = get_property("TriggerMode");
+
+    auto tm = TCAM_PROPERTY_ENUMERATION(base);
+
+    GError* err = nullptr;
+    const char* value = tcam_property_enumeration_get_value(tm, &err);
+
+    if (value)
+    {
+        if (strcmp(value, "On") == 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    if (err)
+    {
+        qWarning("Querying TriggerMode caused an error: %s", err->message);
+        g_error_free(err);
+    }
+
+    return false;
+}

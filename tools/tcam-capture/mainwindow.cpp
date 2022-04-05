@@ -557,6 +557,18 @@ void MainWindow::open_pipeline(FormatHandling handling)
     {
         p_property_dialog->refresh();
     }
+
+    if (m_tcam_collection.is_trigger_mode_active())
+    {
+        this->ui->widget->setAutoFillBackground(true);
+        this->ui->widget->setStyleSheet("background-color:black;color:white;");
+
+        QLayout* l = new QVBoxLayout();
+        this->ui->widget->setLayout(l);
+        QLabel* la = new QLabel("No images received. TriggerMode is 'On'.");
+        la->setStyleSheet("background-color:black;color:white;");
+        l->addWidget(la);
+    }
 }
 
 void MainWindow::close_pipeline()

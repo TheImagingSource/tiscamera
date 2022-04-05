@@ -42,4 +42,6 @@ public:
     std::vector<std::string> get_names() const;
 
     TcamPropertyBase* get_property(const std::string& name);
+
+    bool is_trigger_mode_active();
 };
