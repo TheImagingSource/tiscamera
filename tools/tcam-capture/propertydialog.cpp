@@ -212,12 +212,59 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
         }
     }
 
-    // sort tabs alphabetically
+    static const std::string best_order[] = 
+    {
+        "Exposure",
+        "Color",
+        "Auto ROI",
+        "Image",
+        "Lens",
+        "Color Correction",
+        "Special",
+        "Partial Scan",
+        "WDR",
+        "Multi-Frame Output Mode",
+        "Startup",
+    };
+
+    std::vector<std::string> added_tabs;
+    added_tabs.reserve(known_categories.size());
+
+    for (const auto& o : best_order)
+    {
+        std::vector<Property*> props;
+
+        for (auto& p : prop_list)
+        {
+            if (p->get_category() == o)
+            {
+                props.push_back(p);
+            }
+        }
+        if (props.empty())
+        {
+            continue;
+        }
+
+        PropertyTree* tab_tree = new PropertyTree(props);
+
+        ui->tabWidget->addTab(tab_tree, o.c_str());
+        added_tabs.push_back(o);
+    }
+
+    // sort rest of the tabs alphabetically
     // to get more predictable behavior
     std::sort(known_categories.begin(), known_categories.end());
 
     for (const auto& cat : known_categories)
     {
+        if (std::any_of(added_tabs.begin(),
+                        added_tabs.end(), 
+                        [&cat](const std::string& o){return cat == o;}))
+        {
+            continue;
+        }
+
         std::vector<Property*> props;
 
         for (auto& p : prop_list)
@@ -227,6 +274,12 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
                 props.push_back(p);
             }
         }
+
+        if (props.empty())
+        {
+            continue;
+        }
+
         PropertyTree* tab_tree = new PropertyTree(props);
 
         ui->tabWidget->addTab(tab_tree, cat.c_str());
