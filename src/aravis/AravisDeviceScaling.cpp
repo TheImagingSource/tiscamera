@@ -76,7 +76,7 @@ void AravisDevice::generate_scaling_information()
     auto legal_value = [](const int i)
     {
         // only accept valid values
-        if (i == 2 || i == 4 || i == 8)
+        if (i == 1 || i == 2 || i == 4 || i == 8)
         {
             return true;
         }

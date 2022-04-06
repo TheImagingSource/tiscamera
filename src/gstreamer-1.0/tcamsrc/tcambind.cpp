@@ -114,6 +114,15 @@ static void append_gst_structs_for_res_type_range(
         resolution_list.push_back(reso_desc.max_size);
     }
 
+    // small hack to keep lists short
+    // basically only list explicit resolutions
+    // when binning/skipping are off
+    // the rest is handled via the range description
+    if (!reso_desc.scaling.is_default())
+    {
+        resolution_list.clear();
+    }
+
     for (const auto& fixed_resolution : resolution_list)
     {
         std::vector<double> framerates;
@@ -351,6 +360,12 @@ gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
             }
         }
     }
+
+    // never use gst_caps_simplify
+    // it will remove all generated resolutions 
+    // in favor of ranges
+    // binnning/skipping will also be lost
+    // caps = gst_caps_simplify(caps);
 
     return gst_helper::make_ptr(caps);
 }
