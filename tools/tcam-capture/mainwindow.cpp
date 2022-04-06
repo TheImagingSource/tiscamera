@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     p_toolbar = new QToolBar("Main");
 
-    auto action_quit = new QAction(QIcon::fromTheme(":/images/close.png"), "Quit");
+    auto action_quit = new QAction(QIcon::fromTheme("application-exit"), "Quit");
     action_quit->setShortcut(QKeySequence("Ctrl+Shift+Q"));
 
     connect(action_quit, &QAction::triggered, this, &MainWindow::on_actionQuit_triggered);
@@ -71,26 +71,29 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(action_open, &QAction::triggered, this, &MainWindow::on_actionOpen_Device_triggered);
     p_toolbar->addAction(action_open);
 
-    p_action_property_dialog = new QAction(QIcon(":/images/dialog.png"), "Open Property Dialog");
+    p_action_property_dialog = new QAction("Properties");
+    p_action_property_dialog->setStatusTip("Open Property Dialog");
     p_action_property_dialog->setShortcut(QKeySequence("Ctrl+P"));
     connect(
         p_action_property_dialog, &QAction::triggered, this, &MainWindow::on_actionOpen_triggered);
 
     p_toolbar->addAction(p_action_property_dialog);
 
-    p_action_format_dialog = new QAction(QIcon(":/images/VideoFormat.png"), "Open Format Dialog");
+    p_action_format_dialog = new QAction("Format");
+    p_action_format_dialog->setToolTip("Open Format Dialog");
     p_action_format_dialog->setShortcut(QKeySequence("Ctrl+U"));
     connect(p_action_format_dialog, &QAction::triggered, this, &MainWindow::open_format_triggered);
 
     p_toolbar->addAction(p_action_format_dialog);
 
 
-    auto action_about = new QAction(QIcon::fromTheme("SP_BrowserStop"), "Info");
+    auto action_about = new QAction("Info");
+    action_about->setStatusTip("Open Info Dialog");
     action_about->setShortcut(QKeySequence("Ctrl+I"));
     connect(action_about, &QAction::triggered, this, &MainWindow::open_about_triggered);
     p_toolbar->addAction(action_about);
 
-    auto action_options = new QAction(QIcon(":/images/Settings.png"), "Options");
+    auto action_options = new QAction(QIcon::fromTheme("preferences-other"), "Options");
     connect(action_options, &QAction::triggered, this, &MainWindow::open_options_triggered);
     p_toolbar->addAction(action_options);
 
