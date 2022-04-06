@@ -283,38 +283,32 @@ void IntWidget::update()
 
         if (p_slider)
         {
-            p_slider->blockSignals(true);
+            const QSignalBlocker blocker(p_slider);
 
             p_slider->setRange(min, max, step);
-
             p_slider->setValue(value);
             p_slider->setDisabled(lock);
-
-            p_slider->blockSignals(false);
         }
         if (p_box)
         {
-            p_box->blockSignals(true);
-            p_box->setDisabled(false);
+            const QSignalBlocker blocker(p_box);
 
+            p_box->setDisabled(false);
             p_box->setRange(min, max);
             p_box->setSingleStep(step);
 
             p_box->setValue(value);
             p_box->setReadOnly(lock);
-
-            p_box->blockSignals(false);
         }
     }
 }
 
+
 void IntWidget::slider_changed(int new_value)
 {
-    p_box->blockSignals(true);
-    p_box->setValue(new_value);
-    p_box->blockSignals(false);
+    const QSignalBlocker blocker(p_box);
 
-    p_slider->blockSignals(true);
+    p_box->setValue(new_value);
 
     if (!is_readonly_)
     {
@@ -479,23 +473,22 @@ void DoubleWidget::update()
 
         if (p_slider)
         {
-            p_slider->blockSignals(true);
-            p_slider->setRange(min, max, step);
+            const QSignalBlocker blocker(p_slider);
 
+            p_slider->setRange(min, max, step);
             p_slider->setValue(value);
             p_slider->setDisabled(lock);
-            p_slider->blockSignals(false);
         }
         if (p_box)
         {
-            p_box->blockSignals(true);
+            const QSignalBlocker blocker(p_box);
+
             p_box->setDisabled(false);
             p_box->setRange(min, max);
             p_box->setSingleStep(step);
 
             p_box->setValue(value);
             p_box->setReadOnly(lock);
-            p_box->blockSignals(false);
         }
     }
 }
