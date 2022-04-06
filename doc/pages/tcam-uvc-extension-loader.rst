@@ -14,6 +14,18 @@ direct representation of the underlying struct that is submitted to the kernel.
 For a description of the UVC driver mapping command, please refer to the `kernel
 documentation <https://www.kernel.org/doc/html/latest/media/v4l-drivers/uvcvideo.html#uvcioc-ctrl-map-map-a-uvc-control-to-a-v4l2-control>`_.
 
+Examples
+========
+
+The examples expect a default installation.
+If any paths have been changed some things may have to adjusted.
+
+.. code-block:: sh
+
+    # 
+    # /dev/v4l/by-id contains softlinks to the actual /dev/video0
+    tcam-uvc-extension-loader -f /usr/share/theimagingsource/tiscamera/uvc-extension/usb<X>.json -d /dev/v4l/by-id/usb-The_Imaging_Source_Europe_GmbH_<camera ident>-video-index0
+
 Arguments
 =========
 
@@ -31,6 +43,37 @@ Plug & Play
 With a default installation, `tcam-uvc-extension-loader` is automatically called when a
 compatible device is attached. This is done via :ref:`UDev rules <udev>`.
     
+What extension to use?
+======================
+
+Currently the following associations are used for automatic loading.
+To see the association of a specific camera execute `lsusb` and use the the second part of the ID (199e:XXXX).
+
+.. list-table:: PID - json association
+   :header-rows: 1
+
+   * - Device PID
+     - Extension File
+   * - 82XX
+     - usb2.json
+   * - 83XX
+     - usb2.json
+   * - 84XX
+     - usb23.json
+   * - 85XX
+     - usb23.json
+   * - 86XX
+     - usb23.json
+   * - 87XX
+     - usb23.json
+   * - 90XX
+     - usb33.json
+   * - 94XX
+     - usb37.json
+   * - 98XX
+     - usb33.json
+
+
 Extension Unit
 ==============
 
@@ -42,7 +85,7 @@ C-Style comments are allowed.
 .. code-block:: text
 
     {
-        // execute `lsusb -vd vid:pid`
+        // execute `lsusb -vd <vid>:<pid>`
         // and search for `guidExtensionCode`
         // the guid from that field has to be entered here
         "guid": "0aba49de-5c0b-49d5-8f71-0be40f94a67a",
