@@ -242,7 +242,7 @@ For a quick listing of available devices, execute the following in a terminal:
              gst_structure_free(struc);
          }
 
-         g_list_free(devices);
+         g_list_free_full(devices, gst_object_unref);
          gst_object_unref(monitor);
 
 

@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
         print_device(device);
     }
 
-    g_list_free(devices);
+    g_list_free_full(devices, gst_object_unref);
 
     //
     // dynamic listing

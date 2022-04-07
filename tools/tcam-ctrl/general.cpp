@@ -64,7 +64,7 @@ bool tcam::tools::ctrl::is_valid_device_serial (const std::string& serial)
         }
     }
 
-    g_list_free(devices);
+    g_list_free_full(devices, gst_object_unref);
 
     return ret;
 }

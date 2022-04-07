@@ -61,7 +61,7 @@ static void print_devices(size_t /*t*/)
                gst_structure_get_string(struc, "type"));
     }
 
-    g_list_free(devices);
+    g_list_free_full(devices, gst_object_unref);
     gst_object_unref(monitor);
 }
 
@@ -85,7 +85,7 @@ static void print_serials_long(size_t)
     }
     printf("%s\n", out.c_str());
 
-    g_list_free(devices);
+    g_list_free_full(devices, gst_object_unref);
     gst_object_unref(monitor);
 }
 } // namespace
