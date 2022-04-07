@@ -106,6 +106,7 @@ public slots:
 
 signals:
 
+    void update_category(QString category);
     void value_changed(Property*);
     void device_lost(const QString& info);
 
@@ -143,6 +144,7 @@ public slots:
 
 signals:
 
+    void update_category(QString category);
     void value_changed(Property*);
     void device_lost(const QString& info);
 

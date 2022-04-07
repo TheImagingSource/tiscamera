@@ -281,7 +281,7 @@ void IntWidget::update()
         bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
         HANDLE_ERROR(err, return );
 
-        if (p_slider)
+        if (p_slider && !p_slider->isSliderDown())
         {
             const QSignalBlocker blocker(p_slider);
 
@@ -312,8 +312,8 @@ void IntWidget::slider_changed(int new_value)
 
     if (!is_readonly_)
     {
-        QTimer::singleShot(200, [this]() { p_slider->blockSignals(false); });
-        emit value_changed(this);
+        set_in_backend();
+        emit update_category(get_category().c_str());
     }
 }
 
@@ -387,7 +387,7 @@ void IntWidget::setup_ui()
 
     if (p_slider)
     {
-        connect(p_slider, &TcamSlider::valueChanged, this, &IntWidget::slider_changed);
+        connect(p_slider, &TcamSlider::valueChanged, this, &IntWidget::slider_changed, Qt::QueuedConnection);
         p_layout->addWidget(p_slider);
     }
     if (p_box)
@@ -471,7 +471,7 @@ void DoubleWidget::update()
         bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
         HANDLE_ERROR(err, return );
 
-        if (p_slider)
+        if (p_slider && !p_slider->isSliderDown())
         {
             const QSignalBlocker blocker(p_slider);
 
@@ -499,13 +499,11 @@ void DoubleWidget::slider_changed(double new_value)
     p_box->setValue(new_value);
     p_box->blockSignals(false);
 
-    p_slider->blockSignals(true);
-
-    QTimer::singleShot(200, [this]() { p_slider->blockSignals(false); });
-
     if (!is_readonly_)
     {
-        emit value_changed(this);
+        set_in_backend();
+        //emit value_changed(this);
+        emit update_category(get_category().c_str());
     }
 }
 
@@ -568,7 +566,7 @@ void DoubleWidget::setup_ui()
 
     if (p_slider)
     {
-        connect(p_slider, &TcamSlider::valueChanged, this, &DoubleWidget::slider_changed);
+        connect(p_slider, &TcamSlider::valueChanged, this, &DoubleWidget::slider_changed, Qt::QueuedConnection);
         p_layout->addWidget(p_slider);
     }
     if (p_box)
@@ -576,7 +574,7 @@ void DoubleWidget::setup_ui()
         connect(p_box,
                 QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 this,
-                &DoubleWidget::spinbox_changed);
+                &DoubleWidget::spinbox_changed, Qt::QueuedConnection);
         p_layout->addWidget(p_box);
     }
     this->setToolTip(generate_tooltip(TCAM_PROPERTY_BASE(p_prop)));

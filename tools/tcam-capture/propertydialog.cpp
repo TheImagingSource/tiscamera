@@ -72,6 +72,7 @@ PropertyDialog::PropertyDialog(TcamCollection& collection, QWidget* parent)
     initialize_dialog(collection);
 
     p_worker->add_properties(m_properties);
+    update();
 }
 
 PropertyDialog::~PropertyDialog()
@@ -162,8 +163,8 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
             case TCAM_PROPERTY_TYPE_FLOAT:
             {
                 auto ptr = new DoubleWidget(TCAM_PROPERTY_FLOAT(prop));
-                connect(
-                    ptr, &DoubleWidget::value_changed, p_worker, &PropertyWorker::write_property);
+                connect(ptr, &DoubleWidget::value_changed, p_worker, &PropertyWorker::write_property, Qt::QueuedConnection);
+                connect(ptr, &DoubleWidget::update_category, p_worker, &PropertyWorker::update_category, Qt::QueuedConnection);
                 connect(ptr, &DoubleWidget::device_lost, this, &PropertyDialog::notify_device_lost);
                 prop_list.push_back(ptr);
                 break;
@@ -171,7 +172,8 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
             case TCAM_PROPERTY_TYPE_INTEGER:
             {
                 auto ptr = new IntWidget(TCAM_PROPERTY_INTEGER(prop));
-                connect(ptr, &IntWidget::value_changed, p_worker, &PropertyWorker::write_property);
+                connect(ptr, &IntWidget::value_changed, p_worker, &PropertyWorker::write_property, Qt::QueuedConnection);
+                connect(ptr, &IntWidget::update_category, p_worker, &PropertyWorker::update_category, Qt::QueuedConnection);
                 connect(ptr, &IntWidget::device_lost, this, &PropertyDialog::notify_device_lost);
                 prop_list.push_back(ptr);
                 break;
