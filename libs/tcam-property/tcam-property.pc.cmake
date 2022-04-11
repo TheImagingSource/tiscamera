@@ -3,7 +3,9 @@ exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
 
-Name: Tcam
+Name: tcam-property
 Description: Camera control and image acquisition library
-Version: @TCAM_VERSION@
-Requires: @tcam_pkgconfig_dependencies@ tcam-property-1.0
+Version: @TCAM_PROPERTY_VERSION@
+Requires: @tcam_pkgconfig_dependencies@
+Libs: -L${libdir} -ltcam-property
+Cflags: -I${includedir}/

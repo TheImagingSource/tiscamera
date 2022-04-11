@@ -104,6 +104,35 @@ else()
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam-property.pc.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/tcam-property-1.0.pc")
+
+if (NOT TCAM_PROPERTY_INSTALL_PKG_CONFIG)
+
+  find_program(EXECUTABLE_DPKG_ARCH dpkg-architecture
+    DOC "dpkg-architecture program of Debian-based systems")
+
+  if (EXECUTABLE_DPKG_ARCH)
+    execute_process(COMMAND ${EXECUTABLE_DPKG_ARCH} -qDEB_HOST_MULTIARCH
+      OUTPUT_VARIABLE DEB_HOST_MULTIARCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    string(REGEX REPLACE "\n$" "" DEB_HOST_MULTIARCH "${DEB_HOST_MULTIARCH}")
+
+  endif (EXECUTABLE_DPKG_ARCH)
+
+  if (DEB_HOST_MULTIARCH)
+    set(TCAM_PROPERTY_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/${DEB_HOST_MULTIARCH}/pkgconfig"
+      CACHE PATH "pkgconfig installation path")
+  else (DEB_HOST_MULTIARCH)
+    set(TCAM_PROPERTY_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
+      CACHE PATH "pkgconfig installation path")
+  endif (DEB_HOST_MULTIARCH)
+
+endif (NOT TCAM_PROPERTY_INSTALL_PKG_CONFIG)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tcam-property-1.0.pc" DESTINATION "${TCAM_PROPERTY_INSTALL_PKGCONFIG}")
+
 if( ${tcamproperty-standalone} )
 
     include(CPackComponent)
