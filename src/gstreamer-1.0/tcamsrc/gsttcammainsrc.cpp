@@ -139,7 +139,6 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* self)
              * resolution strictly bigger then the first peer caps */
             if (gst_caps_get_size(icaps) > 1)
             {
-                GstStructure* s = gst_caps_get_structure(tmp, 0);
                 int best = 0;
                 int width = 0, height = 0;
 
@@ -443,6 +442,13 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
         case GST_STATE_CHANGE_READY_TO_PAUSED:
         {
             self->device->n_buffers_delivered_ = 0;
+            ret = GST_STATE_CHANGE_NO_PREROLL;
+            break;
+        }
+        case GST_STATE_CHANGE_PAUSED_TO_PLAYING:
+        {
+            self->device->is_streaming_ = true;
+            self->device->stream_cv_.notify_all();
             break;
         }
         default:
@@ -462,11 +468,26 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
 
     switch (change)
     {
+        case GST_STATE_CHANGE_PLAYING_TO_PAUSED:
+        {
+            self->device->is_streaming_ = false;
+            self->device->stream_cv_.notify_all();
+            ret = GST_STATE_CHANGE_NO_PREROLL;
+            break;
+        }
+        case GST_STATE_CHANGE_PAUSED_TO_READY:
+        {
+            bool stop_ret = self->device->device_->stop_stream();
+            if (!stop_ret)
+            {
+                GST_ERROR("Could not stop stream.");
+            }
+            break;
+        }
         case GST_STATE_CHANGE_READY_TO_NULL:
         {
             if (self->device->is_device_open())
             {
-                // do not close camera, as a restart with the same device might be wanted
                 gst_tcam_mainsrc_close_camera(self);
             }
 
@@ -518,6 +539,8 @@ static void gst_tcam_mainsrc_sh_callback(std::shared_ptr<tcam::ImageBuffer> buff
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(data);
     if (!self->device->is_streaming_)
     {
+        // requeue the buffer so that the backend does not run out
+        self->device->sink->requeue_buffer(buffer);
         return;
     }
 
@@ -1139,18 +1162,6 @@ static void gst_tcam_mainsrc_get_property(GObject* object,
 }
 
 
-static gboolean gst_tcam_mainsrc_unlock(GstBaseSrc* src)
-{
-    GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
-
-    std::lock_guard<std::mutex> lck(self->device->stream_mtx_);
-    self->device->is_streaming_ = false;
-    self->device->stream_cv_.notify_all();
-
-    return TRUE;
-}
-
-
 static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
 {
     GObjectClass* gobject_class = G_OBJECT_CLASS(klass);
@@ -1262,7 +1273,6 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
     gstbasesrc_class->get_caps = gst_tcam_mainsrc_get_caps;
     gstbasesrc_class->set_caps = gst_tcam_mainsrc_set_caps;
     gstbasesrc_class->fixate = gst_tcam_mainsrc_fixate_caps;
-    gstbasesrc_class->unlock = gst_tcam_mainsrc_unlock;
     gstbasesrc_class->negotiate = gst_tcam_mainsrc_negotiate;
     gstbasesrc_class->query = gst_tcam_mainsrc_query;
 
