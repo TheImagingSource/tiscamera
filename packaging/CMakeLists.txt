@@ -67,10 +67,37 @@ set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 
 if (BUILD_ARAVIS)
 
-  set(ARAVIS_PRERM "systemctl stop gige-daemon.service
-        systemctl disable gige-daemon.service")
-  set(ARAVIS_POSTINST "systemctl enable gige-daemon.service
-        systemctl start gige-daemon.service")
+  set(ARAVIS_PRERM "
+# Based on output by dh_installsystemd/13.5.2
+
+if [ -z \"${DPKG_ROOT\:-}\" ] && [ \"$1\" = remove ] && [ -d /run/systemd/system ] ; then
+	deb-systemd-invoke stop 'gige-daemon.service' > /dev/null || true
+fi
+")
+  set(ARAVIS_POSTINST "
+# End automatically added section
+# Based on output by dh_installsystemd/13.5.2
+
+if [ \"$1\" = \"configure\" ] || [ \"$1\" = \"abort-upgrade\" ] || [ \"$1\" = \"abort-deconfigure\" ] || [ \"$1\" = \"abort-remove\" ] ; then
+
+	# was-enabled defaults to true, so new installations run enable.
+	if deb-systemd-helper --quiet was-enabled 'gige-daemon.service'; then
+		# Enables the unit on first installation, creates new
+		# symlinks on upgrades if the unit file has changed.
+		deb-systemd-helper enable 'gige-daemon.service' >/dev/null || true
+	else
+		# Update the statefile to add new symlinks (if any), which need to be
+		# cleaned up on purge. Also remove old symlinks.
+		deb-systemd-helper update-state 'gige-daemon.service' >/dev/null || true
+	fi
+fi
+if [ \"$1\" = \"configure\" ] || [ \"$1\" = \"abort-upgrade\" ] || [ \"$1\" = \"abort-deconfigure\" ] || [ \"$1\" = \"abort-remove\" ] ; then
+	if [ -z \"${DPKG_ROOT\:-}\" ] && [ -d /run/systemd/system ]; then
+		systemctl --system daemon-reload >/dev/null || true
+		deb-systemd-invoke restart 'gige-daemon.service' >/dev/null || true
+	fi
+fi
+")
 
   add_deps("aravis")
 
