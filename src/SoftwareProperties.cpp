@@ -794,7 +794,9 @@ void tcam::property::SoftwareProperties::update_to_new_format(const tcam::VideoF
     m_frame_counter = 0;
     m_format = new_format;
 
-    if (get_int(sp::ExposureAutoUpperLimitAuto))
+    auto auto_upper = get_int(sp::ExposureAutoUpperLimitAuto);
+
+    if (auto_upper && auto_upper.value() == 1)
     {
         m_exposure_auto_upper_limit = 1000000 / m_format.get_framerate();
     }
