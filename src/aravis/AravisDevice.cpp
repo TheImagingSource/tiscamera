@@ -459,11 +459,18 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         return false;
     }
 
-    // #TODO: auto center
     if (has_offset_)
     {
-        int offset_x = 0;
-        int offset_y = 0;
+        // preserve current offset
+        int offset_x;
+        int offset_y;
+        arv_camera_get_region(arv_camera_, &offset_x, &offset_y, nullptr, nullptr, &err);
+        if (err)
+        {
+            SPDLOG_ERROR("Unable to verify offsets: {}", err->message);
+            g_clear_error(&err);
+            return false;
+        }
 
         arv_camera_set_region(this->arv_camera_,
                               offset_x,
