@@ -366,7 +366,9 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
             m_brightness_roi_mode = AutoFunctionsROIPreset_Modes::custom;
 
             // reduce roi width to always remain within image boundaries
-            if (m_brightness_left + m_brightness_width > (int)m_format.get_size().width)
+            // 0 check as proerties may be set before a format is known
+            if (m_format.get_size().width != 0
+                && m_brightness_left + m_brightness_width > (int)m_format.get_size().width)
             {
                 m_brightness_width = m_format.get_size().width - m_brightness_left;
             }
@@ -378,7 +380,9 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
             m_brightness_roi_mode = AutoFunctionsROIPreset_Modes::custom;
 
             // reduce roi height to always remain within image boundaries
-            if (m_brightness_top + m_brightness_height > (int)m_format.get_size().height)
+            // 0 check as proerties may be set before a format is known
+            if (m_format.get_size().height != 0
+                && m_brightness_top + m_brightness_height > (int)m_format.get_size().height)
             {
                 m_brightness_height = m_format.get_size().height - m_brightness_top;
             }
@@ -430,7 +434,9 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
             m_focus_top = new_val;
 
             // reduce roi height to always remain within image boundaries
-            if (m_focus_top + m_focus_height > (int)m_format.get_size().height)
+            // 0 check as proerties may be set before a format is known
+            if (m_format.get_size().height != 0
+                && m_focus_top + m_focus_height > (int)m_format.get_size().height)
             {
                 m_focus_height = m_format.get_size().height - m_focus_top;
             }
@@ -441,7 +447,9 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
             m_focus_left = new_val;
 
             // reduce roi width to always remain within image boundaries
-            if (m_focus_left + m_focus_width > (int)m_format.get_size().width)
+            // 0 check as proerties may be set before a format is known
+            if (m_format.get_size().width != 0
+                && m_focus_left + m_focus_width > (int)m_format.get_size().width)
             {
                 m_focus_width = m_format.get_size().width - m_focus_left;
             }
