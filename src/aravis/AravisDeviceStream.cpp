@@ -397,6 +397,16 @@ void AravisDevice::stop_stream()
     }
     GError* err = nullptr;
 
+    if (stream_)
+    {
+        // emit_signals has to be disabled to prevent
+        // to prevent a warning
+        // disable it before stop_acquisition
+        // as under _some_ circumstances it may end
+        // up locking up in the mutex
+        arv_stream_set_emit_signals(this->stream_, FALSE);
+    }
+
     arv_camera_stop_acquisition(arv_camera_, &err);
 
     if (err)
@@ -408,7 +418,6 @@ void AravisDevice::stop_stream()
 
     if (this->stream_ != nullptr)
     {
-        arv_stream_set_emit_signals(this->stream_, FALSE);
         g_object_unref(this->stream_);
         this->stream_ = NULL;
     }
