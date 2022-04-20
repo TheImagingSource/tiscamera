@@ -62,12 +62,12 @@ Arguments
 .. option:: -c, --caps <SERIAL>
 
    Print GStreamer 1.0 caps the device offers.
-   
+
    *Requires the serial number of the camera to be queried.*
-   
+
    These caps are offered directly by the device.
    Implicitly converted caps offered by the tcambin through conversion are not included.
-   
+
 .. option:: -p, --properties <SERIAL>
 
    Print available properties the device offers.
@@ -82,7 +82,7 @@ Arguments
    For a default GstStructure string description use `--no-console`.
 
    *Requires the serial number of the camera to be queried.*
-   
+
    .. option:: --no-console
 
       Optional flag for `--save`.
@@ -97,7 +97,7 @@ Arguments
    The string must be correctly escaped to be loadable.
 
    *Requires the serial number of the camera to be queried.*
-      
+
 .. option:: --save-json <SERIAL>
 
    Prints a JSON description of the device properties and their values.
@@ -119,3 +119,57 @@ Arguments
       # load string
       tcam-ctrl --load-json <SERIAL> '{\"Exposure\":3000,"Exposure\ Auto\":false}'
 
+.. option:: --transform
+
+   List transformations a GStreamer element offers.
+   Without arguments tcamconvert will be queried.
+   Without `--in` or `--out` both will be listed.
+
+   .. option:: -e,--element <element>
+
+      GstTransformElement that shall be queried.
+
+      Default is `tcamconvert`.
+
+   .. option:: --in <CAPS>
+
+      List GstCaps that `<element>` can transform `<CAPS>` into.
+
+      .. code-block:: sh
+
+         tcam-ctrl --transform --in video/x-bayer,format=rggb
+
+      output:
+
+      .. code-block:: text
+
+         Probing tcamconvert:
+         video/x-bayer,format=rggb;
+         video/x-raw,format=BGRx
+
+   .. option:: --out <CAPS>
+
+      List GstCaps that `<element>` can transform into `<CAPS>`.
+
+      .. code-block:: sh
+
+         tcam-ctrl --transform --out video/x-raw,format=BGRx
+
+      output:
+
+      .. code-block:: text
+
+         Probing tcamconvert:
+         video/x-raw,format=GRAY8;
+
+         # some output omitted
+
+         video/x-bayer,format=grbg;
+         video/x-bayer,format=grbg10;
+         video/x-bayer,format=grbg10sp;
+         video/x-bayer,format=grbg10m;
+         video/x-bayer,format=grbg12;
+         video/x-bayer,format=grbg12p;
+         video/x-bayer,format=grbg12sp;
+         video/x-bayer,format=grbg12m;
+         video/x-bayer,format=grbg16
