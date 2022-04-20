@@ -175,6 +175,12 @@
             "modules": ["aravis"]
         },
         {
+            "name": "ninja-build",
+            "version": ">= 1.8.2",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
+        {
             "name": "libqt5widgets5",
             "version": ">= 5.9.5",
             "phase": "runtime",

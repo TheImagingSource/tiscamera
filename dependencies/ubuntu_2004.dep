@@ -162,7 +162,12 @@
             "phase": "runtime",
             "modules": ["aravis"]
         },
-
+        {
+            "name": "ninja-build",
+            "version": ">= 1.10.0",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
         {
             "name": "libqt5widgets5",
             "version": ">= 5.9.5",
