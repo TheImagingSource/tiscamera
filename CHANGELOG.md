@@ -34,6 +34,7 @@ GStreamer:
   See documentation for more details.
 - tcambin/tcamsrc signals `device-open`/`device-close`
 - support for tcamdutils-cuda
+- example on how to retrieve GstMeta data in python
 
 Tools:
 - `tcam-ctrl --packages` - list all installed 'The Imaging Source' packages and their version
@@ -103,7 +104,6 @@ Tools:
 
 ### Known Issues
 
-- Auto Function ROI emulation is missing
 - In camera Auto Functions ROI may not correctly lock properties
 - In camera Auto Functions ROI Top/Left/Width/Height may not correctly update when using preset
 - AFU050: image/jpeg,width=1280,height=960 may cause segfault when used.
