@@ -43,6 +43,30 @@ bool VideoFormatDescription::operator!=(const VideoFormatDescription& other) con
     return !(*this == other);
 }
 
+
+bool VideoFormatDescription::is_compatible(const tcam::VideoFormat& format) const
+{
+    if (format.get_fourcc() == get_fourcc())
+    {
+        auto fps = get_framerates(format);
+        if (fps.empty())
+        {
+            return false;
+        }
+        if (std::any_of(fps.begin(), fps.end(), [&format](const double& d)
+        {
+            return d == format.get_framerate();
+        }))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    return false;
+}
+
+
 uint32_t VideoFormatDescription::get_fourcc() const
 {
     return format.fourcc;

@@ -275,6 +275,49 @@ static GstCaps* gst_tcam_mainsrc_get_caps(GstBaseSrc* src, GstCaps* filter __att
 
 static void gst_tcam_mainsrc_sh_callback(std::shared_ptr<tcam::ImageBuffer> buffer, void* data);
 
+
+static gboolean caps_to_format(GstCaps& c, tcam::tcam_video_format& format)
+{
+
+    GstStructure* structure = gst_caps_get_structure(&c, 0);
+
+    int height = 0;
+    int width = 0;
+    gst_structure_get_int(structure, "width", &width);
+    gst_structure_get_int(structure, "height", &height);
+    const GValue* frame_rate = gst_structure_get_value(structure, "framerate");
+    const char* format_string = gst_structure_get_string(structure, "format");
+
+    uint32_t fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(
+        gst_structure_get_name(structure), format_string);
+
+    double framerate;
+    if (frame_rate != nullptr)
+    {
+        auto fps_numerator = gst_value_get_fraction_numerator(frame_rate);
+        auto fps_denominator = gst_value_get_fraction_denominator(frame_rate);
+        framerate = (double)fps_numerator / (double)fps_denominator;
+    }
+    else
+    {
+    //     self->fps_numerator = 1;
+    //     self->fps_denominator = 1;
+        framerate = 1.0;
+    }
+
+    //tcam::tcam_video_format format = {};
+    format.fourcc = fourcc;
+    format.width = width;
+    format.height = height;
+    format.framerate = framerate;
+
+    format.scaling = tcam::gst::caps_get_scaling(&c);
+
+    return true;
+
+}
+
+
 static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
@@ -285,6 +328,10 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
 
     self->device->stop_and_clear();
     self->device->sink = nullptr;
+
+    //
+    // TODO: find way to deal with this->fps_denominator/this->fps_numerator to remerge with caps_to_format
+    //
 
     GstStructure* structure = gst_caps_get_structure(caps, 0);
 
@@ -737,71 +784,35 @@ static GstCaps* gst_tcam_mainsrc_fixate_caps(GstBaseSrc* bsrc, GstCaps* caps)
 }
 
 
-#if 0 // disable GST_QUERY_CAPS handling
-
 // Returns true, when the query could be answered, otherwise returns false
 static bool fetch_framerate_via_query_caps_worker(device_state& device,
                                                   GstQuery* query,
                                                   GstCaps* query_caps)
 {
-    assert(gst_caps_is_fixed(query_caps));
-
     GstStructure* structure = gst_caps_get_structure(query_caps, 0);
-
-    if (!gst_structure_has_field(structure, "framerate"))
-    {
-        return false;
-    }
 
     int height = 0;
     int width = 0;
 
     if (!gst_structure_get_int(structure, "width", &width) || width <= 0)
     {
-        SPDLOG_WARN("Failed to fetch 'width' from GstCaps structure.");
+        GST_WARNING("Failed to fetch 'width' from GstCaps structure.");
         return false;
     }
     if (!gst_structure_get_int(structure, "height", &height) || height <= 0)
     {
-        SPDLOG_WARN("Failed to fetch 'width' from GstCaps structure.");
+        GST_WARNING("Failed to fetch 'width' from GstCaps structure.");
         return false;
     }
 
     const char* format_string = gst_structure_get_string(structure, "format");
     if (format_string == nullptr)
     {
-        SPDLOG_WARN("Failed to fetch 'format' from GstCaps structure.");
+        GST_WARNING("Failed to fetch 'format' from GstCaps structure.");
         return false;
     }
 
-    tcam::image_scaling scale_info = {};
-    if (auto bin_str = gst_structure_get_string(structure, "binning"); bin_str)
-    {
-        int h = 0, v = 0;
-        if (sscanf(bin_str, "%dx%d", &h, &v) != 2)
-        {
-            SPDLOG_WARN("Failed to parse GstStructure binning field contents '{}'", bin_str);
-        }
-        else
-        {
-            scale_info.binning_h = h;
-            scale_info.binning_v = v;
-        }
-    }
-    if (auto bin_str = gst_structure_get_string(structure, "skipping"); bin_str)
-    {
-        int h = 0, v = 0;
-        if (sscanf(bin_str, "%dx%d", &h, &v) != 2)
-        {
-            SPDLOG_WARN("Failed to parse GstStructure skipping field contents '{}'", bin_str);
-        }
-        else
-        {
-            scale_info.skipping_h = h;
-            scale_info.skipping_v = v;
-        }
-    }
-
+    tcam::image_scaling scale_info = tcam::gst::caps_get_scaling(query_caps);
 
     uint32_t fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(
         gst_structure_get_name(structure), format_string);
@@ -812,8 +823,8 @@ static bool fetch_framerate_via_query_caps_worker(device_state& device,
         tcam ::VideoFormat { fourcc, { (uint32_t)width, (uint32_t)height }, scale_info });
     if (fps_res.has_error())
     {
-        SPDLOG_ERROR(
-            "Failed to get framerates for '{} ({}x{})' from device.", format_string, width, height);
+        GST_ERROR(
+            "Failed to get framerates for '%s (%dx%d)' from device.", format_string, width, height);
         return false;
     }
 
@@ -838,8 +849,6 @@ static bool fetch_framerate_via_query_caps_worker(device_state& device,
     gst_query_set_caps_result(query, result_caps);
     return true;
 }
-
-#endif
 
 
 static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
@@ -888,9 +897,37 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
             res = TRUE;
             break;
         }
+        case GST_QUERY_ACCEPT_CAPS:
+        {
+            GstCaps* c = nullptr;
+            gst_query_parse_accept_caps(query, &c);
+
+            tcam::tcam_video_format format;
+
+            if (caps_to_format(*c, format))
+            {
+                tcam::VideoFormat fmt(format);
+                auto formats = self->device->device_->get_available_video_formats();
+
+                for (const auto& f : formats)
+                {
+                    if (f.is_compatible(fmt))
+                    {
+                        gst_query_set_accept_caps_result(query, TRUE);
+                        return TRUE;
+                    }
+                }
+                gst_query_set_accept_caps_result(query, FALSE);
+                return TRUE;
+            }
+            else
+            {
+                gst_query_set_accept_caps_result(query, FALSE);
+                return TRUE;
+            }
+        }
         case GST_QUERY_CAPS:
         {
-#if 0 // disable GST_QUERY_CAPS handling
             GstCaps* query_caps = nullptr;
             gst_query_parse_caps(query, &query_caps);
 
@@ -911,17 +948,41 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
                 return FALSE;
             }
 
-            SPDLOG_ERROR(" caps = {}", gst_helper::to_string(*query_caps));
+            GST_ERROR("caps = %s", gst_helper::to_string(*query_caps).c_str());
 
-            if (gst_caps_is_fixed(query_caps))
+            // check what is missing and complete accordingly
+
+            auto has_field = [](const GstCaps& caps, const std::string& name) -> bool
             {
-                if (fetch_framerate_via_query_caps_worker(*self->device, query, query_caps))
-                {
-                    return TRUE;
-                }
-            }
-#endif
+                GstStructure* struc = gst_caps_get_structure(&caps, 0);
 
+                return gst_structure_has_field(struc, name.c_str());
+            };
+
+            gst_helper::gst_ptr<GstCaps> tmp = nullptr;
+
+            // we have a generic query
+            // let the base src handle this
+            // basesrc basically calls get_caps(filter=query_caps)
+            if (!has_field(*query_caps, "format")
+                || !has_field(*query_caps, "width")
+                || !has_field(*query_caps, "height"))
+            {
+                return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->query(bsrc, query);
+            }
+            else
+            {
+                tmp =  gst_helper::make_consume_ptr(gst_caps_copy(query_caps));
+            }
+
+            if (!has_field(*query_caps, "framerate"))
+            {
+                return fetch_framerate_via_query_caps_worker(*self->device, query, tmp.get());
+            }
+
+            GST_DEBUG("Unsure about caps query. Falling back to default handling.");
+
+            // fallthrough, use basic behavior
             return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->query(bsrc, query);
         }
         default:

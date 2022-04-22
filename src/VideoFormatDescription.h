@@ -89,6 +89,8 @@ public:
     bool operator==(const VideoFormatDescription& other) const;
     bool operator!=(const VideoFormatDescription& other) const;
 
+    bool is_compatible(const tcam::VideoFormat& format) const;
+
     /**
      * Returns a struct representation of the format description
      * @return tcam_video_format_description
