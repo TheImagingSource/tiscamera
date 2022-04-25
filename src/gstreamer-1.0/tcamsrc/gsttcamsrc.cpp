@@ -806,6 +806,36 @@ static void gst_tcam_src_get_property(GObject* object,
     }
 }
 
+
+static gboolean gst_tcam_src_query(GstElement* ele, GstQuery* query)
+{
+    GstTcamSrc* self = GST_TCAM_SRC(ele);
+    gboolean ret = FALSE;
+
+    switch (GST_QUERY_TYPE(query))
+    {
+        case GST_QUERY_CAPS:
+        case GST_QUERY_ACCEPT_CAPS:
+        {
+            if (self->state->active_source)
+            {
+                return gst_element_query(self->state->active_source.get(), query);
+            }
+            else
+            {
+                return FALSE;
+            }
+        }
+        default:
+        {
+            return GST_ELEMENT_CLASS(gst_tcam_src_parent_class)->query(ele, query);
+        }
+    }
+
+    return ret;
+}
+
+
 static void gst_tcam_src_init(GstTcamSrc* self)
 {
     self->state = new tcamsrc::tcamsrc_state;
@@ -981,4 +1011,5 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
                                        gst_static_pad_template_get(&tcam_src_template));
 
     element_class->change_state = gst_tcam_src_change_state;
+    element_class->query = gst_tcam_src_query;
 }
