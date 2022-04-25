@@ -41,8 +41,7 @@ struct _GstTcamMainSrc
 
     device_state* device;
 
-    int fps_numerator;
-    int fps_denominator;
+    gdouble fps;
 };
 
 

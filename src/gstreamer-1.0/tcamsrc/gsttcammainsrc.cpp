@@ -305,16 +305,13 @@ static gboolean caps_to_format(GstCaps& c, tcam::tcam_video_format& format)
     {
         auto fps_numerator = gst_value_get_fraction_numerator(frame_rate);
         auto fps_denominator = gst_value_get_fraction_denominator(frame_rate);
-        framerate = (double)fps_numerator / (double)fps_denominator;
+        gst_util_fraction_to_double(fps_numerator, fps_denominator, &framerate);
     }
     else
     {
-    //     self->fps_numerator = 1;
-    //     self->fps_denominator = 1;
         framerate = 1.0;
     }
 
-    //tcam::tcam_video_format format = {};
     format.fourcc = fourcc;
     format.width = width;
     format.height = height;
@@ -338,43 +335,15 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
     self->device->stop_and_clear();
     self->device->sink = nullptr;
 
-    //
-    // TODO: find way to deal with this->fps_denominator/this->fps_numerator to remerge with caps_to_format
-    //
-
-    GstStructure* structure = gst_caps_get_structure(caps, 0);
-
-    int height = 0;
-    int width = 0;
-    gst_structure_get_int(structure, "width", &width);
-    gst_structure_get_int(structure, "height", &height);
-    const GValue* frame_rate = gst_structure_get_value(structure, "framerate");
-    const char* format_string = gst_structure_get_string(structure, "format");
-
-    uint32_t fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(
-        gst_structure_get_name(structure), format_string);
-
-    double framerate;
-    if (frame_rate != nullptr)
-    {
-        self->fps_numerator = gst_value_get_fraction_numerator(frame_rate);
-        self->fps_denominator = gst_value_get_fraction_denominator(frame_rate);
-        framerate = (double)self->fps_numerator / (double)self->fps_denominator;
-    }
-    else
-    {
-        self->fps_numerator = 1;
-        self->fps_denominator = 1;
-        framerate = 1.0;
-    }
-
     tcam::tcam_video_format format = {};
-    format.fourcc = fourcc;
-    format.width = width;
-    format.height = height;
-    format.framerate = framerate;
 
-    format.scaling = tcam::gst::caps_get_scaling(caps);
+    if (!caps_to_format(*caps, format))
+    {
+        GST_ERROR("Unable to interpret caps. Aborting");
+        return false;
+    }
+
+    self->fps = format.framerate;
 
     if (!self->device->device_->set_video_format(tcam::VideoFormat(format)))
     {
@@ -880,15 +849,14 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
             }
 
             /* we must have a framerate */
-            if (self->fps_numerator <= 0 || self->fps_denominator <= 0)
+            if (self->fps == 0.0)
             {
                 GST_WARNING_OBJECT(self, "Can't give latency since framerate isn't fixated !");
                 goto done;
             }
 
             /* min latency is the time to capture one frame/field */
-            min_latency =
-                gst_util_uint64_scale_int(GST_SECOND, self->fps_denominator, self->fps_numerator);
+            min_latency = gst_util_gdouble_to_guint64(self->fps);
 
             /* max latency is set to NONE because cameras may enter trigger mode
                and not deliver images for an unspecified amount of time */
@@ -964,8 +932,6 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
                 return FALSE;
             }
 
-            GST_ERROR("caps = %s", gst_helper::to_string(*query_caps).c_str());
-
             // check what is missing and complete accordingly
 
             auto has_field = [](const GstCaps& caps, const std::string& name) -> bool
@@ -1020,11 +986,8 @@ static void gst_tcam_mainsrc_init(GstTcamMainSrc* self)
 
     self->device = new device_state(self);
 
-    // default to 1/1 fps as fallback
-    // these values are only used for GstQuery
-    // they should always be set in set_caps
-    self->fps_denominator = 1;
-    self->fps_denominator = 1;
+    // this has to be defined in set_caps
+    self->fps = 0.0;
 }
 
 
