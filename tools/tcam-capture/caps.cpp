@@ -37,6 +37,12 @@ struct image_size
         }
         return false;
     }
+
+    bool operator==(const image_size& other) const
+    {
+        return (height == other.height
+                && width == other.width);
+    }
 };
 
 std::vector<image_size> get_standard_resolutions(const image_size& min,
@@ -603,6 +609,19 @@ std::vector<struct caps_format> Caps::generate_from_caps_list()
 
 
         auto resolutions = get_standard_resolutions(min, max, step);
+
+        // ensure both min and max are in the listing
+        if (!std::any_of(resolutions.begin(), resolutions.end(),
+                         [&min](const image_size& res) {return res == min;}))
+        {
+            resolutions.insert(resolutions.begin(), min);
+        }
+
+        if (!std::any_of(resolutions.begin(), resolutions.end(),
+                         [&max](const image_size& res) { return res == max; }))
+        {
+            resolutions.push_back(max);
+        }
 
         const GValue* framerate = gst_structure_get_value(structure, "framerate");
 
