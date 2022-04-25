@@ -288,8 +288,17 @@ static gboolean caps_to_format(GstCaps& c, tcam::tcam_video_format& format)
     const GValue* frame_rate = gst_structure_get_value(structure, "framerate");
     const char* format_string = gst_structure_get_string(structure, "format");
 
-    uint32_t fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(
-        gst_structure_get_name(structure), format_string);
+    uint32_t fourcc;
+    if (format_string)
+    {
+        fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure),
+                                                                 format_string);
+    }
+    else
+    {
+        fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure),
+                                                                 "");
+    }
 
     double framerate;
     if (frame_rate != nullptr)
@@ -899,6 +908,13 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
         }
         case GST_QUERY_ACCEPT_CAPS:
         {
+
+            if (!self->device->is_device_open())
+            {
+                GST_ERROR("Can't query accept caps since device isn't open !");
+                goto done;
+            }
+
             GstCaps* c = nullptr;
             gst_query_parse_accept_caps(query, &c);
 
