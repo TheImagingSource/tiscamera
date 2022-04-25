@@ -232,6 +232,122 @@ This additional information are not part of the GstStructure that contains all c
               if features.contains("memory:NVMM"):
                   # do something with this information
 
+********
+Querying
+********
+
+It is possible to query a GstElement for specific information. For this, `GstQuery <https://gstreamer.freedesktop.org/documentation/gstreamer/gstquery.html>`_ is used.
+
+Caps Query
+----------
+
+The Caps query allows the user to query the boundaries if wanted caps.
+
+A common usage would be to verify the accepted framerate range for a specific resolution.
+
+.. tabs::
+
+   .. group-tab:: c
+                  
+      .. code-block:: c
+
+         GstCaps* filter = gst_caps_from_string("video/x-bayer,format=rggb,width=1920,height=1080");
+         GstQuery* query = gst_query_new_caps (filter);
+
+         gboolean ret = gst_element_query(tcamsrc, query);
+         if (ret)
+         {
+             GstCaps* result_caps = NULL;
+             gst_query_parse_caps_result(query, &result_caps);
+
+             const char* str = gst_caps_to_string(result_caps);
+             // result_caps will contain the allowed framerates
+             // video/x-bayer,format=rggb,width=1920,height=1080,framerate={75/1,30/1}
+             printf("Caps are: %s\n", str);
+             g_free(str);
+             // result caps are still owned by query
+             
+         }
+         else
+         {
+             // query could not be performed
+         }
+
+         gst_query_unref(query);
+
+   .. group-tab:: python
+         
+      .. code-block:: python
+
+         filter = Gst.Caps.from_string("video/x-bayer,format=rggb,width=1920,height=1080")
+         query = Gst.Query.new_caps(filter)
+
+         if tcamsrc.query(query):
+
+             result_caps = query.parse_caps_result()
+             # result_caps will contain the allowed framerates
+             # video/x-bayer,format=rggb,width=1920,height=1080,framerate={75/1,30/1}
+             print("Caps are: {}".format(result_caps.to_string()))
+             
+         else:
+
+             # unable to perform query
+         
+         
+
+Accept Caps Query
+-----------------
+
+The Accept Caps query allows the verification of fixed caps.
+This results in a simple yes/no mechanism, showing if the specified caps are valid.
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. code-block:: c
+
+         GstQuery* query = gst_query_new_accept_caps (GstCaps * caps);
+
+         gboolean ret = gst_element_query(tcamsrc, query);
+         if (ret)
+         {
+             gboolean result;
+             gst_query_parse_accept_caps_result(query, &result);
+
+             if (result)
+             {
+                  // caps are accepted
+             }
+             else
+             {
+                 // caps are not accepted
+             }
+         }
+         else
+         {
+             // query could not be performed
+         }
+         gst_query_unref(query);
+
+   .. group-tab:: python
+                               
+      .. code-block:: python
+
+         c = Gst.Caps.from_string("video/x-bayer,format=rggb,width=2448,height=2048,framerate=70/1")
+
+         query = Gst.Query.new_accept_caps(c)
+         if tcamsrc.query(query):
+         
+             if (query.parse_accept_caps_result()):
+                 print("Caps are accepted")
+             else:
+                 print("Caps are accepted")
+                 
+         else:
+             print("Query could not be performed")
+
+   
 ******************************
 Negotiations & Transformations
 ******************************
