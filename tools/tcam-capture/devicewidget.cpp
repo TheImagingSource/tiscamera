@@ -22,7 +22,7 @@ DeviceWidget::DeviceWidget(const Device& dev, QListWidget* parent)
     setIcon(QIcon(QString(icon_path.c_str())));
     setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     setText((_dev.model() + "\n" + _dev.serial() + "\n" + _dev.type()).c_str());
-    setSizeHint({160,120});
+    setSizeHint({160,140});
 }
 
 bool DeviceWidget::operator==(const Device& dev) const
