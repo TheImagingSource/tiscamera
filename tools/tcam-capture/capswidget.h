@@ -67,7 +67,7 @@ public:
     explicit CapsWidget(const Caps& caps, QWidget* parent = nullptr);
 
     GstCaps* get_caps() const;
-    void set_caps(GstCaps*);
+    void set_caps(GstCaps*, GstElement& element);
 
 public slots:
     void combo_fps_changed(const QString& new_value);

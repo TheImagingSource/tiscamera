@@ -119,50 +119,86 @@ std::vector<double> create_steps_for_range(double min, double max)
     return vec;
 }
 
+std::vector<double> gvalue_to_fps_vector(const GValue* framerate)
+{
+    std::vector<double> framerates;
 
-std::vector<double> index_framerates(const GValue* framerate)
+    for (unsigned int x = 0; x < gst_value_list_get_size(framerate); ++x)
+    {
+        const GValue* val = gst_value_list_get_value(framerate, x);
+
+        if (G_VALUE_TYPE(val) == GST_TYPE_FRACTION)
+        {
+            int num = gst_value_get_fraction_numerator(val);
+            int den = gst_value_get_fraction_denominator(val);
+
+            framerates.push_back(num / den);
+        }
+        else
+        {
+            qWarning("Handling of framerate handling not implemented for non fraction types.\n");
+            break;
+        }
+    }
+    return framerates;
+}
+
+
+std::vector<double> index_framerates(GstElement& element,
+                                     const std::string& fmt,
+                                     struct caps_resolution& res,
+                                     const GValue* framerate)
 {
     std::vector<double> framerates;
 
     if (G_VALUE_TYPE(framerate) == GST_TYPE_LIST)
     {
-        for (unsigned int x = 0; x < gst_value_list_get_size(framerate); ++x)
-        {
-            const GValue* val = gst_value_list_get_value(framerate, x);
-
-            if (G_VALUE_TYPE(val) == GST_TYPE_FRACTION)
-            {
-                int num = gst_value_get_fraction_numerator(val);
-                int den = gst_value_get_fraction_denominator(val);
-
-                framerates.push_back(num / den);
-            }
-            else
-            {
-                qWarning(
-                    "Handling of framerate handling not implemented for non fraction types.\n");
-                break;
-            }
-        }
+        framerates = gvalue_to_fps_vector(framerate);
     }
     else if (G_VALUE_TYPE(framerate) == GST_TYPE_FRACTION_RANGE)
     {
-        const GValue* fps_min = gst_value_get_fraction_range_min(framerate);
-        const GValue* fps_max = gst_value_get_fraction_range_max(framerate);
+        std::string c = fmt;
+        c += ",width=" + std::to_string(res.width);
+        c += ",height=" + std::to_string(res.height);
+        GstCaps* fps_caps = gst_caps_from_string(c.c_str());
+        GstQuery* fps_query = gst_query_new_caps(fps_caps);
+        gst_caps_unref(fps_caps);
+    
+        if (gst_element_query(&element, fps_query))
+        {
+            GstCaps* caps = nullptr;
+            gst_query_parse_caps_result(fps_query, &caps);
 
-        int num = gst_value_get_fraction_numerator(fps_min);
-        int den = gst_value_get_fraction_denominator(fps_min);
+            GstStructure* struc = gst_caps_get_structure(caps, 0);
 
-        double fps_min_value;
-        gst_util_fraction_to_double(num, den, &fps_min_value);
+            const GValue* fps = gst_structure_get_value(struc, "framerate");
 
-        num = gst_value_get_fraction_numerator(fps_max);
-        den = gst_value_get_fraction_denominator(fps_max);
+            if (G_VALUE_TYPE(fps) == GST_TYPE_FRACTION_RANGE)
+            {
+                const GValue* fps_min = gst_value_get_fraction_range_min(fps);
+                const GValue* fps_max = gst_value_get_fraction_range_max(fps);
 
-        double fps_max_value;
-        gst_util_fraction_to_double(num, den, &fps_max_value);
+                int num = gst_value_get_fraction_numerator(fps_min);
+                int den = gst_value_get_fraction_denominator(fps_min);
 
-        framerates = create_steps_for_range(fps_min_value, fps_max_value);
+                double fps_min_value;
+                gst_util_fraction_to_double(num, den, &fps_min_value);
+
+                num = gst_value_get_fraction_numerator(fps_max);
+                den = gst_value_get_fraction_denominator(fps_max);
+
+                double fps_max_value;
+                gst_util_fraction_to_double(num, den, &fps_max_value);
+
+                framerates = create_steps_for_range(fps_min_value, fps_max_value);
+            }
+            else if (G_VALUE_TYPE(framerate) == GST_TYPE_LIST)
+            {
+                framerates = gvalue_to_fps_vector(fps);
+            }
+        }
+
+        gst_query_unref(fps_query);
     }
 
     std::sort(framerates.rbegin(), framerates.rend());
@@ -214,10 +250,10 @@ scaling create_scale(const GstStructure* structure)
 
 
 
-Caps::Caps(GstCaps* caps)
+Caps::Caps(GstCaps* caps, GstElement& element)
     : p_caps(gst_caps_copy(caps))
 {
-    generate();
+    generate(element);
 }
 
 
@@ -391,7 +427,7 @@ std::vector<double> Caps::get_framerates(const std::string& format,
 }
 
 
-std::vector<struct caps_format> Caps::generate_from_fixed_caps()
+std::vector<struct caps_format> Caps::generate_from_fixed_caps(GstElement& element)
 {
     std::vector<struct caps_format> tmp;
 
@@ -518,7 +554,7 @@ std::vector<struct caps_format> Caps::generate_from_fixed_caps()
 
         const GValue* framerate = gst_structure_get_value(structure, "framerate");
 
-        res.framerates = index_framerates(framerate);
+        res.framerates = index_framerates(element, fmt->gst_format, res, framerate);
 
         fmt->resolutions.push_back(res);
     }
@@ -527,7 +563,7 @@ std::vector<struct caps_format> Caps::generate_from_fixed_caps()
 }
 
 
-std::vector<struct caps_format> Caps::generate_from_caps_list()
+std::vector<struct caps_format> Caps::generate_from_caps_list(GstElement& element)
 {
     std::vector<struct caps_format> tmp;
 
@@ -632,7 +668,7 @@ std::vector<struct caps_format> Caps::generate_from_caps_list()
             res.width = resolution.width;
             res.height =resolution.height;
 
-            res.framerates = index_framerates(framerate);
+            res.framerates = index_framerates(element, fmt->gst_format, res, framerate);
             fmt->resolutions.push_back(res);
         }
 
@@ -641,15 +677,15 @@ std::vector<struct caps_format> Caps::generate_from_caps_list()
     return tmp;
 }
 
-void Caps::generate()
+void Caps::generate(GstElement& element)
 {
     if (has_resolution_ranges())
     {
-        formats = generate_from_caps_list();
+        formats = generate_from_caps_list(element);
     }
     else
     {
-        formats = generate_from_fixed_caps();
+        formats = generate_from_fixed_caps(element);
     }
 }
 

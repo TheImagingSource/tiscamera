@@ -153,7 +153,7 @@ void CapsWidget::setup_ui()
     fill_combo_framerate(p_combo_format->currentText(), get_scaling(), res.width, res.height);
 }
 
-void CapsWidget::set_caps(GstCaps* caps)
+void CapsWidget::set_caps(GstCaps* caps, GstElement& element)
 {
     if (!caps || !gst_caps_is_fixed(caps))
     {
@@ -161,7 +161,7 @@ void CapsWidget::set_caps(GstCaps* caps)
         return;
     }
 
-    auto c = Caps(caps);
+    auto c = Caps(caps, element);
 
     GstStructure* struc = gst_caps_get_structure(caps, 0);
 

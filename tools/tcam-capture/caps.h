@@ -83,7 +83,7 @@ struct caps_format
 class Caps
 {
 public:
-    explicit Caps(GstCaps* caps);
+    explicit Caps(GstCaps* caps, GstElement& element);
     Caps(const Caps& other);
     ~Caps();
 
@@ -110,10 +110,10 @@ private:
 
     std::vector<caps_format> formats;
 
-    std::vector<caps_format> generate_from_fixed_caps();
-    std::vector<caps_format> generate_from_caps_list();
+    std::vector<caps_format> generate_from_fixed_caps(GstElement& element);
+    std::vector<caps_format> generate_from_caps_list(GstElement& element);
 
-    void generate();
+    void generate(GstElement& element);
 };
 
 #endif // CAPS_H

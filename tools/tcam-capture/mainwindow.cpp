@@ -868,8 +868,20 @@ GstCaps* MainWindow::open_format_dialog()
 
     format_dialog.setLayout(layout);
 
-    //qInfo("Device caps for format dialog: %s", gst_caps_to_string(m_selected_device.caps()));
-    auto fmt_widget = new CapsWidget(Caps(m_selected_device.caps()));
+    auto factory = gst_element_get_factory(p_source);
+
+    // dependending on the pipeline we want to use a different element
+    // tcambin will change GstQueries we send
+    // always prefer tcamsrc when dealing with device caps
+    GstElement* caps_element = p_source;
+    bool must_free = false;
+    if (strcmp("GstTcamBin", g_type_name(gst_element_factory_get_element_type (factory))) == 0)
+    {
+        caps_element = gst_bin_get_by_name(GST_BIN(p_source), "tcambin-source");
+        must_free = true;
+    }
+
+    auto fmt_widget = new CapsWidget(Caps(m_selected_device.caps(), *caps_element));
 
     layout->addWidget(fmt_widget);
 
@@ -893,8 +905,13 @@ GstCaps* MainWindow::open_format_dialog()
     if (!m_device_caps.isEmpty())
     {
         GstCaps* c = gst_caps_from_string(m_device_caps.toStdString().c_str());
-        fmt_widget->set_caps(c);
+        fmt_widget->set_caps(c, *caps_element);
         gst_caps_unref(c);
+    }
+
+    if (must_free)
+    {
+        gst_object_unref(caps_element);
     }
 
     if (format_dialog.exec() == QDialog::Accepted)
