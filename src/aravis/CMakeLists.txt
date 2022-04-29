@@ -23,6 +23,7 @@ if (TCAM_BUILD_ARAVIS)
     aravis_property_impl.cpp
     aravis_utils.cpp
     aravis_api.cpp
+    aravis_api.h
     )
 
   if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")

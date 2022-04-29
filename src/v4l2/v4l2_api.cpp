@@ -20,37 +20,12 @@
 #include "v4l2_utils.h"
 
 
-DeviceInterface* open_v4l2_device(const struct tcam_device_info* device)
+std::shared_ptr<tcam::DeviceInterface> tcam::V4L2Backend::open_device(const tcam::DeviceInfo& device)
 {
-    return new V4l2Device(DeviceInfo(*device));
+    return std::shared_ptr<DeviceInterface>(new V4l2Device(device));
 }
 
-
-size_t get_v4l2_device_list_size()
+std::vector<tcam::DeviceInfo> tcam::V4L2Backend::get_device_list()
 {
-    auto vec = get_v4l2_device_list();
-    return vec.size();
-}
-
-
-/**
- * @return number of copied device_infos
- */
-size_t get_v4l2_device_list(struct tcam_device_info* array, size_t array_size)
-{
-    auto vec = get_v4l2_device_list();
-
-    if (vec.size() > array_size)
-    {
-        return 0;
-    }
-
-    for (const auto& v : vec)
-    {
-        auto i = v.get_info();
-        memcpy(array, &i, sizeof(struct tcam_device_info));
-        array++;
-    }
-
-    return vec.size();
+    return get_v4l2_device_list();
 }

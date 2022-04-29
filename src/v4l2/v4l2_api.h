@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
+#pragma once
+
 #include "../devicelibrary.h"
 
-#include <cstring>
+namespace tcam
+{
 
-DeviceInterface* open_v4l2_device(const struct tcam_device_info* device);
+class V4L2Backend : public BackendInterface
+{
+public:
+    TCAM_DEVICE_TYPE get_type() const final
+    {
+        return TCAM_DEVICE_TYPE_V4L2;
+    };
+    std::shared_ptr<DeviceInterface> open_device(const tcam::DeviceInfo&) final;
+    std::vector<DeviceInfo> get_device_list() final;
 
-size_t get_v4l2_device_list_size();
+    static V4L2Backend* get_instance()
+    {
+        static V4L2Backend b;
+        return &b;
+    };
+};
 
-/**
- * @return number of copied device_infos
- */
-size_t get_v4l2_device_list(struct tcam_device_info* array, size_t array_size);
+} // namespace tcam

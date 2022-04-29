@@ -24,8 +24,6 @@ typedef void (*dev_callback)(const DeviceInfo&, void* user_data);
 
 #endif /* dev_callback */
 
-//forward declaration
-class BackendLoader;
 
 class Indexer
 {
@@ -78,8 +76,6 @@ private:
     };
 
     std::vector<callback_data> callbacks_;
-
-    std::shared_ptr<BackendLoader> backend_loader_;
 };
 
 

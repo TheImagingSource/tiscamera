@@ -14,40 +14,29 @@
  * limitations under the License.
  */
 
-#ifndef TCAM_DEVICELIBRARY_H
-#define TCAM_DEVICELIBRARY_H
+#pragma once
 
-#include "DeviceInterface.h"
+#include "DeviceInfo.h"
 
-using namespace tcam;
+#include <vector>
+#include <memory>
 
-#ifdef __cplusplus
-extern "C"
+namespace tcam
 {
-#endif /* __cplusplus */
 
-    struct libinfo_v1
-    {
-        // std::shared_ptr<DeviceInterface> (*create_device) (const DeviceInfo& device);
-        // std::vector<DeviceInfo> (*get_device_list) ();
+// forward declaration
+class DeviceInterface;
 
-        DeviceInterface* (*open_device)(const struct tcam_device_info*);
+/*
+ * This class is meant as the definition of backend accessibility
+ */
+class BackendInterface
+{
+public:
+    virtual ~BackendInterface(){};
+    virtual TCAM_DEVICE_TYPE get_type() const = 0;
+    virtual std::shared_ptr<DeviceInterface> open_device(const tcam::DeviceInfo&) = 0;
+    virtual std::vector<DeviceInfo> get_device_list()= 0;
+};
 
-
-        size_t (*get_device_list_size)();
-
-        /**
-         * @return number of copied device_infos
-         */
-        size_t (*get_device_list)(struct tcam_device_info* array, size_t array_size);
-    };
-
-
-    struct libinfo_v1* get_library_functions_v1();
-
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* TCAM_DEVICELIBRARY_H */
+} // namespace tcam

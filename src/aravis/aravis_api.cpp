@@ -21,36 +21,13 @@
 
 #include <cstring>
 
-DeviceInterface* open_aravis_device(const struct tcam_device_info* device)
+std::shared_ptr<tcam::DeviceInterface> tcam::AravisBackend::open_device(const tcam::DeviceInfo& device)
 {
-    return new AravisDevice(DeviceInfo(*device));
+    return std::shared_ptr<DeviceInterface>(new AravisDevice(device));
 }
 
 
-size_t get_aravis_device_list_size()
+std::vector<tcam::DeviceInfo> tcam::AravisBackend::get_device_list()
 {
-    return get_gige_device_count();
-}
-
-
-/**
- * @return number of copied device_infos
- */
-size_t get_aravis_device_list(struct tcam_device_info* array, size_t array_size)
-{
-    auto vec = get_gige_device_list();
-
-    if (vec.size() > array_size)
-    {
-        return 0;
-    }
-
-    for (const auto& v : vec)
-    {
-        auto i = v.get_info();
-        memcpy(array, &i, sizeof(struct tcam_device_info));
-        array++;
-    }
-
-    return vec.size();
+    return get_gige_device_list();
 }

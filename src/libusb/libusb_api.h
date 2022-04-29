@@ -14,15 +14,29 @@
  * limitations under the License.
  */
 
+#pragma once
+
 #include "../devicelibrary.h"
 
-#include <cstring>
+namespace tcam
+{
 
-DeviceInterface* open_libusb_device(const struct tcam_device_info* device);
+class LibUsbBackend : public BackendInterface
+{
 
-size_t get_libusb_device_list_size();
+public:
+    TCAM_DEVICE_TYPE get_type() const final
+    {
+        return TCAM_DEVICE_TYPE_LIBUSB;
+    };
+    std::shared_ptr<DeviceInterface> open_device(const tcam::DeviceInfo&) final;
+    std::vector<DeviceInfo> get_device_list() final;
 
-/**
- * @return number of copied device_infos
- */
-size_t get_libusb_device_list(struct tcam_device_info* array, size_t array_size);
+    static LibUsbBackend* get_instance()
+    {
+        static LibUsbBackend b;
+        return &b;
+    }
+};
+
+} // namespace tcam

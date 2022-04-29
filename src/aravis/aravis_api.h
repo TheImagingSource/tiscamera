@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
+#pragma once
+
 #include "../devicelibrary.h"
 
-#include <cstring>
+namespace tcam
+{
 
-DeviceInterface* open_aravis_device(const struct tcam_device_info* device);
+class AravisBackend : public BackendInterface
+{
 
-size_t get_aravis_device_list_size();
+public:
+    TCAM_DEVICE_TYPE get_type() const final {return TCAM_DEVICE_TYPE_ARAVIS;};
+    std::shared_ptr<DeviceInterface> open_device (const tcam::DeviceInfo&) final;
+    std::vector<DeviceInfo> get_device_list() final;
 
-/**
- * @return number of copied device_infos
- */
-size_t get_aravis_device_list(struct tcam_device_info* array, size_t array_size);
+    static BackendInterface* get_instance()
+    {
+        static AravisBackend b;
+        return &b;
+    };
+
+};
+
+} // namespace tcam

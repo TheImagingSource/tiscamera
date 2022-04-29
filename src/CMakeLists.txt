@@ -31,7 +31,7 @@ add_library(tcam-base STATIC
   DeviceInfo.cpp
   ImageBuffer.cpp
   PropertyInterfaces.cpp
-  
+
   SoftwareProperties.cpp
   SoftwarePropertiesExposureAuto.cpp
   SoftwarePropertiesBalanceWhite.cpp
@@ -44,6 +44,7 @@ add_library(tcam-base STATIC
   property_dependencies.h
   property_dependencies.cpp
   error.cpp
+  devicelibrary.h
 )
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
@@ -70,15 +71,14 @@ PRIVATE
 set_project_warnings(tcam-base)
 
 set( srcs
-  BackendLoader.cpp
   DeviceIndex.cpp
   Indexer.cpp
   DeviceInterface.cpp
   CaptureDevice.cpp
   CaptureDeviceImpl.cpp
-  
+
   PropertyFilter.cpp
-  
+
   public_utils.cpp
 
   libtcam_base.h

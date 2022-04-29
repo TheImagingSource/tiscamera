@@ -22,53 +22,27 @@
 #include "UsbHandler.h"
 #include "libusb_utils.h"
 
-#include <cstring>
 
-
-DeviceInterface* open_libusb_device(const struct tcam_device_info* device)
+std::shared_ptr<tcam::DeviceInterface> tcam::LibUsbBackend::open_device(const tcam::DeviceInfo& device)
 {
-    if (strcmp(device->additional_identifier, "804") == 0)
+    if (strcmp(device.get_info().additional_identifier, "804") == 0)
     {
-        return new AFU420Device(DeviceInfo(*device));
+        return std::shared_ptr<DeviceInterface>(new AFU420Device(device));
     }
-    else if (strcmp(device->additional_identifier, "8209") == 0)
+    else if (strcmp(device.get_info().additional_identifier, "8209") == 0)
     {
-        return new AFU050Device(DeviceInfo(*device));
+        return std::shared_ptr<DeviceInterface>(new AFU050Device(device));
     }
     else
     {
         SPDLOG_ERROR("Unable to identify requested LibUsb Backend %x",
-                     device->additional_identifier);
+                     device.get_info().additional_identifier);
         return nullptr;
     }
 }
 
 
-size_t get_libusb_device_list_size()
+std::vector<tcam::DeviceInfo> tcam::LibUsbBackend::get_device_list()
 {
-    auto vec = tcam::libusb::get_libusb_device_list();
-    return vec.size();
-}
-
-
-/**
- * @return number of copied device_infos
- */
-size_t get_libusb_device_list(struct tcam_device_info* array, size_t array_size)
-{
-    auto vec = tcam::libusb::get_libusb_device_list();
-
-    if (vec.size() > array_size)
-    {
-        return 0;
-    }
-
-    for (const auto& v : vec)
-    {
-        auto i = v.get_info();
-        memcpy(array, &i, sizeof(struct tcam_device_info));
-        array++;
-    }
-
-    return vec.size();
+    return tcam::libusb::get_libusb_device_list();
 }

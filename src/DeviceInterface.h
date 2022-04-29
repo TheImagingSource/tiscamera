@@ -33,8 +33,13 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
-// forward declaration
-class BackendLoader;
+class DeviceInterface;
+
+    std::vector<DeviceInfo> get_device_list();
+
+    // open device interface correlating to device
+    // returns nullptr and logs error on failure
+    std::shared_ptr<DeviceInterface> open_device_interface(const DeviceInfo& device);
 
 class DeviceInterface : public IImageBufferPool
 {
@@ -100,11 +105,6 @@ public:
         return true;
     }
 
-    void set_backend_loader(std::shared_ptr<BackendLoader> ptr)
-    {
-        backend_loader_ = ptr;
-    }
-
     void set_drop_incomplete_frames(bool b)
     {
         drop_incomplete_frames_ = b;
@@ -114,9 +114,6 @@ public:
 
 protected:
     DeviceInfo device;
-
-    // reference to keep the backend open until all devices/indexer are closed
-    std::shared_ptr<BackendLoader> backend_loader_;
 
     void notify_device_lost()
     {
@@ -143,7 +140,7 @@ private:
  * @param device - device description for which an interface shall be created
  * @return shared_ptr containing the device; nullptr on error
  */
-std::shared_ptr<DeviceInterface> openDeviceInterface(const DeviceInfo& device);
+std::shared_ptr<DeviceInterface> open_device_interface(const DeviceInfo& device);
 
 } /* namespace tcam */
 

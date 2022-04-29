@@ -33,7 +33,7 @@ struct bad_device : std::exception
 
 CaptureDeviceImpl::CaptureDeviceImpl(const DeviceInfo& device_desc)
 {
-    device_ = openDeviceInterface(device_desc);
+    device_ = tcam::open_device_interface(device_desc);
     if (device_ == nullptr)
     {
         throw bad_device();
