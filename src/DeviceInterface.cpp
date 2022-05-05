@@ -51,7 +51,11 @@ outcome::result<tcam::framerate_info> DeviceInterface::get_framerate_info(const 
     {
         if (desc.get_fourcc() == fmt.get_fourcc())
         {
-            return tcam::framerate_info { desc.get_framerates(fmt) };
+            auto lst = desc.get_framerates(fmt);
+            if (!lst.empty())
+            {
+                return tcam::framerate_info { lst };
+            }
         }
     }
     return tcam::status::FormatInvalid;
