@@ -20,6 +20,8 @@ if (TCAM_BUILD_ARAVIS)
     AravisDeviceScaling.cpp
     AravisPropertyBackend.cpp
     AravisDeviceProperties.cpp
+    AravisAllocator.h
+    AravisAllocator.cpp
     aravis_property_impl.cpp
     aravis_utils.cpp
     aravis_api.cpp

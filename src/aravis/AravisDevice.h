@@ -18,6 +18,7 @@
 #define TCAM_ARAVISDEVICE_H
 
 #include "../DeviceInterface.h"
+#include "AravisAllocator.h"
 #include "../FormatHandlerInterface.h"
 
 #include <arv.h>
@@ -31,6 +32,7 @@ VISIBILITY_INTERNAL
 namespace tcam::aravis
 {
 class AravisPropertyBackend;
+class AravisAllocator;
 }
 
 namespace tcam
@@ -69,9 +71,9 @@ public:
         return available_videoformats_;
     }
 
-    std::shared_ptr<tcam::AllocatorInterface> get_allocator() override
+    std::shared_ptr<tcam::AllocatorInterface> get_allocator() final
     {
-        return nullptr;
+        return allocator_;
     };
 
     bool initialize_buffers(std::shared_ptr<BufferPool> pool) final;
@@ -106,6 +108,7 @@ private:
     ArvStream* stream_ = nullptr;
     ArvGc* genicam_ = nullptr;
 
+    std::shared_ptr<tcam::aravis::AravisAllocator> allocator_ = nullptr;
     std::weak_ptr<IImageBufferSink> sink_;
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> properties_;

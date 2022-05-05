@@ -19,6 +19,7 @@
 #include "../logging.h"
 #include "../utils.h"
 #include "AravisPropertyBackend.h"
+#include "AravisAllocator.h"
 #include "aravis_utils.h"
 
 #include <algorithm>
@@ -65,6 +66,8 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc)
     // make aravis notify us when the device can not be reached
     g_signal_connect(
         arv_camera_get_device(arv_camera_), "control-lost", G_CALLBACK(device_lost), this);
+
+    allocator_ = std::make_shared<tcam::aravis::AravisAllocator>();
 }
 
 
