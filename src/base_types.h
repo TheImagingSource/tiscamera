@@ -29,6 +29,14 @@
 namespace tcam
 {
 
+enum TCAM_MEMORY_TYPE
+{
+    TCAM_MEMORY_TYPE_USERPTR = 0,
+    TCAM_MEMORY_TYPE_MMAP = 1,
+    TCAM_MEMORY_TYPE_DMA,
+    TCAM_MEMORY_TYPE_DMA_IMPORT,
+};
+
 /**
  * Supported camera types
  */
@@ -248,12 +256,11 @@ struct tcam_video_format
  */
 struct tcam_stream_statistics
 {
-    uint64_t frame_count; /**< current frame number */
-    uint64_t frames_dropped; /**< number of frames that where not delivered */
-    uint64_t capture_time_ns; /**< capture time reported by lib */
-    uint64_t camera_time_ns; /**< capture time reported by camera; empty if not supported */
-    bool
-        is_damaged; /**< flag indicating if the associated buffer had lost packages or other problems */
+    uint64_t frame_count; // current frame number
+    uint64_t frames_dropped; // number of frames that where not delivered
+    uint64_t capture_time_ns; // capture time reported by lib
+    uint64_t camera_time_ns; //capture time reported by camera; empty if not supported
+    bool is_damaged; // flag indicating if the associated buffer had lost packages or other problems
 };
 
 

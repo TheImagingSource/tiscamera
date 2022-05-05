@@ -634,13 +634,14 @@ double tcam::AFU420Device::get_framerate()
 }
 
 
-bool tcam::AFU420Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> buffs)
+bool tcam::AFU420Device::initialize_buffers(std::shared_ptr<BufferPool> pool)
 {
+    auto buffs = pool->get_buffer();
     SPDLOG_TRACE("Received {} buffer from external allocator.", buffs.size());
 
     buffer_list_.reserve(buffs.size());
 
-    for (auto& b : buffs) { buffer_list_.push_back({ b, true }); }
+    for (auto& b : buffs) { buffer_list_.push_back({ b.lock(), true }); }
     return true;
 }
 

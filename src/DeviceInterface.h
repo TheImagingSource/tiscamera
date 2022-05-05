@@ -19,6 +19,8 @@
 
 #include "DeviceInfo.h"
 #include "ImageBuffer.h"
+#include "BufferPool.h"
+#include "Allocator.h"
 #include "PropertyInterfaces.h"
 #include "SinkInterface.h"
 #include "VideoFormat.h"
@@ -71,10 +73,12 @@ public:
      */
     virtual std::vector<VideoFormatDescription> get_available_video_formats() = 0;
 
+    virtual std::shared_ptr<tcam::AllocatorInterface> get_allocator() = 0;
+
     /**
      * @return true on successfull allocation/registration; else false
      */
-    virtual bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) = 0;
+    virtual bool initialize_buffers(std::shared_ptr<BufferPool> pool) = 0;
 
     /**
      * @brief Delete all internal references to used memorybuffers

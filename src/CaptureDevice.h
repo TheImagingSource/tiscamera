@@ -34,6 +34,8 @@ VISIBILITY_DEFAULT
 namespace tcam
 {
 
+class AllocatorInterface;
+class BufferPool;
 class CaptureDeviceImpl;
 
 class CaptureDevice
@@ -95,7 +97,16 @@ public:
      */
     VideoFormat get_active_video_format() const;
 
+
+    std::shared_ptr<tcam::AllocatorInterface> get_allocator();
+
     // playback related:
+
+    bool configure_stream(const VideoFormat& format,
+                          std::shared_ptr<ImageSink>& sink,
+                          std::shared_ptr<BufferPool> pool);
+
+    bool free_stream();
 
     /**
      * @brief Start a new stream

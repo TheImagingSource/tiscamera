@@ -19,6 +19,7 @@
 
 #include "VideoFormat.h"
 #include "base_types.h"
+#include "Memory.h"
 
 #include <memory>
 
@@ -35,6 +36,7 @@ struct img_descriptor;
 
 namespace tcam
 {
+
 
 /// @class ImageBuffer
 /// @brief Transport class for memory, format and statistics representing an actual image
@@ -58,6 +60,8 @@ public:
      */
     ImageBuffer(const VideoFormat& format, void* buffer_ptr, size_t buffer_size) noexcept;
 
+    ImageBuffer(const VideoFormat& format, std::shared_ptr<tcam::Memory> buffer) noexcept;
+
     ImageBuffer() = delete;
     ImageBuffer(const ImageBuffer&) = delete;
     ImageBuffer(ImageBuffer&&) = delete;
@@ -76,7 +80,7 @@ public:
      */
     void* get_image_buffer_ptr() const noexcept
     {
-        return buffer_ptr_;
+        return buffer_->ptr();
     }
 
     /// @name get_image_buffer_size
@@ -84,7 +88,7 @@ public:
     /// @return size_t - size of the internal memory
     size_t get_image_buffer_size() const noexcept
     {
-        return buffer_size_;
+        return buffer_->length();
     }
 
     /// @name get_image_size
@@ -123,8 +127,10 @@ private:
     tcam_stream_statistics statistics_ = {};
 
     size_t valid_data_length_ = 0;
-    size_t buffer_size_ = 0;
-    void* buffer_ptr_ = nullptr;
+    //size_t buffer_size_ = 0;
+    //void* buffer_ptr_ = nullptr;
+
+    std::shared_ptr<Memory> buffer_ = nullptr;
 
     const bool is_own_memory_ = false;
 };

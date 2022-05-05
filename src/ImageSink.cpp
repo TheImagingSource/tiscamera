@@ -65,6 +65,7 @@ std::vector<std::shared_ptr<ImageBuffer>> ImageSink::get_buffer_collection()
 void ImageSinkBufferPool::initialize_internal_buffer()
 {
     buffer_list_.clear();
+    return;
 
     for (size_t i = 0; i < this->buffer_count_to_allocate_; ++i)
     {

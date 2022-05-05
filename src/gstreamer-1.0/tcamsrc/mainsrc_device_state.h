@@ -71,6 +71,10 @@ public: // data members currently still used in gstmainsrc.cpp, maybe move them 
     std::shared_ptr<tcam::CaptureDevice> device_;
     std::shared_ptr<tcam::ImageSink> sink;
 
+    std::shared_ptr<tcam::BufferPool> buffer_pool;
+
+    GstTcamIOMode io_mode_ = GST_TCAM_IO_AUTO;
+
 public: // streaming stuff
     std::mutex stream_mtx_;
     std::condition_variable stream_cv_;

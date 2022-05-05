@@ -23,6 +23,7 @@
 #include "ImageSink.h"
 #include "VideoFormat.h"
 #include "PropertyFilter.h"
+#include "BufferPool.h"
 
 #include <memory>
 #include <string>
@@ -90,6 +91,12 @@ public:
 
     // playback related:
 
+    bool configure_stream(const VideoFormat& format,
+                          std::shared_ptr<ImageSink>& sink,
+                          std::shared_ptr<BufferPool> pool = nullptr);
+
+    bool free_stream();
+
     /**
      * @brief Start a new stream
      * @param sink - SinkInterface that shall be called for new images
@@ -105,6 +112,9 @@ public:
     void set_drop_incomplete_frames(bool b);
 
     outcome::result<tcam::framerate_info> get_framerate_info(const VideoFormat& fmt);
+
+    std::shared_ptr<tcam::AllocatorInterface> get_allocator();
+
 private:
     void push_image(const std::shared_ptr<ImageBuffer>& buffer) final;
 
@@ -125,6 +135,7 @@ private:
     std::vector<VideoFormatDescription> available_output_formats_;
 
     std::shared_ptr<IImageBufferSink> sink_;
+    std::shared_ptr<BufferPool> pool_ = nullptr;
 
     tcam::stream::filter::SoftwarePropertyWrapper property_filter_;
 

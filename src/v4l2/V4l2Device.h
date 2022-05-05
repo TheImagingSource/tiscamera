@@ -20,7 +20,9 @@
 #include "../DeviceInterface.h"
 #include "../VideoFormat.h"
 #include "../VideoFormatDescription.h"
+#include "../BufferPool.h"
 #include "V4L2PropertyBackend.h"
+#include "V4L2Allocator.h"
 
 #include <atomic>
 #include <condition_variable> // std::condition_variable
@@ -65,7 +67,12 @@ public:
 
     double get_framerate();
 
-    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) override;
+    std::shared_ptr<tcam::AllocatorInterface> get_allocator() override
+    {
+        return allocator_;
+    };
+
+    bool initialize_buffers(std::shared_ptr<BufferPool> pool) override;
 
     bool release_buffers() override;
 
@@ -101,6 +108,8 @@ private:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_internal_properties;
+
+    std::shared_ptr<tcam::AllocatorInterface> allocator_ = nullptr;
 
     std::thread m_monitor_v4l2_thread;
     std::atomic<bool> m_stop_monitor_v4l2_thread { false };
@@ -168,9 +177,11 @@ private:
 
     tcam_stream_statistics m_statistics = {};
 
+    std::shared_ptr<BufferPool> pool_;
+
     struct buffer_info
     {
-        std::shared_ptr<ImageBuffer> buffer;
+        std::weak_ptr<ImageBuffer> buffer;
         bool is_queued = false;
     };
 
@@ -187,6 +198,12 @@ private:
     bool get_frame();
 
     void init_userptr_buffers();
+    void init_mmap_buffers();
+    void init_dma_buffers();
+
+    bool queue_dma(int i, std::shared_ptr<ImageBuffer>);
+    bool queue_mmap(int i, std::shared_ptr<ImageBuffer>);
+    bool queue_userptr(int i, std::shared_ptr<ImageBuffer>);
 
     bool is_trigger_mode_enabled();
 

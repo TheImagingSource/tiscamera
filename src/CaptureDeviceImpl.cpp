@@ -115,6 +115,57 @@ VideoFormat CaptureDeviceImpl::get_active_video_format() const
     return device_->get_active_video_format();
 }
 
+
+bool CaptureDeviceImpl::configure_stream(const VideoFormat& format,
+                                         std::shared_ptr<ImageSink>& sink,
+                                         std::shared_ptr<BufferPool> pool)
+{
+    if (!device_->set_video_format(format))
+    {
+        return false;
+    }
+
+    property_filter_.setVideoFormat(device_->get_active_video_format());
+
+    // if no pool is provided allocate an internal
+    // default to userptr as all devices support that
+    if (!pool)
+    {
+        pool_ = std::make_shared<BufferPool>(TCAM_MEMORY_TYPE_USERPTR, device_->get_allocator());
+        auto ret = pool_->allocate(device_->get_active_video_format(), 10);
+
+        // TODO: error handling
+        // if (ret.has_error())
+        // {
+        //     SPDLOG_ERROR("{}", ret.error().message());
+        //     return false;
+        // }
+    }
+    else
+    {
+        SPDLOG_INFO("External pool");
+        pool_ = pool;
+    }
+
+    device_->initialize_buffers(pool_);
+
+    sink_ = sink;
+
+    return true;
+}
+
+
+bool CaptureDeviceImpl::free_stream()
+{
+    // TODO: check if stream is running
+    //if ()
+    device_->release_buffers();
+    sink_.reset();
+
+    return true;
+}
+
+
 bool CaptureDeviceImpl::start_stream(const std::shared_ptr<ImageSink>& sink)
 {
     if (sink == nullptr)
@@ -123,23 +174,10 @@ bool CaptureDeviceImpl::start_stream(const std::shared_ptr<ImageSink>& sink)
         return false;
     }
 
-    if (!sink->start_stream(device_))
+    if (!std::dynamic_pointer_cast<ImageSink>(sink_)->start_stream(device_))
     {
         return false;
     }
-
-    auto buffer_list = sink->get_buffer_collection();
-    if (buffer_list.empty())
-    {
-        SPDLOG_ERROR("CaptureDeviceImpl has no image buffers!");
-        return false;
-    }
-
-    property_filter_.setVideoFormat(device_->get_active_video_format());
-
-    device_->initialize_buffers(buffer_list);
-
-    sink_ = sink;
 
     if (!device_->start_stream(shared_from_this()))
     {
@@ -155,8 +193,8 @@ bool CaptureDeviceImpl::start_stream(const std::shared_ptr<ImageSink>& sink)
 void CaptureDeviceImpl::stop_stream()
 {
     device_->stop_stream();
-    device_->release_buffers();
-    sink_.reset();
+    //device_->release_buffers();
+    //sink_.reset();
 }
 
 void CaptureDeviceImpl::set_drop_incomplete_frames(bool b)
@@ -174,4 +212,9 @@ void CaptureDeviceImpl::push_image(const std::shared_ptr<ImageBuffer>& buffer)
 outcome::result<tcam::framerate_info> CaptureDeviceImpl::get_framerate_info(const VideoFormat& fmt)
 {
     return device_->get_framerate_info(fmt);
+}
+
+std::shared_ptr<tcam::AllocatorInterface> CaptureDeviceImpl::get_allocator()
+{
+    return device_->get_allocator();
 }

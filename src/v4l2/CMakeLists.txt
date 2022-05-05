@@ -35,6 +35,8 @@ find_package(UDev REQUIRED QUIET)
 add_library(tcam-backend-v4l2 STATIC
   V4l2Device.cpp
   V4l2Device.h
+  V4L2Allocator.h
+  V4L2Allocator.cpp
   V4L2PropertyBackend.cpp
   V4L2PropertyBackend.h
   V4L2DeviceProperties.cpp

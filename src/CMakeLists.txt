@@ -28,8 +28,14 @@ if (TCAM_ENABLE_BASE_LIBRARIES)
 
 add_library(tcam-base STATIC
   logging.cpp
+  DeviceInfo.h
   DeviceInfo.cpp
+  ImageBuffer.h
   ImageBuffer.cpp
+  Memory.h
+  Memory.cpp
+  BufferPool.h
+  BufferPool.cpp
   PropertyInterfaces.cpp
 
   SoftwareProperties.cpp

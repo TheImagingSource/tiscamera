@@ -35,6 +35,19 @@ typedef struct _GstTcamMainSrcClass GstTcamMainSrcClass;
 
 struct device_state;
 
+
+#define GST_TYPE_TCAM_IO_MODE (gst_tcam_io_mode_get_type())
+GType gst_tcam_io_mode_get_type(void);
+
+typedef enum
+{
+    GST_TCAM_IO_AUTO = 0,
+    GST_TCAM_IO_MMAP = 1,
+    GST_TCAM_IO_USERPTR = 2,
+    GST_TCAM_IO_DMABUF = 3,
+    GST_TCAM_IO_DMABUF_IMPORT = 4,
+} GstTcamIOMode;
+
 struct _GstTcamMainSrc
 {
     GstPushSrc element;

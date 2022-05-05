@@ -85,6 +85,17 @@ VideoFormat CaptureDevice::get_active_video_format() const
     return impl->get_active_video_format();
 }
 
+bool CaptureDevice::configure_stream(const VideoFormat& format,
+                                     std::shared_ptr<ImageSink>& sink,
+                                     std::shared_ptr<BufferPool> pool)
+{
+    return impl->configure_stream(format, sink, pool);
+}
+
+bool CaptureDevice::free_stream()
+{
+    return impl->free_stream();
+}
 
 bool CaptureDevice::start_stream(std::shared_ptr<ImageSink> sink)
 {
@@ -106,6 +117,11 @@ void CaptureDevice::set_drop_incomplete_frames(bool b)
 outcome::result<tcam::framerate_info> CaptureDevice::get_framerate_info(const VideoFormat& fmt)
 {
     return impl->get_framerate_info(fmt);
+}
+
+std::shared_ptr<tcam::AllocatorInterface> CaptureDevice::get_allocator()
+{
+    return impl->get_allocator();
 }
 
 std::shared_ptr<CaptureDevice> tcam::open_device(const std::string& serial, TCAM_DEVICE_TYPE type)

@@ -47,6 +47,65 @@ G_DEFINE_TYPE_WITH_CODE(GstTcamMainSrc,
                                               tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init))
 
 
+
+
+GType gst_tcam_io_mode_get_type(void)
+{
+    static GType tcam_io_mode = 0;
+
+    if (!tcam_io_mode)
+    {
+        static const GEnumValue io_modes[] = {
+            { GST_TCAM_IO_AUTO, "GST_TCAM_IO_AUTO", "auto" },
+            { GST_TCAM_IO_MMAP, "GST_TCAM_IO_MMAP", "mmap" },
+            { GST_TCAM_IO_USERPTR, "GST_TCAM_IO_USERPTR", "userptr" },
+            { GST_TCAM_IO_DMABUF, "GST_TCAM_IO_DMABUF", "dmabuf" },
+            { GST_TCAM_IO_DMABUF_IMPORT, "GST_TCAM_IO_DMABUF_IMPORT", "dmabuf-import" },
+
+            { 0, NULL, NULL }
+        };
+        tcam_io_mode = g_enum_register_static("GstTcamIOMode", io_modes);
+    }
+    return tcam_io_mode;
+}
+
+
+tcam::TCAM_MEMORY_TYPE io_mode_to_memory_type(GstTcamIOMode mode)
+{
+    switch (mode)
+    {
+        case GST_TCAM_IO_AUTO:
+        case GST_TCAM_IO_USERPTR:
+        {
+            return tcam::TCAM_MEMORY_TYPE_USERPTR;
+        }
+        case GST_TCAM_IO_MMAP:
+            return tcam::TCAM_MEMORY_TYPE_MMAP;
+        case GST_TCAM_IO_DMABUF:
+            return tcam::TCAM_MEMORY_TYPE_DMA;
+        case GST_TCAM_IO_DMABUF_IMPORT:
+            return tcam::TCAM_MEMORY_TYPE_DMA_IMPORT;
+    }
+    return tcam::TCAM_MEMORY_TYPE_USERPTR;
+}
+
+GstTcamIOMode memory_type_to_io_mode(tcam::TCAM_MEMORY_TYPE t)
+{
+    switch (t)
+    {
+        case tcam::TCAM_MEMORY_TYPE_USERPTR:
+            return GST_TCAM_IO_USERPTR;
+        case tcam::TCAM_MEMORY_TYPE_MMAP:
+            return GST_TCAM_IO_MMAP;
+        case tcam::TCAM_MEMORY_TYPE_DMA:
+            return GST_TCAM_IO_DMABUF;
+        case tcam::TCAM_MEMORY_TYPE_DMA_IMPORT:
+            return GST_TCAM_IO_DMABUF_IMPORT;
+    }
+    return GST_TCAM_IO_USERPTR;
+}
+
+
 enum
 {
     SIGNAL_DEVICE_OPEN,
@@ -61,6 +120,7 @@ enum
     PROP_DEVICE_TYPE,
     PROP_CAMERA_BUFFERS,
     PROP_NUM_BUFFERS,
+    PROP_IO_MODE,
     PROP_DROP_INCOMPLETE_BUFFER,
     PROP_TCAM_PROPERTIES_GSTSTRUCT,
 };
@@ -321,7 +381,6 @@ static gboolean caps_to_format(GstCaps& c, tcam::tcam_video_format& format)
     format.scaling = tcam::gst::caps_get_scaling(&c);
 
     return true;
-
 }
 
 
@@ -360,8 +419,33 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
         gst_tcam_mainsrc_sh_callback(cb, self);
     };
 
+    tcam::TCAM_MEMORY_TYPE buffer_type = io_mode_to_memory_type(state.io_mode_);
+    //buffer_type = tcam::TCAM_MEMORY_TYPE_MMAP;
+
+    self->device->buffer_pool = std::make_shared<tcam::BufferPool>(buffer_type,
+                                                                   self->device->device_->get_allocator());
+
+    auto alloc_res = self->device->buffer_pool->allocate(tcam::VideoFormat(format),
+                                                         state.imagesink_buffers_);
+
+    if (!alloc_res)
+    {
+        GST_ERROR("%s", alloc_res.error().message().c_str());
+        GST_ERROR_OBJECT(self, "%s", alloc_res.error().message().c_str());
+        return FALSE;
+    }
+
     self->device->sink = std::make_shared<tcam::ImageSink>(
         cb_func, tcam::VideoFormat(format), state.imagesink_buffers_);
+
+    auto conf_res = self->device->device_->configure_stream(tcam::VideoFormat(format),
+                                                            self->device->sink,
+                                                            self->device->buffer_pool);
+
+    if (!conf_res)
+    {
+        GST_ERROR_OBJECT(self, "Failed to configure stream.");
+    }
 
     auto res = self->device->device_->start_stream(self->device->sink);
     if (!res)
@@ -1132,6 +1216,11 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
             }
             break;
         }
+        case PROP_IO_MODE:
+        {
+            state.io_mode_ = (GstTcamIOMode)g_value_get_enum(value);
+            break;
+        }
         case PROP_NUM_BUFFERS:
         {
             if (!is_state_ready_or_lower(self))
@@ -1202,6 +1291,11 @@ static void gst_tcam_mainsrc_get_property(GObject* object,
             g_value_set_int(value, state.n_buffers_);
             break;
         }
+        case PROP_IO_MODE:
+        {
+            g_value_set_enum(value, state.io_mode_);
+            break;
+        }
         case PROP_DROP_INCOMPLETE_BUFFER:
         {
             g_value_set_boolean(value, state.drop_incomplete_frames_);
@@ -1261,6 +1355,17 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
                          256,
                          GST_TCAM_MAINSRC_DEFAULT_N_BUFFERS,
                          static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
+    g_object_class_install_property(
+        gobject_class,
+        PROP_IO_MODE,
+        g_param_spec_enum("io-mode",
+                          "IO Mode",
+                          "",
+                          GST_TYPE_TCAM_IO_MODE,
+                          0,
+                          static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
     g_object_class_install_property(
         gobject_class,
         PROP_NUM_BUFFERS,

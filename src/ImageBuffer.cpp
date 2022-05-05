@@ -21,6 +21,8 @@
 #include <cstring>
 #include <dutils_img/image_transform_base.h>
 
+#include "logging.h"
+
 using namespace tcam;
 
 ImageBuffer::ImageBuffer(const VideoFormat& format)
@@ -29,39 +31,50 @@ ImageBuffer::ImageBuffer(const VideoFormat& format)
 }
 
 ImageBuffer::ImageBuffer(const VideoFormat& format, size_t buffer_size_to_allocate)
-    : format_(format), buffer_size_(buffer_size_to_allocate), is_own_memory_(true)
+    : format_(format),
+     //buffer_size_(buffer_size_to_allocate),
+      is_own_memory_(true)
 {
     assert(buffer_size_to_allocate >= format.get_required_buffer_size());
-    buffer_ptr_ = malloc(buffer_size_);
-    if (buffer_ptr_ == nullptr)
-    {
-        throw std::bad_alloc();
-    }
+    SPDLOG_ERROR("NO Memory");
+    // buffer_ptr_ = malloc(buffer_size_);
+    // if (buffer_ptr_ == nullptr)
+    // {
+    //     throw std::bad_alloc();
+    // }
 }
 
 ImageBuffer::ImageBuffer(const VideoFormat& format, void* buffer_ptr, size_t buffer_size) noexcept
-    : format_(format), buffer_size_(buffer_size), buffer_ptr_(buffer_ptr),
+    : format_(format),
+    //, buffer_size_(buffer_size), buffer_ptr_(buffer_ptr),
       is_own_memory_(false)
 {
-    assert(buffer_size >= format.get_required_buffer_size());
+    //assert(buffer_size >= format.get_required_buffer_size());
 }
+
+ImageBuffer::ImageBuffer(const VideoFormat& format, std::shared_ptr<Memory> buffer) noexcept
+    : format_(format), buffer_(buffer)
+{
+
+}
+
 
 ImageBuffer::~ImageBuffer()
 {
     if (is_own_memory_)
     {
-        free(buffer_ptr_);
+//        free(buffer_ptr_);
     }
 }
 
 bool ImageBuffer::copy_block(const void* data, size_t size, unsigned int offset) noexcept
 {
-    if (size + offset > buffer_size_)
+    if (size + offset > buffer_->length())
     {
         return false;
     }
 
-    memcpy(static_cast<char*>(buffer_ptr_) + offset, data, size);
+    memcpy(static_cast<char*>(buffer_->ptr()) + offset, data, size);
 
     if (offset == 0)
     {

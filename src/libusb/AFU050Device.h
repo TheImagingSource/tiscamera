@@ -66,7 +66,13 @@ public:
 
     double get_framerate();
 
-    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) final;
+
+    std::shared_ptr<tcam::AllocatorInterface> get_allocator() override
+    {
+        return nullptr;
+    };
+
+    bool initialize_buffers(std::shared_ptr<BufferPool> pool) final;
 
     bool release_buffers() final;
 

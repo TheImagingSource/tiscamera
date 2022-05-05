@@ -52,6 +52,8 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
 
     p_property_backend = std::make_shared<tcam::v4l2::V4L2PropertyBackend>(m_fd);
 
+    allocator_ = std::make_shared<V4L2Allocator>(m_fd);
+
     this->create_properties();
     this->index_formats();
 
@@ -204,7 +206,8 @@ bool V4l2Device::set_framerate(double framerate)
 
     framerate = *iter_low;
 
-    auto f = [framerate](const framerate_conv& _f) {
+    auto f = [framerate](const framerate_conv& _f)
+    {
         return framerate == _f.fps;
     };
 
@@ -264,13 +267,17 @@ double V4l2Device::get_framerate()
            / (double)parm.parm.capture.timeperframe.numerator;
 }
 
-bool V4l2Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> b)
+bool V4l2Device::initialize_buffers(std::shared_ptr<BufferPool> pool)
 {
     if (m_is_stream_on)
     {
         SPDLOG_ERROR("Stream running.");
         return false;
     }
+
+    pool_ = pool;
+
+    auto b = pool_->get_buffer();
 
     this->m_buffers.clear();
     this->m_buffers.reserve(b.size());
@@ -311,30 +318,87 @@ bool V4l2Device::release_buffers()
 }
 
 
+bool V4l2Device::queue_mmap(int i, std::shared_ptr<ImageBuffer> b)
+{
+    struct v4l2_buffer buf = {};
+
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    buf.memory = V4L2_MEMORY_MMAP;
+
+    buf.index = i;
+
+    // requeue buffer
+    int ret = tcam_xioctl(m_fd, VIDIOC_QBUF, &buf);
+    if (ret == -1)
+    {
+        SPDLOG_ERROR("Unable to queue mmap buffer({}): {} {}", errno, strerror(errno), fmt::ptr(b->get_image_buffer_ptr()));
+        return false;
+    }
+    SPDLOG_ERROR("Queued mmap buffer {}", fmt::ptr(b->get_image_buffer_ptr()));
+    return true;
+}
+
+
+bool V4l2Device::queue_userptr(int i, std::shared_ptr<ImageBuffer> b)
+{
+
+    struct v4l2_buffer buf = {};
+
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    buf.memory = V4L2_MEMORY_USERPTR;
+    buf.index = i;
+    buf.m.userptr = (unsigned long)b->get_image_buffer_ptr();
+    buf.length = b->get_image_buffer_size();
+
+    // requeue buffer
+    int ret = tcam_xioctl(m_fd, VIDIOC_QBUF, &buf);
+    if (ret == -1)
+    {
+        SPDLOG_ERROR("Could not requeue buffer");
+        return false;
+    }
+    return true;
+}
+
+
 void V4l2Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
 {
+
     for (unsigned int i = 0; i < m_buffers.size(); ++i)
     {
 
         auto& b = m_buffers.at(i);
-        if (!b.is_queued && b.buffer == buffer)
+
+        auto buf_ptr = b.buffer.lock();
+
+        if (!b.is_queued && buf_ptr == buffer)
         {
-            struct v4l2_buffer buf = {};
-
-            buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-            buf.memory = V4L2_MEMORY_USERPTR;
-            buf.index = i;
-            buf.m.userptr = (unsigned long)b.buffer->get_image_buffer_ptr();
-            buf.length = b.buffer->get_image_buffer_size();
-
-            // requeue buffer
-            int ret = tcam_xioctl(m_fd, VIDIOC_QBUF, &buf);
-            if (ret == -1)
+            switch (pool_->get_memory_type())
             {
-                SPDLOG_ERROR("Could not requeue buffer");
-                return;
+                case TCAM_MEMORY_TYPE_USERPTR:
+                {
+                    if (queue_userptr(i, buf_ptr))
+                    {
+                        b.is_queued = true;
+                    }
+                    break;
+                }
+                case TCAM_MEMORY_TYPE_MMAP:
+                {
+                    SPDLOG_INFO("Requeueing mmap");
+                    if (queue_mmap(i, buf_ptr))
+                    {
+                        b.is_queued = true;
+                    }
+                    break;
+                }
+                case TCAM_MEMORY_TYPE_DMA:
+                case TCAM_MEMORY_TYPE_DMA_IMPORT:
+                {
+                    SPDLOG_ERROR("Queueing of DMA not implemented");
+                    break;
+                }
             }
-            b.is_queued = true;
         }
     }
 }
@@ -365,12 +429,31 @@ void V4l2Device::update_stream_timeout()
 
 bool V4l2Device::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 {
-    init_userptr_buffers();
+    switch (pool_->get_memory_type())
+    {
+        case TCAM_MEMORY_TYPE_USERPTR:
+        {
+            init_userptr_buffers();
+            break;
+        }
+        case TCAM_MEMORY_TYPE_MMAP:
+        {
+            SPDLOG_DEBUG("init mmap");
+            init_mmap_buffers();
+            break;
+        }
+        case TCAM_MEMORY_TYPE_DMA:
+        case TCAM_MEMORY_TYPE_DMA_IMPORT:
+        {
+            SPDLOG_ERROR("MEMORY type not implemented");
+            return false;
+        }
+    }
 
     v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (-1 == tcam_xioctl(m_fd, VIDIOC_STREAMON, &type))
     {
-        SPDLOG_ERROR("Unable to set ioctl VIDIOC_STREAMON {}", errno);
+        SPDLOG_ERROR("Unable to set ioctl VIDIOC_STREAMON {} {}", errno, strerror(errno));
         return false;
     }
 
@@ -393,12 +476,11 @@ bool V4l2Device::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 void V4l2Device::stop_stream()
 {
     SPDLOG_DEBUG("Stopping stream");
-    int ret = 0;
-
+    
     if (m_is_stream_on)
     {
         enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        ret = tcam_xioctl(m_fd, VIDIOC_STREAMOFF, &type);
+        int ret = tcam_xioctl(m_fd, VIDIOC_STREAMOFF, &type);
 
         if (ret < 0)
         {
@@ -1232,8 +1314,15 @@ bool V4l2Device::get_frame()
     struct v4l2_buffer buf = {};
 
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    buf.memory = V4L2_MEMORY_USERPTR;
 
+    if (pool_->get_memory_type() == TCAM_MEMORY_TYPE_USERPTR)
+    {
+        buf.memory = V4L2_MEMORY_USERPTR;
+    }
+    else
+    {
+        buf.memory = V4L2_MEMORY_MMAP;
+    }
     int ret = tcam_xioctl(m_fd, VIDIOC_DQBUF, &buf);
 
     if (ret == -1)
@@ -1267,7 +1356,8 @@ bool V4l2Device::get_frame()
                              buf.bytesused,
                              this->m_active_video_format.get_required_buffer_size());
             }
-            requeue_buffer(image_buffer.buffer);
+            //SPDLOG_ERROR("error requeue");
+            requeue_buffer(image_buffer.buffer.lock());
             return true;
         }
     }
@@ -1277,14 +1367,15 @@ bool V4l2Device::get_frame()
     m_statistics.capture_time_ns =
         ((long long)buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
     m_statistics.frame_count++;
-    image_buffer.buffer->set_statistics(m_statistics);
-    image_buffer.buffer->set_valid_data_length(buf.bytesused);
+    auto b = image_buffer.buffer.lock();
+    b->set_statistics(m_statistics);
+    b->set_valid_data_length(buf.bytesused);
 
-    SPDLOG_TRACE("pushing new buffer");
+    //SPDLOG_INFO("pushing new buffer");
 
     if (auto ptr = m_listener.lock())
     {
-        ptr->push_image(image_buffer.buffer);
+        ptr->push_image(b);
     }
     else
     {
@@ -1326,12 +1417,13 @@ void V4l2Device::init_userptr_buffers()
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_USERPTR;
         buf.index = i;
-        buf.m.userptr = (unsigned long)m_buffers.at(i).buffer->get_image_buffer_ptr();
-        buf.length = m_buffers.at(i).buffer->get_image_buffer_size();
 
-        SPDLOG_TRACE("Queueing buffer({:x}) with length {}",
-                     m_buffers.at(i).buffer->get_image_buffer_ptr(),
-                     buf.length);
+        auto b = m_buffers.at(i).buffer.lock();
+
+        buf.m.userptr = (unsigned long)b->get_image_buffer_ptr();
+        buf.length = b->get_image_buffer_size();
+
+        SPDLOG_DEBUG("Queueing buffer({:x}) with length {}", b->get_image_buffer_ptr(), buf.length);
 
         if (-1 == tcam_xioctl(m_fd, VIDIOC_QBUF, &buf))
         {
@@ -1340,9 +1432,73 @@ void V4l2Device::init_userptr_buffers()
         }
         else
         {
-            SPDLOG_TRACE("Successfully queued v4l2_buffer");
+            //SPDLOG_TRACE("Successfully queued v4l2_buffer");
             m_buffers.at(i).is_queued = true;
         }
+    }
+}
+
+
+void V4l2Device::init_mmap_buffers()
+{
+    // this request _MUST_ be done in the allocator
+    // without it the mmap requests will fail
+    //
+    // struct v4l2_requestbuffers req = {};
+    // req.count = m_buffers.size();
+    // req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    // req.memory = V4L2_MEMORY_MMAP;
+    // if (tcam_xioctl(m_fd, VIDIOC_REQBUFS, &req) == -1) {
+    //     return;
+    // }
+    // if (req.count < 2) {
+    //     SPDLOG_ERROR("Insufficient memory for memory mapping{}", req.count);
+    //     return;
+    // }
+
+    for (unsigned int n_buffers = 0; n_buffers < m_buffers.size(); ++n_buffers)
+    {
+        struct v4l2_buffer buf = {};
+
+        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf.memory = V4L2_MEMORY_MMAP;
+        buf.index = n_buffers;
+
+        if (tcam_xioctl(m_fd, VIDIOC_QUERYBUF, &buf) == -1)
+        {
+            SPDLOG_ERROR("WHAT index: {} {} {}", buf.index, errno, strerror(errno));
+            //return;
+        }
+    }
+
+    for (unsigned int i = 0; i < m_buffers.size(); ++i)
+    {
+        if (queue_mmap(i, m_buffers.at(i).buffer.lock()))
+        {
+            m_buffers.at(i).is_queued = true;
+        }
+    }
+}
+
+
+void V4l2Device::init_dma_buffers()
+{
+    for (unsigned int i = 0; i < m_buffers.size(); ++i)
+    {
+        struct v4l2_buffer buf = {};
+
+        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf.memory = V4L2_MEMORY_DMABUF;
+        buf.index = i;
+        // TODO: pass dma fd
+        // buf.m.fd = dmafd;
+
+        if (tcam_xioctl(m_fd, VIDIOC_QBUF, &buf) == -1)
+        {
+            perror("VIDIOC_QBUF");
+            return;
+        }
+
     }
 }
 
@@ -1397,7 +1553,7 @@ void V4l2Device::monitor_v4l2_thread_func()
            object is set to 0, which will cause select() to not
            block. */
         fd_set fds;
-        int select_fd = udev_fd+1;
+        int select_fd = udev_fd + 1;
 
         FD_ZERO(&fds);
         FD_SET(udev_fd, &fds);

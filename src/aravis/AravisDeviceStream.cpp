@@ -31,8 +31,10 @@ void tcam::AravisDevice::clear_buffer_info_arb_buffer(buffer_info& info)
     info.arv_buffer = nullptr;
 }
 
-bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> new_list)
+bool AravisDevice::initialize_buffers(std::shared_ptr<BufferPool> pool)
 {
+    auto new_list = pool->get_buffer();
+
     std::scoped_lock lck { arv_camera_access_mutex_ };
 
     GError* err = nullptr;
@@ -53,14 +55,14 @@ bool AravisDevice::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> 
         clear_buffer_info_arb_buffer(info);
     };
 
-    size_t buffer_size = new_list.front()->get_image_buffer_size();
+    size_t buffer_size = new_list.front().lock()->get_image_buffer_size();
     if( buffer_size < payload)
     {
         SPDLOG_WARN("Aravis payload-size ({}) > image_buffer_size ({})", payload, buffer_size);
     }
 
     // we build the according items in a 2 step process, so we are able to pass &info to arv_buffer_new_full
-    for (auto&& buffer : new_list) { this->buffer_list_.push_back(buffer_info { this, buffer }); }
+    for (auto&& buffer : new_list) { this->buffer_list_.push_back(buffer_info { this, buffer.lock() }); }
 
     for (auto& info : buffer_list_)
     {

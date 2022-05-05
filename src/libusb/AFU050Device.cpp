@@ -301,14 +301,15 @@ double tcam::AFU050Device::get_framerate()
     return active_video_format_.get_framerate();
 }
 
-bool tcam::AFU050Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> buffs)
+bool tcam::AFU050Device::initialize_buffers(std::shared_ptr<BufferPool> pool)
 {
+    auto buffs = pool->get_buffer();
     std::scoped_lock lck { buffer_list_mtx_ };
 
     buffer_list_.clear();
     buffer_list_.reserve(buffs.size());
 
-    for (auto& b : buffs) { buffer_list_.push_back({ b, true }); }
+    for (auto& b : buffs) { buffer_list_.push_back({ b.lock(), true }); }
     return true;
 }
 

@@ -51,7 +51,7 @@ public:
     {
         return device;
     }
-    
+
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
         return properties_;
@@ -69,7 +69,12 @@ public:
         return available_videoformats_;
     }
 
-    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) final;
+    std::shared_ptr<tcam::AllocatorInterface> get_allocator() override
+    {
+        return nullptr;
+    };
+
+    bool initialize_buffers(std::shared_ptr<BufferPool> pool) final;
     bool release_buffers() final;
 
     void requeue_buffer(const std::shared_ptr<ImageBuffer>&) final;
