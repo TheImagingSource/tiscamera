@@ -105,7 +105,7 @@ std::vector<std::shared_ptr<Memory>> V4L2Allocator::allocate_userptr(size_t leng
         auto ptr = malloc(length);
         if (!ptr)
         {
-            // TODO: error handling
+            SPDLOG_ERROR("malloc failed ({}): {}", errno, strerror(errno));
             continue;
         }
         buffers.push_back(std::make_shared<Memory>(shared_from_this(), TCAM_MEMORY_TYPE_USERPTR, length, ptr));
@@ -142,6 +142,12 @@ std::vector<std::shared_ptr<Memory>> V4L2Allocator::allocate_mmap(size_t length,
 
     }
 
+    if (req.count != buffer_count)
+    {
+        SPDLOG_ERROR("Can only allocate {} mmap buffer. Aborting.", req.count);
+        return {};
+    }
+
     for (unsigned int n_buffers = 0; n_buffers < buffer_count; ++n_buffers)
     {
         struct v4l2_buffer buf = {};
@@ -150,13 +156,7 @@ std::vector<std::shared_ptr<Memory>> V4L2Allocator::allocate_mmap(size_t length,
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = n_buffers;
 
-        // if (tcam_xioctl(fd_, VIDIOC_QUERYBUF, &buf) == -1)
-        // {
-        //     return {};
-        // }
-
         auto ptr =
-            /* use pre-allocated memory */
             (unsigned char*)mmap(NULL,
                                  buffer_size,
                                  PROT_READ | PROT_WRITE, /* required */
@@ -167,11 +167,10 @@ std::vector<std::shared_ptr<Memory>> V4L2Allocator::allocate_mmap(size_t length,
         if (ptr == MAP_FAILED)
         {
             SPDLOG_ERROR("MMAP failed for buffer {}. Aborting. {}", n_buffers, strerror(errno));
-            // TODO: errno
             continue;
         }
 
-
+        SPDLOG_TRACE("New mmap buffer {} {}", n_buffers, fmt::ptr(ptr));
         buffers.push_back(std::make_shared<Memory>(shared_from_this(), TCAM_MEMORY_TYPE_MMAP, length, ptr));
 
         // TODO: find way to ensure fourcc is correctly handled
@@ -281,14 +280,7 @@ void tcam::V4L2Allocator::free_mmap(void* ptr, size_t length)
     }
     else
     {
-        SPDLOG_ERROR("FREE MMAP");
-
-        // auto buf = buffers.at(i).buffer->getImageBuffer();
-
-        // buf.pData = nullptr;
-        // buf.length = 0;
-
-        // buffers.at(i).buffer->set_image_buffer(buf);
+        SPDLOG_TRACE("FREE mmap");
     }
 }
 

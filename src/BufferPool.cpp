@@ -36,6 +36,17 @@ tcam::BufferPool::BufferPool(TCAM_MEMORY_TYPE t, std::shared_ptr<AllocatorInterf
 tcam::BufferPool::~BufferPool() {}
 
 
+outcome::result<void> tcam::BufferPool::configure(const VideoFormat& format,
+                                                  size_t buffer_count)
+{
+    auto ret = clear();
+
+    format_ = format;
+    count_ = buffer_count;
+
+    return outcome::success();
+}
+
 outcome::result<void> tcam::BufferPool::allocate(const VideoFormat& format,
                                                  size_t buffer_count)
 {
@@ -54,6 +65,28 @@ outcome::result<void> tcam::BufferPool::allocate(const VideoFormat& format,
     for (auto& m : memory)
     {
         buffer_.push_back(std::make_shared<ImageBuffer>(format, m));
+    }
+
+    return outcome::success();
+}
+
+outcome::result<void> tcam::BufferPool::allocate()
+{
+
+    auto memory = allocator_->allocate(count_, memory_type_, format_.get_required_buffer_size());
+
+    if (memory.size() != count_)
+    {
+        SPDLOG_ERROR("Could only allocate {} of {} requested buffer", memory.size(), count_);
+        return status::UndefinedError;
+    }
+
+    buffer_.clear();
+    buffer_.reserve(memory.size());
+
+    for (auto& m : memory)
+    {
+        buffer_.push_back(std::make_shared<ImageBuffer>(format_, m));
     }
 
     return outcome::success();

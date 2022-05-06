@@ -104,17 +104,18 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
                  new_format.get_fourcc());
 
     // dequeue all buffers
-    struct v4l2_requestbuffers req = {};
+    // TODO: should dequeuing exist?
+    // struct v4l2_requestbuffers req = {};
 
-    req.count = 0; // free all buffers
-    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    req.memory = V4L2_MEMORY_USERPTR;
+    // req.count = 0; // free all buffers
+    // req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    // req.memory = V4L2_MEMORY_USERPTR;
 
-    if (-1 == tcam_xioctl(m_fd, VIDIOC_REQBUFS, &req))
-    {
-        SPDLOG_ERROR("Error while calling VIDIOC_REQBUFS to empty buffer queue. {}",
-                     strerror(errno));
-    }
+    // if (-1 == tcam_xioctl(m_fd, VIDIOC_REQBUFS, &req))
+    // {
+    //     SPDLOG_ERROR("Error while calling VIDIOC_REQBUFS to empty buffer queue. {}",
+    //                  strerror(errno));
+    // }
 
     uint32_t fourcc = new_format.get_fourcc();
 
@@ -177,7 +178,7 @@ VideoFormat V4l2Device::get_active_video_format() const
 
 std::vector<VideoFormatDescription> V4l2Device::get_available_video_formats()
 {
-    SPDLOG_DEBUG("Returning {} formats.", m_available_videoformats.size());
+    //SPDLOG_DEBUG("Returning {} formats.", m_available_videoformats.size());
     return m_available_videoformats;
 }
 
@@ -327,14 +328,13 @@ bool V4l2Device::queue_mmap(int i, std::shared_ptr<ImageBuffer> b)
 
     buf.index = i;
 
-    // requeue buffer
     int ret = tcam_xioctl(m_fd, VIDIOC_QBUF, &buf);
     if (ret == -1)
     {
         SPDLOG_ERROR("Unable to queue mmap buffer({}): {} {}", errno, strerror(errno), fmt::ptr(b->get_image_buffer_ptr()));
         return false;
     }
-    SPDLOG_ERROR("Queued mmap buffer {}", fmt::ptr(b->get_image_buffer_ptr()));
+
     return true;
 }
 
@@ -385,7 +385,6 @@ void V4l2Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
                 }
                 case TCAM_MEMORY_TYPE_MMAP:
                 {
-                    SPDLOG_INFO("Requeueing mmap");
                     if (queue_mmap(i, buf_ptr))
                     {
                         b.is_queued = true;
@@ -745,7 +744,7 @@ bool V4l2Device::set_scaling(const image_scaling& scale)
     }
     else
     {
-        for (const auto& s :m_scale.scales)
+        for (const auto& s : m_scale.scales)
         {
             if (s == scale)
             {
@@ -904,7 +903,7 @@ void V4l2Device::generate_scales()
         auto mode = dynamic_cast<tcam::property::IPropertyInteger*>(p.get());
         int current_value = mode->get_value().value();
 
-        for (int i = mode->get_range().min; i <= mode->get_range().max; i += mode->get_range().stp )
+        for (int i = mode->get_range().min; i <= mode->get_range().max; i += mode->get_range().stp)
         {
             if (!mode->set_value(i))
             {
@@ -1389,8 +1388,6 @@ bool V4l2Device::get_frame()
 
 void V4l2Device::init_userptr_buffers()
 {
-    SPDLOG_DEBUG("Will use {} buffers", m_buffers.size());
-
     struct v4l2_requestbuffers req = {};
 
     req.count = m_buffers.size();
@@ -1401,7 +1398,7 @@ void V4l2Device::init_userptr_buffers()
     {
         if (EINVAL == errno)
         {
-            SPDLOG_ERROR("{} does not support user pointer i/o", device.get_serial().c_str());
+            SPDLOG_ERROR("{} does not support user pointer i/o", device.get_serial());
             return;
         }
         else

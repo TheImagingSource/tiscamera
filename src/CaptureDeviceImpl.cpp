@@ -135,16 +135,23 @@ bool CaptureDeviceImpl::configure_stream(const VideoFormat& format,
         auto ret = pool_->allocate(device_->get_active_video_format(), 10);
 
         // TODO: error handling
-        // if (ret.has_error())
-        // {
-        //     SPDLOG_ERROR("{}", ret.error().message());
-        //     return false;
-        // }
+        if (!ret)
+        {
+            SPDLOG_ERROR("{}", ret.error().message());
+            return false;
+        }
     }
     else
     {
         SPDLOG_INFO("External pool");
         pool_ = pool;
+        auto ret = pool_->allocate();
+
+        if (!ret)
+        {
+            SPDLOG_ERROR("Error while allocating buffer");
+            return false;
+        }
     }
 
     device_->initialize_buffers(pool_);
@@ -174,7 +181,7 @@ bool CaptureDeviceImpl::start_stream(const std::shared_ptr<ImageSink>& sink)
         return false;
     }
 
-    if (!std::dynamic_pointer_cast<ImageSink>(sink_)->start_stream(device_))
+    if (!sink->start_stream(device_))
     {
         return false;
     }

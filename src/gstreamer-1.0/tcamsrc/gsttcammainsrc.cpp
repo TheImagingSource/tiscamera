@@ -425,7 +425,7 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
     self->device->buffer_pool = std::make_shared<tcam::BufferPool>(buffer_type,
                                                                    self->device->device_->get_allocator());
 
-    auto alloc_res = self->device->buffer_pool->allocate(tcam::VideoFormat(format),
+    auto alloc_res = self->device->buffer_pool->configure(tcam::VideoFormat(format),
                                                          state.imagesink_buffers_);
 
     if (!alloc_res)

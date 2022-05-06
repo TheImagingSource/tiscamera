@@ -127,9 +127,6 @@ private:
     tcam_stream_statistics statistics_ = {};
 
     size_t valid_data_length_ = 0;
-    //size_t buffer_size_ = 0;
-    //void* buffer_ptr_ = nullptr;
-
     std::shared_ptr<Memory> buffer_ = nullptr;
 
     const bool is_own_memory_ = false;
