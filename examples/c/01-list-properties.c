@@ -314,6 +314,7 @@ void list_properties(GstElement* source)
             }
             printf("\n\n\n");
         }
+        g_object_unref(base_property);
     }
     g_slist_free_full(names, g_free);
 }

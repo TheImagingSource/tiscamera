@@ -58,6 +58,7 @@ void print_enum_property(GstElement* source, const char* name)
             printf("%s: %s\n", name, value);
         }
     }
+    g_object_unref(property_base);
 }
 
 
@@ -96,6 +97,7 @@ void set_enum_property(GstElement* source, const char* name, const char* value)
             printf("Set %s to %s\n", name, value);
         }
     }
+    g_object_unref(property_base);
 }
 
 
