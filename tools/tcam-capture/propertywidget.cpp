@@ -312,8 +312,8 @@ void IntWidget::slider_changed(int new_value)
 
     if (!is_readonly_)
     {
-        set_in_backend();
-        emit update_category(get_category().c_str());
+        emit value_changed(this);
+        repaint();
     }
 }
 
@@ -329,9 +329,8 @@ void IntWidget::spinbox_changed(qlonglong new_value)
 
     if (!is_readonly_)
     {
-        write_value(new_value);
-
         emit value_changed(this);
+        repaint();
     }
 }
 
@@ -366,7 +365,7 @@ void IntWidget::setup_ui()
         {
             scale = TcamSliderScale::Logarithmic;
         }
-                
+
         p_slider = new TcamSlider(scale);
     }
 
@@ -495,15 +494,14 @@ void DoubleWidget::update()
 
 void DoubleWidget::slider_changed(double new_value)
 {
-    p_box->blockSignals(true);
+    const QSignalBlocker blocker(p_box);
+
     p_box->setValue(new_value);
-    p_box->blockSignals(false);
 
     if (!is_readonly_)
     {
-        set_in_backend();
-        //emit value_changed(this);
-        emit update_category(get_category().c_str());
+        emit value_changed(this);
+        repaint();
     }
 }
 
@@ -511,14 +509,15 @@ void DoubleWidget::spinbox_changed(double new_value)
 {
     if (p_slider)
     {
-        p_slider->blockSignals(true);
+        const QSignalBlocker blocker(p_slider);
+
         p_slider->setValue(new_value);
-        p_slider->blockSignals(false);
     }
-    
+
     if (!is_readonly_)
     {
         emit value_changed(this);
+        repaint();
     }
 }
 
@@ -760,7 +759,7 @@ void StringWidget::update()
     const char* value = tcam_property_string_get_value(p_prop, &err);
 
     HANDLE_ERROR(err, return)
-    
+
     if (value)
     {
         p_label->setText(value);
@@ -769,7 +768,7 @@ void StringWidget::update()
     {
         // this prevents a segfault (yes, really)
         // setting a long text into an empty label causes
-        // a layout change, which seems to have a library 
+        // a layout change, which seems to have a library
         // bug (tested qt 5.15). Adding a longer empty text
         // prevents reformatting
         p_label->setText("                    ");
