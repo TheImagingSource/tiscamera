@@ -34,7 +34,7 @@
   when calling g_signal_connect. It can be used to pass objects etc.
   from your other function to the callback.
 */
-static GstFlowReturn callback(GstElement* sink, void* user_data)
+static GstFlowReturn callback(GstElement* sink, void* /*user_data*/)
 {
     GstSample* sample = NULL;
     /* Retrieve the buffer */
@@ -59,13 +59,15 @@ static GstFlowReturn callback(GstElement* sink, void* user_data)
                 return GST_FLOW_ERROR;
             }
 
-            /* Get a pointer to the image data */
-            unsigned char* data = info.data;
+            // pointer to the image data
 
-            /* Get the pixel value of the center pixel */
-            int stride = video_info->finfo->bits / 8;
-            unsigned int pixel_offset = video_info->width / 2 * stride
-                                        + video_info->width * video_info->height / 2 * stride;
+            // unsigned char* data = info.data;
+
+            // Get the pixel value of the center pixel
+
+            // int stride = video_info->finfo->bits / 8;
+            // unsigned int pixel_offset = video_info->width / 2 * stride
+            //                             + video_info->width * video_info->height / 2 * stride;
 
             // this is only one pixel
             // when dealing with formats like BGRx
@@ -74,7 +76,8 @@ static GstFlowReturn callback(GstElement* sink, void* user_data)
             // pixel_offset+1 => G
             // pixel_offset+2 => R
             // pixel_offset+3 => x
-            pixel_data = info.data[pixel_offset];
+
+            // pixel_data = info.data[pixel_offset];
 
             gst_buffer_unmap(buffer, &info);
             gst_video_info_free(video_info);
