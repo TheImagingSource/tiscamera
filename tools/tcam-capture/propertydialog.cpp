@@ -214,7 +214,7 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
         }
     }
 
-    static const std::string best_order[] = 
+    static const std::string best_order[] =
     {
         "Exposure",
         "Color",
@@ -222,7 +222,8 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
         "Image",
         "Lens",
         "Color Correction",
-        "Special",
+        "Trigger",
+        "DigitalIO",
         "Partial Scan",
         "WDR",
         "Multi-Frame Output Mode",
@@ -261,7 +262,7 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
     for (const auto& cat : known_categories)
     {
         if (std::any_of(added_tabs.begin(),
-                        added_tabs.end(), 
+                        added_tabs.end(),
                         [&cat](const std::string& o){return cat == o;}))
         {
             continue;
