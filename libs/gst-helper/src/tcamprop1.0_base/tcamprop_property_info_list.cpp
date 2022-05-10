@@ -56,12 +56,12 @@ const prop_static_info_float lst::ExposureAutoUpperLimit = make_Float(
     "ExposureAutoUpperLimit",
     "Exposure", "Exposure Auto Upper Limit",
     "Upper limit of the ExposureAuto function.",
-    "µs", FloatRepresentation_t::Logarithmic, Visibility_t::Expert
+    "µs", FloatRepresentation_t::Logarithmic, Visibility_t::Beginner
 );
 const prop_static_info_boolean lst::ExposureAutoUpperLimitAuto = make_Boolean(
     "ExposureAutoUpperLimitAuto",
     "Exposure", "Exposure Auto Upper Limit Auto",
-    "Automatically sets the upper limit to match the Acquisition Frame Rate.", Visibility_t::Expert
+    "Automatically sets the upper limit to match the Acquisition Frame Rate.", Visibility_t::Beginner
 );
 const prop_static_info_boolean lst::ExposureAutoHighlightReduction = make_Boolean(
     "ExposureAutoHighlightReduction",
@@ -425,91 +425,91 @@ const prop_static_info_integer lst::StrobeDelay = make_Integer(
 
 const prop_static_info_enumeration lst::TriggerMode = make_Enumeration(
     "TriggerMode",
-    "Special", "Trigger Mode",
+    "Trigger", "Trigger Mode",
     "Controls if the selected trigger is active."
 );
 const prop_static_info_command lst::TriggerSoftware = make_Command(
     "TriggerSoftware",
-    "Special", "Trigger Software",
+    "Trigger", "Trigger Software",
     "Generates an internal trigger. TriggerSource must be set to Software."
 );
 const prop_static_info_enumeration lst::TriggerSource = make_Enumeration(
     "TriggerSource",
-    "Special", "Trigger Source",
+    "Trigger", "Trigger Source",
     "Specifies the internal signal or physical input Line to use as the trigger source."
 );
 //const prop_static_info_enumeration lst::TriggerPolarity = make_Enumeration(
 //    "TriggerPolarity",
-//    "Special", "Trigger Polarity",
+//    "Trigger", "Trigger Polarity",
 //    "#TODO"
 //);
 const prop_static_info_enumeration lst::TriggerSelector = make_Enumeration(
     "TriggerSelector",
-    "Special", "Trigger Selector",
+    "Trigger", "Trigger Selector",
     "Controls the way in which the exposure time is controlled in trigger mode."
 );
 //const prop_static_info_enumeration lst::TriggerExposureMode = make_Enumeration(
 //    "TriggerExposureMode",
-//    "Special", "Trigger Exposure Mode",
+//    "Trigger", "Trigger Exposure Mode",
 //    "#TODO"
 //);
 
 //const prop_static_info_integer lst::TriggerBurstCount = make_Integer(
 //    "TriggerBurstCount",
-//    "Special",
+//    "Trigger",
 //    "Trigger Burst Count",
 //    "Controls the count of frames to generate per trigger pulse."
 //);
 
 const prop_static_info_enumeration lst::TriggerOperation = make_Enumeration(
     "TriggerOperation",
-    "Special", "Trigger Operation",
+    "Trigger", "Trigger Operation",
     "Controls the operation mode of the sensor in trigger mode."
 );
 
 const prop_static_info_enumeration lst::TriggerActivation = make_Enumeration(
     "TriggerActivation",
-    "Special", "Trigger Activation",
+    "Trigger", "Trigger Activation",
     "The Trigger Polarity parameter controls whether a trigger event is accepted on the rising or falling edge of the signal connected to the TRIGGER_IN line."
 );
 
 const prop_static_info_enumeration lst::TriggerOverlap = make_Enumeration(
     "TriggerOverlap",
-    "Special", "Trigger Overlap",
+    "Trigger", "Trigger Overlap",
     "Specifies the type trigger overlap permitted with the previous frame or line. This defines when a valid trigger will be accepted (or latched) for a new frame or a new line."
 );
 
 const prop_static_info_float lst::TriggerMask = make_Float(
     "TriggerMask",
-    "Special", "Trigger Mask",
+    "Trigger", "Trigger Mask",
     "Specifies the time for which trigger pulses are ignored after accepting a trigger signal.",
     "µs"
 );
 
 const prop_static_info_float lst::TriggerDenoise = make_Float(
     "TriggerDenoise",
-    "Special", "Trigger Denoise",
+    "Trigger", "Trigger Denoise",
     "Specifies the time for which trigger input has to be high in order to be accepted as a trigger signal.",
     "µs"
 );
 
 const prop_static_info_float lst::TriggerDelay = make_Float(
     "TriggerDelay",
-    "Special", "Trigger Delay",
+    "Trigger", "Trigger Delay",
     "Specifies the delay in microseconds (us) to apply after the trigger reception before activating it.",
     "µs"
 );
 
 const prop_static_info_float lst::TriggerDebouncer = make_Float(
     "TriggerDebouncer",
-    "Special", "Trigger Debouncer",
+    "Trigger", "Trigger Debouncer",
     "Specifies the time for which trigger input has to be low in order accept the next trigger signal.",
     "µs"
 );
 
 const prop_static_info_boolean lst::IMXLowLatencyTriggerMode = make_Boolean(
     "IMXLowLatencyTriggerMode",
-    "Special", "IMX Low-Latency Mode",
+    "Trigger", "IMX Low-Latency Mode",
     "Controls whether the sensor operates in low-latency trigger mode."
 );
 
@@ -533,13 +533,13 @@ const prop_static_info_integer lst::GPIO = make_Integer(
 
 const prop_static_info_integer lst::AcquisitionBurstFrameCount = make_Integer(
     "AcquisitionBurstFrameCount",
-    "Special", "Acquisition Burst Frame Count",
+    "Trigger", "Acquisition Burst Frame Count",
     "Number of frames to acquire for each trigger."
 );
 
 const prop_static_info_integer lst::AcquisitionBurstInterval =
     make_Integer("AcquisitionBurstInterval",
-                 "Special",
+                 "Trigger",
                  "Acquisition Burst Interval",
                  "Minimum interval between frames in an acquisition burst.",
                  "µs");
