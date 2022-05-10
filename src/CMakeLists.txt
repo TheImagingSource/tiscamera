@@ -32,6 +32,8 @@ add_library(tcam-base STATIC
   DeviceInfo.cpp
   ImageBuffer.h
   ImageBuffer.cpp
+  Allocator.h
+  Allocator.cpp
   Memory.h
   Memory.cpp
   BufferPool.h

@@ -45,5 +45,6 @@ public:
 
 };
 
+std::shared_ptr<AllocatorInterface> get_default_allocator();
 
 } // namespace tcam

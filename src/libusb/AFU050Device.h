@@ -66,10 +66,9 @@ public:
 
     double get_framerate();
 
-
     std::shared_ptr<tcam::AllocatorInterface> get_allocator() override
     {
-        return nullptr;
+        return tcam::get_default_allocator();
     };
 
     bool initialize_buffers(std::shared_ptr<BufferPool> pool) final;
