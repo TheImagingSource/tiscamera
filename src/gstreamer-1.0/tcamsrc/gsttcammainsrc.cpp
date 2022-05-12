@@ -21,6 +21,7 @@
 #include "../../logging.h"
 #include "../tcamgstbase/tcamgstbase.h"
 #include "../tcamgstbase/tcamgststrings.h"
+#include "gst/gstvalue.h"
 #include "gstmetatcamstatistics.h"
 #include "mainsrc_device_state.h"
 #include "mainsrc_tcamprop_impl.h"
@@ -807,19 +808,38 @@ static bool fetch_framerate_via_query_caps_worker(device_state& device,
     }
 
     const auto& fps_list = fps_res.value();
-
-    int fps_min_num = 0;
-    int fps_min_den = 0;
-    int fps_max_num = 0;
-    int fps_max_den = 0;
-    gst_util_double_to_fraction(fps_list.min(), &fps_min_num, &fps_min_den);
-    gst_util_double_to_fraction(fps_list.max(), &fps_max_num, &fps_max_den);
-
     GValue fps_val = G_VALUE_INIT;
-    g_value_init(&fps_val, GST_TYPE_FRACTION_RANGE);
 
-    gst_value_set_fraction_range_full(&fps_val, fps_min_num, fps_min_den, fps_max_num, fps_max_den);
+    if (!fps_list.is_discrete_list())
+    {
+        int fps_min_num = 0;
+        int fps_min_den = 0;
+        int fps_max_num = 0;
+        int fps_max_den = 0;
+        gst_util_double_to_fraction(fps_list.min(), &fps_min_num, &fps_min_den);
+        gst_util_double_to_fraction(fps_list.max(), &fps_max_num, &fps_max_den);
 
+        g_value_init(&fps_val, GST_TYPE_FRACTION_RANGE);
+
+        gst_value_set_fraction_range_full(&fps_val, fps_min_num, fps_min_den, fps_max_num, fps_max_den);
+    }
+    else
+    {
+        g_value_init(&fps_val, GST_TYPE_LIST);
+        for (const auto& fps : fps_list.to_list())
+        {
+            int frame_rate_numerator = 0;
+            int frame_rate_denominator = 0;
+            gst_util_double_to_fraction(fps, &frame_rate_numerator, &frame_rate_denominator);
+
+            GValue fraction = G_VALUE_INIT;
+            g_value_init(&fraction, GST_TYPE_FRACTION);
+            gst_value_set_fraction(&fraction, frame_rate_numerator, frame_rate_denominator);
+
+            gst_value_list_append_value(&fps_val, &fraction);
+            g_value_unset(&fraction);
+        }
+    }
     GstCaps* result_caps = gst_caps_copy(query_caps);
 
     gst_caps_set_value(result_caps, "framerate", &fps_val);
