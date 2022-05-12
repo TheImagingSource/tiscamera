@@ -22,10 +22,9 @@ import sys
 import re
 import gi
 
-gi.require_version("Tcam", "0.1")
 gi.require_version("Gst", "1.0")
 
-from gi.repository import Tcam, Gst, GLib
+from gi.repository import Gst, GLib
 
 
 loop = GLib.MainLoop()
