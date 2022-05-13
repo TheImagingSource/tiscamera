@@ -447,7 +447,40 @@ Save and load properties via GstStructure.
    </details>
 
 
-                    
+.. _examples_gstquery:
+
+13 - GstQuery
+=============
+
+Shows how to use GstQuery for GstCaps verification.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Show sample code</a></summary>
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/13-gstquery.c
+         :language: c
+         :linenos:
+         :lines: 16-
+
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/13-gstquery.py
+         :language: python
+         :linenos:
+         :lines: 1, 16-
+
+.. raw:: html
+
+   </details>
+
+
+
 .. _examples_further:
 
 Further Examples

@@ -47,7 +47,7 @@ EXECS = 00-list-devices \
 	10-metadata \
 	11-json-state \
 	12-tcam-properties \
-
+	13-gstquery
 
 all: $(EXECS)
 
