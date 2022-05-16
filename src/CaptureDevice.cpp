@@ -97,9 +97,9 @@ bool CaptureDevice::free_stream()
     return impl->free_stream();
 }
 
-bool CaptureDevice::start_stream(std::shared_ptr<ImageSink> sink)
+bool CaptureDevice::start_stream()
 {
-    return impl->start_stream(sink);
+    return impl->start_stream();
 }
 
 

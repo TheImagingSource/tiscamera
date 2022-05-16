@@ -91,18 +91,28 @@ public:
 
     // playback related:
 
+    /**
+     * @brief Start a new stream
+     * @param format - VideoFormat that shall be used
+     * @param sink - SinkInterface that shall be called for new images
+     * @param pool - BufferPool that shall be used
+     * @return true if stream could successfully be configured
+     */
     bool configure_stream(const VideoFormat& format,
                           std::shared_ptr<ImageSink>& sink,
                           std::shared_ptr<BufferPool> pool = nullptr);
 
+    /**
+     * @brief explicitly free all stream resources
+     * @return true if all resources could be freed
+     */
     bool free_stream();
 
     /**
      * @brief Start a new stream
-     * @param sink - SinkInterface that shall be called for new images
      * @return true if stream could successfully be initialized
      */
-    bool start_stream(const std::shared_ptr<ImageSink>& sink);
+    bool start_stream();
 
     /**
      * @brief Stop currently running stream
@@ -134,7 +144,7 @@ private:
 
     std::vector<VideoFormatDescription> available_output_formats_;
 
-    std::shared_ptr<IImageBufferSink> sink_;
+    std::shared_ptr<ImageSink> sink_;
     std::shared_ptr<BufferPool> pool_ = nullptr;
 
     tcam::stream::filter::SoftwarePropertyWrapper property_filter_;

@@ -173,15 +173,15 @@ bool CaptureDeviceImpl::free_stream()
 }
 
 
-bool CaptureDeviceImpl::start_stream(const std::shared_ptr<ImageSink>& sink)
+bool CaptureDeviceImpl::start_stream()
 {
-    if (sink == nullptr)
+    if (sink_ == nullptr)
     {
-        SPDLOG_ERROR("No viable sink passed.");
+        SPDLOG_ERROR("No viable sink configured.");
         return false;
     }
 
-    if (!sink->start_stream(device_))
+    if (!sink_->start_stream(device_))
     {
         return false;
     }

@@ -447,7 +447,7 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
         GST_ERROR_OBJECT(self, "Failed to configure stream.");
     }
 
-    auto res = self->device->device_->start_stream(self->device->sink);
+    auto res = self->device->device_->start_stream();
     if (!res)
     {
         GST_ERROR_OBJECT(self, "Failed to start stream.");

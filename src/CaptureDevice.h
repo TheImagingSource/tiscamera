@@ -110,10 +110,9 @@ public:
 
     /**
      * @brief Start a new stream
-     * @param sink - SinkInterface that shall be called for new images
      * @return true if stream could successfully be initialized
      */
-    bool start_stream(std::shared_ptr<ImageSink> sink);
+    bool start_stream();
 
 
     /**
