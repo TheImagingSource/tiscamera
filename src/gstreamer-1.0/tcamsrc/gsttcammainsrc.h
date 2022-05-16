@@ -52,6 +52,7 @@ struct _GstTcamMainSrc
 {
     GstPushSrc element;
 
+    GstBufferPool* pool;
     device_state* device;
 
     gdouble fps;

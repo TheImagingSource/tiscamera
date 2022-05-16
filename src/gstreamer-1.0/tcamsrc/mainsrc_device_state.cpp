@@ -19,10 +19,96 @@
 #include "../../logging.h"
 #include "mainsrc_tcamprop_impl.h"
 #include "tcambind.h"
+#include "../tcamgstbase/tcamgststrings.h"
+#include "../tcamgstbase/tcamgstbase.h"
 
 #include <tcamprop1.0_gobject/tcam_property_serialize.h>
 
 #define GST_CAT_DEFAULT tcam_mainsrc_debug
+
+
+tcam::TCAM_MEMORY_TYPE tcam::mainsrc::io_mode_to_memory_type(GstTcamIOMode mode)
+{
+    switch (mode)
+    {
+        case GST_TCAM_IO_AUTO:
+        case GST_TCAM_IO_USERPTR:
+        {
+            return tcam::TCAM_MEMORY_TYPE_USERPTR;
+        }
+        case GST_TCAM_IO_MMAP:
+            return tcam::TCAM_MEMORY_TYPE_MMAP;
+        case GST_TCAM_IO_DMABUF:
+            return tcam::TCAM_MEMORY_TYPE_DMA;
+        case GST_TCAM_IO_DMABUF_IMPORT:
+            return tcam::TCAM_MEMORY_TYPE_DMA_IMPORT;
+    }
+    return tcam::TCAM_MEMORY_TYPE_USERPTR;
+}
+
+GstTcamIOMode tcam::mainsrc::memory_type_to_io_mode(tcam::TCAM_MEMORY_TYPE t)
+{
+    switch (t)
+    {
+        case tcam::TCAM_MEMORY_TYPE_USERPTR:
+            return GST_TCAM_IO_USERPTR;
+        case tcam::TCAM_MEMORY_TYPE_MMAP:
+            return GST_TCAM_IO_MMAP;
+        case tcam::TCAM_MEMORY_TYPE_DMA:
+            return GST_TCAM_IO_DMABUF;
+        case tcam::TCAM_MEMORY_TYPE_DMA_IMPORT:
+            return GST_TCAM_IO_DMABUF_IMPORT;
+    }
+    return GST_TCAM_IO_USERPTR;
+}
+
+
+gboolean tcam::mainsrc::caps_to_format(GstCaps& c, tcam::tcam_video_format& format)
+{
+
+    GstStructure* structure = gst_caps_get_structure(&c, 0);
+
+    int height = 0;
+    int width = 0;
+    gst_structure_get_int(structure, "width", &width);
+    gst_structure_get_int(structure, "height", &height);
+    const GValue* frame_rate = gst_structure_get_value(structure, "framerate");
+    const char* format_string = gst_structure_get_string(structure, "format");
+
+    uint32_t fourcc;
+    if (format_string)
+    {
+        fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure),
+                                                                 format_string);
+    }
+    else
+    {
+        fourcc =
+            tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure), "");
+    }
+
+    double framerate;
+    if (frame_rate != nullptr)
+    {
+        auto fps_numerator = gst_value_get_fraction_numerator(frame_rate);
+        auto fps_denominator = gst_value_get_fraction_denominator(frame_rate);
+        gst_util_fraction_to_double(fps_numerator, fps_denominator, &framerate);
+    }
+    else
+    {
+        framerate = 1.0;
+    }
+
+    format.fourcc = fourcc;
+    format.width = width;
+    format.height = height;
+    format.framerate = framerate;
+
+    format.scaling = tcam::gst::caps_get_scaling(&c);
+
+    return true;
+}
+
 
 bool device_state::set_device_serial(const std::string& str) noexcept
 {
@@ -118,6 +204,39 @@ GstCaps* device_state::get_device_caps() const
     return gst_caps_copy(all_caps_.get());
 }
 
+
+bool device_state::configure_stream()
+{
+    auto conf_res = device_->configure_stream(format_, sink, buffer_pool);
+
+    if (!conf_res)
+    {
+        GST_ELEMENT_ERROR(parent_, CORE, CAPS, ("Failed to configure stream."), (NULL));
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
+void device_state::start_stream()
+{
+    if (device_)
+    {
+        device_->start_stream();
+    }
+}
+
+
+void device_state::stop_stream()
+{
+    if (device_)
+    {
+        device_->stop_stream();
+    }
+    is_streaming_ = false;
+}
+
+
 void device_state::stop_and_clear()
 {
     if (device_)
@@ -130,7 +249,7 @@ void device_state::stop_and_clear()
         queue.pop();
         if (sink)
         {
-            sink->requeue_buffer(ptr);
+            sink->requeue_buffer(ptr.tcam_buffer);
         }
     }
 }

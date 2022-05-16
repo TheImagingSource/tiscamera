@@ -17,6 +17,7 @@
 #pragma once
 
 #include "../../tcam.h"
+#include "gsttcambufferpool.h"
 #include "gsttcammainsrc.h"
 
 #include <condition_variable>
@@ -31,6 +32,25 @@
 
 namespace tcam::mainsrc
 {
+
+
+tcam::TCAM_MEMORY_TYPE io_mode_to_memory_type(GstTcamIOMode mode);
+
+GstTcamIOMode memory_type_to_io_mode(tcam::TCAM_MEMORY_TYPE t);
+
+gboolean caps_to_format(GstCaps& c, tcam::tcam_video_format& format);
+
+
+struct buffer_info
+{
+    void* addr;
+    GstBuffer* gst_buffer;
+    std::shared_ptr<tcam::ImageBuffer> tcam_buffer;
+    bool pooled;
+};
+
+//std::vector<buffer_info> get_buffer_collection(GstTcamBufferPool* pool);
+
 struct src_interface_list : tcamprop1::property_list_interface
 {
     std::vector<std::unique_ptr<tcamprop1::property_interface>> tcamprop_properties;
@@ -72,6 +92,7 @@ public: // data members currently still used in gstmainsrc.cpp, maybe move them 
     std::shared_ptr<tcam::ImageSink> sink;
 
     std::shared_ptr<tcam::BufferPool> buffer_pool;
+    tcam::VideoFormat format_;
 
     GstTcamIOMode io_mode_ = GST_TCAM_IO_AUTO;
 
@@ -80,7 +101,7 @@ public: // streaming stuff
     std::condition_variable stream_cv_;
     std::atomic<bool> is_streaming_ = false;
 
-    std::queue<std::shared_ptr<tcam::ImageBuffer>> queue;
+    std::queue<tcam::mainsrc::buffer_info> queue;
 
 public: // sink init properties, should be moved into this object
     int imagesink_buffers_ = 10;
@@ -108,6 +129,10 @@ public:
     {
         return device_ != nullptr;
     }
+
+    bool configure_stream();
+    void start_stream();
+    void stop_stream();
 
     void stop_and_clear();
     void close();

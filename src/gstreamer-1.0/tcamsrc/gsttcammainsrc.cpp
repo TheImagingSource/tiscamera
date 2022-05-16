@@ -23,6 +23,7 @@
 #include "../tcamgstbase/tcamgststrings.h"
 #include "gst/gstvalue.h"
 #include "gstmetatcamstatistics.h"
+#include "gsttcambufferpool.h"
 #include "mainsrc_device_state.h"
 #include "mainsrc_tcamprop_impl.h"
 #include "tcambind.h"
@@ -47,8 +48,6 @@ G_DEFINE_TYPE_WITH_CODE(GstTcamMainSrc,
                                               tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init))
 
 
-
-
 GType gst_tcam_io_mode_get_type(void)
 {
     static GType tcam_io_mode = 0;
@@ -67,42 +66,6 @@ GType gst_tcam_io_mode_get_type(void)
         tcam_io_mode = g_enum_register_static("GstTcamIOMode", io_modes);
     }
     return tcam_io_mode;
-}
-
-
-tcam::TCAM_MEMORY_TYPE io_mode_to_memory_type(GstTcamIOMode mode)
-{
-    switch (mode)
-    {
-        case GST_TCAM_IO_AUTO:
-        case GST_TCAM_IO_USERPTR:
-        {
-            return tcam::TCAM_MEMORY_TYPE_USERPTR;
-        }
-        case GST_TCAM_IO_MMAP:
-            return tcam::TCAM_MEMORY_TYPE_MMAP;
-        case GST_TCAM_IO_DMABUF:
-            return tcam::TCAM_MEMORY_TYPE_DMA;
-        case GST_TCAM_IO_DMABUF_IMPORT:
-            return tcam::TCAM_MEMORY_TYPE_DMA_IMPORT;
-    }
-    return tcam::TCAM_MEMORY_TYPE_USERPTR;
-}
-
-GstTcamIOMode memory_type_to_io_mode(tcam::TCAM_MEMORY_TYPE t)
-{
-    switch (t)
-    {
-        case tcam::TCAM_MEMORY_TYPE_USERPTR:
-            return GST_TCAM_IO_USERPTR;
-        case tcam::TCAM_MEMORY_TYPE_MMAP:
-            return GST_TCAM_IO_MMAP;
-        case tcam::TCAM_MEMORY_TYPE_DMA:
-            return GST_TCAM_IO_DMABUF;
-        case tcam::TCAM_MEMORY_TYPE_DMA_IMPORT:
-            return GST_TCAM_IO_DMABUF_IMPORT;
-    }
-    return GST_TCAM_IO_USERPTR;
 }
 
 
@@ -334,70 +297,20 @@ static GstCaps* gst_tcam_mainsrc_get_caps(GstBaseSrc* src, GstCaps* filter __att
     return caps;
 }
 
-static void gst_tcam_mainsrc_sh_callback(std::shared_ptr<tcam::ImageBuffer> buffer, void* data);
-
-
-static gboolean caps_to_format(GstCaps& c, tcam::tcam_video_format& format)
-{
-
-    GstStructure* structure = gst_caps_get_structure(&c, 0);
-
-    int height = 0;
-    int width = 0;
-    gst_structure_get_int(structure, "width", &width);
-    gst_structure_get_int(structure, "height", &height);
-    const GValue* frame_rate = gst_structure_get_value(structure, "framerate");
-    const char* format_string = gst_structure_get_string(structure, "format");
-
-    uint32_t fourcc;
-    if (format_string)
-    {
-        fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure),
-                                                                 format_string);
-    }
-    else
-    {
-        fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure),
-                                                                 "");
-    }
-
-    double framerate;
-    if (frame_rate != nullptr)
-    {
-        auto fps_numerator = gst_value_get_fraction_numerator(frame_rate);
-        auto fps_denominator = gst_value_get_fraction_denominator(frame_rate);
-        gst_util_fraction_to_double(fps_numerator, fps_denominator, &framerate);
-    }
-    else
-    {
-        framerate = 1.0;
-    }
-
-    format.fourcc = fourcc;
-    format.width = width;
-    format.height = height;
-    format.framerate = framerate;
-
-    format.scaling = tcam::gst::caps_get_scaling(&c);
-
-    return true;
-}
-
 
 static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
 
-    auto& state = *self->device;
-
     GST_DEBUG_OBJECT(self, "Requested caps = %s", gst_helper::to_string(*caps).c_str());
 
+    // TODO: move to somewhere more sensible?
     self->device->stop_and_clear();
     self->device->sink = nullptr;
 
     tcam::tcam_video_format format = {};
 
-    if (!caps_to_format(*caps, format))
+    if (!tcam::mainsrc::caps_to_format(*caps, format))
     {
         GST_ERROR("Unable to interpret caps. Aborting");
         return false;
@@ -405,6 +318,7 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
 
     self->fps = format.framerate;
 
+    self->device->format_ = tcam::VideoFormat(format);
     if (!self->device->device_->set_video_format(tcam::VideoFormat(format)))
     {
         GST_ERROR_OBJECT(self, "Unable to set format in device");
@@ -412,49 +326,9 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
         return FALSE;
     }
 
-    self->device->device_->set_drop_incomplete_frames(state.drop_incomplete_frames_);
+    // self->device->device_->set_drop_incomplete_frames(state.drop_incomplete_frames_);
 
-    auto cb_func = [self](const std::shared_ptr<tcam::ImageBuffer>& cb)
-    {
-        gst_tcam_mainsrc_sh_callback(cb, self);
-    };
-
-    tcam::TCAM_MEMORY_TYPE buffer_type = io_mode_to_memory_type(state.io_mode_);
-    //buffer_type = tcam::TCAM_MEMORY_TYPE_MMAP;
-
-    self->device->buffer_pool = std::make_shared<tcam::BufferPool>(buffer_type,
-                                                                   self->device->device_->get_allocator());
-
-    auto alloc_res = self->device->buffer_pool->configure(tcam::VideoFormat(format),
-                                                         state.imagesink_buffers_);
-
-    if (!alloc_res)
-    {
-        GST_ERROR("%s", alloc_res.error().message().c_str());
-        GST_ERROR_OBJECT(self, "%s", alloc_res.error().message().c_str());
-        return FALSE;
-    }
-
-    self->device->sink = std::make_shared<tcam::ImageSink>(
-        cb_func, tcam::VideoFormat(format), state.imagesink_buffers_);
-
-    auto conf_res = self->device->device_->configure_stream(tcam::VideoFormat(format),
-                                                            self->device->sink,
-                                                            self->device->buffer_pool);
-
-    if (!conf_res)
-    {
-        GST_ERROR_OBJECT(self, "Failed to configure stream.");
-    }
-
-    auto res = self->device->device_->start_stream();
-    if (!res)
-    {
-        GST_ERROR_OBJECT(self, "Failed to start stream.");
-        return FALSE;
-    }
-
-    self->device->is_streaming_ = true;
+    // self->device->is_streaming_ = true;
     GST_INFO_OBJECT(self, "Successfully set caps to: %s", gst_helper::to_string(*caps).c_str());
 
     return TRUE;
@@ -610,134 +484,47 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
 }
 
 
-static void buffer_destroy_callback(gpointer data)
-{
-    destroy_transfer* trans = static_cast<destroy_transfer*>(data);
-
-    GstTcamMainSrc* self = trans->self;
-    if (!GST_IS_TCAM_MAINSRC(self))
-    {
-        GST_ERROR_OBJECT(self, "Received source is not valid.");
-        delete trans;
-        return;
-    }
-
-    std::unique_lock<std::mutex> lck(self->device->stream_mtx_);
-
-    if (trans->ptr == nullptr)
-    {
-        GST_ERROR_OBJECT(self, "Memory does not seem to exist.");
-        delete trans;
-        return;
-    }
-
-    if (self->device->sink)
-    {
-        self->device->sink->requeue_buffer(trans->ptr);
-    }
-    else
-    {
-        GST_ERROR_OBJECT(self, "Unable to requeue buffer. Device is not open.");
-    }
-
-    delete trans;
-}
-
-
-static void gst_tcam_mainsrc_sh_callback(std::shared_ptr<tcam::ImageBuffer> buffer, void* data)
-{
-    GstTcamMainSrc* self = GST_TCAM_MAINSRC(data);
-    if (!self->device->is_streaming_)
-    {
-        // requeue the buffer so that the backend does not run out
-        self->device->sink->requeue_buffer(buffer);
-        return;
-    }
-
-    std::unique_lock<std::mutex> lck(self->device->stream_mtx_);
-
-    self->device->queue.push(buffer);
-
-    self->device->stream_cv_.notify_all();
-
-    lck.unlock();
-}
-
-
-static void statistics_to_gst_structure(const tcam::tcam_stream_statistics* statistics,
-                                        GstStructure* struc)
-{
-
-    if (!statistics || !struc)
-    {
-        return;
-    }
-
-    gst_structure_set(struc,
-                      "frame_count",
-                      G_TYPE_UINT64,
-                      statistics->frame_count,
-                      "frames_dropped",
-                      G_TYPE_UINT64,
-                      statistics->frames_dropped,
-                      "capture_time_ns",
-                      G_TYPE_UINT64,
-                      statistics->capture_time_ns,
-                      "camera_time_ns",
-                      G_TYPE_UINT64,
-                      statistics->camera_time_ns,
-                      "is_damaged",
-                      G_TYPE_BOOLEAN,
-                      statistics->is_damaged,
-                      nullptr);
-}
-
-
 static GstFlowReturn gst_tcam_mainsrc_create(GstPushSrc* push_src, GstBuffer** buffer)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(push_src);
 
-    std::shared_ptr<tcam::ImageBuffer> ptr;
+    if (self->device->n_buffers_ != -1)
     {
-        std::unique_lock<std::mutex> lck(self->device->stream_mtx_);
-
-        if (self->device->n_buffers_ != -1)
-        {
-            /*
+        /*
               TODO: self->n_buffers should have same type as ptr->get_statistics().frame_count
             */
-            if (self->device->n_buffers_delivered_ >= (guint)self->device->n_buffers_)
-            {
-                GST_INFO_OBJECT(
-                    self,
-                    "Stopping stream after %llu buffers.",
-                    static_cast<long long unsigned int>(self->device->n_buffers_delivered_));
-                return GST_FLOW_EOS;
-            }
-            self->device->n_buffers_delivered_++;
-        }
-
-        while (true)
+        if (self->device->n_buffers_delivered_ >= (guint)self->device->n_buffers_)
         {
-            if (self->device->queue.empty() && self->device->is_streaming_)
-            {
-                // wait until new buffer arrives or stop waiting when we have to shut down
-                self->device->stream_cv_.wait(lck);
-            }
-            if (!self->device->is_streaming_)
-            {
-                return GST_FLOW_EOS;
-            }
-            if (!self->device->queue.empty())
-            {
-                ptr = self->device->queue.front();
-                self->device->queue.pop(); // remove buffer from queue
-
-                break;
-            }
+            GST_INFO_OBJECT(
+                self,
+                "Stopping stream after %llu buffers.",
+                static_cast<long long unsigned int>(self->device->n_buffers_delivered_));
+            return GST_FLOW_EOS;
         }
+        self->device->n_buffers_delivered_++;
     }
 
+start_create:
+
+    GstBufferPool* src_pool = gst_base_src_get_buffer_pool(GST_BASE_SRC(push_src));
+
+    if (src_pool)
+    {
+        // this blocks until we get a buffer
+        GstFlowReturn pool_ret = gst_buffer_pool_acquire_buffer(src_pool, buffer, nullptr);
+
+        if (pool_ret == GST_FLOW_FLUSHING)
+        {
+            return GST_FLOW_FLUSHING;
+        }
+
+        if (!*buffer)
+        {
+            goto start_create;
+        }
+
+        gst_object_unref(src_pool);
+    }
     /* TODO: check why aravis throws an incomplete buffer error
        but the received images are still valid */
     // if (!tcam::is_image_buffer_complete(self->ptr))
@@ -746,69 +533,6 @@ static GstFlowReturn gst_tcam_mainsrc_create(GstPushSrc* push_src, GstBuffer** b
 
     //     goto wait_again;
     // }
-
-    destroy_transfer* trans = new destroy_transfer;
-    trans->self = self;
-    trans->ptr = ptr;
-
-    *buffer = gst_buffer_new_wrapped_full(static_cast<GstMemoryFlags>(0),
-                                          ptr->get_image_buffer_ptr(),
-                                          ptr->get_image_buffer_size(),
-                                          0,
-                                          ptr->get_valid_data_length(),
-                                          trans,
-                                          buffer_destroy_callback);
-
-    gst_buffer_set_flags(*buffer, GST_BUFFER_FLAG_LIVE);
-
-    // add meta statistics data to buffer
-    {
-        uint64_t gst_frame_count = self->element.parent.segment.position;
-        auto stat = ptr->get_statistics();
-
-        GstStructure* struc = gst_structure_new_empty("TcamStatistics");
-        statistics_to_gst_structure(&stat, struc);
-
-        auto meta = gst_buffer_add_tcam_statistics_meta(*buffer, struc);
-
-        if (!meta)
-        {
-            GST_WARNING_OBJECT(self, "Unable to add meta !!!!");
-        }
-        else
-        {
-            // Disable this code when tracing is not enabled
-            if (gst_debug_category_get_threshold(GST_CAT_DEFAULT) >= GST_LEVEL_TRACE)
-            {
-                const char* damaged = nullptr;
-                if (stat.is_damaged)
-                {
-                    damaged = "true";
-                }
-                else
-                {
-                    damaged = "false";
-                }
-
-                auto test = fmt::format("Added meta info: \n"
-                                        "gst frame_count: {}\n"
-                                        "backend frame_count {}\n"
-                                        "frames_dropped {}\n"
-                                        "capture_time_ns: {}\n"
-                                        "camera_time_ns: {}\n"
-                                        "is_damaged: {}\n",
-                                        gst_frame_count,
-                                        stat.frame_count,
-                                        stat.frames_dropped,
-                                        stat.capture_time_ns,
-                                        stat.camera_time_ns,
-                                        damaged);
-
-                //GST_TRACE_OBJECT(self, "%s", test.c_str());
-            }
-        }
-
-    } // end meta data
 
     return GST_FLOW_OK;
 }
@@ -886,8 +610,8 @@ static bool fetch_framerate_via_query_caps_worker(device_state& device,
         tcam ::VideoFormat { fourcc, { (uint32_t)width, (uint32_t)height }, scale_info });
     if (fps_res.has_error())
     {
-        GST_ERROR(
-            "Failed to get framerates for '%s (%dx%d)' from device.", format_string, width, height);
+        GST_ERROR("Failed to get framerates for '%s (%dx%d)' from device.",
+                  format_string, width, height);
         return false;
     }
 
@@ -992,7 +716,7 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
 
             tcam::tcam_video_format format;
 
-            if (caps_to_format(*c, format))
+            if (tcam::mainsrc::caps_to_format(*c, format))
             {
                 tcam::VideoFormat fmt(format);
                 auto formats = self->device->device_->get_available_video_formats();
@@ -1058,7 +782,7 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
             }
             else
             {
-                tmp =  gst_helper::make_consume_ptr(gst_caps_copy(query_caps));
+                tmp = gst_helper::make_consume_ptr(gst_caps_copy(query_caps));
             }
 
             if (!has_field(*query_caps, "framerate"))
@@ -1316,6 +1040,84 @@ static void gst_tcam_mainsrc_get_property(GObject* object,
 }
 
 
+static gboolean tcam_mainsrc_decide_allocation(GstBaseSrc* base_src, GstQuery* query)
+{
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(base_src);
+
+    if (GST_QUERY_TYPE(query) != GST_QUERY_ALLOCATION)
+    {
+        return FALSE;
+    }
+
+    GstCaps* caps = gst_pad_get_current_caps(GST_BASE_SRC_PAD(base_src));
+
+    GST_DEBUG("Allocation caps: %s", gst_caps_to_string(caps));
+
+    tcam::tcam_video_format format;
+    tcam::mainsrc::caps_to_format(*caps, format);
+
+    gst_caps_unref(caps);
+
+
+    GstBufferPool* src_pool = gst_base_src_get_buffer_pool(GST_BASE_SRC(base_src));
+
+    if (src_pool)
+    {
+        // these steps are taking to prevent a reconfigure
+        
+        //GST_ERROR("existing pool");
+
+        if (gst_buffer_pool_is_active(self->pool))
+        {
+            GstBufferPool* pool = src_pool;
+            if (gst_query_get_n_allocation_pools(query))
+            {
+                gst_query_set_nth_allocation_pool(
+                    query, 0, pool, self->device->format_.get_required_buffer_size(), 1, 0);
+            }
+            else
+            {
+                gst_query_add_allocation_pool(
+                    query, pool, self->device->format_.get_required_buffer_size(), 1, 0);
+            }
+        }
+
+        gst_object_unref(src_pool);
+    }
+    else
+    {
+        //GST_ERROR("!+!+!+!+!+!+!+!+!+!+!+!+!+!+! NEW POOL !+!+!+!+!+!+!+!+!+!+!+!+!+!+!");
+        self->pool = gst_tcam_buffer_pool_new(GST_ELEMENT(self), caps);
+        unsigned int size = 10;
+
+        auto* config = gst_buffer_pool_get_config(self->pool);
+        gst_buffer_pool_config_set_params(
+            config, caps, tcam::VideoFormat(format).get_required_buffer_size(), 10, 10);
+        gst_buffer_pool_set_config(self->pool, config);
+
+
+        gst_query_add_allocation_pool(query, self->pool, size, self->device->imagesink_buffers_, 0);
+
+
+        self->device->device_->set_drop_incomplete_frames(self->device->drop_incomplete_frames_);
+
+        bool ret = TRUE;
+
+        self->device->format_ = tcam::VideoFormat(format);
+
+        self->device->is_streaming_ = true;
+        if (ret)
+        {
+            // if (!gst_buffer_pool_set_active(self->pool, TRUE))
+            // {
+            //     return FALSE;
+            // }
+        }
+    }
+    return TRUE;
+}
+
+
 static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
 {
     GObjectClass* gobject_class = G_OBJECT_CLASS(klass);
@@ -1440,6 +1242,7 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
     gstbasesrc_class->fixate = gst_tcam_mainsrc_fixate_caps;
     gstbasesrc_class->negotiate = gst_tcam_mainsrc_negotiate;
     gstbasesrc_class->query = gst_tcam_mainsrc_query;
+    gstbasesrc_class->decide_allocation = tcam_mainsrc_decide_allocation;
 
     gstpushsrc_class->create = gst_tcam_mainsrc_create;
 }

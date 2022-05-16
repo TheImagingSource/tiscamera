@@ -35,11 +35,15 @@ add_library(gsttcamsrc SHARED
 	gsttcammainsrc.cpp
 	mainsrc_tcamprop_impl.h
 	mainsrc_tcamprop_impl.cpp
+	mainsrc_device_state.h
 	mainsrc_device_state.cpp
     tcamsrc_tcamprop_impl.h
     tcamsrc_tcamprop_impl.cpp
 
-	mainsrc_gst_device_provider.cpp
+    gsttcambufferpool.h
+    gsttcambufferpool.cpp
+
+    mainsrc_gst_device_provider.cpp
 	mainsrc_gst_device_provider.h
 	mainsrc_gst_device.cpp
 	mainsrc_gst_device.h
