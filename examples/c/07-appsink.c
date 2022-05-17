@@ -33,8 +33,11 @@
   says there is data for us. user_data has to be defined
   when calling g_signal_connect. It can be used to pass objects etc.
   from your other function to the callback.
+
+  user_data can point to additional data for your usage
+            marked as unused to prevent compiler warnings
 */
-static GstFlowReturn callback(GstElement* sink, void* /*user_data*/)
+static GstFlowReturn callback(GstElement* sink, void* user_data __attribute__((unused)))
 {
     GstSample* sample = NULL;
     /* Retrieve the buffer */
