@@ -530,17 +530,24 @@ void MainWindow::open_pipeline(FormatHandling handling)
 
     p_displaysink = gst_bin_get_by_name(GST_BIN(p_pipeline), "sink");
 
-    if (has_property(p_displaysink, "video-sink"))
+    if (!p_displaysink)
     {
-        GstElement* disp = nullptr;
-        g_object_get(p_displaysink, "video-sink", &disp, nullptr);
-        gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(disp), this->ui->widget->winId());
-        g_object_unref(disp);
+        qErrnoWarning("Unable to find sink element. Potentially unable to stream...");
     }
+    else
+    {
 
-    m_fps_signal_id = g_signal_connect(
-        p_displaysink, "fps-measurements", G_CALLBACK(&FPSCounter::fps_callback), &m_fps_counter);
+        if (has_property(p_displaysink, "video-sink"))
+        {
+            GstElement* disp = nullptr;
+            g_object_get(p_displaysink, "video-sink", &disp, nullptr);
+            gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(disp), this->ui->widget->winId());
+            g_object_unref(disp);
+        }
 
+        m_fps_signal_id = g_signal_connect(
+            p_displaysink, "fps-measurements", G_CALLBACK(&FPSCounter::fps_callback), &m_fps_counter);
+    }
     gst_element_set_state(p_pipeline, GST_STATE_PLAYING);
 
     connect(&m_fps_counter, &FPSCounter::new_fps_measurement, this, &MainWindow::fps_tick);
@@ -749,6 +756,11 @@ void MainWindow::reset_fps_tick()
 
 void MainWindow::fps_tick(double new_fps)
 {
+    if (!p_displaysink)
+    {
+        return;
+    }
+
     p_fps_label->setText("FPS: " + QString::number(new_fps));
 
     GstElement* sink = nullptr;
