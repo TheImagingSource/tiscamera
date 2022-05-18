@@ -26,7 +26,7 @@ option(TCAM_BUILD_TESTS    "Build tests."                         OFF)
 
 
 option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system libraries" ON)
-option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." OFF)
+option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." ON)
 option(TCAM_DOWNLOAD_MESON "Download version of meson for compilation purposes" ON)
 
 option(TCAM_INSTALL_FORCE_PREFIX "Force CMAKE_INSTALL_PREFIX onto all tiscamera parts. Only works with custom prefix." OFF)
