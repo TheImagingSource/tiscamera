@@ -307,6 +307,10 @@ The most commonly used git commands are:
         # everything or have default behavior
         if compilation == runtime and not self.modules:
             return self.dependencies
+        elif compilation == runtime:
+            ret = self.__get_phase_dependencies("compilation")
+            ret.extend(self.__get_phase_dependencies("runtime"))
+            return ret
 
         if compilation:
             return self.__get_phase_dependencies("compilation")
