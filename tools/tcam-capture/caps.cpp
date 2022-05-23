@@ -123,6 +123,29 @@ std::vector<double> gvalue_to_fps_vector(const GValue* framerate)
 {
     std::vector<double> framerates;
 
+    if (G_VALUE_TYPE(framerate) == GST_TYPE_FRACTION_RANGE)
+    {
+        const GValue* fps_min = gst_value_get_fraction_range_min(framerate);
+        const GValue* fps_max = gst_value_get_fraction_range_max(framerate);
+
+        int num = gst_value_get_fraction_numerator(fps_min);
+        int den = gst_value_get_fraction_denominator(fps_min);
+
+        double fps_min_value;
+        gst_util_fraction_to_double(num, den, &fps_min_value);
+
+        num = gst_value_get_fraction_numerator(fps_max);
+        den = gst_value_get_fraction_denominator(fps_max);
+
+        double fps_max_value;
+        gst_util_fraction_to_double(num, den, &fps_max_value);
+
+//        qInfo("range for %dx%d: %f %f", res.width, res.height, fps_min_value, fps_max_value);
+
+        framerates = create_steps_for_range(fps_min_value, fps_max_value);
+    }
+    else if (G_VALUE_TYPE(framerate) == GST_TYPE_LIST)
+    {
     for (unsigned int x = 0; x < gst_value_list_get_size(framerate); ++x)
     {
         const GValue* val = gst_value_list_get_value(framerate, x);
@@ -139,6 +162,11 @@ std::vector<double> gvalue_to_fps_vector(const GValue* framerate)
             qWarning("Handling of framerate handling not implemented for non fraction types.\n");
             break;
         }
+    }
+    }
+    else
+    {
+        qErrnoWarning("GValue type handling not implemented!");
     }
     return framerates;
 }
@@ -173,29 +201,11 @@ std::vector<double> index_framerates(GstElement& element,
 
             const GValue* fps = gst_structure_get_value(struc, "framerate");
 
-            if (G_VALUE_TYPE(fps) == GST_TYPE_FRACTION_RANGE)
-            {
-                const GValue* fps_min = gst_value_get_fraction_range_min(fps);
-                const GValue* fps_max = gst_value_get_fraction_range_max(fps);
-
-                int num = gst_value_get_fraction_numerator(fps_min);
-                int den = gst_value_get_fraction_denominator(fps_min);
-
-                double fps_min_value;
-                gst_util_fraction_to_double(num, den, &fps_min_value);
-
-                num = gst_value_get_fraction_numerator(fps_max);
-                den = gst_value_get_fraction_denominator(fps_max);
-
-                double fps_max_value;
-                gst_util_fraction_to_double(num, den, &fps_max_value);
-
-                framerates = create_steps_for_range(fps_min_value, fps_max_value);
-            }
-            else if (G_VALUE_TYPE(framerate) == GST_TYPE_LIST)
-            {
-                framerates = gvalue_to_fps_vector(fps);
-            }
+            framerates = gvalue_to_fps_vector(fps);
+        }
+        else
+        {
+            framerates = gvalue_to_fps_vector(framerate);
         }
 
         gst_query_unref(fps_query);
