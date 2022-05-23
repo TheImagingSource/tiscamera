@@ -190,6 +190,84 @@ static auto fetch_FPS_enum_framerates(ArvDevice* dev)
     return tcam::framerate_info{ ret };
 }
 
+// workaround for aravis behavior
+// aravis expects FPS
+// not all cameras have that node
+// get_frame_rate(_bounds) uses FPS
+static double get_framerate(ArvCamera* camera)
+{
+    ArvGcNode* node = arv_device_get_feature(arv_camera_get_device(camera), "AcquisitionFrameRate");
+
+    double value = -1.0;
+    GError* err = nullptr;
+
+    if (node)
+    {
+        value = arv_gc_float_get_value(ARV_GC_FLOAT(node), &err);
+    }
+    else {
+        value = arv_camera_get_frame_rate(camera, &err);
+    }
+
+    if (err)
+    {
+        SPDLOG_ERROR("Unable to query framerate: {}", err->message);
+        g_clear_error(&err);
+    }
+
+    return value;
+}
+
+static std::pair<double, double> get_framerate_bounds(ArvCamera* camera)
+{
+    ArvGcNode* node = arv_device_get_feature(arv_camera_get_device(camera), "AcquisitionFrameRate");
+
+    double min = -1;
+    double max = -1;
+    GError* err = nullptr;
+
+    if (node)
+    {
+        min = arv_gc_float_get_min(ARV_GC_FLOAT(node), &err);
+        max = arv_gc_float_get_max(ARV_GC_FLOAT(node), &err);
+    }
+    else
+    {
+        arv_camera_get_frame_rate_bounds(camera, &min, &max, &err);
+    }
+
+    if (err)
+    {
+        SPDLOG_ERROR("Unable to query framerate bounds: {}", err->message);
+        g_clear_error(&err);
+    }
+
+    return {min, max};
+}
+
+
+void set_frame_rate(ArvCamera* camera, double fps)
+{
+    ArvGcNode* node = arv_device_get_feature(arv_camera_get_device(camera), "AcquisitionFrameRate");
+
+
+    GError* err = nullptr;
+    if (node)
+    {
+        arv_gc_float_set_value(ARV_GC_FLOAT(node), fps, &err);
+    }
+    else
+    {
+        arv_camera_set_frame_rate(camera, fps, &err);
+    }
+    if (err)
+    {
+        SPDLOG_ERROR("Failed to set framerate. error: {}", err->message);
+        g_clear_error(&err);
+    }
+}
+
+
 namespace
 {
 struct data_to_restore_active_format
@@ -351,18 +429,10 @@ outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(con
         }
     }
 
-    GError* error = nullptr;
+    auto fps_bounds = get_framerate_bounds(arv_camera_);
 
-    double min = 0.0;
-    double max = 0.0;
-    arv_camera_get_frame_rate_bounds(arv_camera_, &min, &max, &error);
-    if (error)
-    {
-        SPDLOG_WARN("Failed to fetch framerate list. arv_camera_get_frame_rate_bounds error: {}",
-                    error->message);
-        g_clear_error(&error);
-        //return {};    // we skip returning here, to reapply the active format
-    }
+    double min = fps_bounds.first;
+    double max = fps_bounds.second;
 
     // restore previous settings
     restore_data_reapply(arv_camera_, restore_data.value());
@@ -507,12 +577,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         return false;
     }
 
-    arv_camera_set_frame_rate(this->arv_camera_, new_format.get_framerate(), &err);
-    if (err)
-    {
-        SPDLOG_ERROR("Failed to set framerate. error: {}", err->message);
-        g_clear_error(&err);
-    }
+    set_frame_rate(arv_camera_, new_format.get_framerate());
 
     active_video_format_ = read_camera_current_video_format();
     SPDLOG_DEBUG("Active format is now '{}'", active_video_format_.to_string());
@@ -524,13 +589,9 @@ tcam::VideoFormat AravisDevice::read_camera_current_video_format()
 {
     VideoFormat format;
 
+    format.set_framerate(get_framerate(this->arv_camera_));
+
     GError* err = nullptr;
-    format.set_framerate(arv_camera_get_frame_rate(this->arv_camera_, &err));
-    if (err)
-    {
-        SPDLOG_ERROR("Unable to retrieve frame rate: {}", err->message);
-        g_clear_error(&err);
-    }
 
     format.set_fourcc(aravis2fourcc(arv_camera_get_pixel_format(this->arv_camera_, &err)));
     if (err)
