@@ -89,7 +89,7 @@ cmake options
        When v4l2 and Usb3Vision are enabled cameras will be listed twice but with different bookends.
        To select Usb3Vision either set the `type` argument to `aravis`,
        or set the serial to `<serial>-aravis`.
-     - OFF
+     - ON
        
    * - TCAM_VERSION
      - TCAM release version
