@@ -90,18 +90,10 @@ Properties on the same tab are refreshed when:
 - The user presses `F5`.
 - A property is changed
 
-
-  
-.. TODO::
-
-   describe
-
 Caps Dialog
 ===========
 
-.. TODO::
-
-   describe
+The caps dialog allows a full configuration of the used device format.
 
 Info
 ====
@@ -135,18 +127,11 @@ Selector for the tcambin property `conversion-element`.
 
 See :ref:`tcambin properties <tcambin_properties>` for details.
    
-Apply properties on start
--------------------------
+======
+Config
+======
 
-.. TODO::
+tcam-capture has a config directory that can be found at
+`$XDG_CACHE_DIR/the_imaging_source/`.
 
-   implement
-
-=======
-Caching
-=======
-
-tcam-capture has a cache directory that can be found at
-`$XDG_CACHE_DIR/tcam-capture/`.
-
-The default is: `~/.cache/tcam-capture/`
+The default is: `~/.cache/the_imaging_source/`

@@ -124,10 +124,6 @@ Camera Interactions
 
 This sections describes how a program can interact with a camera.
 
-.. todo::
-
-   add cmake/pkg-config/python steps when necessary
-
 .. tabs::
 
    .. group-tab:: c

@@ -23,10 +23,6 @@ E.g.:
 
 Setting several properties via `GstStructure`:
 
-.. todo::
-
-   Add python samples
-
 .. tabs::
 
    .. group-tab:: c
@@ -58,6 +54,9 @@ Setting several properties via `GstStructure`:
          source = ...
 
          new_property_struct = Gst.Structure.empty("tcam-properties")
+                      
+         new_property_struct.set_value("ExposureAuto", "Off")
+         new_property_struct.set_value("ExposureTime", 35000.0)
          
          source.set_property("tcam-properties", new_state)
          
@@ -86,6 +85,16 @@ Reading the `GstStructure` of a opened device:
 
          g_value_unset(&current_properties); // free the GstStructure in the GValue
 
+   .. group-tab:: python
+
+      .. code-block:: python
+
+         source = ...
+
+         state = source.get_property("tcam-properties")
+         print(f"New state of device is:\n{state.to_string()}")
+
+         
 .. note::
    * If a property is locked when loading it, writing to the property is retried after all other properties are written. (This circumvents the problem of property order for e.g. "ExposureTime" and "ExposureAuto")
    * Failed writing/reading of properties gets logged to the gstreamer log.

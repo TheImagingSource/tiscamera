@@ -97,10 +97,6 @@ libtcamgstbase
 
 Common functionality that is shared between the tcam gstreamer elements.
 
-.. todo::
-
-   move threading to own page?
-
 Threading
 =========
 

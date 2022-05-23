@@ -253,9 +253,6 @@ The caps auto selection is dependent on the internally used source element.
 
 If your device uses the tcammainsrc (v4l2, aravis, libusb), see :ref:`here<tcammainsrc_caps_auto_selection>`.
 
-.. todo:: check if pimipisrc and tegrasrc actually document what they are doing.
-          they don't. add to their docs
-
 .. _tcamdutils:
 
 tcamdutils

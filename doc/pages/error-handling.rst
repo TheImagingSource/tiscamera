@@ -10,11 +10,7 @@ This is a small overview as to how error handling might be handled.
 GStreamer
 #########
 
-gst_element_set_state() will return a GstStateChangeReturn value.
-
-.. todo::
-
-   add gstreamer documentation links
+gst_element_set_state() will return a `GstStateChangeReturn <https://gstreamer.freedesktop.org/documentation/gstreamer/gstelement.html?gi-language=c#GstStateChangeReturn>`_ value.
 
 .. tabs::
 
@@ -82,7 +78,7 @@ gst_element_set_state() will return a GstStateChangeReturn value.
 tcam-property
 #############
 
-tcam-property handles error by returning a GError to the user.
+tcam-property handles error by returning a `GError <https://docs.gtk.org/glib/struct.Error.html>`_ to the user.
 All possible error types are defined in the enum :ref:`tcamerror`
 
 .. tabs::
