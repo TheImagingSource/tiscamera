@@ -293,6 +293,19 @@ bool V4l2Device::release_buffers()
         return false;
     }
 
+    // dequeue all buffers
+    struct v4l2_requestbuffers req = {};
+
+    req.count = 0; // free all buffers
+    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    req.memory = V4L2_MEMORY_USERPTR;
+
+    if (-1 == tcam_xioctl(m_fd, VIDIOC_REQBUFS, &req))
+    {
+        SPDLOG_ERROR("Error while calling VIDIOC_REQBUFS to empty buffer queue. {}",
+                     strerror(errno));
+    }
+
     m_buffers.clear();
     return true;
 }
