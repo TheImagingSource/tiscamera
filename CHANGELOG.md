@@ -35,6 +35,7 @@ GStreamer:
 - tcambin/tcamsrc signals `device-open`/`device-close`
 - support for tcamdutils-cuda
 - example on how to retrieve GstMeta data in python
+- GstQuery for AcceptCaps and Caps in tcammainsrc
 
 Tools:
 - `tcam-ctrl --packages` - list all installed 'The Imaging Source' packages and their version
@@ -54,6 +55,7 @@ CMake:
 - installation variables are now all defined in CMakeInstall.cmake
 - cmake option `TCAM_BUILD_ARAVIS` now defaults to `ON`
 - cmake option `TCAM_BUILD_DOCUMENTATION` now defaults to `ON`
+- cmake option `TCAM_ARAVIS_USB_VISION` now defaults to `ON`
 
 GStreamer:
 - gstreamer buffers are now marked as "live"
@@ -77,6 +79,7 @@ Tools:
 - tcam-capture rewrite. Now implemented with C++.
   Aimed to be as simple as possible.
   For more complex use cases use tis-measure.
+  https://www.theimagingsource.com/support/downloads-for-linux/end-user-software/icmeasureappimage/
 
 ### Fixed
 
@@ -108,6 +111,7 @@ Tools:
 - In camera Auto Functions ROI Top/Left/Width/Height may not correctly update when using preset
 - AFU050: image/jpeg,width=1280,height=960 may cause segfault when used.
   Cause is in external library.
+- GstQueryCaps for Usb3Vision devices via aravis does not work correctly
 
 ## [0.14.0] - 2021.07.05
 
