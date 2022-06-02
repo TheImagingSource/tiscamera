@@ -32,7 +32,8 @@
 SUBSYSTEM=="usb", ATTRS{idVendor}=="199e", \
                   GROUP="video", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
 
-
+# disable powersaving for TIS devices to prevent any potential issues
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="199e", TEST=="power/control", ATTR{power/control}="on"
 
 #######
 # UVC Extension Units
