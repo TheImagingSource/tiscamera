@@ -24,6 +24,16 @@ Version 1.0.0 introduces several API changes.
 
 To port your software check [our upgrade guide](doc/upgrade_guide_1.0.md)
 
+The following device types are not supported going forward:
+
+- 23G
+- 23U
+- 73U
+- AFU130
+
+A complete compatibility list can be found here:
+https://www.theimagingsource.com/documentation/tiscamera/supported-devices.html
+
 ## Dependencies
 
 ### Compilation
