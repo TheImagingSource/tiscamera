@@ -336,8 +336,6 @@ static GstFlowReturn gst_tcamconvert_transform_ip(GstBaseTransform* base, GstBuf
 
 /**
  * Helper function for copy_metadata
- * basically a functional copy from:
- * https://cgit.freedesktop.org/gstreamer/gstreamer/tree/libs/gst/base/gstadapter.c
  */
 static gboolean foreach_metadata(GstBuffer* inbuf, GstMeta** meta, gpointer user_data)
 {
@@ -345,20 +343,11 @@ static gboolean foreach_metadata(GstBuffer* inbuf, GstMeta** meta, gpointer user
 
     const GstMetaInfo* info = (*meta)->info;
 
-    //auto klass = GST_BASE_TRANSFORM_GET_CLASS( trans );
-
-    bool copy = false;
-    if (GST_META_FLAG_IS_SET(*meta, GST_META_FLAG_POOLED)
-        || gst_meta_api_type_has_tag(info->api, _gst_meta_tag_memory))
-    {
-        copy = false;
-    }
-    else
-    {
-        copy = true;
-    }
-
-    if (copy)
+    // check memory tag
+    // This metadata stays relevant as long as memory layout is unchanged.
+    // copying thus invalidates the meta data
+    // https://gstreamer.freedesktop.org/documentation/gstreamer/gstmeta.html?gi-language=c#GST_META_TAG_MEMORY_STR
+    if (!gst_meta_api_type_has_tag(info->api, _gst_meta_tag_memory))
     {
         // ignore narrowing warning for -1
         // gstreamer documentation says it has to be -1 for off
