@@ -15,6 +15,7 @@
  */
 
 #include "Allocator.h"
+#include <memory>
 
 namespace
 {
@@ -60,6 +61,6 @@ namespace
 
 std::shared_ptr<tcam::AllocatorInterface> tcam::get_default_allocator()
 {
-
+    return std::make_shared<DefaultAllocator>();
 
 }

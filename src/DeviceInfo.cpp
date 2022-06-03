@@ -15,6 +15,7 @@
  */
 
 #include "DeviceInfo.h"
+#include "public_utils.h"
 
 #include <cstring>
 #include <string>
@@ -67,15 +68,5 @@ enum TCAM_DEVICE_TYPE DeviceInfo::get_device_type() const
 
 std::string DeviceInfo::get_device_type_as_string() const
 {
-    switch (device.type)
-    {
-        case TCAM_DEVICE_TYPE_V4L2:
-            return "v4l2";
-        case TCAM_DEVICE_TYPE_ARAVIS:
-            return "aravis";
-        case TCAM_DEVICE_TYPE_LIBUSB:
-            return "libusb";
-        default:
-            return "unknown";
-    }
+    return tcam_device_type_to_string(device.type);
 }

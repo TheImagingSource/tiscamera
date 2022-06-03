@@ -16,6 +16,7 @@
 
 #include "public_utils.h"
 
+#include "base_types.h"
 #include "utils.h"
 
 #include <algorithm>
@@ -61,6 +62,8 @@ std::string tcam::tcam_device_type_to_string(TCAM_DEVICE_TYPE type)
             return "mipi";
         case TCAM_DEVICE_TYPE_TEGRA:
             return "tegra";
+        case TCAM_DEVICE_TYPE_VIRTCAM:
+            return "virtcam";
         case TCAM_DEVICE_TYPE_UNKNOWN:
         default:
             return "unknown";
@@ -92,6 +95,8 @@ TCAM_DEVICE_TYPE tcam::tcam_device_from_string(const std::string& input)
         return TCAM_DEVICE_TYPE_MIPI;
     else if (str == "tegra")
         return TCAM_DEVICE_TYPE_TEGRA;
+    else if (str == "virtcam")
+        return TCAM_DEVICE_TYPE_VIRTCAM;
 
     return TCAM_DEVICE_TYPE_UNKNOWN;
 }
@@ -100,7 +105,7 @@ std::vector<tcam_image_size> tcam::get_standard_resolutions(const tcam_image_siz
                                                             const tcam_image_size& max)
 {
     static const tcam_image_size resolutions[] = {
-        { 320, 240 }, 
+        { 320, 240 },
         { 640, 480 },
         { 960, 720 },
         { 1280, 720 },  // HDTV

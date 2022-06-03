@@ -155,6 +155,14 @@ target_link_libraries(tcam
   tcamprop1::base
   )
 
+if (TCAM_BUILD_VIRTCAM)
+  add_subdirectory(virtcam)
+
+  target_compile_definitions(tcam PRIVATE -DHAVE_VIRTCAM)
+
+  target_link_libraries(tcam PRIVATE tcam-backend-virtcam)
+
+endif (TCAM_BUILD_VIRTCAM)
 
 if (TCAM_BUILD_V4L2)
   add_subdirectory(v4l2)

@@ -16,6 +16,7 @@
 
 #include "DeviceInterface.h"
 
+#include "base_types.h"
 #include "logging.h"
 
 #include <algorithm>
@@ -32,6 +33,10 @@
 
 #ifdef HAVE_LIBUSB
 #include "libusb/libusb_api.h"
+#endif
+
+#ifdef HAVE_VIRTCAM
+#include "virtcam/virtcam_api.h"
 #endif
 
 
@@ -63,6 +68,12 @@ std::vector<DeviceInfo> tcam::get_device_list()
 
 #endif
 
+#ifdef HAVE_VIRTCAM
+
+    auto virtcam_list = virtcam::VirtBackend::get_instance()->get_device_list();
+    ret.insert(ret.end(), virtcam_list.begin(), virtcam_list.end());
+
+#endif
 
     return ret;
 }
@@ -101,6 +112,16 @@ std::shared_ptr<DeviceInterface> tcam::open_device_interface(const DeviceInfo& d
 #else
                 SPDLOG_ERROR("LibUsb has not been enabled as a backend. Compile tiscamera with "
                              "libusb enabled.");
+#endif
+            }
+            case TCAM_DEVICE_TYPE_VIRTCAM:
+            {
+
+#ifdef HAVE_VIRTCAM
+                return virtcam::VirtBackend::get_instance()->open_device(device);
+#else
+                SPDLOG_ERROR("Virtcam has not been enabled as a backend. Compile tiscamera with "
+                             "virtcam enabled.");
 #endif
             }
             default:
