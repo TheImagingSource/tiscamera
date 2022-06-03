@@ -92,6 +92,7 @@ Tools:
 
 ### Removed
 
+- Support for 23G, 23U, 73U and AFU130
 - gstreamer elements tcamautoexposure, tcamwhitebalance, tcamautofocus
 - tcamprop 0.1 API
 - firmware-update
