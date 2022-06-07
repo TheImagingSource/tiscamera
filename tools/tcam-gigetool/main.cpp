@@ -23,6 +23,8 @@
 #include <memory>
 #include <string>
 
+namespace
+{
 enum class IP_Mode
 {
     DHCP,
@@ -796,6 +798,63 @@ int execute_batch_upload (const CLI::App& app)
 }
 
 
+int execute_check_control(const CLI::App& app)
+{
+    auto ident = get_camera_ident(app);
+    auto camera = findCamera(ident);
+    if (!camera)
+    {
+        return 1;
+    }
+
+    if (!camera->isReachable())
+    {
+        std::cerr << "Camera is not reachable" << std::endl;
+        return 1;
+    }
+    if (!camera->getIsBusy())
+    {
+        std::cout << "Camera is not controlled by anyone." << std::endl;
+        return 0;
+    }
+
+    static constexpr int GEV_PRIMARY_APPLICATION_PORT_REGISTER = 0x0A04;
+    static constexpr int GEV_PRIMARY_APPLICATION_IP_ADDRESS_REGISTER = 0x0A14;
+    static constexpr int GEV_HEARTBEAT_TIMEOUT_REGISTER = 0x0938;
+    uint32_t port;
+    uint32_t address;
+    uint32_t timeout;
+    if (!camera->sendReadRegister(GEV_PRIMARY_APPLICATION_IP_ADDRESS_REGISTER, &address))
+    {
+        std::cerr << "Unable to read address register from device." << std::endl;
+        return 2;
+    }
+    if (!camera->sendReadRegister(GEV_PRIMARY_APPLICATION_PORT_REGISTER, &port))
+    {
+        std::cerr << "Unable to read port register from device." << std::endl;
+        return 2;
+    }
+    if (!camera->sendReadRegister(GEV_HEARTBEAT_TIMEOUT_REGISTER, &timeout))
+    {
+        std::cerr << "Unable to read timeout register from device." << std::endl;
+        return 2;
+    }
+
+    // hacky fix
+    // many firmware versions return a wrong value for the port information
+    // the value might require an additional conversions
+    // check if valid and fix otherwise
+    if (port > 65535)
+    {
+        port = ntohs(ntohl(port));
+    }
+
+    std::cout << "Controlling IP: " << tis::int2ip(ntohl(address)) << ":" << port << std::endl
+        << "Heartbeat Duration: " << timeout << " µs" << std::endl;
+    return 0;
+}
+
+
 // all allowed characters
 static const std::string list_format_chars = "msuingINGfdSMr";
 
@@ -823,7 +882,7 @@ struct ListValidator : public CLI::Validator
     }
 };
 const static ListValidator list_validator;
-
+} // namespace
 
 int main(int argc, char* argv[])
 {
@@ -890,6 +949,8 @@ int main(int argc, char* argv[])
     app_batch_fw->add_option("--file", "Firmware file to use")->check(CLI::ExistingFile)->required();
     app_batch_fw->add_option("-b,--baseaddress", "Firmware file to use")->check(CLI::ExistingFile)->required();
 
+    auto check_control = app.add_subcommand("check-control", "find IP of controlling PC");
+
     app.require_subcommand();
     // CLI11 uses "TEXT" as a filler for the option string arguments
     // replace it with "SERIAL" to make the help text more intuitive.
@@ -926,6 +987,10 @@ int main(int argc, char* argv[])
     else if (*app_batch_fw)
     {
         return execute_batch_upload(*app_batch_fw);
+    }
+    else if (*check_control)
+    {
+        return execute_check_control(*check_control);
     }
 
     return 0;

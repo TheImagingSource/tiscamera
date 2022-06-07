@@ -142,3 +142,8 @@ The following arguments may be required by a command:
       (default=x.x.x.10)
 
       
+.. option:: check-control IDENTIFIER
+
+   Checks if given camera is currently in use.
+   Prints IP and port that currently controls the camera.
+
