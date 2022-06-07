@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+- UDev rule to disable usb power management for TIS devices
+- tcammainsrc property `io-mode`
+  Allows selection of backend memory allocation
+- tcammainsrc bufferpool
+- tcam-gigetool: check-control command
+  Get IP/port that controls the camera
+
 ## [1.0.0] - 2022.06.01
 
 ### Added
