@@ -64,6 +64,8 @@ public:
 
     void stop_stream() final;
 
+    void trigger_device_lost();
+
 private:
     std::atomic<bool> m_is_stream_on { false };
 

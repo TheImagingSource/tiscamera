@@ -18,11 +18,19 @@
 
 #include "../logging.h"
 #include "../utils.h"
+#include "spdlog/spdlog.h"
 
 #include <algorithm>
+#include <bits/stdc++.h>
+#include <cmath> /* ceil */
+#include <cstdint>
 #include <cstring> /* memcpy*/
+#include <dutils_img/image_bayer_pattern.h>
 #include <dutils_img/image_transform_base.h>
 #include <sys/mman.h>
+
+using namespace img::by_transform;
+
 
 tcam::virtcam::VirtcamDevice::VirtcamDevice(const DeviceInfo& info)
 {
@@ -30,16 +38,17 @@ tcam::virtcam::VirtcamDevice::VirtcamDevice(const DeviceInfo& info)
 
     tcam_video_format_description desc_list[] = {
         { FOURCC_MONO8, "Mono8?" },
+        { FOURCC_RGGB8, "RGGB8?" },
         { FOURCC_RGGB16, "RGGB16?" },
     };
     tcam_resolution_description res_type = {
-        TCAM_RESOLUTION_TYPE_FIXED,
+        TCAM_RESOLUTION_TYPE_RANGE,
         { 640, 480 },
-        { 640, 480 },
-        1, 1,
+        { 1920, 1080 },
+        16, 4,
         image_scaling {},
     };
-    framerate_mapping m = { res_type, { 15., 30. } };
+    framerate_mapping m = { res_type, { 15., 30., 60.} };
 
     for (auto&& d : desc_list)
     {
@@ -136,6 +145,13 @@ void tcam::virtcam::VirtcamDevice::stop_stream()
     stream_thread_.join();
 }
 
+void tcam::virtcam::VirtcamDevice::trigger_device_lost ()
+{
+    stop_stream();
+    notify_device_lost();
+}
+
+
 void tcam::virtcam::VirtcamDevice::stream_thread_main()
 {
     const int64_t timeout_in_us = 1'000'000 / active_video_format_.get_framerate();
@@ -205,10 +221,144 @@ static void fill_buffer_MONO8(img::img_descriptor dst, int frames_delivered)
     }
 }
 
+
+template<typename T>
+constexpr T calc_speed(T max)
+{
+    if (std::is_same<T, uint8_t>::value)
+    {
+        return 1;
+    }
+    else if (std::is_same<T, uint16_t>::value)
+    {
+        return 85;
+    }
+    else
+    {
+        T tmp = (max >> (sizeof(T) * sizeof(T)));
+
+        tmp -= max % tmp;
+
+        return tmp;
+    }
+}
+
+template<typename T>
+struct PixelCalc
+{
+    static const T CLR_MAX = std::numeric_limits<T>::max();
+    T speed_ = calc_speed(CLR_MAX);
+
+    T r_ = 0;
+    T g_ = 0;
+    T b_ = 0;
+
+    T* rising_ = &r_;
+    T* descending_ = nullptr;
+
+    void step()
+    {
+        if (rising_)
+        {
+            *rising_ += speed_;
+        }
+
+        if (descending_)
+        {
+            *descending_ -= speed_;
+        }
+
+        if ((r_ == CLR_MAX && g_ == 0 && b_ == 0))
+        {
+            rising_ = &g_;
+            descending_ = nullptr;
+        }
+        else if (r_ == CLR_MAX && g_ == CLR_MAX && b_ == 0)
+        {
+            rising_ = nullptr;
+            descending_ = &r_;
+        }
+        else if (g_ == CLR_MAX && r_ == 0 && b_ == 0)
+        {
+            rising_ = &b_;
+            descending_ = nullptr;
+        }
+        else if (r_ == 0 && g_ == CLR_MAX && b_ == CLR_MAX)
+        {
+            rising_ = nullptr;
+            descending_ = &g_;
+        }
+        else if (r_ == 0 && b_ == CLR_MAX && g_ == 0)
+        {
+            rising_ = &r_;
+            descending_ = nullptr;
+        }
+        else if (g_ == 0 && b_ == CLR_MAX && r_ == CLR_MAX)
+        {
+            rising_ = nullptr;
+            descending_ = &b_;
+        }
+    }
+
+    void fill (T& pixel, by_pattern pattern)
+    {
+        switch (pattern)
+        {
+            case by_pattern::BG:
+            {
+                pixel = b_;
+                break;
+            }
+            case by_pattern::GB:
+            case by_pattern::GR:
+            {
+                pixel = g_;
+                break;
+            }
+            case by_pattern::RG:
+            {
+                pixel = r_;
+                break;
+            }
+        }
+    }
+};
+
+
+
+static void fill_buffer_RGGB8(img::img_descriptor dst, int frames_delivered)
+{
+    static PixelCalc<uint8_t> pixel;
+    by_pattern pattern = by_pattern::RG;
+
+    pixel.step();
+
+    for (int y = 0; y < dst.dim.cy; y += 2)
+    {
+        auto line_start0 = (uint8_t*)img::get_line_start<uint8_t>(dst, y + 0);
+        auto line_start1 = (uint8_t*)img::get_line_start<uint8_t>(dst, y + 1);
+
+        for (int x = 0; x < dst.dim.cx; x += 2)
+        {
+            pixel.fill(line_start0[x], pattern);
+            pixel.fill(line_start0[x+1], by_pattern_alg::next_pixel(pattern));
+            auto n = by_pattern_alg::next_line(pattern);
+
+            pixel.fill(line_start1[x], n);
+            pixel.fill(line_start1[x+1], by_pattern_alg::next_pixel(n));
+        }
+    }
+
+}
+
 static void fill_buffer_RGGB16(img::img_descriptor dst, int frames_delivered)
 {
-    uint16_t clr0 = (((128 + frames_delivered) * 2) % 255) << 8;
-    uint16_t clr1 = (((148 + frames_delivered) * 2) % 255) << 8;
+    static PixelCalc<uint16_t> pixel;
+    by_pattern pattern = by_pattern::RG;
+
+    pixel.step();
+    // uint16_t clr0 = (((128 + frames_delivered) * 2) % 255) << 8;
+    // uint16_t clr1 = (((148 + frames_delivered) * 2) % 255) << 8;
 
     for (int y = 0; y < dst.dim.cy; y += 2)
     {
@@ -217,8 +367,13 @@ static void fill_buffer_RGGB16(img::img_descriptor dst, int frames_delivered)
 
         for (int x = 0; x < dst.dim.cx; x += 2)
         {
-            line_start0[x] = clr0;
-            line_start1[x] = clr1;
+
+            pixel.fill(line_start0[x], pattern);
+            pixel.fill(line_start0[x + 1], by_pattern_alg::next_pixel(pattern));
+            auto n = by_pattern_alg::next_line(pattern);
+
+            pixel.fill(line_start1[x], n);
+            pixel.fill(line_start1[x + 1], by_pattern_alg::next_pixel(n));
         }
     }
 }
@@ -230,6 +385,9 @@ void tcam::virtcam::VirtcamDevice::fill_buffer(ImageBuffer& buf)
     {
         case img::fourcc::MONO8:
             fill_buffer_MONO8(dst, frames_delivered_);
+            break;
+        case img::fourcc::RGGB8:
+            fill_buffer_RGGB8(dst, frames_delivered_);
             break;
         case img::fourcc::RGGB16:
             fill_buffer_RGGB16(dst, frames_delivered_);
