@@ -21,12 +21,15 @@ add_library(gsttcamstatistics SHARED
 target_include_directories(gsttcamstatistics
   PRIVATE
   ${GSTREAMER_INCLUDE_DIRS}
+  ${GSTREAMER_BASE_INCLUDE_DIRS}
+  ${GSTREAMER_VIDEO_INCLUDE_DIRS}
   )
 
 target_link_libraries( gsttcamstatistics
   PRIVATE
   ${GSTREAMER_LIBRARIES}
   ${GSTREAMER_BASE_LIBRARIES}
+  ${GSTREAMER_VIDEO_LIBRARIES}
   )
 
 
@@ -53,10 +56,18 @@ add_library(gsttcamsrc SHARED
 	tcambind.cpp
     )
 
+  target_include_directories(gsttcamsrc
+    PRIVATE
+    ${GSTREAMER_INCLUDE_DIRS}
+    ${GSTREAMER_BASE_INCLUDE_DIRS}
+    ${GSTREAMER_VIDEO_INCLUDE_DIRS}
+    )
+
   target_link_libraries( gsttcamsrc
     PRIVATE
 	${GSTREAMER_LIBRARIES}
 	${GSTREAMER_BASE_LIBRARIES}
+    ${GSTREAMER_VIDEO_LIBRARIES}
 
 	tcamgstbase
 	tcam::gst-helper
