@@ -28,6 +28,8 @@ add_library(tcamconvert SHARED
 target_include_directories(tcamconvert
   PRIVATE
   ${GSTREAMER_INCLUDE_DIRS}
+  ${GSTREAMER_BASE_INCLUDE_DIRS}
+  ${GSTREAMER_VIDEO_INCLUDE_DIRS}
   )
 
 set_project_warnings(tcamconvert)
