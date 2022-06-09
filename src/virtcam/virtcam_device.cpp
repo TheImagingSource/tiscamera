@@ -18,6 +18,9 @@
 
 #include "../logging.h"
 #include "../utils.h"
+#include "dutils_img/image_fourcc.h"
+#include "dutils_img/image_fourcc_enum.h"
+#include "dutils_img/image_fourcc_func.h"
 #include "spdlog/spdlog.h"
 
 #include <algorithm>
@@ -27,6 +30,7 @@
 #include <cstring> /* memcpy*/
 #include <dutils_img/image_bayer_pattern.h>
 #include <dutils_img/image_transform_base.h>
+#include <dutils_img/pixel_structs.h>
 #include <sys/mman.h>
 
 using namespace img::by_transform;
@@ -38,6 +42,8 @@ tcam::virtcam::VirtcamDevice::VirtcamDevice(const DeviceInfo& info)
 
     tcam_video_format_description desc_list[] = {
         { FOURCC_MONO8, "Mono8?" },
+        { FOURCC_RGGB12_MIPI_PACKED, "RGGB12p?" },
+        { FOURCC_GRBG12_MIPI_PACKED, "GRBG12p?" },
         { FOURCC_RGGB8, "RGGB8?" },
         { FOURCC_RGGB16, "RGGB16?" },
     };
@@ -54,6 +60,13 @@ tcam::virtcam::VirtcamDevice::VirtcamDevice(const DeviceInfo& info)
     {
         available_videoformats_.push_back(tcam::VideoFormatDescription(nullptr, d, { m }));
     }
+}
+
+tcam::virtcam::VirtcamDevice::VirtcamDevice(const DeviceInfo& info, const std::vector<tcam::VideoFormatDescription>& desc)
+{
+    device = info;
+    available_videoformats_ = desc;
+
 }
 
 tcam::virtcam::VirtcamDevice::~VirtcamDevice()
@@ -222,6 +235,253 @@ static void fill_buffer_MONO8(img::img_descriptor dst, int frames_delivered)
 }
 
 
+struct line_values
+{
+    uint16_t v0, v1;
+};
+
+
+struct bayer16
+{
+    uint16_t v0, v1;
+};
+
+using namespace img::pixel_type;
+
+
+template<typename T> T generate_struct(line_values vals) = delete;
+
+
+template<> bayer16 generate_struct<bayer16>(line_values vals)
+{
+    return bayer16 { vals.v0, vals.v1 };
+}
+
+
+template<> RAW12_MIPI_PACKED generate_struct<RAW12_MIPI_PACKED>(line_values vals)
+{
+    return RAW12_MIPI_PACKED { vals.v0 >> 8,
+                               vals.v1 >> 8,
+                               (vals.v0 >> 4 & 0x0F) | (vals.v1 >> 4 & 0x0F) << 4 };
+}
+
+
+template<class TStructType, int struct_step_size, int x_step_size>
+void fill_image(img::img_descriptor dst, line_values even, line_values odd)
+{
+//    SPDLOG_ERROR("Filling {}:{} - {}:{}",even.v0, even.v1, odd.v0, odd.v1);
+
+    for (int y = 0; y < dst.dim.cy; y += 2)
+    {
+        auto line_start0 = img::get_line_start<TStructType>(dst, y + 0);
+        auto line_start1 = img::get_line_start<TStructType>(dst, y + 1);
+
+        int struct_index = 0;
+        for (int x = 0; x < dst.dim.cx; x += x_step_size)
+        {
+            line_start0[struct_index] = generate_struct<TStructType>(even);
+            line_start1[struct_index] = generate_struct<TStructType>(odd);
+
+            struct_index += struct_step_size;
+        }
+    }
+}
+
+struct DefStepSize
+{
+    int pix_max;
+    uint16_t step_size;
+};
+
+static const DefStepSize default_step_size[] = {
+
+    { 255, 1 },
+    { 4095, 63 },
+    { 65535, 83 },
+};
+
+uint16_t get_default_step_size(uint16_t max_pix)
+{
+    for (const auto& entry : default_step_size)
+    {
+        if (entry.pix_max == max_pix)
+        {
+            return entry.step_size;
+        }
+    }
+
+    return 1;
+}
+
+
+struct PixCalc
+{
+    uint16_t CLR_MAX = 4095;
+    uint16_t speed_ = 63;
+    //calc_speed(CLR_MAX);
+
+    uint16_t r_ = 0;
+    uint16_t g_ = 0;
+    uint16_t b_ = 0;
+
+    uint16_t* rising_ = &r_;
+    uint16_t* descending_ = nullptr;
+
+    PixCalc()
+    {
+        SPDLOG_ERROR("def");
+
+        CLR_MAX = INT16_MAX;
+        speed_ = 255;
+    }
+    PixCalc(uint16_t max)
+    {
+        SPDLOG_ERROR("const");
+        CLR_MAX = max;
+        speed_ = 63;
+
+        r_ = 0;
+        g_ = 0;
+        b_ = 0;
+
+        rising_ = &r_;
+        descending_ = nullptr;
+    }
+
+    PixCalc(img::fourcc fcc)
+    {
+        CLR_MAX = pow(2, img::get_bits_per_pixel(fcc)) - 1;
+
+        speed_ = get_default_step_size(CLR_MAX);
+    }
+
+    void step()
+    {
+        if (rising_)
+        {
+            *rising_ += speed_;
+            SPDLOG_ERROR("ris {} -> {}", speed_, *rising_);
+        }
+
+        if (descending_)
+        {
+            SPDLOG_ERROR("desc");
+
+            *descending_ -= speed_;
+        }
+
+        if ((r_ >= CLR_MAX && g_ == 0 && b_ == 0))
+        {
+            rising_ = &g_;
+            descending_ = nullptr;
+        }
+        else if (r_ >= CLR_MAX && g_ >= CLR_MAX && b_ == 0)
+        {
+            rising_ = nullptr;
+            descending_ = &r_;
+        }
+        else if (g_ >= CLR_MAX && r_ == 0 && b_ == 0)
+        {
+            rising_ = &b_;
+            descending_ = nullptr;
+        }
+        else if (r_ == 0 && g_ >= CLR_MAX && b_ >= CLR_MAX)
+        {
+            rising_ = nullptr;
+            descending_ = &g_;
+        }
+        else if (r_ == 0 && b_ >= CLR_MAX && g_ == 0)
+        {
+            rising_ = &r_;
+            descending_ = nullptr;
+        }
+        else if (g_ == 0 && b_ >= CLR_MAX && r_ >= CLR_MAX)
+        {
+            rising_ = nullptr;
+            descending_ = &b_;
+        }
+        SPDLOG_ERROR("step {}:{}:{}", r_,g_,b_);
+    }
+
+    // void fill(T& pixel, by_pattern pattern)
+    // {
+    //     switch (pattern)
+    //     {
+    //         case by_pattern::BG:
+    //         {
+    //             pixel = b_;
+    //             break;
+    //         }
+    //         case by_pattern::GB:
+    //         case by_pattern::GR:
+    //         {
+    //             pixel = g_;
+    //             break;
+    //         }
+    //         case by_pattern::RG:
+    //         {
+    //             pixel = r_;
+    //             break;
+    //         }
+    //     }
+    // }
+
+    line_values generate_even()
+    {
+        return {r_, g_};
+    }
+
+    line_values generate_odd()
+    {
+
+        return {g_, b_};
+    }
+};
+
+
+void f(img::img_descriptor dst)
+{
+    // if (dst.fourcc_type() == img::fourcc::RGGB16)
+    // {
+    //     auto even_values = generate_even(dst.fourcc_type());
+    //     auto odd_values = generate_odd(dst.fourcc_type());
+
+
+    //     fill_image<bayer16, 1, 2>(dst, even_values, odd_values);
+    // }
+    // else
+    if (dst.fourcc_type() == img::fourcc::RGGB12_MIPI_PACKED)
+    {
+        static bool is_init;
+        static PixCalc p;
+        if (!is_init)
+        {
+            //    p = PixCalc(4095) ;
+            is_init = true;
+        }
+        p.step();
+
+        auto even = p.generate_even();
+        auto odd = p.generate_odd();
+        fill_image<RAW12_MIPI_PACKED, 1, 2>(dst, even, odd);
+    }
+    else if (dst.fourcc_type() == img::fourcc::GRBG12_MIPI_PACKED)
+    {
+        static bool is_init;
+        static PixCalc p;
+        if (!is_init)
+        {
+            //    p = PixCalc(4095) ;
+            is_init = true;
+        }
+        p.step();
+
+        auto even = p.generate_even();
+        auto odd = p.generate_odd();
+        fill_image<RAW12_MIPI_PACKED, 1, 2>(dst, even, odd);
+    }
+}
+
 template<typename T>
 constexpr T calc_speed(T max)
 {
@@ -235,6 +495,7 @@ constexpr T calc_speed(T max)
     }
     else
     {
+        return 63;
         T tmp = (max >> (sizeof(T) * sizeof(T)));
 
         tmp -= max % tmp;
@@ -325,11 +586,10 @@ struct PixelCalc
 };
 
 
-
-static void fill_buffer_RGGB8(img::img_descriptor dst, int frames_delivered)
+template<enum by_pattern T>
+static void fill_buffer_bayer8(img::img_descriptor dst)
 {
     static PixelCalc<uint8_t> pixel;
-    by_pattern pattern = by_pattern::RG;
 
     pixel.step();
 
@@ -340,9 +600,9 @@ static void fill_buffer_RGGB8(img::img_descriptor dst, int frames_delivered)
 
         for (int x = 0; x < dst.dim.cx; x += 2)
         {
-            pixel.fill(line_start0[x], pattern);
-            pixel.fill(line_start0[x+1], by_pattern_alg::next_pixel(pattern));
-            auto n = by_pattern_alg::next_line(pattern);
+            pixel.fill(line_start0[x], T);
+            pixel.fill(line_start0[x+1], by_pattern_alg::next_pixel(T));
+            auto n = by_pattern_alg::next_line(T);
 
             pixel.fill(line_start1[x], n);
             pixel.fill(line_start1[x+1], by_pattern_alg::next_pixel(n));
@@ -351,14 +611,12 @@ static void fill_buffer_RGGB8(img::img_descriptor dst, int frames_delivered)
 
 }
 
-static void fill_buffer_RGGB16(img::img_descriptor dst, int frames_delivered)
+template<enum by_pattern T>
+static void fill_buffer_bayer16(img::img_descriptor dst)
 {
     static PixelCalc<uint16_t> pixel;
-    by_pattern pattern = by_pattern::RG;
 
     pixel.step();
-    // uint16_t clr0 = (((128 + frames_delivered) * 2) % 255) << 8;
-    // uint16_t clr1 = (((148 + frames_delivered) * 2) % 255) << 8;
 
     for (int y = 0; y < dst.dim.cy; y += 2)
     {
@@ -368,9 +626,9 @@ static void fill_buffer_RGGB16(img::img_descriptor dst, int frames_delivered)
         for (int x = 0; x < dst.dim.cx; x += 2)
         {
 
-            pixel.fill(line_start0[x], pattern);
-            pixel.fill(line_start0[x + 1], by_pattern_alg::next_pixel(pattern));
-            auto n = by_pattern_alg::next_line(pattern);
+            pixel.fill(line_start0[x], T);
+            pixel.fill(line_start0[x + 1], by_pattern_alg::next_pixel(T));
+            auto n = by_pattern_alg::next_line(T);
 
             pixel.fill(line_start1[x], n);
             pixel.fill(line_start1[x + 1], by_pattern_alg::next_pixel(n));
@@ -387,10 +645,29 @@ void tcam::virtcam::VirtcamDevice::fill_buffer(ImageBuffer& buf)
             fill_buffer_MONO8(dst, frames_delivered_);
             break;
         case img::fourcc::RGGB8:
-            fill_buffer_RGGB8(dst, frames_delivered_);
+            //fill_buffer_bayer8<convert_bayer_fcc_to_bayer8_fcc(dst.fourcc_type())>(dst);
+//            fill_buffer_RGGB8(dst, frames_delivered_);
+            fill_buffer_bayer8<by_pattern::RG>(dst);
+            break;
+        case img::fourcc::GRBG8:
+//            fill_buffer_RGGB8(dst, frames_delivered_);
+            fill_buffer_bayer8<by_pattern::GR>(dst);
             break;
         case img::fourcc::RGGB16:
-            fill_buffer_RGGB16(dst, frames_delivered_);
+            fill_buffer_bayer16<by_pattern::RG>(dst);
+            break;
+        case img::fourcc::GRBG16:
+            fill_buffer_bayer16<by_pattern::GR>(dst);
+            break;
+        case img::fourcc::GBRG16:
+            fill_buffer_bayer16<by_pattern::GB>(dst);
+            break;
+        case img::fourcc::BGGR16:
+            fill_buffer_bayer16<by_pattern::BG>(dst);
+            break;
+        case img::fourcc::RGGB12_MIPI_PACKED:
+        case img::fourcc::GRBG12_MIPI_PACKED:
+            f(dst);
             break;
         default:
             break;
