@@ -92,7 +92,7 @@ else()
 
   else()
 
-    set(TCAM_INSTALL_UDEV "${CMAKE_INSTALL_PREFIX}/udev/rules.d" CACHE PATH "udev rules installation path" FORCE)
+    set(TCAM_INSTALL_UDEV "${CMAKE_INSTALL_PREFIX}/lib/udev/rules.d" CACHE PATH "udev rules installation path" FORCE)
     set(TCAM_INSTALL_SYSTEMD "${CMAKE_INSTALL_PREFIX}/lib/systemd/system/" CACHE PATH "systemd unit installation path" FORCE)
 
     set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" CACHE PATH "pkgconfig installation path" FORCE)
