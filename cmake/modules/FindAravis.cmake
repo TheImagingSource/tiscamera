@@ -20,7 +20,7 @@ find_path(aravis_INCLUDE_DIR
 	arv.h
 	PATHS
 	${aravis_PKGCONF_INCLUDE_DIRS}
-	${aravis0_6_PKGCONF_INCLUDE_DIRS}
+	${aravis0_8_PKGCONF_INCLUDE_DIRS}
 	/usr/local/include
 	# /usr/local/include/aravis-0.4
 	/usr/local/include/aravis-0.8
