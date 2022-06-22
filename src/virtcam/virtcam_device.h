@@ -27,6 +27,8 @@
 namespace tcam::virtcam
 {
 
+class VirtcamPropertyBackend;
+
 class VirtcamDevice : public DeviceInterface
 {
 public:
@@ -83,6 +85,14 @@ private:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> properties_;
 
+    friend class VirtcamPropertyBackend;
+
+    std::shared_ptr<tcam::virtcam::VirtcamPropertyBackend> property_backend_;
+
+
+    std::atomic<bool> trigger_mode_ { false };
+    std::atomic<bool> trigger_next_image_ { false };
+
     std::shared_ptr<BufferPool> pool_ = nullptr;
 
     std::vector<std::shared_ptr<ImageBuffer>> buffer_queue_;
@@ -95,6 +105,8 @@ private:
     std::shared_ptr<ImageBuffer> fetch_free_buffer();
 
     void fill_buffer(ImageBuffer& buf);
+
+    void generate_properties();
 };
 
 } // namespace tcam::virtcam

@@ -18,6 +18,9 @@ add_library(tcam-backend-virtcam STATIC
 	virtcam_api.cpp
 	virtcam_device.h
 	virtcam_device.cpp
+    virtcam_properties_impl.h
+    virtcam_properties_impl.cpp
+    virtcam_properties.cpp
   )
 
 set_project_warnings(tcam-backend-virtcam)

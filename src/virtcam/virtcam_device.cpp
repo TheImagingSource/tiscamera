@@ -60,6 +60,8 @@ tcam::virtcam::VirtcamDevice::VirtcamDevice(const DeviceInfo& info)
     {
         available_videoformats_.push_back(tcam::VideoFormatDescription(nullptr, d, { m }));
     }
+
+    generate_properties();
 }
 
 tcam::virtcam::VirtcamDevice::VirtcamDevice(const DeviceInfo& info, const std::vector<tcam::VideoFormatDescription>& desc)
@@ -184,10 +186,22 @@ void tcam::virtcam::VirtcamDevice::stream_thread_main()
             {
                 auto res = stream_thread_cv_.wait_until(lck, next_time);
                 send_image = res == std::cv_status::timeout;
+                // trigger mode but no software trigger signal
+                // reset to false to prevent delivery
+                if (trigger_mode_ && !trigger_next_image_)
+                {
+                    send_image = false;
+                }
+                if (trigger_mode_ && trigger_next_image_)
+                {
+                    trigger_next_image_ = false;
+                }
             }
 
             if (stream_thread_ended_)
+            {
                 break;
+            }
         }
 
         if (send_image)
