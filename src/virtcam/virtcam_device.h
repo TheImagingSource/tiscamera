@@ -24,6 +24,14 @@
 #include <mutex> // std::mutex, std::unique_lock
 #include <thread>
 
+
+// forward declaration
+
+namespace tcam::generator
+{
+class IGenerator;
+}
+
 namespace tcam::virtcam
 {
 
@@ -33,6 +41,8 @@ class VirtcamDevice : public DeviceInterface
 {
 public:
     explicit VirtcamDevice(const DeviceInfo&);
+    VirtcamDevice(const DeviceInfo& info,
+                  const std::vector<tcam::VideoFormatDescription>& desc);
 
     VirtcamDevice() = delete;
 
@@ -100,11 +110,11 @@ private:
 
     std::shared_ptr<IImageBufferSink> stream_sink_;
 
+    std::shared_ptr<tcam::generator::IGenerator> generator_;
+
     void stream_thread_main();
 
     std::shared_ptr<ImageBuffer> fetch_free_buffer();
-
-    void fill_buffer(ImageBuffer& buf);
 
     void generate_properties();
 };
