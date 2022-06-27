@@ -26,6 +26,9 @@
 
 using namespace tcam;
 
+namespace tcam::tools::gige_daemon
+{
+
 class CameraListHolder
 {
 public:
@@ -66,3 +69,5 @@ private:
 
     tcam::semaphore semaphore_id;
 };
+
+} // namespace tcam::tools::gige_daemon

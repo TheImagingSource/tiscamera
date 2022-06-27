@@ -19,6 +19,9 @@
 
 #include "../../src/base_types.h"
 
+namespace tcam::tools::gige_daemon
+{
+
 static const size_t TCAM_DEVICE_LIST_MAX = 50;
 
 struct tcam_gige_device_list
@@ -29,5 +32,7 @@ struct tcam_gige_device_list
 };
 
 constexpr const char* LOCK_FILE = "/var/lock/tcam-gige-daemon.lock";
+
+} // namespace tcam::tools::gige_daemon
 
 #endif /* TCAM_GIGE_DAEMON_H */

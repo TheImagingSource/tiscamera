@@ -28,15 +28,19 @@
 #include <sys/shm.h>
 #include <unistd.h>
 
+using namespace tcam::tools;
 
-DaemonClass daemon_instance(LOCK_FILE);
+namespace
+{
+
+DaemonClass daemon_instance(gige_daemon::LOCK_FILE);
 
 
 std::vector<struct tcam_device_info> get_camera_list()
 {
 
-    key_t shmkey = ftok(LOCK_FILE, 'G');
-    key_t sem_key = ftok(LOCK_FILE, 'S');
+    key_t shmkey = ftok(gige_daemon::LOCK_FILE, 'G');
+    key_t sem_key = ftok(gige_daemon::LOCK_FILE, 'S');
 
     if (sem_key < 0)
     {
@@ -53,7 +57,8 @@ std::vector<struct tcam_device_info> get_camera_list()
     }
 
     int shmid;
-    if ((shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644 | IPC_CREAT)) == -1)
+    if ((shmid = shmget(shmkey, sizeof(gige_daemon::tcam_gige_device_list), 0644 | IPC_CREAT))
+        == -1)
     {
         perror("shmget");
         exit(1);
@@ -61,7 +66,7 @@ std::vector<struct tcam_device_info> get_camera_list()
 
     tcam::semaphore_lock(sem_id);
 
-    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
+    gige_daemon::tcam_gige_device_list* d = (gige_daemon::tcam_gige_device_list*)shmat(shmid, NULL, 0);
 
     if (d == nullptr)
     {
@@ -127,7 +132,7 @@ void signal_handler(int sig)
         case SIGINT:
             /* finalize the server */
 
-            CameraListHolder::get_instance().stop();
+            gige_daemon::CameraListHolder::get_instance().stop();
             daemon_instance.stop_daemon();
 
             break;
@@ -137,6 +142,7 @@ void signal_handler(int sig)
     }
 }
 
+} // namespace
 
 int main(int argc, char* argv[])
 {
@@ -200,7 +206,7 @@ int main(int argc, char* argv[])
 
             try
             {
-                CameraListHolder::get_instance().set_interface_list(interfaces);
+                gige_daemon::CameraListHolder::get_instance().set_interface_list(interfaces);
             }
             catch (std::runtime_error& e)
             {

@@ -35,7 +35,7 @@
 using namespace tis;
 
 
-CameraListHolder::CameraListHolder() : continue_loop(true)
+tcam::tools::gige_daemon::CameraListHolder::CameraListHolder() : continue_loop(true)
 {
     // to understand shared memory use this guide:
     // https://beej.us/guide/bgipc/html/single/bgipc.html#semaphores
@@ -77,7 +77,7 @@ CameraListHolder::CameraListHolder() : continue_loop(true)
 }
 
 
-CameraListHolder::~CameraListHolder()
+tcam::tools::gige_daemon::CameraListHolder::~CameraListHolder()
 {
     continue_loop = false;
     if (work_thread.joinable())
@@ -89,7 +89,7 @@ CameraListHolder::~CameraListHolder()
 }
 
 
-CameraListHolder& CameraListHolder::get_instance()
+tcam::tools::gige_daemon::CameraListHolder& tcam::tools::gige_daemon::CameraListHolder::get_instance()
 {
     static CameraListHolder instance;
 
@@ -97,7 +97,7 @@ CameraListHolder& CameraListHolder::get_instance()
 }
 
 
-std::vector<DeviceInfo> CameraListHolder::get_camera_list()
+std::vector<DeviceInfo> tcam::tools::gige_daemon::CameraListHolder::get_camera_list()
 {
     std::lock_guard<semaphore> lck(semaphore_id);
 
@@ -116,27 +116,27 @@ std::vector<DeviceInfo> CameraListHolder::get_camera_list()
 }
 
 
-std::vector<std::string> CameraListHolder::get_interface_list() const
+std::vector<std::string> tcam::tools::gige_daemon::CameraListHolder::get_interface_list() const
 {
     return interface_list;
 }
 
 
-void CameraListHolder::set_interface_list(std::vector<std::string>& interfaces)
+void tcam::tools::gige_daemon::CameraListHolder::set_interface_list(std::vector<std::string>& interfaces)
 {
     std::lock_guard<std::mutex> mutex_lock(mtx);
     interface_list = interfaces;
 }
 
 
-void CameraListHolder::stop()
+void tcam::tools::gige_daemon::CameraListHolder::stop()
 {
     this->continue_loop = false;
     cv.notify_all();
 }
 
 
-void CameraListHolder::index_loop()
+void tcam::tools::gige_daemon::CameraListHolder::index_loop()
 {
     while (continue_loop) { loop_function(); }
 }
@@ -148,7 +148,7 @@ static std::vector<tcam::DeviceInfo> get_aravis_list()
 }
 
 
-void CameraListHolder::loop_function()
+void tcam::tools::gige_daemon::CameraListHolder::loop_function()
 {
     std::unique_lock<std::mutex> lck(mtx);
 

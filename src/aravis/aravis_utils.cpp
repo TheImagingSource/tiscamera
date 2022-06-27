@@ -35,7 +35,7 @@
 #include <sys/shm.h>
 
 using namespace tcam;
-
+using namespace tcam::tools;
 
 struct aravis_fourcc
 {
@@ -81,7 +81,7 @@ static const aravis_fourcc arv_fourcc_conversion_table[] = {
     { 0, ARV_PIXEL_FORMAT_RGB_12_PLANAR },
     { 0, ARV_PIXEL_FORMAT_RGB_16_PLANAR },
     { FOURCC_IYU1, ARV_PIXEL_FORMAT_YUV_422_YUYV_PACKED },
-    
+
     { FOURCC_POLARIZATION_BG8_90_45_135_0, 0x8108000D },
     { FOURCC_POLARIZATION_BG12_PACKED_90_45_135_0, 0x810C0011 }, // GigE
     { FOURCC_POLARIZATION_BG12_PACKED_90_45_135_0, 0x810C000E }, // USB3Vision
@@ -179,7 +179,7 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
 {
     try
     {
-        key_t shmkey = ftok(LOCK_FILE, 'G');
+        key_t shmkey = ftok(gige_daemon::LOCK_FILE, 'G');
         if (shmkey == -1)
         {
             if (!not_using_gige_deamon_message_reported) // print this message only once and not every time we are queried
@@ -193,14 +193,14 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
         not_using_gige_deamon_message_reported =
             false; // reset message when fetching the lock worked
 
-        key_t shm_semaphore_key = ftok(LOCK_FILE, 'S');
+        key_t shm_semaphore_key = ftok(gige_daemon::LOCK_FILE, 'S');
         if (shm_semaphore_key == -1)
         {
             SPDLOG_INFO("Failed to create shmkey. errno={}.", errno);
             return std::nullopt;
         }
 
-        int shm_mem_id = shmget(shmkey, sizeof(tcam_gige_device_list), 0644);
+        int shm_mem_id = shmget(shmkey, sizeof(gige_daemon::tcam_gige_device_list), 0644);
         if (shm_mem_id < 0)
         {
             SPDLOG_INFO("Unable to connect to gige-daemon. Using internal methods");
@@ -216,8 +216,8 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
             SPDLOG_ERROR("shmat failed to map memory. errno={}", errno);
             return std::nullopt;
         }
-        const tcam_gige_device_list* shared_mem_list =
-            static_cast<const tcam_gige_device_list*>(ptr);
+        const gige_daemon::tcam_gige_device_list* shared_mem_list =
+            static_cast<const gige_daemon::tcam_gige_device_list*>(ptr);
         if (shared_mem_list == nullptr)
         {
             SPDLOG_ERROR("shmat returned nullptr.");
