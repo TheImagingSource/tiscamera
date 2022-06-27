@@ -172,6 +172,27 @@ public:
         }
     }
 
+    static constexpr bool is_supported_fcc(img::fourcc fcc)
+    {
+        if (fcc == img::fourcc::RGGB8
+            || fcc == img::fourcc::GRBG8
+            || fcc == img::fourcc::BGGR8
+            || fcc == img::fourcc::GBRG8
+            || fcc == img::fourcc::RGGB12_MIPI_PACKED
+            || fcc == img::fourcc::GRBG12_MIPI_PACKED
+            || fcc == img::fourcc::BGGR12_MIPI_PACKED
+            || fcc == img::fourcc::GBRG12_MIPI_PACKED
+            || fcc == img::fourcc::RGGB16
+            || fcc == img::fourcc::GRBG16
+            || fcc == img::fourcc::BGGR16
+            || fcc == img::fourcc::GBRG16)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     // switch to next image
     // this function iterates through all colors
     // by increasing a channel to max before increasing the next one
@@ -207,7 +228,7 @@ public:
         }
         else
         {
-            //static_assert(false, "Fourcc not implemented!");
+            static_assert(is_supported_fcc(T), "Fourcc not implemented!");
         }
     }
 

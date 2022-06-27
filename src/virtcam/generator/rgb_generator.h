@@ -73,6 +73,16 @@ private:
 public:
     RGBGenerator<T>() : pattern_generator_(CLR_MAX, calc_default_speed()) {}
 
+    static constexpr bool is_supported_fcc (img::fourcc fcc)
+    {
+        if (fcc == img::fourcc::BGR24
+            || fcc == img::fourcc::BGRA64)
+        {
+            return true;
+        }
+        return false;
+    }
+
     // switch to next image
     // this function iterates through all colors
     // by increasing a channel to max before increasing the next one
@@ -113,7 +123,7 @@ public:
         }
         else
         {
-            //static_assert(false, "Fourcc not implemented!");
+            static_assert(is_supported_fcc(T), "Fourcc not implemented!");
         }
     }
 
