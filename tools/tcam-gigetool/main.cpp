@@ -19,8 +19,10 @@
 #include "../../src/tcam-network/Camera.h"
 #include "../../src/tcam-network/CameraDiscovery.h"
 
+#include <iostream>
 #include <mutex>
 #include <memory>
+#include <ostream>
 #include <string>
 
 namespace
@@ -338,13 +340,22 @@ std::shared_ptr<tis::Camera> findCamera(const std::string& ident)
 
 std::string get_camera_ident (const CLI::App& app)
 {
-    if (app.remaining_size() != 1)
+    if (app.remaining_size() == 0)
     {
-        std::cerr << "require camera identifier!" << std::endl
-                  << "Usage:" << std::endl
-                  << "\t tcam-gigetool <command> <identifier>" << std::endl
-                  << std::endl
-                  << "The identifier can be the serial, IP oder MAC" << std::endl;
+        std::cerr << "tcam-gigetool requires camera identifier!" << std::endl
+                  << app.help();
+    }
+    else if (app.remaining_size() > 1)
+    {
+        std::cerr << "Too many arguments as potential camera identifier." << std::endl
+                  << "Arguments are: ";
+        std::string rem_str;
+
+        for (const auto& e : app.remaining())
+        {
+            rem_str += e + " ";
+        }
+        std::cerr << rem_str << std::endl;
 
         return std::string();
     }
@@ -501,6 +512,11 @@ int execute_rescue(const CLI::App& app)
 
     auto ident = get_camera_ident(app);
 
+    if (ident.empty())
+    {
+        return 1;
+    }
+
     auto camera = findCamera(ident);
 
     std::string mac;
@@ -527,21 +543,21 @@ int execute_rescue(const CLI::App& app)
     if (*ip)
     {
         ip->results(ip_str);
-        std::cout << "Setting ip to:" << ip_str <<std::endl;
+        std::cout << "Setting ip to: " << ip_str <<std::endl;
     }
 
     auto netmask = app.get_option("--netmask");
     if (*netmask)
     {
         netmask->results(nm_str);
-        std::cout << "Setting netmask to:" << nm_str <<std::endl;
+        std::cout << "Setting netmask to: " << nm_str <<std::endl;
     }
 
     auto gateway = app.get_option("--gateway");
     if (*gateway)
     {
         gateway->results(gw_str);
-        std::cout << "Setting gw to:" << gw_str <<std::endl;
+        std::cout << "Setting gw to: " << gw_str <<std::endl;
     }
 
     auto send = [=] ()

@@ -41,6 +41,11 @@ std::shared_ptr<Camera> getCameraFromList(const camera_list cameras,
 {
     std::shared_ptr<Camera> rval;
 
+    if (identifier.empty())
+    {
+        return nullptr;
+    }
+
     std::function<bool(std::shared_ptr<Camera>)> f = [&identifier,
                                                       &id_type](std::shared_ptr<Camera> cam) {
         if (id_type == CAMERA_MAC)
