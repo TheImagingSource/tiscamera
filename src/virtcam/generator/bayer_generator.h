@@ -64,8 +64,8 @@ template<> inline bayer16 generate_struct<bayer16>(line_values vals)
 
 template<> inline RAW12_MIPI_PACKED generate_struct<RAW12_MIPI_PACKED>(line_values vals)
 {
-    return RAW12_MIPI_PACKED { static_cast<uint8_t>(vals.v0 >> 8),
-                               static_cast<uint8_t>(vals.v1 >> 8),
+    return RAW12_MIPI_PACKED { static_cast<uint8_t>(vals.v0 >> 4),
+                               static_cast<uint8_t>(vals.v1 >> 4),
                                static_cast<uint8_t>((vals.v0 >> 4 & 0x0F) | (vals.v1 >> 4 & 0x0F) << 4) };
 }
 
