@@ -17,8 +17,8 @@ add_library(tcamconvert SHARED
   "tcamconvert.h"
   "tcamconvert.cpp"
 
-  
-  
+
+
   "tcamconvert_context.h"
   "tcamconvert_context.cpp"
   "transform_impl.h"
@@ -69,5 +69,5 @@ endif()
 install(TARGETS tcamconvert
   LIBRARY
   DESTINATION "${TCAM_INSTALL_GST_1_0}"
-  COMPONENT tcam-gstreamer-1
+  COMPONENT bin
   )

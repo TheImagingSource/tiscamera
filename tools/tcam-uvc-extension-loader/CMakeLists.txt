@@ -26,4 +26,4 @@ set_project_warnings(tcam-uvc-extension-loader)
 
 install(TARGETS tcam-uvc-extension-loader
   DESTINATION "${TCAM_INSTALL_BIN}"
-  COMPONENT uvc-extension)
+  COMPONENT bin)

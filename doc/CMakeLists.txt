@@ -54,8 +54,10 @@ if (TCAM_BUILD_DOCUMENTATION)
 
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
     DESTINATION "${TCAM_INSTALL_DOCUMENTATION}"
+    COMPONENT bin
     PATTERN ".nojekyll" EXCLUDE
-    PATTERN ".buildinfo" EXCLUDE)
+    PATTERN ".buildinfo" EXCLUDE
+    )
 
   # This adds the doxygen output directories to the 'make clean' command
   set_property(DIRECTORY APPEND PROPERTY

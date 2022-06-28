@@ -14,10 +14,8 @@
 # limitations under the License.
 
 
-# assure executable exists
-# find_executable(UVCDYNCTRL uvcdynctrl)
-
 set(TCAM_EXTENSION_UNITS usb2.json usb23.json usb33.json usb37.json)
 
 install(FILES ${TCAM_EXTENSION_UNITS}
-  DESTINATION ${TCAM_INSTALL_UVC_EXTENSION})
+  DESTINATION ${TCAM_INSTALL_UVC_EXTENSION}
+  COMPONENT bin)

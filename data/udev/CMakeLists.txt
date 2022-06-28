@@ -19,4 +19,4 @@ set(RULE_FILES ${CMAKE_CURRENT_BINARY_DIR}/80-theimagingsource-cameras.rules)
 
 install(FILES ${RULE_FILES}
   DESTINATION ${TCAM_INSTALL_UDEV}
-  COMPONENT tcam-udev)
+  COMPONENT bin)

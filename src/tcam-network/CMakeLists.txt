@@ -41,4 +41,4 @@ set_property(TARGET tcam-network PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 
 install(TARGETS tcam-network
   DESTINATION ${TCAM_INSTALL_LIB}
-  COMPONENT tcam-network)
+  COMPONENT bin)

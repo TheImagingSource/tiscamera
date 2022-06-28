@@ -45,4 +45,4 @@ PRIVATE
 
 install(TARGETS tcam-ctrl
   DESTINATION ${TCAM_INSTALL_BIN}
-  COMPONENT tcam-ctrl)
+  COMPONENT bin)

@@ -20,6 +20,6 @@ if(TCAM_BUILD_ARAVIS)
 
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tcam-gige-daemon.service
     DESTINATION ${TCAM_INSTALL_SYSTEMD}
-    COMPONENT tcam-gige-daemon)
+    COMPONENT bin)
 
 endif(TCAM_BUILD_ARAVIS)

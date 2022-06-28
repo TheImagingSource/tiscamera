@@ -34,4 +34,4 @@ set_project_warnings(gsttcambin)
 
 install(TARGETS gsttcambin
   DESTINATION ${TCAM_INSTALL_GST_1_0}
-  COMPONENT tcam-gstreamer-1)
+  COMPONENT bin)

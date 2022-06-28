@@ -52,4 +52,4 @@ PRIVATE
 
 install(TARGETS tcam-gige-daemon
   DESTINATION ${TCAM_INSTALL_BIN}
-  COMPONENT tcam-gige-daemon)
+  COMPONENT bin)

@@ -26,4 +26,4 @@ set_project_warnings(tcam-gigetool)
 
 install(TARGETS tcam-gigetool
   DESTINATION "${TCAM_INSTALL_BIN}"
-  COMPONENT gigetool)
+  COMPONENT bin)

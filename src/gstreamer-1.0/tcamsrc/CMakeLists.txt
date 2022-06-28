@@ -82,8 +82,8 @@ set_project_warnings(gsttcamsrc)
 
 install(TARGETS gsttcamsrc
   DESTINATION ${TCAM_INSTALL_GST_1_0}
-  COMPONENT tcam-gstreamer-1)
+  COMPONENT bin)
 
 install(FILES gstmetatcamstatistics.h
   DESTINATION "${TCAM_INSTALL_GST_1_0_HEADER}"
-  COMPONENT tcam-gstreamer-1)
+  COMPONENT dev)
