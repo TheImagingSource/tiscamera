@@ -110,7 +110,7 @@ private:
 
     std::shared_ptr<IImageBufferSink> stream_sink_;
 
-    std::shared_ptr<tcam::generator::IGenerator> generator_;
+    std::unique_ptr<tcam::generator::IGenerator> generator_;
 
     void stream_thread_main();
 

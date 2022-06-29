@@ -31,36 +31,16 @@
 namespace tcam::generator
 {
 
-
-using namespace img::pixel_type;
-
-
-template<enum img::fourcc T>
 class MonoGenerator : public IGenerator
 {
 
-    static_assert(img::is_mono_fcc(T), "Must be mono!");
-
 private:
-    // maximum possible value for a single pixel
-    // e.g. 255 for bayer8
-    static constexpr uint16_t CLR_MAX = pow(2, img::get_bits_per_pixel(T)) - 1;
 
     pattern::WhiteNoise pattern_gen_;
+    img::fourcc fourcc_;
 
 public:
-    MonoGenerator<T>() : pattern_gen_(CLR_MAX) {}
-
-    static constexpr bool is_supported_fcc(img::fourcc fcc)
-    {
-        if (fcc == img::fourcc::MONO8
-            || fcc == img::fourcc::MONO16)
-        {
-            return true;
-        }
-
-        return false;
-    }
+    explicit MonoGenerator(img::fourcc fcc);
 
     // switch to next image
     // this function iterates through all colors
@@ -68,29 +48,7 @@ public:
     // after that the first one will be decreased before beginning anew
     void step() final {}
 
-    void fill_image(img::img_descriptor& dst) final
-    {
-
-        if constexpr (T == img::fourcc::MONO8)
-        {
-
-            for (unsigned int offset = 0; offset < dst.size(); offset += 1)
-            {
-                dst.data()[offset] = pattern_gen_.get_pixel();
-            }
-        }
-        else if constexpr (T == img::fourcc::MONO16)
-        {
-            for (unsigned int offset = 0; offset < dst.size(); offset += 2)
-            {
-                dst.data()[offset] = pattern_gen_.get_pixel();
-            }
-        }
-        else
-        {
-            static_assert(is_supported_fcc(T), "Fourcc not implemented!");
-        }
-    }
+    void fill_image(img::img_descriptor& dst) final;
 
 }; // class MonoGenerator
 

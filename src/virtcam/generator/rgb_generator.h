@@ -31,51 +31,22 @@
 namespace tcam::generator
 {
 
-static constexpr bool is_rgb(img::fourcc fcc)
+class RGBGenerator : public IGenerator
 {
-    if (fcc == img::fourcc::BGR24
-        || fcc == img::fourcc::BGRA32
-        || fcc == img::fourcc::BGRA64
-        || fcc == img::fourcc::BGRFloat)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-
-template<enum img::fourcc T> class RGBGenerator : public IGenerator
-{
-    static_assert(is_rgb(T), "Must be RGB!");
 
 private:
-    // maximum possible value for a single pixel
-    // e.g. 255 for bayer8
-    static constexpr uint16_t CLR_MAX = pow(2, img::get_bits_per_pixel(T) / 3) - 1;
 
     pattern::ColorWheel pattern_generator_;
-
-    uint16_t calc_default_speed()
-    {
-        // somewhat useable method to get usable default speed;
-        // use width of color space to guess a valid sub step;
-        // -1 as ranges are 0-255, etc not 1-256
-        uint16_t ret = (1 << (img::get_bits_per_pixel(T) / 3 / 2)) - 1;
-
-        if (ret < 20)
-            // we are this close to 1, just use that instead
-            return 1;
-        return ret;
-    }
-
+    img::fourcc fourcc_;
 
 public:
-    RGBGenerator<T>() : pattern_generator_(CLR_MAX, calc_default_speed()) {}
+
+    explicit RGBGenerator(img::fourcc fcc);
 
     static constexpr bool is_supported_fcc (img::fourcc fcc)
     {
         if (fcc == img::fourcc::BGR24
+            || fcc == img::fourcc::BGRA32
             || fcc == img::fourcc::BGRA64)
         {
             return true;
@@ -87,45 +58,9 @@ public:
     // this function iterates through all colors
     // by increasing a channel to max before increasing the next one
     // after that the first one will be decreased before beginning anew
-    void step() final
-    {
-        pattern_generator_.step();
-    }
+    void step() final;
 
-    void fill_image(img::img_descriptor& dst) final
-    {
-        if constexpr (T == img::fourcc::BGR24)
-        {
-            auto pix = pattern_generator_.get_pixel();
-            img::pixel_type::B8G8R8 data {
-                static_cast<uint8_t>(pix.b),
-                static_cast<uint8_t>(pix.g),
-                static_cast<uint8_t>(pix.r)
-            };
-
-            for (unsigned int offset = 0; offset < dst.size(); offset += sizeof(data))
-            {
-                auto ptr = reinterpret_cast<img::pixel_type::B8G8R8*>(dst.data() + offset);
-
-                *ptr = data;
-            }
-        }
-        else if constexpr (T == img::fourcc::BGRA64)
-        {
-            auto pix = pattern_generator_.get_pixel();
-
-            for (unsigned int offset = 0; offset < dst.size(); offset += sizeof(pix))
-            {
-                auto ptr = reinterpret_cast<img::pixel_type::BGRA64*>(dst.data() + offset);
-
-                *ptr = pix;
-            }
-        }
-        else
-        {
-            static_assert(is_supported_fcc(T), "Fourcc not implemented!");
-        }
-    }
+    void fill_image(img::img_descriptor& dst) final;
 
 }; // class RGBGenerator
 

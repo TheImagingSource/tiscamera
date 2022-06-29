@@ -15,9 +15,11 @@
  */
 
 #include "virtcam_generator.h"
+#include "dutils_img/fcc_to_string.h"
 #include "dutils_img/image_fourcc_enum.h"
 #include <algorithm>
 #include <memory>
+#include "dutils_img/image_fourcc_func.h"
 #include "spdlog/spdlog.h"
 
 #include "generator/mono_generator.h"
@@ -27,10 +29,11 @@
 
 static const img::fourcc supported_fourcc[] {
     img::fourcc::MONO8,
+    img::fourcc::MONO12_MIPI_PACKED,
     img::fourcc::MONO16,
     img::fourcc::RGGB8,
-    img::fourcc::RGGB16,
     img::fourcc::RGGB12_MIPI_PACKED,
+    img::fourcc::RGGB16,
     img::fourcc::BGR24,
 };
 
@@ -41,49 +44,29 @@ std::vector<img::fourcc> tcam::virtcam::get_supported_fourcc()
 }
 
 
-constexpr bool tcam::virtcam::is_supported_fourcc(img::fourcc fcc)
-{
-    for (const auto& f : supported_fourcc)
-    {
-        if (f == fcc)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-
-std::shared_ptr<tcam::generator::IGenerator> tcam::virtcam::get_generator(img::fourcc fcc)
+std::unique_ptr<tcam::generator::IGenerator> tcam::virtcam::get_generator(img::fourcc fcc)
 {
     switch (fcc)
     {
         case img::fourcc::MONO8:
-        {
-            return std::make_shared<tcam::generator::MonoGenerator<img::fourcc::MONO8>>();
-        }
+        case img::fourcc::MONO12_MIPI_PACKED:
         case img::fourcc::MONO16:
         {
-            return std::make_shared<tcam::generator::MonoGenerator<img::fourcc::MONO16>>();
+            return std::make_unique<tcam::generator::MonoGenerator>(fcc);
         }
         case img::fourcc::RGGB8:
-        {
-            return std::make_shared<tcam::generator::BayerGenerator<img::fourcc::RGGB8>>();
-        }
         case img::fourcc::RGGB16:
-        {
-            return std::make_shared<tcam::generator::BayerGenerator<img::fourcc::RGGB16>>();
-        }
         case img::fourcc::RGGB12_MIPI_PACKED:
         {
-            return std::make_shared<tcam::generator::BayerGenerator<img::fourcc::RGGB12_MIPI_PACKED>>();
+            return std::make_unique<tcam::generator::BayerGenerator>(fcc);
         }
         case img::fourcc::BGR24:
         {
-            return std::make_shared<tcam::generator::RGBGenerator<img::fourcc::BGR24>>();
+            return std::make_unique<tcam::generator::RGBGenerator>(fcc);
         }
         default:
         {
+            SPDLOG_ERROR("Generator not implemented for fourcc: {}", img::fcc_to_string(fcc));
             return nullptr;
         }
     }

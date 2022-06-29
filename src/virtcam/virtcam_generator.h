@@ -29,10 +29,8 @@ namespace tcam::virtcam
 // returns a vector of all supported fourcc that can be generated
 std::vector<img::fourcc> get_supported_fourcc();
 
-constexpr bool is_supported_fourcc(img::fourcc fcc);
-
 // create an image generator for the given fourcc
 // returns nullptr if fourcc is not supported
-std::shared_ptr<tcam::generator::IGenerator> get_generator(img::fourcc);
+std::unique_ptr<tcam::generator::IGenerator> get_generator(img::fourcc);
 
 } // namespace tcam::virtcam

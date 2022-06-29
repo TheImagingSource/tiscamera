@@ -18,6 +18,7 @@
 
 #include "dutils_img/pixel_structs.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <random>
 
@@ -38,7 +39,7 @@ private:
     uint16_t* rising_ = &r_;
     uint16_t* descending_ = nullptr;
 
-    uint16_t CLR_MAX = 255;
+    uint16_t max_ = 255;
     uint16_t min_ = 0;
 
     // speed with which colors will change;
@@ -52,14 +53,90 @@ private:
 
     inline uint16_t get_color_max() const
     {
-        return CLR_MAX;
+        return max_;
     }
 
 public:
 
+    ColorWheel() {};
+
     ColorWheel(uint16_t max, uint16_t speed)
-        : CLR_MAX(max), speed_(speed)
-    {}
+        : max_(max), speed_(speed)
+    {
+
+        r_ = 0;
+        g_ = 0;
+        b_ = 0;
+    }
+
+    ColorWheel(const ColorWheel& other)
+    {
+        max_ = other.max_;
+        min_ = other.min_;
+        r_ = other.r_;
+        g_ = other.g_;
+        b_ = other.b_;
+
+        if (other.rising_ == &other.r_)
+        {
+            rising_ = &r_;
+        }
+        else if (other.rising_ == &other.g_)
+        {
+            rising_ = &g_;
+        }
+        else if (other.rising_ == &other.b_)
+        {
+            rising_ = &b_;
+        }
+        if (other.descending_ == &other.r_)
+        {
+            descending_ = &r_;
+        }
+        else if (other.descending_ == &other.g_)
+        {
+            descending_ = &g_;
+        }
+        else if (other.descending_ == &other.b_)
+        {
+            descending_ = &b_;
+        }
+    }
+
+    ColorWheel& operator=(const ColorWheel& other)
+    {
+        max_ = other.max_;
+        min_ = other.min_;
+        r_ = other.r_;
+        g_ = other.g_;
+        b_ = other.b_;
+
+        if (other.rising_ == &other.r_)
+        {
+            rising_ = &r_;
+        }
+        else if (other.rising_ == &other.g_)
+        {
+            rising_ = &g_;
+        }
+        else if (other.rising_ == &other.b_)
+        {
+            rising_ = &b_;
+        }
+        if (other.descending_ == &other.r_)
+        {
+            descending_ = &r_;
+        }
+        else if (other.descending_ == &other.g_)
+        {
+                descending_ = &g_;
+        }
+        else if (other.descending_ == &other.b_)
+        {
+            descending_ = &b_;
+        }
+        return *this;
+    }
 
     // switch to next image
     // this function iterates through all colors
@@ -67,6 +144,8 @@ public:
     // after that the first one will be decreased before beginning anew
     void step()
     {
+        uint16_t min = get_color_min();
+        uint16_t max = get_color_max();
         if (rising_)
         {
             *rising_ += speed_;
@@ -76,9 +155,6 @@ public:
         {
             *descending_ -= speed_;
         }
-
-        uint16_t min = get_color_min();
-        uint16_t max = get_color_max();
 
         if ((r_ >= max && g_ == min && b_ == min))
         {
@@ -110,6 +186,7 @@ public:
             rising_ = nullptr;
             descending_ = &b_;
         }
+        //SPDLOG_INFO("{}:{}:{} - {}", r_, g_, b_, speed_);
     }
 
     inline img::pixel_type::BGRA64 get_pixel() const
@@ -128,16 +205,17 @@ class WhiteNoise
 {
 private:
     std::default_random_engine rng_;
-    std::uniform_int_distribution<uint16_t> value_gen_; // guaranteed unbiased
+    std::uniform_int_distribution<uint16_t> value_gen_;
 
 public:
 
-    WhiteNoise(uint16_t max)
+    WhiteNoise() {};
+
+    explicit WhiteNoise(uint16_t max)
     {
         std::random_device rd; // only used once to initialise (seed) engine
-        rng_ = std::default_random_engine(
-            rd()); // random-number engine used (Mersenne-Twister in this case)
-        value_gen_ = std::uniform_int_distribution<uint16_t>(0, max); // guaranteed unbiased
+        rng_ = std::default_random_engine(rd());
+        value_gen_ = std::uniform_int_distribution<uint16_t>(0, max);
     }
 
     uint16_t get_pixel()

@@ -26,8 +26,11 @@ add_library(tcam-backend-virtcam STATIC
     generator/generator_base.h
     generator/pattern_generator.h
     generator/mono_generator.h
+    generator/mono_generator.cpp
     generator/rgb_generator.h
+    generator/rgb_generator.cpp
     generator/bayer_generator.h
+    generator/bayer_generator.cpp
   )
 
 set_project_warnings(tcam-backend-virtcam)

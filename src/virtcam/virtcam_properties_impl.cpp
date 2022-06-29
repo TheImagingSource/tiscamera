@@ -47,6 +47,7 @@ outcome::result<void> tcam::virtcam::VirtcamPropertyBackend::set_bool(
             return tcam::status::PropertyNotImplemented;
         }
     }
+    return tcam::status::PropertyNotImplemented;
 }
 
 outcome::result<bool> tcam::virtcam::VirtcamPropertyBackend::get_bool(
@@ -63,6 +64,7 @@ outcome::result<bool> tcam::virtcam::VirtcamPropertyBackend::get_bool(
             return tcam::status::PropertyNotImplemented;
         }
     }
+    return tcam::status::PropertyNotImplemented;
 }
 
 
@@ -80,7 +82,7 @@ outcome::result<void> tcam::virtcam::VirtcamPropertyBackend::execute(tcam::virtc
             return outcome::success();
         }
     }
-
+    return tcam::status::PropertyNotImplemented;
 }
 
 //

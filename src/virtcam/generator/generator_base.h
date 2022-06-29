@@ -26,8 +26,13 @@ class IGenerator
 public:
     virtual ~IGenerator() {};
 
+    // create new image, if needed
+    // separate step from fill image
+    // as multiple images may be filled
+    // or multiple steps may be performed between image fills
     virtual void step() = 0;
 
+    // fill image descriptor with generated one
     virtual void fill_image(img::img_descriptor& dst) = 0;
 };
 

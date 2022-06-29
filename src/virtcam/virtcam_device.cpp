@@ -42,16 +42,6 @@ tcam::virtcam::VirtcamDevice::VirtcamDevice(const DeviceInfo& info)
 {
     device = info;
 
-    tcam_video_format_description desc_list[] = {
-        { FOURCC_MONO8, "Mono8?" },
-        { FOURCC_MONO16, "Mono16?" },
-        { FOURCC_RGGB8, "RGGB8?" },
-        //{ FOURCC_RGGB10_MIPI_PACKED, "RGGB10p?" },
-        { FOURCC_RGGB12_MIPI_PACKED, "RGGB12p?" },
-        //{ FOURCC_GRBG12_MIPI_PACKED, "GRBG12p?" },
-        { FOURCC_RGGB16, "RGGB16?" },
-        { FOURCC_BGR24, "BGR24?" },
-    };
     tcam_resolution_description res_type = {
         TCAM_RESOLUTION_TYPE_RANGE,
         { 640, 480 },
@@ -61,9 +51,10 @@ tcam::virtcam::VirtcamDevice::VirtcamDevice(const DeviceInfo& info)
     };
     framerate_mapping m = { res_type, { 15., 30., 60.} };
 
-    for (auto&& d : desc_list)
+    for (auto&& d : get_supported_fourcc())
     {
-        available_videoformats_.push_back(tcam::VideoFormatDescription(nullptr, d, { m }));
+        tcam_video_format_description desc = { (uint32_t)d, "" };
+        available_videoformats_.push_back(tcam::VideoFormatDescription(nullptr, desc, { m }));
     }
 
     generate_properties();
@@ -111,21 +102,12 @@ bool tcam::virtcam::VirtcamDevice::initialize_buffers(std::shared_ptr<BufferPool
     buffer_queue_.clear();
     buffer_queue_.reserve(b.size());
 
-    for (unsigned int i = 0; i < b.size(); ++i)
+    for (auto& weak_buffer : b)
     {
-        //tcam::buffer_info info = { b.at(i), false };
-        auto buf = b.at(i).lock();
-        //
-        // mprotect causes problems when starting image generation
-        // under some? circumstances
-        // TODO: is this needed?
-        //
-        // int res = mprotect(buf->get_image_buffer_ptr(), buf->get_image_buffer_size(), PROT_READ);
-        // if (res != 0)
-        // {
-        //     SPDLOG_WARN("MProtect failed with errno={}", errno);
-        // }
-        buffer_queue_.push_back(buf);
+        if (auto buf = weak_buffer.lock())
+        {
+            buffer_queue_.push_back(buf);
+        }
     }
 
     return true;
@@ -185,6 +167,8 @@ void tcam::virtcam::VirtcamDevice::stream_thread_main()
 
     std::chrono::steady_clock::time_point next_time = std::chrono::steady_clock::now();
 
+    // SPDLOG_ERROR("Start thread");
+
     while (true)
     {
         bool send_image = false;
@@ -221,6 +205,8 @@ void tcam::virtcam::VirtcamDevice::stream_thread_main()
             std::shared_ptr<ImageBuffer> buf = fetch_free_buffer();
             if (buf)
             {
+                // SPDLOG_ERROR("next image"); //
+
                 auto dst = buf->get_img_descriptor();
 
                 generator_->step();
