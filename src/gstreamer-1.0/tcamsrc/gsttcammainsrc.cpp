@@ -1064,7 +1064,7 @@ static gboolean tcam_mainsrc_decide_allocation(GstBaseSrc* base_src, GstQuery* q
     if (src_pool)
     {
         // these steps are taking to prevent a reconfigure
-        
+
         //GST_ERROR("existing pool");
 
         if (gst_buffer_pool_is_active(self->pool))
@@ -1095,9 +1095,15 @@ static gboolean tcam_mainsrc_decide_allocation(GstBaseSrc* base_src, GstQuery* q
             config, caps, tcam::VideoFormat(format).get_required_buffer_size(), 10, 10);
         gst_buffer_pool_set_config(self->pool, config);
 
-
-        gst_query_add_allocation_pool(query, self->pool, size, self->device->imagesink_buffers_, 0);
-
+        if (gst_query_get_n_allocation_pools(query))
+        {
+            gst_query_set_nth_allocation_pool(
+                query, 0, self->pool, self->device->imagesink_buffers_, 1, 0);
+        }
+        else
+        {
+            gst_query_add_allocation_pool(query, self->pool, size, self->device->imagesink_buffers_, 0);
+        }
 
         self->device->device_->set_drop_incomplete_frames(self->device->drop_incomplete_frames_);
 
