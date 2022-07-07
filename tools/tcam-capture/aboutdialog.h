@@ -40,10 +40,10 @@ public:
 public slots:
 
     void update_meta(GstStructure* meta);
+    void update_state();
 
 private slots:
 
-    void update_state();
     void write_state();
 
     void open_state();
