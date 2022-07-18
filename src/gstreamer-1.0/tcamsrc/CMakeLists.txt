@@ -13,19 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_library(gsttcamstatistics SHARED
+add_library(tcamgststatistics SHARED
   gstmetatcamstatistics.cpp
   gstmetatcamstatistics.h
   )
 
-target_include_directories(gsttcamstatistics
+target_include_directories(tcamgststatistics
   PRIVATE
   ${GSTREAMER_INCLUDE_DIRS}
   ${GSTREAMER_BASE_INCLUDE_DIRS}
   ${GSTREAMER_VIDEO_INCLUDE_DIRS}
   )
 
-target_link_libraries( gsttcamstatistics
+target_link_libraries( tcamgststatistics
   PRIVATE
   ${GSTREAMER_LIBRARIES}
   ${GSTREAMER_BASE_LIBRARIES}
@@ -79,6 +79,10 @@ add_library(gsttcamsrc SHARED
     tcamprop1::provider_gobject
     )
 set_project_warnings(gsttcamsrc)
+
+install(TARGETS tcamgststatistics
+  DESTINATION ${TCAM_INSTALL_LIB}
+  COMPONENT bin)
 
 install(TARGETS gsttcamsrc
   DESTINATION ${TCAM_INSTALL_GST_1_0}
