@@ -4,25 +4,29 @@
             "name": "git",
             "version": ">= 1:2.7.4",
             "phase": "compilation",
-            "modules": ["base"]
+            "modules": ["base"],
+            "include_in_package": false
         },
         {
             "name": "g++",
             "version": ">= 4:5.3.1",
             "phase": "compilation",
-            "modules": ["base"]
+            "modules": ["base"],
+            "include_in_package": false
         },
         {
             "name": "cmake",
             "version": ">= 3.2",
             "phase": "compilation",
-            "modules": ["base"]
+            "modules": ["base"],
+            "include_in_package": false
         },
         {
             "name": "pkg-config",
             "version": ">= 0.29.1",
             "phase": "compilation",
-            "modules": ["base"]
+            "modules": ["base"],
+            "include_in_package": false
         },
 
         {
@@ -60,12 +64,6 @@
             "version": ">= 1.0.1",
             "phase": "compilation",
             "modules": ["base"]
-        },
-        {
-            "name": "python3-setuptools",
-            "version": ">= 20.7.0-1",
-            "phase": "compilation",
-            "modules": ["tools-aravis"]
         },
 
         {
@@ -123,7 +121,8 @@
             "name": "python3-sphinx",
             "version": ">= 1.3.6",
             "phase": "compilation",
-            "modules": ["documentation"]
+            "modules": ["documentation"],
+            "include_in_package": false
         },
         {
             "name": "libc6",
@@ -178,7 +177,8 @@
             "name": "ninja-build",
             "version": ">= 1.8.2",
             "phase": "compilation",
-            "modules": ["aravis"]
+            "modules": ["aravis"],
+            "include_in_package": false
         },
         {
             "name": "libqt5widgets5",
@@ -196,13 +196,15 @@
             "name": "qtbase5-dev",
             "version": ">= 5.9.5",
             "phase": "compilation",
-            "modules": ["gui", "tools"]
+            "modules": ["gui", "tools"],
+            "include_in_package": false
         },
         {
             "name": "graphviz",
             "version": ">= 2.40.1",
             "phase": "compilation",
-            "modules": ["documentation"]
+            "modules": ["documentation"],
+            "include_in_package": false
         }
     ]
 
