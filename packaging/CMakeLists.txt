@@ -14,7 +14,19 @@
 
 include(CPackComponent)
 
-set(CPACK_COMPONENTS_ALL tiscamera)
+set(CPACK_COMPONENTS_ALL bin dev)
+ set(CPACK_DEB_COMPONENT_INSTALL ON)
+# set(CPACK_COMPONENTS_ALL filter convolution tegraae )
+
+
+# cpack_add_component(tcam_bin
+#   DISPLAY_NAME "tiscamera binary"
+#   DESCRIPTION "tiscamera installation component for binary files"
+#   DEPENDS tcam-gige-daemon tcam-gstreamer-1 tcam-capture tcam-introspection gigetool udev)
+
+
+# set(CPACK_COMPONENTS_ALL tcam-bin tcam-dev)
+# set(CPACK_DEB_COMPONENT_INSTALL ON)
 
 #set(CPACK_MONOLITHIC_INSTALL ON)
 
@@ -128,15 +140,25 @@ if (TCAM_BUILD_DOCUMENTATION)
   add_deps("documentation")
 endif (TCAM_BUILD_DOCUMENTATION)
 
-set(TCAM_DEB_DEPENDECY_CMD ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES})
+set(TCAM_BIN_DEB_DEPENDECY_CMD ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES} --runtime)
+set(TCAM_DEV_DEB_DEPENDECY_CMD ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES} --compilation)
 
-if (TCAM_PACKAGE_INCLUDE_BUILD_DEPENDENCIES)
-  list(APPEND TCAM_DEB_DEPENDECY_CMD --compilation)
-endif (TCAM_PACKAGE_INCLUDE_BUILD_DEPENDENCIES)
+# if (TCAM_PACKAGE_INCLUDE_BUILD_DEPENDENCIES)
+#   list(APPEND TCAM_BIN_DEB_DEPENDECY_CMD --compilation)
+# endif (TCAM_PACKAGE_INCLUDE_BUILD_DEPENDENCIES)
 
-execute_process(COMMAND ${TCAM_DEB_DEPENDECY_CMD}
+execute_process(COMMAND ${TCAM_BIN_DEB_DEPENDECY_CMD}
   WORKING_DIRECTORY "${TCAM_SOURCE_DIR}"
-  OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_DEPENDS
+  OUTPUT_VARIABLE CPACK_DEBIAN_TCAM_BIN_PACKAGE_DEPENDS
+  RESULT_VARIABLE return_value)
+
+if (return_value EQUAL "1")
+  message(WARNING "Unable to parse dependencies. You will not be able to generate packages without errors.")
+endif()
+
+execute_process(COMMAND ${TCAM_DEV_DEB_DEPENDECY_CMD}
+  WORKING_DIRECTORY "${TCAM_SOURCE_DIR}"
+  OUTPUT_VARIABLE CPACK_DEBIAN_TCAM_DEV_PACKAGE_DEPENDS
   RESULT_VARIABLE return_value)
 
 if (return_value EQUAL "1")
@@ -162,29 +184,36 @@ endif (NOT TCAM_DISTRIBUTION_DESCRIPTION)
 # the dependency list might end with a trailing `,`
 # this will cause dpkg to report an error and abort the installation
 # remove it as the list will not be touched after this
-string(REGEX REPLACE ",$" "" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
+string(REGEX REPLACE ",$" "" CPACK_DEBIAN_TCAM_BIN_PACKAGE_DEPENDS "${CPACK_DEBIAN_TCAM_BIN_PACKAGE_DEPENDS}")
+string(REGEX REPLACE ",$" "" CPACK_DEBIAN_TCAM_DEV_PACKAGE_DEPENDS "${CPACK_DEBIAN_TCAM_DEV_PACKAGE_DEPENDS}")
 # remove line breaks
 # they may be in the string due to dependency-manager being a commandlione tool
 # line breaks may cause the package to not be installable
-string(REGEX REPLACE "\n" "" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
+string(REGEX REPLACE "\n" "" CPACK_DEBIAN_BIN_PACKAGE_DEPENDS "${CPACK_DEBIAN_TCAM_BIN_PACKAGE_DEPENDS}")
+string(REGEX REPLACE "\n" "" CPACK_DEBIAN_DEV_PACKAGE_DEPENDS "${CPACK_DEBIAN_TCAM_DEV_PACKAGE_DEPENDS}")
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/postinst.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/prerm.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/prerm")
 
-set(CPACK_DEBIAN_PACKAGE_PROVIDES "tiscamera-tcamproperty (=${TCAM_VERSION})")
-set(CPACK_DEBIAN_PACKAGE_CONFLICTS "tiscamera-tcamproperty")
-set(CPACK_DEBIAN_PACKAGE_REPLACES "tiscamera-tcamproperty")
+# set(CPACK_DEBIAN_TCAM_BIN_PACKAGE_DEPENDS "tiscamera-tcamproperty (=${TCAM_VERSION})")
+# set(CPACK_DEBIAN_TCAM_BIN_PACKAGE_DEPENDS "tiscamera-tcamproperty")
+# set(CPACK_DEBIAN_TCAM_BIN_PACKAGE_DEPENDS "tiscamera-tcamproperty")
 
-set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst;${CMAKE_CURRENT_BINARY_DIR}/deb/prerm;")
+set(CPACK_DEBIAN_BIN_PACKAGE_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst;${CMAKE_CURRENT_BINARY_DIR}/deb/prerm;")
 
 
-set(CPACK_PACKAGE_NAME "tiscamera")
+set(CPACK_DEBIAN_BIN_PACKAGE_NAME_BASE "tiscamera")
 
 include(package-name)
 
-create_package_name(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}" "${TCAM_VERSION}")
+create_package_name(CPACK_DEBIAN_BIN_PACKAGE_NAME "${CPACK_DEBIAN_BIN_PACKAGE_NAME_BASE}" "${TCAM_VERSION}")
+#create_package_name(CPACK_DEBIAN_BIN_FILE_NAME "${CPACK_DEBIAN_BIN_PACKAGE_NAME}" "${TCAM_VERSION}")
+set(CPACK_DEBIAN_BIN_FILE_NAME "${CPACK_DEBIAN_BIN_PACKAGE_NAME}.deb")
 
-set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+create_package_name(CPACK_DEBIAN_DEV_PACKAGE_NAME "${CPACK_DEBIAN_BIN_PACKAGE_NAME_BASE}-dev" "${TCAM_VERSION}")
+set(CPACK_DEBIAN_DEV_FILE_NAME "${CPACK_DEBIAN_DEV_PACKAGE_NAME}.deb")
+
+set(CPACK_DEBIAN_BIN_PACKAGE_PRIORITY "optional")
 
 
 # always last

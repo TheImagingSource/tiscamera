@@ -129,6 +129,11 @@ class Dependency():
         self.phase = json_node["phase"]
         self.modules = json_node["modules"]
 
+        if "include_in_package" in json_node:
+            self.include_in_package = json_node["include_in_package"]
+        else:
+            self.include_in_package = True
+
     def __str__(self):
 
         return "{} ({}) - {} - {}".format(self.name, self.version, self.modules, self.phase)
@@ -267,7 +272,7 @@ The most commonly used git commands are:
         """
         Print a dependency list that can be used for deb control files
         """
-        d = [i.deb() for i in packages]
+        d = [i.deb() for i in packages if i.include_in_package]
 
         print(convert_to_str(d, ", "))
 
@@ -339,11 +344,6 @@ The most commonly used git commands are:
         'list' subcommand
         """
         if self.args.package == "deb":
-
-            # Ensure runtime is always true
-            # These dependencies always have to be listed
-            if not self.args.runtime:
-                self.args.runtime = True
 
             self.__print_deb_list(self.collect_dependencies(self.args.compilation, self.args.runtime))
             return
