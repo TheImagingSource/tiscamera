@@ -488,10 +488,11 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
 
     disable_chunk_mode();
 
+    bool ret = false;
     GError* err = nullptr;
 
-    // // arv_camera_set_frame_rate overwrites TriggerSelector and TriggerMode
-    // // set them again after changing the framerate to ensure consistent behavior
+    // arv_camera_set_frame_rate overwrites TriggerSelector and TriggerMode
+    // set them again after changing the framerate to ensure consistent behavior
     const char* trig_selector = arv_device_get_string_feature_value(
         arv_camera_get_device(arv_camera_), "TriggerSelector", &err);
     if (err)
@@ -508,6 +509,73 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         g_clear_error(&err);
     }
 
+    arv_camera_set_pixel_format(this->arv_camera_, fourcc2aravis(new_format.get_fourcc()), &err);
+
+    if (err)
+    {
+        SPDLOG_ERROR("Unable to set pixel format: {}", err->message);
+        g_clear_error(&err);
+        goto set_video_format_finish;
+    }
+
+    if (has_offset_)
+    {
+        // preserve current offset
+        int offset_x;
+        int offset_y;
+        arv_camera_get_region(arv_camera_, &offset_x, &offset_y, nullptr, nullptr, &err);
+        if (err)
+        {
+            SPDLOG_ERROR("Unable to verify offsets: {}", err->message);
+            g_clear_error(&err);
+            goto set_video_format_finish;
+        }
+
+        arv_camera_set_region(this->arv_camera_,
+                              offset_x,
+                              offset_y,
+                              new_format.get_size().width,
+                              new_format.get_size().height,
+                              &err);
+        if (err)
+        {
+            SPDLOG_ERROR("Unable to set region: {}", err->message);
+            g_clear_error(&err);
+            goto set_video_format_finish;
+        }
+    }
+    else
+    {
+        arv_camera_set_integer(arv_camera_, "Width", new_format.get_size().width, &err);
+        if (err)
+        {
+            SPDLOG_ERROR("Unable to set Width: {}", err->message);
+            g_clear_error(&err);
+            goto set_video_format_finish;
+        }
+        arv_camera_set_integer(arv_camera_, "Height", new_format.get_size().height, &err);
+        if (err)
+        {
+            SPDLOG_ERROR("Unable to set Height: {}", err->message);
+            g_clear_error(&err);
+            goto set_video_format_finish;
+        }
+    }
+    if (!set_scaling(new_format.get_scaling()))
+    {
+        goto set_video_format_finish;
+    }
+
+    set_frame_rate(arv_camera_, new_format.get_framerate());
+
+    active_video_format_ = read_camera_current_video_format();
+    SPDLOG_DEBUG("Active format is now '{}'", active_video_format_.to_string());
+    ret = true;
+
+set_video_format_finish:
+
+    // reset properties
+    // NO FORMAT CHANGES AFTER THIS POINT
     arv_device_set_string_feature_value(
         arv_camera_get_device(arv_camera_), "TriggerSelector", trig_selector, &err);
     if (err)
@@ -523,69 +591,8 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         SPDLOG_ERROR("Failed to reset 'TriggerMode' error: {}", err->message);
         g_clear_error(&err);
     }
-    arv_camera_set_pixel_format(this->arv_camera_, fourcc2aravis(new_format.get_fourcc()), &err);
 
-    if (err)
-    {
-        SPDLOG_ERROR("Unable to set pixel format: {}", err->message);
-        g_clear_error(&err);
-        return false;
-    }
-
-    if (has_offset_)
-    {
-        // preserve current offset
-        int offset_x;
-        int offset_y;
-        arv_camera_get_region(arv_camera_, &offset_x, &offset_y, nullptr, nullptr, &err);
-        if (err)
-        {
-            SPDLOG_ERROR("Unable to verify offsets: {}", err->message);
-            g_clear_error(&err);
-            return false;
-        }
-
-        arv_camera_set_region(this->arv_camera_,
-                              offset_x,
-                              offset_y,
-                              new_format.get_size().width,
-                              new_format.get_size().height,
-                              &err);
-        if (err)
-        {
-            SPDLOG_ERROR("Unable to set region: {}", err->message);
-            g_clear_error(&err);
-            return false;
-        }
-    }
-    else
-    {
-        arv_camera_set_integer(arv_camera_, "Width", new_format.get_size().width, &err);
-        if (err)
-        {
-            SPDLOG_ERROR("Unable to set Width: {}", err->message);
-            g_clear_error(&err);
-            return false;
-        }
-        arv_camera_set_integer(arv_camera_, "Height", new_format.get_size().height, &err);
-        if (err)
-        {
-            SPDLOG_ERROR("Unable to set Height: {}", err->message);
-            g_clear_error(&err);
-            return false;
-        }
-    }
-    if (!set_scaling(new_format.get_scaling()))
-    {
-        return false;
-    }
-
-    set_frame_rate(arv_camera_, new_format.get_framerate());
-
-    active_video_format_ = read_camera_current_video_format();
-    SPDLOG_DEBUG("Active format is now '{}'", active_video_format_.to_string());
-
-    return true;
+    return ret;
 }
 
 tcam::VideoFormat AravisDevice::read_camera_current_video_format()
