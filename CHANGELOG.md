@@ -15,6 +15,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcammainsrc bufferpool
 - tcam-gigetool: check-control command
   Get IP/port that controls the camera
+- simple virtual camera, set `TCAM_VIRTCAM_DEVICES=name0:name1` to generate devices
+
+### Fixed
+
+tcam-capture:
+- Property JSON description was not updated when re-opening the dialog
+- No more critical warning if camera has no trigger mode
+
+tcam-gigetool:
+- Fixed misidentification of camera identifier
+
+installation:
+- tcamgststatistics.so is now installed into `TCAM_INSTALL_LIB`
+
+examples:
+10-metadata.py - example should now load tcamgststatistics.so even when installed
 
 ## [1.0.0] - 2022.06.01
 
