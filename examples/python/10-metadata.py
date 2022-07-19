@@ -34,7 +34,7 @@ from gi.repository import Gst, GstVideo, GObject, GLib
 # workaround for missing GstMeta apis
 
 # load tiscamera GstMeta library
-clib = ctypes.CDLL("../../build/lib/libgsttcamstatistics.so")
+clib = ctypes.CDLL("libtcamgststatistics.so")
 
 # declare input/output type for our helper function
 clib.tcam_statistics_get_structure.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_size_t]
