@@ -24,21 +24,22 @@ using namespace tcam;
 
 static std::vector<tcam::DeviceInfo> get_virtcam_device_list()
 {
+    std::vector<tcam::DeviceInfo> rval;
+
     std::vector<std::string> split_names;
     auto env_devices = tcam::get_environment_variable( "TCAM_VIRTCAM_DEVICES", "" );
-    if( env_devices.empty() )
+    if (env_devices.empty())
     {
-        split_names.push_back("test0");
+        // no devices wanted
+        return rval;
     }
     else
     {
         split_names = split_string( env_devices, ":" );
     }
 
-    std::vector<tcam::DeviceInfo> rval;
-
     int index = 0;
-    for( auto name : split_names )
+    for (auto name : split_names)
     {
         std::string serial = "7150" + std::to_string( index++ );
 
