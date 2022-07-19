@@ -79,9 +79,14 @@ TcamPropertyBase* TcamCollection::get_property(const std::string& name)
 
 bool TcamCollection::is_trigger_mode_active()
 {
-    //for (auto& p_base : m_prop_origin)
-
     auto base = get_property("TriggerMode");
+
+    if (!base)
+    {
+        // device does not have trigger mode
+        // likely a FPD/MiPi camera
+        return false;
+    }
 
     auto tm = TCAM_PROPERTY_ENUMERATION(base);
 
