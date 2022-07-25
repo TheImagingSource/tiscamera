@@ -44,8 +44,8 @@ typedef enum
     GST_TCAM_IO_AUTO = 0,
     GST_TCAM_IO_MMAP = 1,
     GST_TCAM_IO_USERPTR = 2,
-    GST_TCAM_IO_DMABUF = 3,
-    GST_TCAM_IO_DMABUF_IMPORT = 4,
+    //GST_TCAM_IO_DMABUF = 3,
+    //GST_TCAM_IO_DMABUF_IMPORT = 4,
 } GstTcamIOMode;
 
 struct _GstTcamMainSrc

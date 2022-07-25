@@ -58,8 +58,8 @@ GType gst_tcam_io_mode_get_type(void)
             { GST_TCAM_IO_AUTO, "GST_TCAM_IO_AUTO", "auto" },
             { GST_TCAM_IO_MMAP, "GST_TCAM_IO_MMAP", "mmap" },
             { GST_TCAM_IO_USERPTR, "GST_TCAM_IO_USERPTR", "userptr" },
-            { GST_TCAM_IO_DMABUF, "GST_TCAM_IO_DMABUF", "dmabuf" },
-            { GST_TCAM_IO_DMABUF_IMPORT, "GST_TCAM_IO_DMABUF_IMPORT", "dmabuf-import" },
+            //{ GST_TCAM_IO_DMABUF, "GST_TCAM_IO_DMABUF", "dmabuf" },
+            //{ GST_TCAM_IO_DMABUF_IMPORT, "GST_TCAM_IO_DMABUF_IMPORT", "dmabuf-import" },
 
             { 0, NULL, NULL }
         };

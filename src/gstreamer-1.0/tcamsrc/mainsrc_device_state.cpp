@@ -38,10 +38,10 @@ tcam::TCAM_MEMORY_TYPE tcam::mainsrc::io_mode_to_memory_type(GstTcamIOMode mode)
         }
         case GST_TCAM_IO_MMAP:
             return tcam::TCAM_MEMORY_TYPE_MMAP;
-        case GST_TCAM_IO_DMABUF:
-            return tcam::TCAM_MEMORY_TYPE_DMA;
-        case GST_TCAM_IO_DMABUF_IMPORT:
-            return tcam::TCAM_MEMORY_TYPE_DMA_IMPORT;
+        // case GST_TCAM_IO_DMABUF:
+        //     return tcam::TCAM_MEMORY_TYPE_DMA;
+        // case GST_TCAM_IO_DMABUF_IMPORT:
+        //     return tcam::TCAM_MEMORY_TYPE_DMA_IMPORT;
     }
     return tcam::TCAM_MEMORY_TYPE_USERPTR;
 }
@@ -54,10 +54,10 @@ GstTcamIOMode tcam::mainsrc::memory_type_to_io_mode(tcam::TCAM_MEMORY_TYPE t)
             return GST_TCAM_IO_USERPTR;
         case tcam::TCAM_MEMORY_TYPE_MMAP:
             return GST_TCAM_IO_MMAP;
-        case tcam::TCAM_MEMORY_TYPE_DMA:
-            return GST_TCAM_IO_DMABUF;
-        case tcam::TCAM_MEMORY_TYPE_DMA_IMPORT:
-            return GST_TCAM_IO_DMABUF_IMPORT;
+        // case tcam::TCAM_MEMORY_TYPE_DMA:
+        //     return GST_TCAM_IO_DMABUF;
+        // case tcam::TCAM_MEMORY_TYPE_DMA_IMPORT:
+        //     return GST_TCAM_IO_DMABUF_IMPORT;
     }
     return GST_TCAM_IO_USERPTR;
 }
