@@ -6,6 +6,8 @@
     <file alias="images/close.png">../../data/images/close.png</file>
     <file alias="images/dialog.png">../../data/images/dialog.png</file>
     <file alias="images/Settings.png">../../data/images/Settings.png</file>
-    <!-- <file>images/save.png</file> -->
+    <file alias="images/start_capture.png">../../data/images/start_capture.png</file>
+    <file alias="images/stop.png">../../data/images/stop.png</file>
+    <file alias="images/snap.png">../../data/images/snap.png</file>
   </qresource>
 </RCC>

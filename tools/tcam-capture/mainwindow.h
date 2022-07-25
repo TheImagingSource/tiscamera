@@ -23,6 +23,7 @@
 #include "fpscounter.h"
 #include "indexer.h"
 #include "tcamcollection.h"
+#include "videosaver.h"
 
 #include <QCloseEvent>
 #include <QMainWindow>
@@ -64,6 +65,9 @@ public slots:
     void device_lost(const QString& message = "");
     void device_lost_cb(const Device& dev);
 
+    void save_image_triggered();
+    void save_video_triggered();
+
 private slots:
 
     void on_actionOpen_Device_triggered();
@@ -91,6 +95,7 @@ private slots:
 
     void fps_tick(double);
 
+
 private:
     static void init_device_dialog(MainWindow* instance)
     {
@@ -104,6 +109,7 @@ private:
     TcamCaptureConfig m_config;
 
     QToolBar* p_toolbar = nullptr;
+    QAction* p_save_video = nullptr;
 
     QAction* p_action_property_dialog = nullptr;
     QAction* p_action_format_dialog = nullptr;
@@ -119,10 +125,16 @@ private:
     gulong m_fps_signal_id = 0;
 
     QLabel* p_fps_label = nullptr;
+    QLabel* p_trigger_info_label = nullptr;
 
     FPSCounter m_fps_counter;
 
+    std::unique_ptr<tcam::tools::capture::VideoSaver> video_saver_ = nullptr;
+
     static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user_data);
+    static GstPadProbeReturn pad_probe_callback(GstPad* pad,
+                                                GstPadProbeInfo* info,
+                                                gpointer user_data);
 
     void reset_fps_tick();
     GstCaps* open_format_dialog();

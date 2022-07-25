@@ -21,19 +21,35 @@
 
 #include "definitions.h"
 
+
 struct TcamCaptureConfig
 {
     FormatHandling format_selection_type = FormatHandling::Auto;
     ConversionElement conversion_element = ConversionElement::Auto;
-    QString video_sink_element = "xvimagesink";
+    QString video_sink_element = "qwidget5videosink";
+
     // expectations
     // output element name: sink
+    // tee name: capture-tee
+    // queue has disabled caching
     // if a capsfilter element named device-caps exists it will have the configured caps set
     // all tcam-property elements are named: tcam0, tcam1, etc
     // tcam0 is always source
-    QString pipeline = "tcambin name=tcam0 ! video/x-raw,format=BGRx ! queue leaky=downstream ! videoconvert n-threads=4 "
-        "! fpsdisplaysink video-sink={video-sink-element} sync=false name=sink text-overlay=false signal-fps-measurements=true";
+    QString pipeline =
+        "tcambin name=tcam0 ! video/x-raw,format=BGRx "
+        " ! tee name=capture-tee "
+        " ! queue leaky=1 max-size-time=0 max-size-bytes=0 max-size-buffers=0"
+        " ! videoconvert n-threads=4 "
+        " ! fpsdisplaysink video-sink={video-sink-element} sync=false name=sink "
+        "text-overlay=false signal-fps-measurements=true";
 
+    ImageSaveType save_image_type = ImageSaveType::BMP;
+    QString save_image_location = "/tmp/";
+    QString save_image_filename_structure = "tcam-capture-{serial}-{caps}-{timestamp}.{extension}";
+
+    QString save_video_location = "/tmp/";
+    QString save_video_filename_structure = "tcam-capture-{serial}-{caps}-{timestamp}.{extension}";
+    VideoCodec save_video_type = VideoCodec::H264;
 
     void save()
     {
@@ -42,6 +58,14 @@ struct TcamCaptureConfig
         s.setValue("format_selection_type", (int)format_selection_type);
         s.setValue("conversion_element", (int)conversion_element);
 
+        s.setValue("save_image_type", (int)save_image_type);
+        s.setValue("save_image_location", save_image_location);
+        s.setValue("save_image_filename_structure", save_image_filename_structure);
+
+        s.setValue("save_video_type", (int)save_video_type);
+        s.setValue("save_video_location", save_video_location);
+        s.setValue("save_video_filename_structure", save_video_filename_structure);
+
         // do not save pipeline
         // if in doubt we always have the default value
     }
@@ -49,6 +73,15 @@ struct TcamCaptureConfig
     void load()
     {
         QSettings s;
+
+        save_image_type = (ImageSaveType)s.value("save_image_type", (int)save_image_type).toInt();
+        save_image_location = s.value("save_image_location", save_image_location).toString();
+        save_image_filename_structure = s.value("save_image_filename_structure", save_image_filename_structure).toString();
+
+        save_video_type = (VideoCodec)s.value("save_video_type", (int)save_video_type).toInt();
+        save_video_location = s.value("save_video_location", save_video_location).toString();
+        save_video_filename_structure = s.value("save_video_filename_structure",
+                                                save_video_filename_structure).toString();
 
         format_selection_type = (FormatHandling)s.value("format_selection_type", (int)format_selection_type).toInt();
         conversion_element = (ConversionElement)s.value("conversion_element", (int)conversion_element).toInt();

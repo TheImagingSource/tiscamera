@@ -25,15 +25,31 @@
 // #include <QVideoWidget>
 #include "aboutdialog.h"
 #include "caps.h"
+#include "definitions.h"
 #include "device.h"
 #include "devicedialog.h"
+#include "filename_generator.h"
 #include "optionsdialog.h"
 #include "propertydialog.h"
 
 #include <glib-object.h>
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
+#include <memory>
+#include <qimage.h>
 #include "../../src/gstreamer-1.0/tcamsrc/gstmetatcamstatistics.h"
+#include "videosaver.h"
+
+
+namespace
+{
+
+bool has_property (GstElement* element, const char* name)
+{
+    return g_object_class_find_property(G_OBJECT_GET_CLASS(element), name) != nullptr;
+};
+
+} // namespace
 
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -96,6 +112,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     auto action_options = new QAction(QIcon::fromTheme("preferences-other"), "Options");
     connect(action_options, &QAction::triggered, this, &MainWindow::open_options_triggered);
     p_toolbar->addAction(action_options);
+
+    auto action_save_image = new QAction(QIcon(":/images/snap.png"), "Save Image");
+    connect(action_save_image, &QAction::triggered, this, &MainWindow::save_image_triggered);
+    p_toolbar->addAction(action_save_image);
+
+    p_save_video = new QAction(QIcon(":/images/start_capture.png"), "Record Video");
+    connect(p_save_video, &QAction::triggered, this, &MainWindow::save_video_triggered);
+    p_toolbar->addAction(p_save_video);
 
     p_toolbar->setMovable(false);
     this->addToolBar(p_toolbar);
@@ -252,6 +276,30 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
         }
         case GST_MESSAGE_ELEMENT:
         {
+            const GstStructure* s = gst_message_get_structure(message);
+
+            GstMessage* forward_msg = nullptr;
+
+            gst_structure_get(s, "message", GST_TYPE_MESSAGE, &forward_msg, nullptr);
+
+            //qInfo("%s",gst_structure_to_string(s));
+
+            if (gst_structure_has_name(s, "GstBinForwarded"))
+            {
+                if (GST_MESSAGE_TYPE(forward_msg) == GST_MESSAGE_EOS)
+                {
+                    MainWindow* self = ((MainWindow*)user_data);
+
+                    if (self->video_saver_ && GST_MESSAGE_SRC(forward_msg) == self->video_saver_->gst_pointer())
+                    {
+                        self->video_saver_->destroy_pipeline();
+                        self->video_saver_ = nullptr;
+
+                        self->statusBar()->showMessage("Saved video. ", 5000);
+                        return TRUE;
+                    }
+                }
+            }
             break;
         }
         case GST_MESSAGE_ASYNC_DONE:
@@ -260,6 +308,22 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
         }
         case GST_MESSAGE_NEW_CLOCK:
         { // ignore
+            break;
+        }
+        case GST_MESSAGE_QOS:
+        {
+            const GstStructure* s = gst_message_get_structure(message);
+            GstMessage* forward_msg = NULL;
+
+            gst_structure_get(s, "message", GST_TYPE_MESSAGE, &forward_msg, NULL);
+            qInfo("=================== %s", GST_OBJECT_NAME(GST_MESSAGE_SRC(forward_msg)));
+            gst_message_unref(forward_msg);
+
+            break;
+        }
+        case GST_MESSAGE_LATENCY:
+        {
+            //ignore
             break;
         }
         default:
@@ -271,6 +335,20 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
 
     return TRUE;
 }
+
+
+GstPadProbeReturn MainWindow::pad_probe_callback (GstPad* /*pad*/,
+                                                  GstPadProbeInfo* /*info*/,
+                                                  gpointer user_data)
+{
+    MainWindow* self = (MainWindow*)user_data;
+
+    self->ui->widget->layout()->removeWidget(self->p_trigger_info_label);
+    self->p_trigger_info_label->deleteLater();
+
+    return GST_PAD_PROBE_REMOVE;
+}
+
 
 void MainWindow::on_actionOpen_Device_triggered()
 {
@@ -345,6 +423,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
     {
         set_device = true;
         p_pipeline = gst_parse_launch(pipeline_string.c_str(), &err);
+        g_object_set(G_OBJECT(p_pipeline), "message-forward", TRUE, nullptr);
 
         auto bus = gst_pipeline_get_bus(GST_PIPELINE(p_pipeline));
         [[maybe_unused]] auto gst_bus_id = gst_bus_add_watch(bus, bus_callback, this);
@@ -377,11 +456,6 @@ void MainWindow::open_pipeline(FormatHandling handling)
             return;
         }
 
-        // if (has_property(p_source, "tcam-device"))
-        // {
-        //     g_object_set(p_source, "tcam-device", m_selected_device, nullptr);
-        // }
-        // else
         if (has_property(p_source, "serial"))
         {
             std::string serial = m_selected_device.serial_long();
@@ -494,6 +568,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
     else
     {
         caps = Caps::get_default_caps(src_caps);
+        p_selected_caps = gst_caps_copy(caps);
     }
 
     if (src_caps)
@@ -536,17 +611,26 @@ void MainWindow::open_pipeline(FormatHandling handling)
     }
     else
     {
-
-        if (has_property(p_displaysink, "video-sink"))
+        if (strcmp(g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(p_displaysink))),
+                   "GstFPSDisplaySink") == 0)
         {
             GstElement* disp = nullptr;
             g_object_get(p_displaysink, "video-sink", &disp, nullptr);
-            gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(disp), this->ui->widget->winId());
+
+            if (has_property(disp, "widget"))
+            {
+                g_object_set(disp, "widget", ui->widget, nullptr);
+            }
+            else if (has_property(disp, "video-sink"))
+            {
+                gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(disp), this->ui->widget->winId());
+            }
             g_object_unref(disp);
+
+            m_fps_signal_id = g_signal_connect(
+                p_displaysink, "fps-measurements", G_CALLBACK(&FPSCounter::fps_callback), &m_fps_counter);
         }
 
-        m_fps_signal_id = g_signal_connect(
-            p_displaysink, "fps-measurements", G_CALLBACK(&FPSCounter::fps_callback), &m_fps_counter);
     }
     gst_element_set_state(p_pipeline, GST_STATE_PLAYING);
 
@@ -575,11 +659,31 @@ void MainWindow::open_pipeline(FormatHandling handling)
 
         QLayout* l = new QVBoxLayout();
         this->ui->widget->setLayout(l);
-        QLabel* la = new QLabel("No images received. TriggerMode is 'On'.");
-        la->setStyleSheet("background-color:black;color:white;");
-        l->addWidget(la);
+        p_trigger_info_label = new QLabel("No images received. TriggerMode is 'On'.");
+        p_trigger_info_label->setStyleSheet("background-color:black;color:white;");
+        l->addWidget(p_trigger_info_label);
+
+        if (p_displaysink)
+        {
+            // we add a probe that informs us about incoming data
+            // this way we know a buffer went through
+            // and can remove any warnings about trigger mode
+            // being active
+            // this prevents any weird overlays of video display and info text
+            GstPad* display_pad = gst_element_get_static_pad(p_displaysink, "sink");
+
+            gst_pad_add_probe(display_pad,
+                              GST_PAD_PROBE_TYPE_BUFFER,
+                              pad_probe_callback,
+                              this,
+                              NULL);
+
+            gst_object_unref(display_pad);
+        }
+
     }
 }
+
 
 void MainWindow::close_pipeline()
 {
@@ -766,7 +870,31 @@ void MainWindow::fps_tick(double new_fps)
 
     GstElement* sink = nullptr;
 
-    g_object_get(p_displaysink, "video-sink", &sink, nullptr);
+    if (has_property(p_displaysink, "video-sink"))
+    {
+        g_object_get(p_displaysink, "video-sink", &sink, nullptr);
+    }
+    else
+    {
+        sink = p_displaysink;
+    }
+
+    if (new_fps < 0)
+    {
+        if (has_property(sink, "stats"))
+        {
+            GstStructure* struc = nullptr;
+            g_object_get(sink, "stats", &struc, nullptr);
+            double rate;
+            gst_structure_get_double(struc, "average-rate", &rate);
+            p_fps_label->setText("FPS: " + QString::number(rate));
+
+            //gst_object_unref(struc);
+            gst_structure_free(struc);
+            qInfo("stats %f", rate);
+        }
+    }
+
 
     GstSample* sample = nullptr;
 
@@ -949,5 +1077,131 @@ void MainWindow::open_format_triggered()
 
         p_selected_caps = caps;
         open_pipeline(FormatHandling::Static);
+    }
+}
+
+
+void MainWindow::save_image_triggered()
+{
+
+    GstElement* sink = p_displaysink;
+
+    if (has_property(p_displaysink, "video-sink"))
+    {
+        sink = nullptr;
+        g_object_get(p_displaysink, "video-sink", &sink, nullptr);
+    }
+
+    GstSample* sample = nullptr;
+    /* Retrieve the buffer */
+
+    g_object_get(sink, "last-sample", &sample, nullptr);
+
+    if (sample)
+    {
+
+        GstBuffer* buffer = gst_sample_get_buffer(sample);
+        GstMapInfo info; // contains the actual image
+        if (gst_buffer_map(buffer, &info, GST_MAP_READ))
+        {
+            GstVideoInfo* video_info = gst_video_info_new();
+            if (!gst_video_info_from_caps(video_info, gst_sample_get_caps(sample)))
+            {
+                // Could not parse video info (should not happen)
+                g_warning("Failed to parse video info");
+            }
+
+            QImage image = QImage(info.data, video_info->width, video_info->height, QImage::Format::Format_ARGB32);
+
+            // BMP - Windows Bitmap Read / write
+            // GIF - Graphic Interchange Format(optional) Read
+            // JPG - Joint Photographic Experts Group Read / write
+            // JPEG - Joint Photographic Experts Group Read / write
+            // PNG - Portable Network Graphics Read / write
+            // PBM - Portable Bitmap Read
+            // PGM - Portable Graymap Read PPM Portable Pixmap Read / write
+            // XBM - X11 Bitmap Read / write
+            // XPM
+
+            const QString path = m_config.save_image_location;
+            auto image_type = m_config.save_image_type;
+            const QString extension = image_save_type_to_string(image_type).toLower();
+
+
+            QString caps_str;
+            if (p_selected_caps)
+            {
+                caps_str = tcam::tools::capture::caps_to_file_str(*p_selected_caps);
+            }
+            else
+            {
+                qInfo("No caps to interpret");
+                caps_str = "";
+            }
+
+            auto fng = tcam::tools::capture::FileNameGenerator(
+                m_selected_device.serial_long().c_str(), caps_str);
+
+            fng.set_base_pattern(m_config.save_image_filename_structure);
+            fng.set_file_extension(extension);
+
+            auto name = fng.generate();
+
+            image.save(path + "/" + name, extension.toStdString().c_str());
+
+            // show message for 5 seconds
+            statusBar()->showMessage("Saved image: " + path + "/" + name, 5000);
+
+            gst_buffer_unmap(buffer, &info);
+            gst_video_info_free(video_info);
+        }
+
+        gst_sample_unref(sample);
+    }
+
+    if (has_property(p_displaysink, "video-sink"))
+    {
+        g_object_unref(sink);
+    }
+}
+
+
+void MainWindow::save_video_triggered()
+{
+    if (!video_saver_)
+    {
+        auto codec = m_config.save_video_type;
+
+        auto caps_str = tcam::tools::capture::caps_to_file_str(*p_selected_caps);
+        //
+        auto fng = tcam::tools::capture::FileNameGenerator(m_selected_device.serial_long().c_str(), caps_str);
+        fng.set_base_pattern(m_config.save_video_filename_structure);
+        fng.set_file_extension(video_codec_file_extension(codec));
+
+        QString name = m_config.save_video_location + "/" + fng.generate();
+        video_saver_ = std::make_unique<tcam::tools::capture::VideoSaver>(GST_PIPELINE(p_pipeline), name, codec);
+
+        video_saver_->start_saving();
+
+        // Adjust GUI
+
+        p_save_video->setText("Stop Recording");
+        p_save_video->setIcon(QIcon(":/images/stop.png"));
+
+        statusBar()->showMessage("Saving video: " + name);
+    }
+    else
+    {
+        qInfo("Stop saving");
+
+        video_saver_->stop_saving();
+        // do not delete saver
+        // still need to wait on EOS
+        //video_saver_ = nullptr;
+
+        // Reset GUI
+
+        p_save_video->setText("Start Recording");
+        p_save_video->setIcon(QIcon(":/images/start_capture.png"));
     }
 }

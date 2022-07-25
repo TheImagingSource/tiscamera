@@ -34,6 +34,12 @@ enum class OptionsConversionElement
     TcamDutilsCuda,
 };
 
+enum class MediaType
+{
+    Image,
+    Video,
+};
+
 
 struct OptionsSettings
 {
@@ -54,10 +60,25 @@ public:
 
     TcamCaptureConfig get_config ();
 
+public slots:
+
+    void open_image_file_dialog ();
+    void open_video_file_dialog ();
+    void open_file_dialog (MediaType);
+
+    void update_image_filename_preview (const QString&);
+    void update_image_filename_extension_preview (const QString&);
+    void update_video_filename_preview (const QString&);
+    void update_video_filename_extension_preview (const QString&);
+
 private:
     void enable_menu_entry (QComboBox* comboBox,
                             int index,
                             bool enabled);
+
+    void setup_general();
+    void setup_image();
+    void setup_video();
 
     TcamCaptureConfig app_config;
 

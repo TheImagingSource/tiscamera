@@ -67,6 +67,10 @@ set(TCAM_CAPTURE_SOURCES
   tcamcollection.h
   fpscounter.cpp
   fpscounter.h
+  filename_generator.h
+  filename_generator.cpp
+  videosaver.h
+  videosaver.cpp
   resources.qrc
   )
 
