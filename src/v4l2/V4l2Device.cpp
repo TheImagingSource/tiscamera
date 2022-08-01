@@ -1420,7 +1420,7 @@ void V4l2Device::init_userptr_buffers()
         buf.m.userptr = (unsigned long)b->get_image_buffer_ptr();
         buf.length = b->get_image_buffer_size();
 
-        SPDLOG_DEBUG("Queueing buffer({:x}) with length {}", b->get_image_buffer_ptr(), buf.length);
+        SPDLOG_DEBUG("Queueing buffer({}) with length {}", fmt::ptr(b->get_image_buffer_ptr()), buf.length);
 
         if (-1 == tcam_xioctl(m_fd, VIDIOC_QBUF, &buf))
         {
