@@ -684,7 +684,7 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
             }
 
             /* min latency is the time to capture one frame/field */
-            min_latency = gst_util_gdouble_to_guint64(self->fps);
+            min_latency = gst_util_gdouble_to_guint64(GST_SECOND / self->fps);
 
             /* max latency is set to NONE because cameras may enter trigger mode
                and not deliver images for an unspecified amount of time */
