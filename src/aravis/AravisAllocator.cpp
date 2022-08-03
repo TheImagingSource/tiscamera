@@ -17,17 +17,18 @@
 #include "AravisAllocator.h"
 
 
-void* tcam::aravis::AravisAllocator::allocate(TCAM_MEMORY_TYPE t, size_t length, int fd)
+void* tcam::aravis::AravisAllocator::allocate(TCAM_MEMORY_TYPE t, size_t length, int /*fd*/)
 {
     if (t != tcam::TCAM_MEMORY_TYPE_USERPTR)
-    {   
+    {
         return nullptr;
     }
 
     return malloc(length);
 }
 
-void tcam::aravis::AravisAllocator::free(TCAM_MEMORY_TYPE, void* ptr, size_t, int fd)
+
+void tcam::aravis::AravisAllocator::free(TCAM_MEMORY_TYPE, void* ptr, size_t, int /*fd*/)
 {
     std::free(ptr);
 }

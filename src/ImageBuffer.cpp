@@ -44,7 +44,7 @@ ImageBuffer::ImageBuffer(const VideoFormat& format, size_t buffer_size_to_alloca
     // }
 }
 
-ImageBuffer::ImageBuffer(const VideoFormat& format, void* buffer_ptr, size_t buffer_size) noexcept
+ImageBuffer::ImageBuffer(const VideoFormat& format, void* /*buffer_ptr*/, size_t /*buffer_size*/) noexcept
     : format_(format),
     //, buffer_size_(buffer_size), buffer_ptr_(buffer_ptr),
       is_own_memory_(false)

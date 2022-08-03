@@ -28,7 +28,7 @@ namespace
         return {tcam::TCAM_MEMORY_TYPE_USERPTR};
     }
 
-    void* allocate(tcam::TCAM_MEMORY_TYPE t, size_t length, int fd=0) final
+        void* allocate(tcam::TCAM_MEMORY_TYPE t, size_t length, int /*fd*/) final
     {
         if (t != tcam::TCAM_MEMORY_TYPE_USERPTR)
         {
@@ -37,7 +37,7 @@ namespace
         return malloc(length);
     }
 
-    void free(tcam::TCAM_MEMORY_TYPE, void* ptr, size_t, int fd = 0) final
+    void free(tcam::TCAM_MEMORY_TYPE, void* ptr, size_t, int /*fd*/) final
     {
         if (ptr)
         {
@@ -45,7 +45,7 @@ namespace
         }
     }
 
-    std::vector<std::shared_ptr<tcam::Memory>> allocate(size_t buffer_count, tcam::TCAM_MEMORY_TYPE, size_t length, int fd=0)
+    std::vector<std::shared_ptr<tcam::Memory>> allocate(size_t buffer_count, tcam::TCAM_MEMORY_TYPE, size_t length, int /*fd*/)
     {
         std::vector<std::shared_ptr<tcam::Memory>> buffer;
         buffer.reserve(buffer_count);
