@@ -160,7 +160,12 @@
             "phase": "runtime",
             "modules": ["gstreamer"]
         },
-
+        {
+            "name": "qtgstreamer-plugins-qt5",
+            "version": ">=1.2.0",
+            "phase": "runtime",
+            "modules": ["gui"]
+        },
         {
             "name": "libxml2-dev",
             "version": ">= 2.9.3",
