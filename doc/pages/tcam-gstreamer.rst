@@ -56,7 +56,52 @@ Always use tcamsrc. tcammainsrc is considered an internal element.
        This can be used like: `gst-launch-1.0 tcammainsrc tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
      - always
      - always
+   * - io-mode
+     - integer
+     - For a description of possible values, see :ref:`TcamMainSrc_io_mode`
+     - `< GST_STATE_PAUSED`
+     - always
 
+.. _TcamMainSrc_io_mode:
+
+.. list-table:: tcammainsrc io-mode
+   :header-rows: 1
+
+   * - int
+     - name
+     - desccription
+   * - 0
+     - auto
+     - Automatically select the io-mode to use.
+       Typically this will result in mmap for v4l2 and userptr for aravis/libusb.
+   * - 1
+     - mmap
+     - Use memory allocated by the kernel driver
+   * - 2
+     - userptr
+     - Use memory allocated in user space   
+       
+TcamMainSrc Signals
+-------------------
+
+tcammainsrc will emit the following signals:
+
+.. list-table:: tcammainsrc signals
+   :header-rows: 1
+
+   * - signal
+     - description
+     - callback function
+   * - device-open
+     - Signal will be emitted when a device is opened.
+       After this signal property interactions will be possible.
+     - void user_function (GstElement* object, gpointer user_data);
+   * - device-close
+     - Signal will be emitted when the device is closed.
+       All further device interactions through properties, etc will fail.
+     - void user_function (GstElement* object, gpointer user_data);
+
+       
 .. _tcammainsrc_caps_auto_selection:
        
 TcamMainsSrc Caps Auto Selection
