@@ -10,12 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - UDev rule to disable usb power management for TIS devices
-- tcammainsrc property `io-mode`
-  Allows selection of backend memory allocation
-- tcammainsrc bufferpool
-- tcam-gigetool: check-control command
-  Get IP/port that controls the camera
+
+tcammainsrc:
+- own bufferpool
+- io-mode property, currently consists out of user-ptr and mmap
 - simple virtual camera, set `TCAM_VIRTCAM_DEVICES=name0:name1` to generate devices
+
+tcam-capture:
+- Ability to save images
+- Ability to save videos
+
+tcam-gigetool:
+- check-control command
+  Get IP/port that controls the camera
+
+packaging:
+- split development dependencies into own package
 
 ### Fixed
 
@@ -26,11 +36,17 @@ tcam-capture:
 tcam-gigetool:
 - Fixed misidentification of camera identifier
 
+aravis:
+- TriggerMode is now respected when setting formats
+
 installation:
 - tcamgststatistics.so is now installed into `TCAM_INSTALL_LIB`
 
 examples:
-10-metadata.py - example should now load tcamgststatistics.so even when installed
+- 10-metadata.py - example should now load tcamgststatistics.so even when installed
+
+packaging:
+- Removed dependencies that are not required for runtime
 
 ## [1.0.0] - 2022.06.01
 
