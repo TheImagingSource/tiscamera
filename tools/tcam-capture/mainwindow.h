@@ -109,7 +109,8 @@ private:
     TcamCaptureConfig m_config;
 
     QToolBar* p_toolbar = nullptr;
-    QAction* p_save_video = nullptr;
+    QAction* p_action_save_video = nullptr;
+    QAction* p_action_save_image = nullptr;
 
     QAction* p_action_property_dialog = nullptr;
     QAction* p_action_format_dialog = nullptr;

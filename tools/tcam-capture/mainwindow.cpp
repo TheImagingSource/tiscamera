@@ -113,13 +113,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(action_options, &QAction::triggered, this, &MainWindow::open_options_triggered);
     p_toolbar->addAction(action_options);
 
-    auto action_save_image = new QAction(QIcon(":/images/snap.png"), "Save Image");
-    connect(action_save_image, &QAction::triggered, this, &MainWindow::save_image_triggered);
-    p_toolbar->addAction(action_save_image);
+    p_action_save_image = new QAction(QIcon(":/images/snap.png"), "Save Image");
+    connect(p_action_save_image, &QAction::triggered, this, &MainWindow::save_image_triggered);
+    p_toolbar->addAction(p_action_save_image);
 
-    p_save_video = new QAction(QIcon(":/images/start_capture.png"), "Record Video");
-    connect(p_save_video, &QAction::triggered, this, &MainWindow::save_video_triggered);
-    p_toolbar->addAction(p_save_video);
+    p_action_save_video = new QAction(QIcon(":/images/start_capture.png"), "Record Video");
+    connect(p_action_save_video, &QAction::triggered, this, &MainWindow::save_video_triggered);
+    p_toolbar->addAction(p_action_save_video);
 
     p_toolbar->setMovable(false);
     this->addToolBar(p_toolbar);
@@ -249,31 +249,6 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
 
             break;
         }
-        case GST_MESSAGE_STREAM_START:
-        {
-            // all sink elements are playing.
-            // stream actually started
-
-            break;
-        }
-        case GST_MESSAGE_STREAM_STATUS:
-        {
-            break;
-        }
-        case GST_MESSAGE_STATE_CHANGED:
-        {
-            // GstState oldstate;
-            // GstState newstate;
-            // GstState pending;
-            // gst_message_parse_state_changed(message, &oldstate, &newstate, &pending);
-
-            // qInfo("State change: old: %s new: %s pend: %s",
-            //       gst_element_state_get_name(oldstate),
-            //       gst_element_state_get_name(newstate),
-            //       gst_element_state_get_name(pending));
-
-            break;
-        }
         case GST_MESSAGE_ELEMENT:
         {
             const GstStructure* s = gst_message_get_structure(message);
@@ -302,14 +277,6 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
             }
             break;
         }
-        case GST_MESSAGE_ASYNC_DONE:
-        { // ignore
-            break;
-        }
-        case GST_MESSAGE_NEW_CLOCK:
-        { // ignore
-            break;
-        }
         case GST_MESSAGE_QOS:
         {
             const GstStructure* s = gst_message_get_structure(message);
@@ -322,8 +289,12 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
             break;
         }
         case GST_MESSAGE_LATENCY:
-        {
-            //ignore
+        case GST_MESSAGE_STREAM_START:
+        case GST_MESSAGE_STREAM_STATUS:
+        case GST_MESSAGE_STATE_CHANGED:
+        case GST_MESSAGE_ASYNC_DONE:
+        case GST_MESSAGE_NEW_CLOCK:
+        { // ignore
             break;
         }
         default:
@@ -835,6 +806,9 @@ void MainWindow::enable_device_gui_elements(bool toggle)
     p_action_property_dialog->setEnabled(toggle);
     p_action_format_dialog->setEnabled(toggle);
 
+    p_action_save_image->setEnabled(toggle);
+    p_action_save_video->setEnabled(toggle);
+
     if (p_about)
     {
         p_about->set_tcambin(p_source);
@@ -1185,8 +1159,8 @@ void MainWindow::save_video_triggered()
 
         // Adjust GUI
 
-        p_save_video->setText("Stop Recording");
-        p_save_video->setIcon(QIcon(":/images/stop.png"));
+        p_action_save_video->setText("Stop Recording");
+        p_action_save_video->setIcon(QIcon(":/images/stop.png"));
 
         statusBar()->showMessage("Saving video: " + name);
     }
@@ -1201,7 +1175,7 @@ void MainWindow::save_video_triggered()
 
         // Reset GUI
 
-        p_save_video->setText("Start Recording");
-        p_save_video->setIcon(QIcon(":/images/start_capture.png"));
+        p_action_save_video->setText("Start Recording");
+        p_action_save_video->setIcon(QIcon(":/images/start_capture.png"));
     }
 }
