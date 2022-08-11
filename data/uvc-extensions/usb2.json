@@ -117,6 +117,51 @@
 		    "v4l2_type": "boolean",
 		    "size_bits": 1,
 		    "offset_bits": 1
+        },
+        {
+            "id": "0x199e216",
+		    "name": "Digital Output",
+		    "selector": "0x27",
+		    "uvc_type": "boolean",
+		    "v4l2_type": "boolean",
+		    "size_bits": 1,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e217",
+		    "name": "Digital Input",
+		    "selector": "0x28",
+		    "uvc_type": "boolean",
+		    "v4l2_type": "boolean",
+		    "size_bits": 1,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e100",
+		    "name": "Firmware Version",
+		    "selector": "0x29",
+		    "uvc_type": "unsigned",
+		    "v4l2_type": "integer",
+		    "size_bits": 16,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e101",
+		    "name": "Sensor ID",
+		    "selector": "0x2a",
+		    "uvc_type": "unsigned",
+		    "v4l2_type": "integer",
+		    "size_bits": 16,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e917",
+		    "name": "Gain DB",
+		    "selector": "0x2b",
+		    "uvc_type": "unsigned",
+		    "v4l2_type": "integer",
+		    "size_bits": 16,
+		    "offset_bits": 0
         }
     ]
 }

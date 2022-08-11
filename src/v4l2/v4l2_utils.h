@@ -34,6 +34,7 @@ enum class v4l2_device_type
     dxk72,
     dxk42,
     dxk22,
+    dxk0234,
     dxk33u,
     dxk37u,
     dxk38u,

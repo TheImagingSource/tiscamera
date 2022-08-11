@@ -586,6 +586,11 @@ static const v4l2_genicam_mapping    dxk33u_GainDB_factor_AR0234[] =
     { 0x199e259, &prop_lst::GainAutoLowerLimit, quirk_33u::gain_to_db_factor_AR0234 },
     { 0x199e260, &prop_lst::GainAutoUpperLimit, quirk_33u::gain_to_db_factor_AR0234 },
 };
+
+static const v4l2_genicam_mapping   dxk0234_GainDB_factor_AR0234[] =
+{
+    { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_AR0234 },
+};
 // clang-format on
 
 
@@ -673,6 +678,15 @@ const tcam::v4l2::v4l2_genicam_mapping* find_mapping_info_specific(v4l2_device_t
             return find_mapping_(dxk42_conv_dict, v4l2_id);
         case tcam::v4l2::v4l2_device_type::dxk22: // MT9V023
             return find_mapping_(dxk22_conv_dict, v4l2_id);
+        case tcam::v4l2::v4l2_device_type::dxk0234:
+        {
+            if (auto ptr = find_mapping_(dxk0234_GainDB_factor_AR0234, v4l2_id);
+                ptr != nullptr)
+            {
+                return ptr;
+            }
+            break;
+        }
         case tcam::v4l2::v4l2_device_type::dxk33u:
         case tcam::v4l2::v4l2_device_type::dxk37u:
         case tcam::v4l2::v4l2_device_type::dxk38u:
