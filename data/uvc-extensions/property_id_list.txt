@@ -1,0 +1,359 @@
+// This is an overview list over all extension unit properties
+// that have existed up to this point
+// It exists to ensure that all IDs remain unique
+// For v4l2 standard properties read:
+// https://www.linuxtv.org/downloads/legacy/video4linux/API/V4L2_API/spec-single/v4l2.html#camera-controls
+
+
+{
+"id": "0x199e100",
+"name": "Firmware Version",
+},
+{
+"id": "0x199e101",
+"name": "Sensor ID",
+},
+
+{
+"id": "0x199e201",
+"name": "Exposure Time (us)",
+},
+{
+"id": "0x199e202",
+"name": "Auto Shutter",
+},
+{
+"id": "0x199e203",
+"name": "Auto Exposure Reference",
+},
+{
+"id": "0x199e204",
+"name": "Gain (dB/100)",
+},
+{
+"id": "0x199e205",
+"name": "Gain Auto",
+},
+{
+"id": "0x199e206",
+"name": "White Balance One Push",
+},
+{
+"id": "0x199e207",
+"name": "White Balance Preset",
+},
+{
+"id": "0x199e208",
+"name": "Trigger Mode",
+},
+{
+"id": "0x199e209",
+"name": "Software Trigger",
+},
+{
+"id": "0x199e210",
+"name": "Trigger Delay",
+},
+{
+"id": "0x199e211",
+"name": "Strobe Enable",
+},
+{
+"id": "0x199e212",
+"name": "Strobe Polarity",
+},
+
+// usb23
+{
+"id": "0x199e213",
+"name": "Strobe Exposure",
+},
+// for all others
+{
+"id": "0x199e213",
+"name": "Strobe Operation",
+},
+
+{
+"id": "0x199e214",
+"name": "Strobe Duration",
+},
+{
+"id": "0x199e215",
+"name": "Strobe Delay",
+},
+{
+"id": "0x199e216",
+"name": "GPOUT",
+},
+{
+"id": "0x199e217",
+"name": "GPIN",
+},
+{
+"id": "0x199e218",
+"name": "ROI Offset X",
+},
+{
+"id": "0x199e219",
+"name": "ROI Offset Y",
+},
+{
+"id": "0x199e220",
+"name": "ROI Auto Center",
+},
+{
+"id": "0x199e221",
+"name": "Auto Focus One Push",
+},
+{
+"id": "0x199e222",
+"name": "Auto Focus ROI Enable",
+},
+{
+"id": "0x199e223",
+"name": "Auto Focus ROI Left",
+},
+{
+"id": "0x199e224",
+"name": "Auto Focus ROI Top",
+},
+{
+"id": "0x199e225",
+"name": "ATR Enable",
+},
+{
+"id": "0x199e226",
+"name": "ATR Gain",
+},
+{
+"id": "0x199e227",
+"name": "ATR Enable Wide D",
+},
+{
+"id": "0x199e228",
+"name": "ATR Contrast",
+},
+{
+"id": "0x199e229",
+"name": "ATR Contrast Auto",
+},
+{
+"id": "0x199e230",
+"name": "ATR Chroma",
+},
+{
+"id": "0x199e231",
+"name": "Image Stabilization",
+},
+{
+"id": "0x199e232",
+"name": "Noise Reduction",
+},
+{
+"id": "0x199e233",
+"name": "Face Detection",
+},
+{
+"id": "0x199e234",
+"name": "Trigger Polarity",
+},
+{
+"id": "0x199e235",
+"name": "Trigger Operation",
+},
+{
+"id": "0x199e236",
+"name": "Trigger Exposure Mode",
+},
+{
+"id": "0x199e237",
+"name": "Trigger Burst Count",
+},
+{
+"id": "0x199e238",
+"name": "Trigger Debounce Time (us)",
+},
+{
+"id": "0x199e239",
+"name": "Trigger Mask Time (us)",
+},
+{
+"id": "0x199e240",
+"name": "Trigger Noise Suppression Time",
+},
+{
+"id": "0x199e241",
+"name": "Auto Functions ROI Control",
+},
+{
+"id": "0x199e242",
+"name": "Auto Functions ROI Left",
+},
+{
+"id": "0x199e243",
+"name": "Auto Functions ROI Top",
+},
+{
+"id": "0x199e244",
+"name": "Auto Functions ROI Width",
+},
+{
+"id": "0x199e245",
+"name": "Auto Functions ROI Height",
+},
+{
+"id": "0x199e246",
+"name": "White Balance Mode",
+},
+{
+"id": "0x199e247",
+"name": "White Balance Auto Preset",
+},
+{
+"id": "0x199e248",
+"name": "White Balance Green Component",
+},
+
+
+
+{
+"id": "0x199e250",
+"name": "White Balance Temperature",
+},
+{
+"id": "0x199e251",
+"name": "Flip Horizontal",
+},
+{
+"id": "0x199e252",
+"name": "Flip Vertical",
+},
+{
+"id": "0x199e253",
+"name": "Highlight Reduction",
+},
+{
+"id": "0x199e254",
+"name": "Exposure Auto Upper Limit Auto",
+},
+{
+"id": "0x199e255",
+"name": "Exposure Auto Lower Limit (us)",
+},
+{
+"id": "0x199e256",
+"name": "Exposure Auto Upper Limit (us)",
+},
+{
+"id": "0x199e257",
+"name": "Override Scanning Mode",
+},
+{
+"id": "0x199e258",
+"name": "Auto Functions ROI Preset",
+},
+{
+"id": "0x199e259",
+"name": "Gain Auto Lower Limit",
+},
+{
+"id": "0x199e260",
+"name": "Gain Auto Upper Limit",
+},
+{
+"id": "0x199e261",
+"name": "Trigger Global Reset Release",
+},
+{
+"id": "0x199e262",
+"name": "IMX Low-Latency Mode",
+},
+{
+"id": "0x199e263",
+"name": "Scanning Mode Selector",
+},
+{
+"id": "0x199e264",
+"name": "Scanning Mode Identifier",
+},
+{
+"id": "0x199e265",
+"name": "Scanning Mode Scale Horizontal",
+},
+{
+"id": "0x199e266",
+"name": "Scanning Mode Scale Vertical",
+},
+{
+"id": "0x199e267",
+"name": "Scanning Mode Binning H",
+},
+{
+"id": "0x199e268",
+"name": "Scanning Mode Binning V",
+},
+{
+"id": "0x199e269",
+"name": "Scanning Mode Skipping H",
+},
+{
+"id": "0x199e270",
+"name": "Scanning Mode Skipping V",
+},
+{
+"id": "0x199e271",
+"name": "Scanning Mode Flags",
+},
+{
+"id": "0x199e272",
+"name": "Trigger Delay (100ns)",
+},
+
+// the following are currently used for usb2 cameras
+
+{
+"id": "0x199e917",
+"name": "Gain DB",
+}
+
+{
+"id": "0x199e920",
+"name": "ExtIO",
+},
+{
+"id": "0x199e921",
+"name": "GainR",
+},
+{
+"id": "0x199e922",
+"name": "GainG",
+},
+{
+"id": "0x199e923",
+"name": "GainB",
+},
+{
+"id": "0x199e208",
+"name": "Trigger",
+},
+{
+"id": "0x199e92a",
+"name": "Trigger Global Reset Shutter",
+},
+{
+"id": "0x199e925",
+"name": "Binning",
+},
+{
+"id": "0x199e929",
+"name": "Skipping",
+},
+{
+"id": "0x199e927",
+"name": "X Offset",
+},
+{
+"id": "0x199e928",
+"name": "Y Offset",
+},
