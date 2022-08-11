@@ -135,6 +135,8 @@ bool tcam::virtcam::VirtcamDevice::start_stream(const std::shared_ptr<IImageBuff
     stream_thread_ended_ = false;
     stream_thread_ = std::thread([this] { stream_thread_main(); });
 
+    start_time_ = std::chrono::high_resolution_clock::now();
+
     return true;
 }
 
@@ -215,8 +217,9 @@ void tcam::virtcam::VirtcamDevice::stream_thread_main()
                 tcam_stream_statistics stats = {};
                 stats.frame_count = frames_delivered_;
                 stats.frames_dropped = frames_dropped_;
-                // TODO: capture time based on stream start?
-                stats.capture_time_ns = 0;
+
+                auto end = std::chrono::high_resolution_clock::now();
+                stats.capture_time_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start_time_).count();
 
                 buf->set_statistics(stats);
                 buf->set_valid_data_length(buf->get_image_buffer_size());

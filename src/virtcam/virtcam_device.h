@@ -21,6 +21,7 @@
 
 #include <condition_variable> // std::condition_variable
 #include <memory>
+#include <chrono>
 #include <mutex> // std::mutex, std::unique_lock
 #include <thread>
 
@@ -88,6 +89,7 @@ private:
 
     int frames_dropped_ = 0;
     int frames_delivered_ = 0;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_time_;
 
     VideoFormat active_video_format_;
 
