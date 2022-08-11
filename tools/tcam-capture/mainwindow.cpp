@@ -588,6 +588,11 @@ void MainWindow::open_pipeline(FormatHandling handling)
             GstElement* disp = nullptr;
             g_object_get(p_displaysink, "video-sink", &disp, nullptr);
 
+            if (has_property(disp, "force-aspect-ratio"))
+            {
+                g_object_set(disp, "force-aspect-ratio", true, nullptr);
+            }
+
             if (has_property(disp, "widget"))
             {
                 g_object_set(disp, "widget", ui->widget, nullptr);
