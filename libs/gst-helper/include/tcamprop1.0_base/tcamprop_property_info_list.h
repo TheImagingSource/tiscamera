@@ -1,9 +1,9 @@
 
-/** 
+/**
  * This file contains the(/many) known properties and their static information tidbits
- * 
+ *
  * If you add one here, add the property to the list in src/tcamprop1.0_base/tcamprop_property_list_impl.cpp
- * 
+ *
  * Guidelines:
  *  - The variable should be the same as the GenICam name
  *  - When adding a property here, add all its data here.
@@ -175,6 +175,9 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_float MultiFrameSetOutputModeGain1;
     extern const prop_static_info_float MultiFrameSetOutputModeGain2;
     extern const prop_static_info_float MultiFrameSetOutputModeGain3;
+
+    extern const prop_static_info_boolean ExpandOutputRange;
+    extern const prop_static_info_boolean ShowInfoOverlay;
 
 /* Disable these, because this is a device-specific property, and should always come out of the GenICam document of the device itself.
     extern const prop_static_info_integer ActionQueueSize;

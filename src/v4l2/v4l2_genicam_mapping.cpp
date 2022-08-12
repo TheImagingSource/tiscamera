@@ -209,6 +209,7 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x00980902 /*V4L2_CID_SATURATION*/,       &prop_lst::Saturation, saturation_converter },
     { 0x00980903 /*V4L2_CID_HUE*/,              &prop_lst::Hue },
     { 0x00980910 /*V4L2_CID_GAMMA*/,            &prop_lst::Gamma, gamma_converter },
+    { 0x0098091b /*V4L2_CID_SHARPNESS*/,        &prop_lst::Sharpness},
 
     { 0x009a0902 /*V4L2_CID_EXPOSURE_ABSOLUTE*/,&prop_lst::ExposureTime, exposure_absolute_converter, 0x199e201 },
     { 0x199e201, &prop_lst::ExposureTime },                                        // usb23 usb33 "Exposure Time (us)"
@@ -299,6 +300,8 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x199e269, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Skipping H
     { 0x199e270, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Skipping V
     { 0x199e271, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Flag
+    { 0x199e273, &prop_lst::ExpandOutputRange},                                         // usb33 dfg/hdmi Expand Output Range
+    { 0x199e274, &prop_lst::ShowInfoOverlay},                                           // usb33 dfg/hdmi Show Info Overlay
 
     { 0x199e920, mapping_type::internal },                                             // usb2 "ExtO"
     // 0x199e921- 0x199e923 Gain channels
@@ -591,6 +594,12 @@ static const v4l2_genicam_mapping   dxk0234_GainDB_factor_AR0234[] =
 {
     { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_AR0234 },
 };
+
+static const v4l2_genicam_mapping dxg_hdmi_conv_dict[] =
+{
+    {V4L2_CID_EXPOSURE_AUTO, mapping_type::blacklist},
+    {V4L2_CID_EXPOSURE_ABSOLUTE, mapping_type::blacklist},
+};
 // clang-format on
 
 
@@ -690,9 +699,20 @@ const tcam::v4l2::v4l2_genicam_mapping* find_mapping_info_specific(v4l2_device_t
         case tcam::v4l2::v4l2_device_type::dxk33u:
         case tcam::v4l2::v4l2_device_type::dxk37u:
         case tcam::v4l2::v4l2_device_type::dxk38u:
-        case tcam::v4l2::v4l2_device_type::dxk_hdmi:
         {
             if (auto ptr = find_mapping_info_33u_gain(product_id, v4l2_id); ptr != nullptr)
+            {
+                return ptr;
+            }
+            if (auto ptr = find_mapping_(dxk33u_conv_dict, v4l2_id); ptr != nullptr)
+            {
+                return ptr;
+            }
+            break;
+        }
+        case tcam::v4l2::v4l2_device_type::dxk_hdmi:
+        {
+            if (auto ptr = find_mapping_(dxg_hdmi_conv_dict, v4l2_id); ptr != nullptr)
             {
                 return ptr;
             }

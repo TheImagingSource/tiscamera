@@ -179,7 +179,7 @@ const prop_static_info_integer lst::Iris = make_Integer(
 const prop_static_info_enumeration lst::IrisAuto = make_Enumeration(
     "IrisAuto",
     "Lens", "Auto Iris",
-    "Enables the automatic Iris setting selection." 
+    "Enables the automatic Iris setting selection."
 );
 
 const prop_static_info_integer lst::Focus = make_Integer(
@@ -687,4 +687,18 @@ const prop_static_info_float lst::MultiFrameSetOutputModeGain3 = make_Float(
     "Multi-Frame Output Mode", "Gain 3",
     "Gain value for fourth Multi-Frame Output frame.",
     "dB"
+);
+
+const prop_static_info_boolean lst::ExpandOutputRange = make_Boolean(
+    "ExpandOutput",
+    "HDMI",
+    "Expand Output",
+    "Change output luminance values in the range of 0 - 255."
+);
+
+const prop_static_info_boolean lst::ShowInfoOverlay = make_Boolean(
+    "ShowInfoOverlay",
+    "HDMI",
+    "Show Info Overlay",
+    "Show an overlay containing stream information for the first few seconds after stream start."
 );

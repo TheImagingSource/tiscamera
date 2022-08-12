@@ -310,6 +310,15 @@
 "name": "Trigger Delay (100ns)",
 },
 
+{
+"id": "0x199e273",
+"name": "Expand Output Range",
+},
+{
+"id": "0x199e274",
+"name": "Show Info Overlay",
+}
+
 // the following are currently used for usb2 cameras
 
 {
@@ -357,3 +366,6 @@
 "id": "0x199e928",
 "name": "Y Offset",
 },
+
+#define XU_HDMI_FULL_RANGE                            MAKE_CONTROL_INFO(0x60, 95) // BM8
+#define XU_HDMI_SHOW_INFO_OVERLAY                    MAKE_CONTROL_INFO(0x61, 96) // BM8

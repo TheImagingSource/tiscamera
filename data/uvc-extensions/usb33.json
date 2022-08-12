@@ -678,6 +678,26 @@
             "v4l2_type": "integer",
             "size_bits":8,
             "offset_bits": 56
+        },
+        {
+            "id": "0x199e273",
+            "name": "Expand Output Range",
+            "selector": "0x60",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits":1,
+            "offset_bits": 0
+
+        },
+        {
+            "id": "0x199e274",
+            "name": "Show Info Overlay",
+            "selector": "0x61",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits":1,
+            "offset_bits": 0
+
         }
     ]
 }

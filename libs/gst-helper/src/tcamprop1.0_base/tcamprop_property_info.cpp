@@ -136,6 +136,9 @@ static const constexpr tcamprop1::prop_static_info_find_result static_prop_list[
     to_( lst::MultiFrameSetOutputModeGain2 ),
     to_( lst::MultiFrameSetOutputModeGain3 ),
 
+    to_( lst::ExpandOutputRange ),
+    to_( lst::ShowInfoOverlay ),
+
     to_( lst::SensorWidth ),
     to_( lst::SensorHeight ),
 
