@@ -22,6 +22,29 @@
 
 using namespace tcam;
 
+namespace
+{
+
+bool prevent_software_properties (const DeviceInfo& dev)
+{
+    if (dev.get_device_type() == tcam::TCAM_DEVICE_TYPE_V4L2)
+    {
+        // DFG/HDMI
+        if (std::string(dev.get_info().additional_identifier) == "9c97")
+        {
+            return true;
+        }
+    }
+    else if (dev.get_device_type() == tcam::TCAM_DEVICE_TYPE_VIRTCAM)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+} // namepsace
+
 
 struct bad_device : std::exception
 {
@@ -48,9 +71,12 @@ CaptureDeviceImpl::CaptureDeviceImpl(const DeviceInfo& device_desc)
                      device_desc.get_device_type_as_string());
         throw bad_device();
     }
+    apply_software_properties_ = !prevent_software_properties(device_desc);
 
-    property_filter_.setup(device_->get_properties(), available_output_formats_);
-
+    if (apply_software_properties_)
+    {
+        property_filter_.setup(device_->get_properties(), available_output_formats_);
+    }
     const auto serial = device_->get_device_description().get_serial();
     index_.register_device_lost(deviceindex_lost_cb, this, serial);
 }
@@ -97,7 +123,14 @@ void CaptureDeviceImpl::deviceindex_lost_cb(const DeviceInfo& info, void* user_d
 
 std::vector<std::shared_ptr<tcam::property::IPropertyBase>> CaptureDeviceImpl::get_properties()
 {
-    return property_filter_.getProperties();
+    if (apply_software_properties_)
+    {
+        return property_filter_.getProperties();
+    }
+    else
+    {
+        return device_->get_properties();
+    }
 }
 
 std::vector<VideoFormatDescription> CaptureDeviceImpl::get_available_video_formats() const
@@ -125,8 +158,10 @@ bool CaptureDeviceImpl::configure_stream(const VideoFormat& format,
         return false;
     }
 
-    property_filter_.setVideoFormat(device_->get_active_video_format());
-
+    if (apply_software_properties_)
+    {
+        property_filter_.setVideoFormat(device_->get_active_video_format());
+    }
     // if no pool is provided allocate an internal
     // default to userptr as all devices support that
     if (!pool)
@@ -211,7 +246,10 @@ void CaptureDeviceImpl::set_drop_incomplete_frames(bool b)
 
 void CaptureDeviceImpl::push_image(const std::shared_ptr<ImageBuffer>& buffer)
 {
-    property_filter_.apply(*buffer);
+    if (apply_software_properties_)
+    {
+        property_filter_.apply(*buffer);
+    }
 
     sink_->push_image(buffer);
 }

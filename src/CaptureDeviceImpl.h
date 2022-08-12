@@ -147,6 +147,7 @@ private:
     std::shared_ptr<ImageSink> sink_;
     std::shared_ptr<BufferPool> pool_ = nullptr;
 
+    bool apply_software_properties_ = true;
     tcam::stream::filter::SoftwarePropertyWrapper property_filter_;
 
 }; /* class CaptureDeviceImpl */
