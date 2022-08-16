@@ -94,7 +94,7 @@ ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="199e", TEST=="power/control", 
 #
 # load uvc extensions for USB2 cameras
 # Product IDs 0x82xx, 0x83xx = 22U, 72U
-# Product ID  0x9c87         =
+# Product ID  0x9c87         = 52U
 #
 
 @SILENT@ACTION=="add", SUBSYSTEM=="video4linux", \

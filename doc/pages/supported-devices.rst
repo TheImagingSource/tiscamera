@@ -24,6 +24,10 @@ Exceptions to these rules will be explicitly stated in the table.
      - yes
      - yes
      - yes
+   * - 52
+     - yes
+     - no
+     - yes [#]_
    * - 23
      - yes
      - yes
@@ -87,3 +91,5 @@ Your camera is not listed or you are still unsure?
 
 **Linux I/O** means that device interaction are possible either through
 standard Linux kernel drivers or open source third party libraries such as aravis.
+
+.. [#] Supported since 1.1

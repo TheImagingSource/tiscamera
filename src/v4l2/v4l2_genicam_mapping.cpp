@@ -215,7 +215,7 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x199e201, &prop_lst::ExposureTime },                                        // usb23 usb33 "Exposure Time (us)"
     { 0x009a0901 /*V4L2_CID_EXPOSURE_AUTO*/,    &prop_lst::ExposureAuto, fetch_menu_entries_v4l2_ExposureAuto, 0x199e202 },
     { 0x199e202, &prop_lst::ExposureAuto, fetch_menu_entries_off_continuous },     // usb23 usb33 "Auto Shutter"
-    { 0x199e203, &prop_lst::ExposureAutoReference },                               // usb23 usb33 
+    { 0x199e203, &prop_lst::ExposureAutoReference },                               // usb23 usb33
     { 0x199e255, &prop_lst::ExposureAutoLowerLimit },                              // usb23 usb33 "Exposure Auto Lower Limit (us)"
     { 0x199e256, &prop_lst::ExposureAutoUpperLimit },                              // usb23 usb33 "Exposure Auto Upper Limit (us)"
     { 0x199e254, &prop_lst::ExposureAutoUpperLimitAuto },                          // usb23 usb33
@@ -251,7 +251,7 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x009a0910 /*V4L2_CID_PRIVACY*/,          &prop_lst::TriggerMode, fetch_menu_entries_off_on },
     { 0x199e208, &prop_lst::TriggerMode, fetch_menu_entries_off_on, 0x009a0910 },  // usb2 usb23 usb33 "Trigger Mode"
     { 0x199e209, &prop_lst::TriggerSoftware },                                     // usb2 usb23 usb33
-    { 0x199e210, &prop_lst::TriggerDelay, 0x199e272 },                             // usb23 
+    { 0x199e210, &prop_lst::TriggerDelay, 0x199e272 },                             // usb23
     { 0x199e211, &prop_lst::StrobeEnable, fetch_menu_entries_off_on },             // usb2 usb23 usb33
     { 0x199e212, &prop_lst::StrobePolarity, fetch_menu_entries_StrobePolarity },   // usb2 usb23 usb33
     { 0x199e213, &prop_lst::StrobeOperation, fetch_menu_entries_StrobeOperation },                                     // usb23 usb33 "Strobe Exposure"/"Strobe Operation"
@@ -263,7 +263,7 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x199e220, &prop_lst::OffsetAutoCenter, fetch_menu_entries_off_on },         // usb23 usb33 "ROI Auto Center",
     { 0x199e218, &prop_lst::OffsetX },                                             // usb23 usb33 "ROI Offset X"
     { 0x199e219, &prop_lst::OffsetY },                                             // usb23 usb33 "ROI Offset Y"
-    
+
     { 0x199e927, &prop_lst::OffsetX },                                                 // usb2 "X Offset"
     { 0x199e928, &prop_lst::OffsetY },                                                 // usb2 "Y Offset"
 
@@ -350,8 +350,8 @@ static const converter_scale_init_float dxk42_gain_mul_dB_converter =
         return 20. * std::log10(factor);
     },
     { 0. },     // min
-    {},         // max      
-    { 0.1 },    // stp      
+    {},         // max
+    { 0.1 },    // stp
     { 0. }      // def
 };
 
@@ -367,8 +367,8 @@ static const converter_scale_init_float dxk22_gain_mul_dB_converter =
         return 20. * std::log10(factor);
     },
     {},         // min
-    {},         // max   
-    { 0.1 },    // stp   
+    {},         // max
+    { 0.1 },    // stp
     { 0. }      // def
 };
 
@@ -590,7 +590,7 @@ static const v4l2_genicam_mapping    dxk33u_GainDB_factor_AR0234[] =
     { 0x199e260, &prop_lst::GainAutoUpperLimit, quirk_33u::gain_to_db_factor_AR0234 },
 };
 
-static const v4l2_genicam_mapping   dxk0234_GainDB_factor_AR0234[] =
+static const v4l2_genicam_mapping   dxk52_GainDB_factor_AR0234[] =
 {
     { V4L2_CID_GAIN, &prop_lst::Gain, quirk_33u::gain_to_db_factor_AR0234 },
 };
@@ -687,9 +687,9 @@ const tcam::v4l2::v4l2_genicam_mapping* find_mapping_info_specific(v4l2_device_t
             return find_mapping_(dxk42_conv_dict, v4l2_id);
         case tcam::v4l2::v4l2_device_type::dxk22: // MT9V023
             return find_mapping_(dxk22_conv_dict, v4l2_id);
-        case tcam::v4l2::v4l2_device_type::dxk0234:
+        case tcam::v4l2::v4l2_device_type::dxk52:
         {
-            if (auto ptr = find_mapping_(dxk0234_GainDB_factor_AR0234, v4l2_id);
+            if (auto ptr = find_mapping_(dxk52_GainDB_factor_AR0234, v4l2_id);
                 ptr != nullptr)
             {
                 return ptr;

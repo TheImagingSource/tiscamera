@@ -206,7 +206,7 @@ tcam::v4l2::v4l2_device_type tcam::v4l2::get_device_type(const DeviceInfo& info)
 
     if (product_id == 0x9c87)
     {
-        return v4l2_device_type::dxk0234;
+        return v4l2_device_type::dxk52;
     }
 
     if (product_id == 0x9041 || product_id == 0x90C1 || product_id == 0x9851
