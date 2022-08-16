@@ -63,6 +63,11 @@ ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="199e", TEST=="power/control", 
 @SILENT@               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="98??", \
 @SILENT@               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb33.json"
 
+# explicit rule for DFG/HDMI converter
+@SILENT@ACTION=="add", SUBSYSTEM=="video4linux", \
+@SILENT@               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="9c97", \
+@SILENT@               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb33.json"
+
 
 #
 # load uvc extensions for USB3 23 cameras
