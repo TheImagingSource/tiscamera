@@ -690,9 +690,9 @@ const prop_static_info_float lst::MultiFrameSetOutputModeGain3 = make_Float(
 );
 
 const prop_static_info_boolean lst::ExpandOutputRange = make_Boolean(
-    "ExpandOutput",
+    "ExpandOutputRange",
     "HDMI",
-    "Expand Output",
+    "Expand Output Range",
     "Change output luminance values in the range of 0 - 255."
 );
 
