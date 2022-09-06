@@ -232,8 +232,7 @@ static void prepare_gst_buffer_pool(GstTcamBufferPool* self)
 
             if (!meta)
             {
-                GST_WARNING_OBJECT(self, "Unable to add meta !!!!");
-                GST_ERROR("NOPE meta");
+                GST_WARNING_OBJECT(self, "Unable to add meta!");
             }
             else
             {
@@ -326,24 +325,10 @@ static gboolean gst_tcam_buffer_pool_start(GstBufferPool* pool)
 
     //gst_buffer_pool_set_config(GstBufferPool *pool, GstStructure *config)
     gst_buffer_pool_config_set_params(config, caps, size, min_buffers, max_buffers);
-    // if (GST_IS_BUFFER_POOL_CLASS(pclass))
-    // {
-    //     pclass->set_config(pool, config);
-
-    //     if (!pclass->start(pool))
-    //     {
-    //         GST_ERROR_OBJECT(self, "Unable to start allocation");
-    //     }
-    // }
-    // else
-    // {
-    //     GST_ERROR("No pclass");
-    // }
 
     gst_structure_free(config);
 
     gst_buffer_pool_set_flushing(pool, FALSE);
-    GST_ERROR("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! START");
 
     auto cb_func = [self](const std::shared_ptr<tcam::ImageBuffer>& cb)
     {
