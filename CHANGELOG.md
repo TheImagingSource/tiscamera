@@ -9,7 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- UDev rule to disable usb power management for TIS devices
+Devices:
+- Support for 52U usb-2.0 cameras
+- Support for new DFG/HDMI properties
+
+UDev:
+- rule to disable usb power management for TIS devices
 
 tcammainsrc:
 - own bufferpool
