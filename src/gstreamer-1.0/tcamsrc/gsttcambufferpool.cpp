@@ -26,7 +26,6 @@ struct tcam_pool_state
     std::vector<tcam::mainsrc::buffer_info> buffer;
 };
 
-//GST_DEBUG_CATEGORY(tcam_mainsrc_debug);
 #define GST_CAT_DEFAULT tcam_mainsrc_debug
 
 #define gst_tcam_buffer_pool_parent_class parent_class
@@ -156,12 +155,12 @@ static GstFlowReturn gst_tcam_buffer_pool_acquire_buffer(GstBufferPool* pool,
             auto buffer_desc = state->queue.front();
             state->queue.pop(); // remove buffer from queue
             *buffer = buffer_desc.gst_buffer;
-            //GST_INFO("ok");
+
             return GST_FLOW_OK;
         }
     }
 
-    // TOOD: return flusjhing only when inactive
+    // TOOD: return flushing only when inactive
     // acquire may block, so we can wait indefinetly
 
     return GST_FLOW_FLUSHING;
@@ -223,11 +222,6 @@ static void prepare_gst_buffer_pool(GstTcamBufferPool* self)
 
             // TODO: check config and add meta data that is listed there
             GstStructure* struc = gst_structure_new_empty("TcamStatistics");
-            //    statistics_to_gst_structure(&stat, struc);
-
-
-            //auto meta =
-            //  gst_buffer_add_meta(gst_buffer, TCAM_STATISTICS_META_INFO, nullptr);
             auto meta = gst_buffer_add_tcam_statistics_meta(gst_buffer, struc);
 
             if (!meta)
@@ -236,9 +230,7 @@ static void prepare_gst_buffer_pool(GstTcamBufferPool* self)
             }
             else
             {
-                GST_ERROR("added meta");
                 auto m = (GstMeta*)meta;
-                //meta->flags |= (int)GST_META_FLAG_POOLED;
                 m->flags = static_cast<GstMetaFlags>(m->flags | GST_META_FLAG_POOLED);
             }
 
@@ -254,14 +246,13 @@ static void prepare_gst_buffer_pool(GstTcamBufferPool* self)
 }
 
 
-//Start the bufferpool.The default implementation will preallocate
+// Start the bufferpool.The default implementation will preallocate
 // min-buffers buffers and put them in the queue.
 static gboolean gst_tcam_buffer_pool_start(GstBufferPool* pool)
 {
     GST_INFO("start");
 
     GstTcamBufferPool* self = GST_TCAM_BUFFER_POOL(pool);
-    //GstBufferPoolClass* pclass = GST_BUFFER_POOL_GET_CLASS(pool);
     struct device_state* state = GST_TCAM_MAINSRC(self->src_element)->device;
 
     if (self->other_pool_)
@@ -299,7 +290,6 @@ static gboolean gst_tcam_buffer_pool_start(GstBufferPool* pool)
     auto dev = state->device_;
 
     tcam::TCAM_MEMORY_TYPE buffer_type = tcam::mainsrc::io_mode_to_memory_type(state->io_mode_);
-    //buffer_type = tcam::TCAM_MEMORY_TYPE_MMAP;
 
     tcam::tcam_video_format format;
 
@@ -323,7 +313,6 @@ static gboolean gst_tcam_buffer_pool_start(GstBufferPool* pool)
     min_buffers = state->imagesink_buffers_;
     max_buffers = state->imagesink_buffers_;
 
-    //gst_buffer_pool_set_config(GstBufferPool *pool, GstStructure *config)
     gst_buffer_pool_config_set_params(config, caps, size, min_buffers, max_buffers);
 
     gst_structure_free(config);
@@ -347,12 +336,10 @@ static gboolean gst_tcam_buffer_pool_start(GstBufferPool* pool)
 }
 
 
-// Stop the bufferpool.the default implementation will free the preallocated
+// Stop the bufferpool. the default implementation will free the preallocated
 // buffers.This function is called when all the buffers are returned to the pool.
 static gboolean gst_tcam_buffer_pool_stop(GstBufferPool* pool)
 {
-    GST_INFO("stop");
-
     GstTcamBufferPool* self = GST_TCAM_BUFFER_POOL(pool);
 
     gst_buffer_pool_set_flushing(pool, TRUE);
@@ -362,15 +349,12 @@ static gboolean gst_tcam_buffer_pool_stop(GstBufferPool* pool)
     state->stop_stream();
     state->stream_cv_.notify_all();
 
-
     return TRUE;
 }
 
 
 static void gst_tcam_buffer_pool_dispose(GObject* object)
 {
-    GST_INFO("dispose");
-
     auto self = GST_TCAM_BUFFER_POOL(object);
 
     delete self->state_;
@@ -381,16 +365,12 @@ static void gst_tcam_buffer_pool_dispose(GObject* object)
 
 static void gst_tcam_buffer_pool_finalize(GObject* object)
 {
-
-    GST_INFO("finalize");
-
     G_OBJECT_CLASS(parent_class)->finalize(object);
 }
 
 
 static void gst_tcam_buffer_pool_init(GstTcamBufferPool* pool)
 {
-    GST_INFO("init");
     pool->state_ = new tcam_pool_state();
 }
 
@@ -447,10 +427,3 @@ void gst_tcam_buffer_pool_set_other_pool(GstTcamBufferPool* pool, GstBufferPool*
     }
     pool->other_pool_ = (GstBufferPool*)gst_object_ref(other_pool);
 }
-
-
-// std::vector<tcam::mainsrc::buffer_info> get_buffer(GstTcamBufferPool* pool)
-// {
-
-//     return {};
-// }
