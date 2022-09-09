@@ -166,9 +166,9 @@ int main(int argc, char* argv[])
     /* alternatively you can get/set directly on the TCAM_PROPERTY_PROVIDER */
     /* for this you need to know the type of the property you want to get/set */
 
-    /* tcam_property_provider_set_tcam_enumeration(TCAM_PROPERTY_PROVIDER(source), "ExposureAuto", "Off"); */
-    /* tcam_property_provider_set_tcam_integer(TCAM_PROPERTY_PROVIDER(source), "Brightness", 200); */
-    /* tcam_property_provider_set_tcam_float(TCAM_PROPERTY_PROVIDER(source), "ExposureTime", 30000.0); */
+    /* tcam_property_provider_set_tcam_enumeration(TCAM_PROPERTY_PROVIDER(source), "ExposureAuto", "Off", &err); */
+    /* tcam_property_provider_set_tcam_integer(TCAM_PROPERTY_PROVIDER(source), "Brightness", 200, &err); */
+    /* tcam_property_provider_set_tcam_float(TCAM_PROPERTY_PROVIDER(source), "ExposureTime", 30000.0, &err); */
 
     printf("\nValues after we changed them:\n\n");
 
