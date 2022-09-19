@@ -20,6 +20,9 @@
 #include <QSettings>
 
 #include "definitions.h"
+#include "spdlog/spdlog.h"
+
+#include <gst/gst.h>
 
 
 struct TcamCaptureConfig
@@ -96,10 +99,26 @@ struct TcamCaptureConfig
             qInfo("Pipeline string: %s", pipeline.toStdString().c_str());
         }
 
-        auto tmp_sink_element = s.value("video-sink-element", video_sink_element).toString();
 
-        pipeline.replace(QString("{video-sink-element}"),
-                         tmp_sink_element);
+        auto factory = gst_element_factory_find(video_sink_element.toStdString().c_str());
+
+        if (factory != nullptr)
+        {
+
+            gst_object_unref(factory);
+            auto tmp_sink_element = s.value("video-sink-element", video_sink_element).toString();
+            pipeline.replace(QString("{video-sink-element}"), tmp_sink_element);
+        }
+        else
+        {
+            SPDLOG_ERROR("Unable to find Gstreamer element: {}\n"
+                         "\t\tUsing fallback. this disabled some functionalities.\n"
+                         "\t\tAre display elements installed?   sudo apt install qtgstreamer-plugins-qt5",
+                         video_sink_element.toStdString().c_str());
+            auto tmp_sink_element = s.value("video-sink-element", "xvimagesink").toString();
+            pipeline.replace(QString("{video-sink-element}"), tmp_sink_element);
+        }
+
 
     }
 };

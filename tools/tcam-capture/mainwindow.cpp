@@ -587,24 +587,30 @@ void MainWindow::open_pipeline(FormatHandling handling)
         {
             GstElement* disp = nullptr;
             g_object_get(p_displaysink, "video-sink", &disp, nullptr);
-
-            if (has_property(disp, "force-aspect-ratio"))
+            if (disp)
             {
-                g_object_set(disp, "force-aspect-ratio", true, nullptr);
-            }
+                if (has_property(disp, "force-aspect-ratio"))
+                {
+                    g_object_set(disp, "force-aspect-ratio", true, nullptr);
+                }
 
-            if (has_property(disp, "widget"))
-            {
-                g_object_set(disp, "widget", ui->widget, nullptr);
-            }
-            else if (has_property(disp, "video-sink"))
-            {
-                gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(disp), this->ui->widget->winId());
-            }
-            g_object_unref(disp);
+                if (has_property(disp, "widget"))
+                {
+                    g_object_set(disp, "widget", ui->widget, nullptr);
+                }
+                else if (has_property(disp, "video-sink"))
+                {
+                    gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(disp), this->ui->widget->winId());
+                }
+                g_object_unref(disp);
 
-            m_fps_signal_id = g_signal_connect(
-                p_displaysink, "fps-measurements", G_CALLBACK(&FPSCounter::fps_callback), &m_fps_counter);
+                m_fps_signal_id = g_signal_connect(
+                    p_displaysink, "fps-measurements", G_CALLBACK(&FPSCounter::fps_callback), &m_fps_counter);
+            }
+            else
+            {
+                SPDLOG_ERROR("Unable to retrieve video-sink from fpsdisplaysink. This will cause certain functionalities to not work.");
+            }
         }
 
     }
