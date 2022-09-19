@@ -85,6 +85,11 @@ struct TcamPropertyInteger : TcamPropertyBase<tcamprop1::property_interface_inte
     {
         auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
 
+        if (property::is_locked(m_prop->get_flags()))
+        {
+            return tcam::status::PropertyNotWriteable;
+        }
+
         auto ret = tmp->set_value(value);
         if (ret)
         {
@@ -140,6 +145,11 @@ struct TcamPropertyFloat : TcamPropertyBase<tcamprop1::property_interface_float>
     {
         auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
 
+        if (property::is_locked(m_prop->get_flags()))
+        {
+            return tcam::status::PropertyNotWriteable;
+        }
+
         auto ret = tmp->set_value(value);
 
         if (ret)
@@ -188,6 +198,11 @@ struct TcamPropertyBoolean : TcamPropertyBase<tcamprop1::property_interface_bool
     {
         auto tmp = static_cast<tcam::property::IPropertyBool*>(m_prop.get());
 
+        if (property::is_locked(m_prop->get_flags()))
+        {
+            return tcam::status::PropertyNotWriteable;
+        }
+
         auto ret = tmp->set_value(value);
 
         if (ret)
@@ -232,6 +247,11 @@ struct TcamPropertyEnumeration : TcamPropertyBase<tcamprop1::property_interface_
     {
         auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
 
+        if (property::is_locked(m_prop->get_flags()))
+        {
+            return tcam::status::PropertyNotWriteable;
+        }
+
         auto ret = tmp->set_value(value);
         if (ret)
         {
@@ -252,6 +272,12 @@ struct TcamPropertyCommand : TcamPropertyBase<tcamprop1::property_interface_comm
     auto execute_command(uint32_t /* flags */) -> std::error_code final
     {
         auto tmp = static_cast<tcam::property::IPropertyCommand*>(m_prop.get());
+
+        if (property::is_locked(m_prop->get_flags()))
+        {
+            return tcam::status::PropertyNotWriteable;
+        }
+
         auto ret = tmp->execute();
         if (ret)
         {
@@ -279,6 +305,11 @@ struct TcamPropertyString : TcamPropertyBase<tcamprop1::property_interface_strin
     auto set_property_value(std::string_view value, uint32_t /*flags*/) -> std::error_code final
     {
         auto tmp = static_cast<tcam::property::IPropertyString*>(m_prop.get());
+
+        if (property::is_locked(m_prop->get_flags()))
+        {
+            return tcam::status::PropertyNotWriteable;
+        }
 
         auto err = tmp->set_value(value);
         if (err)

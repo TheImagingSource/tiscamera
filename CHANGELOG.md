@@ -34,6 +34,10 @@ packaging:
 
 ### Fixed
 
+tcammainsrc:
+- Locked properties now return TCAM_ERROR_PROPERTY_NOT_WRITEABLE when they are locked and being set.
+  Previously they could still be set even when locked.
+
 tcam-capture:
 - Property JSON description was not updated when re-opening the dialog
 - No more critical warning if camera has no trigger mode
