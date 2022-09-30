@@ -179,9 +179,10 @@ int main(int argc, char* argv[])
     print_enum_property(source, "GainAuto");
 
     /* cleanup, reset state */
-    gst_element_set_state(source, GST_STATE_NULL);
+    gst_element_set_state(pipeline, GST_STATE_NULL);
 
     gst_object_unref(source);
+    gst_object_unref(pipeline);
 
     return 0;
 }
