@@ -27,7 +27,7 @@ if (TCAM_BUILD_ARAVIS)
     if (TCAM_DOWNLOAD_MESON)
 
       ExternalProject_Add(meson
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/meson
+        SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/meson
         GIT_REPOSITORY "https://github.com/mesonbuild/meson/"
         GIT_TAG 0.59.0
         CONFIGURE_COMMAND ""
@@ -36,7 +36,7 @@ if (TCAM_BUILD_ARAVIS)
         UPDATE_COMMAND ""         # Do not rebuild when calling make
         )
 
-      set(TCAM_MESON_CMD ${CMAKE_CURRENT_SOURCE_DIR}/meson/meson.py)
+      set(TCAM_MESON_CMD ${CMAKE_CURRENT_BINARY_DIR}/meson/meson.py)
 
     else ()
 
@@ -58,7 +58,7 @@ if (TCAM_BUILD_ARAVIS)
     endif ()
 
     # meson configuration
-    list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC ${TCAM_MESON_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/aravis -Dviewer=disabled -Dgst-plugin=disabled -Dfast-heartbeat=false -Ddocumentation=disabled -Dintrospection=disabled -Ddefault_library=static)
+    list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC ${TCAM_MESON_CMD} ${CMAKE_CURRENT_BINARY_DIR}/aravis -Dviewer=disabled -Dgst-plugin=disabled -Dfast-heartbeat=false -Ddocumentation=disabled -Dintrospection=disabled -Ddefault_library=static)
 
     if (TCAM_ARAVIS_USB_VISION)
 
@@ -71,9 +71,9 @@ if (TCAM_BUILD_ARAVIS)
     endif (TCAM_ARAVIS_USB_VISION)
 
     ExternalProject_Add(aravis
-      SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
+      SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/aravis
       GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
-      GIT_TAG af87146      
+      GIT_TAG af87146
       CONFIGURE_COMMAND ${ARAVIS_CONFIG}
       BUILD_COMMAND ninja
       INSTALL_COMMAND ""        # Do not install we are statically linking
@@ -90,7 +90,7 @@ if (TCAM_BUILD_ARAVIS)
     # Get the latest abbreviated commit hash of the working branch
     execute_process(
       COMMAND git log -1 --format=%h
-      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/aravis"
+      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/aravis"
       OUTPUT_VARIABLE ARAVIS_GIT_COMMIT_HASH_INTERNAL
       OUTPUT_STRIP_TRAILING_WHITESPACE
       )

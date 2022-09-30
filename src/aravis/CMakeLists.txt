@@ -54,7 +54,7 @@ if (TCAM_BUILD_ARAVIS)
 
     target_include_directories(tcam-backend-aravis PRIVATE ${GOBJECT_INCLUDE_DIR})
 
-    target_include_directories(tcam-backend-aravis SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/external/aravis/src")
+    target_include_directories(tcam-backend-aravis SYSTEM PRIVATE "${TCAM_BINARY_DIR}/external/aravis/src")
     target_include_directories(tcam-backend-aravis PRIVATE SYSTEM "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/")
 
     target_link_libraries(tcam-backend-aravis PRIVATE aravis-library)

@@ -27,7 +27,7 @@ target_include_directories(tcam-gige-daemon PRIVATE ${GLIB2_INCLUDE_DIR})
 if (TCAM_INTERNAL_ARAVIS)
   # we require two includes
   # as some header are generated
-  target_include_directories(tcam-gige-daemon SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/external/aravis/src")
+  target_include_directories(tcam-gige-daemon SYSTEM PRIVATE "${TCAM_BINARY_DIR}/external/aravis/src")
   target_include_directories(tcam-gige-daemon SYSTEM PRIVATE "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/")
 
   target_link_libraries(tcam-gige-daemon PRIVATE "${ARAVIS_LIB}")
