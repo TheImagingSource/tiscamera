@@ -463,6 +463,12 @@ int set_camera_options(const CLI::App& app)
         gateway->results(gw_str);
     }
 
+    // if no further settings are to be applied, exit
+    if (!*ip && !*netmask && !*gateway)
+    {
+        return 0;
+    }
+
     std::string err;
     if (tis::verifySettings(ip_str, nm_str, gw_str, err))
     {
