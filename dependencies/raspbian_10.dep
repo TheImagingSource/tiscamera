@@ -23,12 +23,11 @@
         },
         {
             "name": "pkg-config",
-            "version": ">= 0.29.1",
+            "version": ">= 0.29.0",
             "phase": "compilation",
             "modules": ["base"],
             "include_in_package": false
         },
-
         {
             "name": "libgstreamer1.0-dev",
             "version": ">= 1.8.3-1",
