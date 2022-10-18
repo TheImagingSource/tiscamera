@@ -22,8 +22,8 @@ find_package(GStreamer REQUIRED QUIET)
 find_package(GLIB2     REQUIRED QUIET)
 find_package(GObject   REQUIRED QUIET)
 find_package(GObjectIntrospection REQUIRED QUIET)
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets MultiMediaWidgets Multimedia REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+find_package(QT NAMES Qt5 COMPONENTS Widgets MultiMediaWidgets Multimedia REQUIRED)
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
 # find_package(Qt5MultimediaWidgets REQUIRED)
 
 set(TCAM_CAPTURE_SOURCES
