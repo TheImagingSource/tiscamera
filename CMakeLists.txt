@@ -56,6 +56,10 @@ include(CMakeOptions.cmake)
 add_compile_options( -Wno-psabi )   # disable ABI change message of g++8
 add_compile_options( -Wall -Wextra -pedantic -pthread )
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  add_compile_options( -fsized-deallocation )
+endif()
+
 set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_POSITION_INDEPENDENT_CODE ON )
