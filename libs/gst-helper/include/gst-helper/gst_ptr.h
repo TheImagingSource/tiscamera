@@ -140,7 +140,7 @@ template<class T> class gst_ptr
 public:
     gst_ptr() = default;
 
-    gst_ptr(nullptr_t) noexcept {}
+    gst_ptr(std::nullptr_t) noexcept {}
 
     gst_ptr(const gst_ptr& op2) noexcept : ptr_ { ref(op2.ptr_) } {}
     gst_ptr(gst_ptr&& op2) noexcept : ptr_ { std::exchange(op2.ptr_, nullptr) } {}
@@ -292,20 +292,20 @@ private:
     }
 };
 
-template<class T> bool operator==(nullptr_t, const gst_ptr<T>& ptr) noexcept
+template<class T> bool operator==(std::nullptr_t, const gst_ptr<T>& ptr) noexcept
 {
     return ptr.empty();
 }
-template<class T> bool operator==(const gst_ptr<T>& ptr, nullptr_t) noexcept
+template<class T> bool operator==(const gst_ptr<T>& ptr, std::nullptr_t) noexcept
 {
     return ptr.empty();
 }
 
-template<class T> bool operator!=(nullptr_t, const gst_ptr<T>& ptr) noexcept
+template<class T> bool operator!=(std::nullptr_t, const gst_ptr<T>& ptr) noexcept
 {
     return !ptr.empty();
 }
-template<class T> bool operator!=(const gst_ptr<T>& ptr, nullptr_t) noexcept
+template<class T> bool operator!=(const gst_ptr<T>& ptr, std::nullptr_t) noexcept
 {
     return !ptr.empty();
 }
@@ -333,7 +333,7 @@ template<> class gst_ptr<GstStructure>
 public:
     gst_ptr() = default;
 
-    gst_ptr( nullptr_t ) noexcept {}
+    gst_ptr( std::nullptr_t ) noexcept {}
 
     gst_ptr( const gst_ptr& op2 ) = delete;
     gst_ptr& operator=( const gst_ptr& op2 ) = delete;

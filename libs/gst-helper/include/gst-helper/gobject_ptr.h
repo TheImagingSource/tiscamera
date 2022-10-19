@@ -66,7 +66,7 @@ template<class T> class gobject_ptr
 public:
     gobject_ptr() = default;
 
-    gobject_ptr(nullptr_t) noexcept {}
+    gobject_ptr(std::nullptr_t) noexcept {}
 
     gobject_ptr(const gobject_ptr& op2) noexcept : ptr_ { internal_ref_ptr(op2.ptr_) } {}
     gobject_ptr(gobject_ptr&& op2) noexcept : ptr_ { std::exchange(op2.ptr_, nullptr) } {}
@@ -217,20 +217,20 @@ private:
     }
 };
 
-template<class T> bool operator==(nullptr_t, const gobject_ptr<T>& ptr) noexcept
+template<class T> bool operator==(std::nullptr_t, const gobject_ptr<T>& ptr) noexcept
 {
     return ptr.empty();
 }
-template<class T> bool operator==(const gobject_ptr<T>& ptr, nullptr_t) noexcept
+template<class T> bool operator==(const gobject_ptr<T>& ptr, std::nullptr_t) noexcept
 {
     return ptr.empty();
 }
 
-template<class T> bool operator!=(nullptr_t, const gobject_ptr<T>& ptr) noexcept
+template<class T> bool operator!=(std::nullptr_t, const gobject_ptr<T>& ptr) noexcept
 {
     return !ptr.empty();
 }
-template<class T> bool operator!=(const gobject_ptr<T>& ptr, nullptr_t) noexcept
+template<class T> bool operator!=(const gobject_ptr<T>& ptr, std::nullptr_t) noexcept
 {
     return !ptr.empty();
 }

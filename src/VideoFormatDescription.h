@@ -73,7 +73,7 @@ class VideoFormatDescription
 public:
     VideoFormatDescription() = delete;
 
-    VideoFormatDescription(nullptr_t,
+    VideoFormatDescription(std::nullptr_t,
                            const tcam_video_format_description& desc,
                            const std::vector<framerate_mapping>& map)
         : VideoFormatDescription(desc, map)
