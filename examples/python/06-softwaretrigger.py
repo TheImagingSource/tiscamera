@@ -67,12 +67,12 @@ def main():
             if input_text == "q":
                 break
             else:
-                ret = source.set_tcam_command("TriggerSoftware")
-
-                if ret:
+                try:
+                    source.set_tcam_command("TriggerSoftware")
                     print("=== Triggered image. ===\n")
-                else:
-                    print("!!! Could not trigger. !!!\n")
+
+                except GLib.Error as err:
+                    print("!!! Could not trigger. {}!!!\n", err.message)
 
         # deactivate trigger mode
         # this is simply to prevent confusion when the camera ist started without wanting to trigger

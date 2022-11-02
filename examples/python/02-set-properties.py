@@ -97,11 +97,15 @@ def main():
     print_properties(camera)
 
     # Set properties
+    try:
+        camera.set_tcam_enumeration("ExposureAuto", "Off")
+        camera.set_tcam_enumeration("GainAuto", "Off")
 
-    camera.set_tcam_enumeration("ExposureAuto", "Off")
-    camera.set_tcam_enumeration("GainAuto", "Off")
+        camera.set_tcam_float("ExposureTime", 2000)
 
-    camera.set_tcam_float("ExposureTime", 2000)
+    except GLib.Error as err:
+        # if setting properties fail, print the reason
+        print(f"{err.message}")
 
     print_properties(camera)
 
