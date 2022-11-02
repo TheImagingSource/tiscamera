@@ -220,7 +220,7 @@ The most commonly used git commands are:
 
         parser_install = subparser.add_parser("install",
                                               help="Install dependencies",
-                                              add_help=False)
+                                              add_help=True)
 
         parser_install.add_argument("--yes", "-y",
                                     help="Assume 'yes' for prompts",
@@ -231,6 +231,10 @@ The most commonly used git commands are:
         parser_install.add_argument("--no-update",
                                     help="Do not update the package list before installing",
                                     action="store_true")
+        parser_install.add_argument("--ignore",
+                                    help="List of dependencies that shall not be installed",
+                                    nargs="+",
+                                    required=False)
 
         parser_list = subparser.add_parser("list",
                                            help="List dependencies",
@@ -367,7 +371,26 @@ The most commonly used git commands are:
         packages = self.collect_dependencies(self.args.compilation, self.args.runtime)
 
         if not self.args.no_update:
-            update_package_list()
+            if not self.args.dry_run:
+                update_package_list()
+            else:
+                print("Would run `apt-get update` at this point.")
+
+        def remove_package(name: str):
+            """
+            Helper function to remove package from package list
+            """
+            for p in packages:
+                if p.name == name:
+                    packages.remove(p)
+                    return True
+            return False
+
+        if self.args.ignore:
+            for ignore_entry in self.args.ignore:
+                print(ignore_entry)
+                if not remove_package(ignore_entry):
+                    print("'{}' is not in the dependency list! Cannot remove.".format(ignore_entry))
 
         install_packages([i.name for i in packages], self.args.yes, self.args.dry_run)
 
