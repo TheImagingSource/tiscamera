@@ -121,13 +121,13 @@ int main(int argc, char* argv[])
 
     auto save_properties = app.add_option("--save",
                                           serial,
-                                          "Print a JSON string containing all properties and their current values");
+                                          "Print a GstStructure string containing all properties and their current values");
     auto save_properties_no_console = app.add_flag("--no-console",
                                                    "Output string is not intended for commandline usage.")->needs(save_properties);
 
     auto load_properties = app.add_option("--load",
                                           serial,
-                                          "Read a JSON string/file containing properties and their "
+                                          "Read a GstStrcture string containing properties and their "
                                           "values and set them in the device");
 
     auto save_json = app.add_option(
