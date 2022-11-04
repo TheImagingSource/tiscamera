@@ -13,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# define external dependencies for linkage
-set(tcam_pkgconfig_dependencies "gobject-introspection-1.0")
-
 add_subdirectory(images)
 
 if (TCAM_BUILD_TOOLS)
@@ -56,6 +53,12 @@ if (TCAM_BUILD_V4L2 OR TCAM_BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
 endif (TCAM_BUILD_V4L2 OR TCAM_BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
 
 if (NOT TCAM_EXCLUSIVE_BUILD)
+
+  # define external dependencies for linkage
+  # gobject is needed for tcam-property
+  # since the Requires field contains tcam-property let that take care of gobject
+  #set(tcam_pkgconfig_dependencies "gobject-introspection-1.0")
+
 
   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/tcam.pc.cmake  ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc @ONLY)
 

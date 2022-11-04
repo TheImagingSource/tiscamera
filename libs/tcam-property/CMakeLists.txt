@@ -103,9 +103,10 @@ else()
   add_custom_target(uninstall-tcamproperty
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
+set(tcam_pkgconfig_dependencies "gobject-introspection-1.0")
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam-property.pc.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/tcam-property-1.0.pc")
+  "${CMAKE_CURRENT_BINARY_DIR}/tcam-property-1.0.pc" @ONLY)
 
 if (NOT TCAM_PROPERTY_INSTALL_PKG_CONFIG)
 

@@ -6,4 +6,4 @@ includedir=${prefix}/include
 Name: Tcam
 Description: Camera control and image acquisition library
 Version: @TCAM_VERSION@
-Requires: @tcam_pkgconfig_dependencies@ tcam-property-1.0
+Requires: tcam-property-1.0
