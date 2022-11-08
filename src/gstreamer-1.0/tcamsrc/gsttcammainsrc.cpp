@@ -1086,7 +1086,6 @@ static gboolean tcam_mainsrc_decide_allocation(GstBaseSrc* base_src, GstQuery* q
     }
     else
     {
-        //GST_ERROR("!+!+!+!+!+!+!+!+!+!+!+!+!+!+! NEW POOL !+!+!+!+!+!+!+!+!+!+!+!+!+!+!");
         self->pool = gst_tcam_buffer_pool_new(GST_ELEMENT(self), caps);
         unsigned int size = 10;
 
@@ -1107,18 +1106,11 @@ static gboolean tcam_mainsrc_decide_allocation(GstBaseSrc* base_src, GstQuery* q
 
         self->device->device_->set_drop_incomplete_frames(self->device->drop_incomplete_frames_);
 
-        bool ret = TRUE;
 
         self->device->format_ = tcam::VideoFormat(format);
 
         self->device->is_streaming_ = true;
-        if (ret)
-        {
-            // if (!gst_buffer_pool_set_active(self->pool, TRUE))
-            // {
-            //     return FALSE;
-            // }
-        }
+
     }
     return TRUE;
 }

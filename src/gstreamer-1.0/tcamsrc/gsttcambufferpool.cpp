@@ -195,7 +195,7 @@ static void gst_tcam_buffer_pool_release_buffer(GstBufferPool* pool, GstBuffer* 
 
 static gboolean gst_tcam_buffer_pool_set_config(GstBufferPool* /*bpool*/, GstStructure* /*config*/)
 {
-    GST_INFO("set_config============================================");
+    //GST_INFO("set_config============================================");
     return TRUE;
 }
 
@@ -317,7 +317,11 @@ static gboolean gst_tcam_buffer_pool_start(GstBufferPool* pool)
 
     gst_structure_free(config);
 
-    gst_buffer_pool_set_flushing(pool, FALSE);
+    // do not flush pool
+    // this function might be called from within gst_buffer_pool_set_active
+    // which means that the pool is _not yet_ active
+    // this would cause warning messages
+    // gst_buffer_pool_set_flushing(pool, FALSE);
 
     auto cb_func = [self](const std::shared_ptr<tcam::ImageBuffer>& cb)
     {
