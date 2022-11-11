@@ -121,8 +121,8 @@ static void close_active_source_element(GstTcamSrc* self)
     if (self->state->is_open())
     {
         gst_element_set_state(self->state->active_source.get(), GST_STATE_NULL);
-        // TODO causes critical error  g_object_ref: assertion 'old_val > 0' failed
-        // gst_bin_remove(GST_BIN(self), self->active_source);
+
+        gst_bin_remove(GST_BIN(self), self->state->active_source.get());
 
         self->state->active_source = nullptr;
     }
