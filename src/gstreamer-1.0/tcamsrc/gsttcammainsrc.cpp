@@ -466,6 +466,11 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
             {
                 GST_ERROR("Could not stop stream.");
             }
+            if (self->pool)
+            {
+                gst_object_unref(self->pool);
+                self->pool = nullptr;
+            }
             break;
         }
         case GST_STATE_CHANGE_READY_TO_NULL:
@@ -831,6 +836,12 @@ static void gst_tcam_mainsrc_finalize(GObject* object)
         self->device = nullptr;
     }
 
+    if (self->pool)
+    {
+        gst_object_unref(self->pool);
+        self->pool = nullptr;
+    }
+
     G_OBJECT_CLASS(gst_tcam_mainsrc_parent_class)->finalize(object);
 }
 
@@ -1086,6 +1097,11 @@ static gboolean tcam_mainsrc_decide_allocation(GstBaseSrc* base_src, GstQuery* q
     }
     else
     {
+        if (self->pool)
+        {
+            gst_object_unref(self->pool);
+            self->pool = nullptr;
+        }
         self->pool = gst_tcam_buffer_pool_new(GST_ELEMENT(self), caps);
         unsigned int size = 10;
 
