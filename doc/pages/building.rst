@@ -101,7 +101,7 @@ cmake options
 
    * - TCAM_DOWNLOAD_MESON
      - Download a local meson version to compile aravis.
-     - OFF
+     - ON
 
    * - TCAM_BUILD_WITH_GUI
      - Enable/Disable GUI parts of tiscamera. Currently only involves tcam-capture.
