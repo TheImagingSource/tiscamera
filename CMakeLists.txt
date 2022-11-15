@@ -79,6 +79,11 @@ endif (TCAM_ENABLE_CMAKE_CLANGFORMAT_TARGET)
 
 if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
+
+  configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/tcam-config.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/src/tcam-config.h")
+
   add_subdirectory(src/v4l2)
   add_subdirectory(tools/tcam-uvc-extension-loader/)
   add_subdirectory(data/uvc-extensions/)
