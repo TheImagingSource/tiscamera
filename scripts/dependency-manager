@@ -108,7 +108,7 @@ def update_package_list():
     """
     Constructs and executes package update command
     """
-    cmd = ["sudo", "apt", "update"]
+    cmd = ["sudo", "apt-get", "update"]
     subprocess.call(cmd)
 
 
@@ -117,7 +117,7 @@ def install_packages(package_list: list, yes: bool = False, dry: bool = False):
     Constructs and executes package installation command
     """
 
-    cmd = ["sudo", "apt", "install"]
+    cmd = ["sudo", "apt-get", "install"]
     if yes:
         cmd.append("-y")
 
