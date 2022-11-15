@@ -29,8 +29,19 @@ tcam-gigetool:
 - check-control command
   Get IP/port that controls the camera
 
+dependency-manager:
+- option --ignore for install routine
+  Allows preventing dependencies from being installed
+- Warning if 'lsb_release' can not be found
+
 packaging:
 - split development dependencies into own package
+
+### Changed
+
+CMake:
+- aravis is cloned into the build directory, not into the source tree
+- meson is cloned into the build directory, not into the source tree
 
 ### Fixed
 
@@ -48,11 +59,20 @@ tcam-gigetool:
 aravis:
 - TriggerMode is now respected when setting formats
 
+cmake:
+- TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY build
+
 installation:
 - tcamgststatistics.so is now installed into `TCAM_INSTALL_LIB`
 
+doc:
+- TCAM_DOWNLOAD_MESON now has correct default value (ON)
+
 examples:
 - 10-metadata.py - example should now load tcamgststatistics.so even when installed
+- 02-set-properties.c - pipeline was not freed correctly
+- 02-set-properties.py - Catch exception when setting properties
+- 06-softwaretrigger.py - Catch exception when setting softwaretrigger
 
 packaging:
 - Removed dependencies that are not required for runtime
