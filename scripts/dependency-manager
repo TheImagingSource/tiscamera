@@ -20,6 +20,14 @@ import json
 import os
 import re
 import sys
+import shutil
+
+
+def executable_exists(exe_name: str):
+    """
+    Returns: True if executable exists
+    """
+    return (shutil.which(exe_name) is not None)
 
 
 def convert_to_str(input_list, seperator):
@@ -62,7 +70,6 @@ def get_distribution():
 # Release:	10
 # Codename:	buster
 
-
 # No LSB modules are available.
 # Distributor ID:	Ubuntu
 # Description:	Ubuntu 20.04 LTS
@@ -74,6 +81,13 @@ def get_distribution():
 # Description:	Debian GNU/Linux 10 (buster)
 # Release:	10
 # Codename:	buster
+
+    if not executable_exists("lsb_release"):
+        print("Executable 'lsb_release' could not be found.\n"
+              "Install it or use '-f <dependency file>' to manually set the dependency description.\n"
+              "cmake will need TCAM_DISTRIBUTION_DESCRIPTION to generate packages.",
+              file=sys.stderr)
+        sys.exit(2)
 
     process = subprocess.Popen(['lsb_release', '-a'],
                                stdout=subprocess.PIPE,
