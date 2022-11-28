@@ -183,19 +183,19 @@
             "name": "libqt5widgets5",
             "version": ">= 5.15.3",
             "phase": "runtime",
-            "modules": ["gui", "tools"]
+            "modules": ["gui"]
         },
         {
             "name": "libqt5gui5",
             "version": ">= 5.15.3",
             "phase": "runtime",
-            "modules": ["gui", "tools"]
+            "modules": ["gui"]
         },
         {
             "name": "qtbase5-dev",
             "version": ">= 5.15.3",
             "phase": "compilation",
-            "modules": ["gui", "tools"],
+            "modules": ["gui"],
             "include_in_package": false
         },
         {
