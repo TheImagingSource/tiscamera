@@ -167,6 +167,10 @@ if (return_value EQUAL "1")
   message(WARNING "Unable to parse dependencies. You will not be able to generate packages without errors.")
 endif()
 
+# add tiscamera to the tiscamera-dev dependecy list
+# this must be done so that the libraries will also be available when linking
+set(CPACK_DEBIAN_TCAM_DEV_PACKAGE_DEPENDS "${CPACK_DEBIAN_TCAM_DEV_PACKAGE_DEPENDS} tiscamera (>=1.1.0)")
+
 if (NOT TCAM_DISTRIBUTION_DESCRIPTION)
   # TCAM_DISTRIBUTION_DESCRIPTION will be read be package-name.cmake
   execute_process(COMMAND ${TCAM_SOURCE_DIR}/scripts/dependency-manager dist-release
