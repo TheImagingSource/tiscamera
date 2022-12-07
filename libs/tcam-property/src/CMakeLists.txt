@@ -17,6 +17,8 @@ find_package(GObject   REQUIRED QUIET)
 find_package(GLIB2     REQUIRED QUIET)
 find_package(GObjectIntrospection REQUIRED QUIET)
 
+add_subdirectory(gst)
+
 add_library(tcam-property SHARED
 
     "Tcam-1.0.h"

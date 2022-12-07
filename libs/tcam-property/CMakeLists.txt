@@ -76,6 +76,34 @@ if (NOT TCAM_PROPERTY_INSTALL_TYPELIB)
 endif()
 
 
+if (NOT TCAM_PROPERTY_INSTALL_GST_1_0_HEADER)
+
+  pkg_check_variable(gstreamer-1.0 pluginsdir)
+  pkg_check_variable(gstreamer-1.0 includedir)
+
+  if (GSTREAMER_1.0_PLUGINSDIR AND NOT TCAM_INSTALL_FORCE_PREFIX)
+    set(TCAM_PROPERTY_INSTALL_GST_1_0 "${GSTREAMER_1.0_PLUGINSDIR}" CACHE PATH "gstreamer-1.0 module installation path")
+  else()
+    set(TCAM_PROPERTY_INSTALL_GST_1_0 "${CMAKE_INSTALL_PREFIX}/lib/gstreamer-1.0" CACHE PATH "gstreamer-1.0 module installation path")
+  endif()
+
+  if (GSTREAMER_1.0_INCLUDEDIR AND NOT TCAM_INSTALL_FORCE_PREFIX)
+    set(TCAM_PROPERTY_INSTALL_GST_1_0_HEADER "${GSTREAMER_1.0_INCLUDEDIR}" CACHE PATH "gstreamer-1.0 header installation path")
+  else()
+    set(TCAM_PROPERTY_INSTALL_GST_1_0_HEADER "${CMAKE_INSTALL_PREFIX}/include/gstreamer-1.0" CACHE PATH "gstreamer-1.0 header installation path")
+  endif()
+
+
+  pkg_check_variable(gobject-introspection-1.0 typelibdir)
+  if (GOBJECT_INTROSPECTION_1.0_TYPELIBDIR)
+    set(TCAM_PROPERTY_INSTALL_GST_1_0_HEADER ${GOBJECT_INTROSPECTION_1.0_TYPELIBDIR} CACHE PATH "gobject introspection typelib installation path")
+  else()
+    set(TCAM_PROPERTY_INSTALL_GST_1_0_HEADER "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE PATH "gobject introspection typelib installation path")
+  endif()
+
+endif (NOT TCAM_PROPERTY_INSTALL_GST_1_0_HEADER)
+
+
 set(TCAM_PROPERTY_VERSION_MAJOR 1)
 set(TCAM_PROPERTY_VERSION_MINOR 0)
 set(TCAM_PROPERTY_VERSION_PATCH 0)
@@ -86,6 +114,7 @@ set(TCAM_PROPERTY_VERSION "${TCAM_PROPERTY_VERSION_MAJOR}.${TCAM_PROPERTY_VERSIO
 add_subdirectory(src)
 
 add_library( tcam::tcam-property ALIAS tcam-property )
+add_library( tcam::tcamgststatistics ALIAS tcamgststatistics )
 
 # uninstall target
 configure_file(

@@ -1,8 +1,8 @@
-# tcamprop
+# tcam-property
 
 Linux gobject introspection interface.
 
-This is identical to the tcamprop API in tiscamera.
+This is the standalone version of the tcam-property API in tiscamera.
 
 Use this for your own libraries or for TIS closed source tools.
 
@@ -28,20 +28,20 @@ To install all compilation dependencies, execute:
     cmake ..
     make
     make package
-    sudo apt install ./tiscamera-tcamprop*.deb
+    sudo apt install ./tiscamera-tcamproperty*.deb
 ```
 
 ## Remove
 
 ```
-    sudo apt remove tiscamera-tcamprop
+    sudo apt remove tiscamera-tcamproperty
 ```
 
 ## Replacement
 
-tiscamera-tcamprop and tiscamera provide the tcamprop interface.
+tiscamera-tcamproperty and tiscamera provide the tcam-property interface.
 Installing the tiscamera debian package will automatically
-remove installed tiscamera-tcamprop packages.
+remove installed tiscamera-tcamproperty packages.
 
 ## License
 

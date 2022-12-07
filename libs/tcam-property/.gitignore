@@ -1,0 +1,41 @@
+
+# ### C++ ###
+
+# Compiled Object files
+
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+
+*.so
+*.dylib
+
+# Compiled Static libraries
+
+*.lai
+*.la
+*.a
+
+# various IDEs
+
+.idea/
+build/
+.vscode/
+nbproject
+.vs/
+/out
+/CMakeSettings.json
+
+# kdevelop
+
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes
+
+.dir-locals.el
+
+.gdb_history
