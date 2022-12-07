@@ -37,7 +37,7 @@
 #include <gst/video/videooverlay.h>
 #include <memory>
 #include <qimage.h>
-#include "../../src/gstreamer-1.0/tcamsrc/gstmetatcamstatistics.h"
+#include "../../libs/tcam-property//src/gst/meta/gstmetatcamstatistics.h"
 #include "videosaver.h"
 
 

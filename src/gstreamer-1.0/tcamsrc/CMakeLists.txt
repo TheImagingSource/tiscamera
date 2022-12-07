@@ -13,26 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_library(tcamgststatistics SHARED
-  gstmetatcamstatistics.cpp
-  gstmetatcamstatistics.h
-  )
-
-target_include_directories(tcamgststatistics
-  PRIVATE
-  ${GSTREAMER_INCLUDE_DIRS}
-  ${GSTREAMER_BASE_INCLUDE_DIRS}
-  ${GSTREAMER_VIDEO_INCLUDE_DIRS}
-  )
-
-target_link_libraries( tcamgststatistics
-  PRIVATE
-  ${GSTREAMER_LIBRARIES}
-  ${GSTREAMER_BASE_LIBRARIES}
-  ${GSTREAMER_VIDEO_LIBRARIES}
-  )
-
-
 add_library(gsttcamsrc SHARED
 	gsttcamsrc.cpp
 	gsttcammainsrc.cpp
@@ -50,9 +30,6 @@ add_library(gsttcamsrc SHARED
 	mainsrc_gst_device_provider.h
 	mainsrc_gst_device.cpp
 	mainsrc_gst_device.h
-
-	gstmetatcamstatistics.cpp
-	gstmetatcamstatistics.h
 
 	tcamsrc_plugin.cpp
 
@@ -76,18 +53,7 @@ add_library(gsttcamsrc SHARED
 	tcamgstbase
 	tcam::gst-helper
     tcam::tcam-property
+    tcam::tcamgststatistics
     tcamprop1::provider_gobject
     )
 set_project_warnings(gsttcamsrc)
-
-install(TARGETS tcamgststatistics
-  DESTINATION ${TCAM_INSTALL_LIB}
-  COMPONENT bin)
-
-install(TARGETS gsttcamsrc
-  DESTINATION ${TCAM_INSTALL_GST_1_0}
-  COMPONENT bin)
-
-install(FILES gstmetatcamstatistics.h
-  DESTINATION "${TCAM_INSTALL_GST_1_0_HEADER}"
-  COMPONENT dev)
