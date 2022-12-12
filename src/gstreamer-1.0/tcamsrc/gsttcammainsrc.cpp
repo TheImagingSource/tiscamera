@@ -468,7 +468,18 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
             }
             if (self->pool)
             {
+                gst_buffer_pool_set_active(self->pool, FALSE);
+
+                if (self->pool->object.object.ref_count > 1)
+                {
+                    // gst_query_add_allocation_pool increases the ref count
+                    // but does not decrease it
+                    // get rid of the query reference
+                    // so that our (actual) unref later on causes a cleanup of the pool
+                    gst_object_unref(self->pool);
+                }
                 gst_object_unref(self->pool);
+
                 self->pool = nullptr;
             }
             break;
@@ -838,6 +849,8 @@ static void gst_tcam_mainsrc_finalize(GObject* object)
 
     if (self->pool)
     {
+        if (self->pool)
+            gst_buffer_pool_set_active(self->pool, FALSE);
         gst_object_unref(self->pool);
         self->pool = nullptr;
     }
@@ -1076,8 +1089,6 @@ static gboolean tcam_mainsrc_decide_allocation(GstBaseSrc* base_src, GstQuery* q
     {
         // these steps are taking to prevent a reconfigure
 
-        //GST_ERROR("existing pool");
-
         if (gst_buffer_pool_is_active(self->pool))
         {
             GstBufferPool* pool = src_pool;
@@ -1099,6 +1110,8 @@ static gboolean tcam_mainsrc_decide_allocation(GstBaseSrc* base_src, GstQuery* q
     {
         if (self->pool)
         {
+            gst_buffer_pool_set_active(self->pool, FALSE);
+
             gst_object_unref(self->pool);
             self->pool = nullptr;
         }
@@ -1106,8 +1119,8 @@ static gboolean tcam_mainsrc_decide_allocation(GstBaseSrc* base_src, GstQuery* q
         unsigned int size = 10;
 
         auto* config = gst_buffer_pool_get_config(self->pool);
-        gst_buffer_pool_config_set_params(
-            config, caps, tcam::VideoFormat(format).get_required_buffer_size(), 10, 10);
+
+        gst_buffer_pool_config_set_params(config, caps, tcam::VideoFormat(format).get_required_buffer_size(), 10, 10);
         gst_buffer_pool_set_config(self->pool, config);
 
         if (gst_query_get_n_allocation_pools(query))
@@ -1127,6 +1140,7 @@ static gboolean tcam_mainsrc_decide_allocation(GstBaseSrc* base_src, GstQuery* q
 
         self->device->is_streaming_ = true;
 
+        return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->decide_allocation(base_src, query);
     }
     return TRUE;
 }
