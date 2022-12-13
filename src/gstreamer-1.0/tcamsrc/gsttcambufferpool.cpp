@@ -16,8 +16,8 @@
 
 #include "gsttcambufferpool.h"
 
+#include "../../../libs/tcam-property/src/gst/meta/gstmetatcamstatistics.h"
 #include "gst/gstbufferpool.h"
-#include "gstmetatcamstatistics.h"
 #include "gsttcammainsrc.h"
 #include "mainsrc_device_state.h"
 

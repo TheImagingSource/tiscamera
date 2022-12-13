@@ -22,7 +22,7 @@
 #include "../tcamgstbase/tcamgstbase.h"
 #include "../tcamgstbase/tcamgststrings.h"
 #include "gst/gstvalue.h"
-#include "gstmetatcamstatistics.h"
+#include "../../../libs/tcam-property/src/gst/meta/gstmetatcamstatistics.h"
 #include "gsttcambufferpool.h"
 #include "mainsrc_device_state.h"
 #include "mainsrc_tcamprop_impl.h"
