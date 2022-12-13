@@ -57,3 +57,7 @@ add_library(gsttcamsrc SHARED
     tcamprop1::provider_gobject
     )
 set_project_warnings(gsttcamsrc)
+
+install(TARGETS gsttcamsrc
+  DESTINATION ${TCAM_INSTALL_GST_1_0}
+  COMPONENT bin)
