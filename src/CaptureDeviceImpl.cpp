@@ -87,6 +87,8 @@ CaptureDeviceImpl::~CaptureDeviceImpl()
 
     available_output_formats_.clear();
 
+    index_.remove_device_lost(deviceindex_lost_cb);
+
     device_.reset();
 }
 
