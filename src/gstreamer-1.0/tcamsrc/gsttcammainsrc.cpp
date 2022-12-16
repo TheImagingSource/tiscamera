@@ -383,6 +383,19 @@ static void gst_tcam_mainsrc_device_lost_callback(const tcam::tcam_device_info* 
 {
     GstTcamMainSrc* self = (GstTcamMainSrc*)user_data;
 
+    GstState state;
+
+    // wait for 1 seconds max
+    gst_element_get_state(GST_ELEMENT(self), &state, nullptr, 1000000000);
+
+    if (!self->device || state == GST_STATE_NULL)
+    {
+        // device does not exist
+        // or source is null (aka no device exists)
+        // do nothing
+        return;
+    }
+
     if (!self->device->is_streaming_)
     {
         return;
@@ -428,6 +441,8 @@ static bool gst_tcam_mainsrc_init_camera(GstTcamMainSrc* self)
         return false;
     }
 
+    // this cb will automatically be deleted once the device is closed
+    // no need for explicit cleanup
     self->device->device_->register_device_lost_callback(gst_tcam_mainsrc_device_lost_callback,
                                                          self);
 
