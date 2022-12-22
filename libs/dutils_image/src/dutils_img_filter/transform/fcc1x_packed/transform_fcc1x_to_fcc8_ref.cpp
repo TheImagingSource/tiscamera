@@ -9,9 +9,9 @@ using filter_params = img_filter::filter_params;
 
 namespace
 {
-inline uint8_t  apply_wb_ref( uint16_t val, float fac ) noexcept {
+inline uint8_t  apply_wb_ref( uint16_t v, float fac ) noexcept {
     assert( fac >= 0.f );
-    const auto val = lroundf( val * fac );
+    const auto val = lroundf( v * fac );
     const auto res = static_cast<unsigned int>( val );
     return (res > 0xFFFF) ? 0xFF : static_cast<uint8_t>(res >> 8);
 }

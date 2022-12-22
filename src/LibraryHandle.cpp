@@ -20,8 +20,8 @@
 #include <string>
 
 
-std::shared_ptr<LibraryHandle> tcam::LibraryHandle::open(const std::string& name,
-                                                         const std::string& path)
+std::shared_ptr<tcam::LibraryHandle> tcam::LibraryHandle::open(const std::string& name,
+                                                               const std::string& path)
 {
     // std::shared_ptr<LibraryHandle> lib = std::make_shared<LibraryHandle>(name, path);
     std::shared_ptr<LibraryHandle> lib =
