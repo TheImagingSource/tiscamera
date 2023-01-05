@@ -21,7 +21,8 @@
 #include <stddef.h> // NULL
 #include <string.h> // strcmp
 #include <algorithm> //std::find
-
+#include <array>
+#include <string> 
 #include "tcamgststrings.h"
 #include "image_transform_base.h"
 
