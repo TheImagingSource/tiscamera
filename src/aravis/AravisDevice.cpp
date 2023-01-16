@@ -204,7 +204,7 @@ static double get_framerate(ArvCamera* camera)
     double value = -1.0;
     GError* err = nullptr;
 
-    if (node)
+    if (node && ARV_IS_GC_FLOAT_NODE(node))
     {
         value = arv_gc_float_get_value(ARV_GC_FLOAT(node), &err);
     }
@@ -229,7 +229,7 @@ static std::pair<double, double> get_framerate_bounds(ArvCamera* camera)
     double max = -1;
     GError* err = nullptr;
 
-    if (node)
+    if (node && ARV_IS_GC_FLOAT_NODE(node))
     {
         min = arv_gc_float_get_min(ARV_GC_FLOAT(node), &err);
         max = arv_gc_float_get_max(ARV_GC_FLOAT(node), &err);
@@ -255,7 +255,7 @@ void set_frame_rate(ArvCamera* camera, double fps)
 
 
     GError* err = nullptr;
-    if (node)
+    if (node && ARV_IS_GC_FLOAT_NODE(node))
     {
         arv_gc_float_set_value(ARV_GC_FLOAT(node), fps, &err);
     }
@@ -484,7 +484,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         return false;
     }
 
-    SPDLOG_DEBUG("Setting format to '{}'", new_format.to_string());
+//    SPDLOG_DEBUG("Setting format to '{}'", new_format.to_string());
 
     disable_chunk_mode();
 
@@ -569,7 +569,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
     set_frame_rate(arv_camera_, new_format.get_framerate());
 
     active_video_format_ = read_camera_current_video_format();
-    SPDLOG_DEBUG("Active format is now '{}'", active_video_format_.to_string());
+    //SPDLOG_DEBUG("Active format is now '{}'", active_video_format_.to_string());
     ret = true;
 
 set_video_format_finish:
