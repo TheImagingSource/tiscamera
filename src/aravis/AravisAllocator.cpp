@@ -24,7 +24,7 @@ void* tcam::aravis::AravisAllocator::allocate(TCAM_MEMORY_TYPE t, size_t length,
         return nullptr;
     }
 
-    return malloc(length);
+    return std::malloc(length);
 }
 
 

@@ -43,8 +43,8 @@ gboolean caps_to_format(GstCaps& c, tcam::tcam_video_format& format);
 
 struct buffer_info
 {
-    void* addr;
-    GstBuffer* gst_buffer;
+    void* addr = nullptr;
+    GstBuffer* gst_buffer = nullptr;
     std::shared_ptr<tcam::ImageBuffer> tcam_buffer;
     bool pooled;
 };

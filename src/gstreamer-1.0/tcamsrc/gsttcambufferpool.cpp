@@ -353,15 +353,27 @@ static gboolean gst_tcam_buffer_pool_stop(GstBufferPool* pool)
     state->stop_stream();
     state->stream_cv_.notify_all();
 
+    for (const auto& b : self->state_->buffer)
+    {
+        //GST_INFO("buffer refcount: %d sh_ptr usecount: %ld", b.gst_buffer->mini_object.refcount, b.tcam_buffer.use_count());
+        gst_buffer_unref(b.gst_buffer);
+    }
+
+    state->buffer_pool->clear();
+    self->state_->buffer.clear();
+
     return TRUE;
 }
 
 
 static void gst_tcam_buffer_pool_dispose(GObject* object)
 {
+    GST_INFO("disp");
+
     auto self = GST_TCAM_BUFFER_POOL(object);
 
     delete self->state_;
+    self->state_ = nullptr;
 
     G_OBJECT_CLASS(parent_class)->dispose(object);
 }
