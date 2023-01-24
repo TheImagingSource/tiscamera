@@ -74,7 +74,7 @@ if (TCAM_BUILD_ARAVIS)
       SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/aravis
       GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
       # current aravis master
-      GIT_TAG f06f366
+      GIT_TAG 5602abb08909cf19c7f0d6d1d99f05cb93bbde3b
       CONFIGURE_COMMAND ${ARAVIS_CONFIG}
       BUILD_COMMAND ninja
       INSTALL_COMMAND ""        # Do not install we are statically linking
