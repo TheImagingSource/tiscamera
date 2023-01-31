@@ -21,6 +21,7 @@
 #include "../tcamgstbase/version_check.h"
 #include "../tcamgstbase/tcamgstbase.h"
 #include "../tcamgstbase/tcamgstjson.h"
+#include "gst/gstchildproxy.h"
 #include "tcambin_data.h"
 #include "tcambin_tcamprop_impl.h"
 
@@ -40,7 +41,8 @@ G_DEFINE_TYPE_WITH_CODE(GstTcamBin,
                         gst_tcambin,
                         GST_TYPE_BIN,
                         G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROPERTY_PROVIDER,
-                                              tcam::gst::bin::gst_tcambin_tcamprop_init))
+                                              tcam::gst::bin::gst_tcambin_tcamprop_init)
+                        G_IMPLEMENT_INTERFACE(GST_TYPE_CHILD_PROXY, nullptr))
 
 static void gst_tcambin_clear_source(GstTcamBin* self);
 
@@ -56,6 +58,14 @@ enum
     PROP_TCAMDEVICE,
     PROP_TCAM_PROPERTIES_GSTSTRUCT,
 };
+
+
+static const char* name_source = "tcambin-source";
+static const char* name_capsfilter = "tcambin-src_caps";
+static const char* name_converter = "tcambin-converter";
+static const char* name_jpeg = "tcambin-jpegdec";
+static const char* name_videoconvert = "tcambin-videoconvert";
+
 
 static GstStaticPadTemplate src_template =
     GST_STATIC_PAD_TEMPLATE("src", GST_PAD_SRC, GST_PAD_ALWAYS, GST_STATIC_CAPS_ANY);
@@ -130,11 +140,11 @@ static bool tcambin_create_source(GstTcamBin* self)
     if (data.prop_tcam_device)
     {
         src_element = gst_helper::make_ptr(
-            gst_device_create_element(data.prop_tcam_device.get(), "tcambin-source"));
+            gst_device_create_element(data.prop_tcam_device.get(), name_source));
     }
     else
     {
-        src_element = gst_helper::make_ptr(gst_element_factory_make("tcamsrc", "tcambin-source"));
+        src_element = gst_helper::make_ptr(gst_element_factory_make("tcamsrc", name_source));
         assert(src_element);
 
         if (!data.device_type.empty())
@@ -157,6 +167,9 @@ static bool tcambin_create_source(GstTcamBin* self)
     }
 
     gst_bin_add(GST_BIN(self), src_element.get());
+
+    GstChildProxy* proxy = GST_CHILD_PROXY(self);
+    gst_child_proxy_child_added(proxy, (GObject*)src_element.get(), name_source);
 
     // set to READY so that caps are always readable
     auto res = gst_element_set_state(src_element.get(), GST_STATE_READY);
@@ -195,6 +208,9 @@ static void gst_tcambin_clear_source(GstTcamBin* self)
     if (data.src_element)
     {
         gst_element_set_state(data.src_element.get(), GST_STATE_NULL);
+
+        GstChildProxy* proxy = GST_CHILD_PROXY(self);
+        gst_child_proxy_child_removed(proxy, G_OBJECT(data.src_element.get()), name_source);
         gst_bin_remove(GST_BIN(self), data.src_element.get());
         data.src_element = nullptr;
     }
@@ -204,11 +220,15 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
 {
     auto& data = get_tcambin_data(self);
 
-    auto remove_element = [self](GstElement* element)
+    auto remove_element = [self](GstElement* element, const char* name)
     {
         assert(GST_IS_ELEMENT(element));
 
         gst_element_set_state(element, GST_STATE_NULL);
+
+        GstChildProxy* proxy = GST_CHILD_PROXY(self);
+        gst_child_proxy_child_removed(proxy, (GObject*)element, name);
+
         gst_bin_remove(GST_BIN(self), element);
         // not needed bin_remove automatically does that
         // gst_object_unref(element);
@@ -227,18 +247,18 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
 
     if (data.tcam_converter)
     {
-        remove_element(data.tcam_converter);
+        remove_element(data.tcam_converter, name_converter);
         data.tcam_converter = nullptr;
     }
 
     if (data.jpegdec)
     {
-        remove_element(data.jpegdec);
+        remove_element(data.jpegdec, name_jpeg);
         data.jpegdec = nullptr;
 
         if (data.videoconvert)
         {
-            remove_element(data.videoconvert);
+            remove_element(data.videoconvert, name_videoconvert);
             data.videoconvert = nullptr;
         }
     }
@@ -378,6 +398,10 @@ static gboolean create_and_add_element(GstElement** element,
     }
     GST_DEBUG_OBJECT(GST_ELEMENT(bin), "Adding %s(%p) to pipeline", factory_name, (void*)*element);
     gst_bin_add(bin, *element);
+
+    GstChildProxy* proxy = GST_CHILD_PROXY(bin);
+    gst_child_proxy_child_added(proxy, (GObject*)*element, element_name);
+
     return TRUE;
 }
 
@@ -410,7 +434,7 @@ static bool tcambin_create_elements(GstTcamBin* self)
 
     GST_INFO_OBJECT(self, "creating all tcambin pipeline elements");
 
-    data.pipeline_caps = gst_element_factory_make("capsfilter", "tcambin-src_caps");
+    data.pipeline_caps = gst_element_factory_make("capsfilter", name_capsfilter);
     if (data.pipeline_caps == nullptr)
     {
         GST_ERROR_OBJECT(self, "Could not create internal pipeline caps. Aborting");
@@ -434,7 +458,7 @@ static bool tcambin_create_elements(GstTcamBin* self)
 
     if (tcam::gst::contains_jpeg(data.available_caps.get()))
     {
-        if (!create_and_add_element(&data.jpegdec, "jpegdec", "tcambin-jpegdec", GST_BIN(self)))
+        if (!create_and_add_element(&data.jpegdec, "jpegdec", name_jpeg, GST_BIN(self)))
         {
             GST_ELEMENT_ERROR(
                 self, CORE, MISSING_PLUGIN, ("Could not create element 'jpegdec'."), (NULL));
@@ -460,7 +484,7 @@ static bool tcambin_create_elements(GstTcamBin* self)
             return false;
         }
 
-        if (!link_elements(data.jpegdec, data.videoconvert, pipeline_string, "tcambin-videoconvert"))
+        if (!link_elements(data.jpegdec, data.videoconvert, pipeline_string, name_videoconvert))
         {
             GST_ELEMENT_ERROR(
                 self, CORE, NEGOTIATION, ("Could not link element '%s'.", "videoconvert"), (NULL));
@@ -475,7 +499,7 @@ static bool tcambin_create_elements(GstTcamBin* self)
         if (data.conversion_info.selected_conversion == TCAM_BIN_CONVERSION_DUTILS)
         {
             if (!create_and_add_element(
-                    &data.tcam_converter, "tcamdutils", "tcambin-tcamdutils", GST_BIN(self)))
+                    &data.tcam_converter, "tcamdutils", name_converter, GST_BIN(self)))
             {
                 GST_ELEMENT_ERROR(
                     self, CORE, MISSING_PLUGIN, ("Could not create element 'tcamdutils'."), (NULL));
@@ -487,7 +511,7 @@ static bool tcambin_create_elements(GstTcamBin* self)
         {
             if (!create_and_add_element(&data.tcam_converter,
                                         "tcamdutils-cuda",
-                                        "tcambin-tcamdutils-cuda",
+                                        name_converter,
                                         GST_BIN(self)))
             {
                 GST_ELEMENT_ERROR(self,
@@ -502,7 +526,7 @@ static bool tcambin_create_elements(GstTcamBin* self)
         else // default selection
         {
             if (!create_and_add_element(
-                    &data.tcam_converter, "tcamconvert", "tcambin-tcamconvert", GST_BIN(self)))
+                    &data.tcam_converter, "tcamconvert", name_converter, GST_BIN(self)))
             {
                 GST_ELEMENT_ERROR(self,
                                   CORE,
