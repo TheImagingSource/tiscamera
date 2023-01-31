@@ -68,14 +68,14 @@ GST_DEBUG_CATEGORY_STATIC(tcam_src_debug);
 
 static gboolean open_source_element(GstTcamSrc* self);
 
-
 #define gst_tcam_src_parent_class parent_class
 
 G_DEFINE_TYPE_WITH_CODE(GstTcamSrc,
                         gst_tcam_src,
                         GST_TYPE_BIN,
                         G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROPERTY_PROVIDER,
-                                              tcam::gst::src::gst_tcam_src_prop_init))
+                                              tcam::gst::src::gst_tcam_src_prop_init)
+                         G_IMPLEMENT_INTERFACE(GST_TYPE_CHILD_PROXY, nullptr))
 
 enum
 {
@@ -272,6 +272,7 @@ static gboolean open_source_element(GstTcamSrc* self)
     g_signal_connect(
         G_OBJECT(new_device.get()), "device-close", G_CALLBACK(emit_device_close), self);
 
+    gst_element_set_name(new_device.get(), "source");
     auto state_change_res = gst_element_set_state(new_device.get(), GST_STATE_READY);
     if (state_change_res == GST_STATE_CHANGE_FAILURE)
     {
@@ -341,10 +342,10 @@ static gboolean open_source_element(GstTcamSrc* self)
                     state.device_serial.c_str(),
                     tcam::tcam_device_type_to_string(state.device_type).c_str());
 
-    
+
     // We emit the device-open notifications here after the device is __really__ open and we have setup everything surrounding that
     g_signal_emit(G_OBJECT(self), gst_tcamsrc_signals[SIGNAL_DEVICE_OPEN], 0);
-    
+
     return TRUE;
 }
 
