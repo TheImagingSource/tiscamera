@@ -38,7 +38,7 @@ struct tcam_pool_state;
 struct _GstTcamBufferPool
 {
     GstBufferPool parent;
-    
+
     GstBufferPool* other_pool_ = nullptr;
 
     GstElement* src_element = nullptr;
@@ -57,5 +57,7 @@ GType gst_tcam_buffer_pool_get_type();
 GstBufferPool* gst_tcam_buffer_pool_new(GstElement* src, GstCaps* caps);
 
 void gst_tcam_buffer_pool_set_other_pool(GstTcamBufferPool* pool, GstBufferPool* other_pool);
+
+void gst_tcam_buffer_pool_delete_buffer(GstTcamBufferPool* self);
 
 G_END_DECLS

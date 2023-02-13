@@ -470,6 +470,8 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
             {
                 gst_buffer_pool_set_active(self->pool, FALSE);
 
+                gst_tcam_buffer_pool_delete_buffer(GST_TCAM_BUFFER_POOL(self->pool));
+
                 if (self->pool->object.object.ref_count > 1)
                 {
                     // gst_query_add_allocation_pool increases the ref count

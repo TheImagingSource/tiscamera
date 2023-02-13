@@ -232,7 +232,7 @@ void device_state::start_stream()
 
 void device_state::stop_stream()
 {
-    if (device_)
+    if (device_ && is_streaming_)
     {
         device_->stop_stream();
     }
@@ -242,7 +242,7 @@ void device_state::stop_stream()
 
 void device_state::stop_and_clear()
 {
-    if (device_)
+    if (device_ && is_streaming_)
     {
         device_->stop_stream();
     }

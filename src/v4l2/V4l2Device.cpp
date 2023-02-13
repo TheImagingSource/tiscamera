@@ -103,20 +103,6 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
                  new_format.to_string(),
                  new_format.get_fourcc());
 
-    // dequeue all buffers
-    // TODO: should dequeuing exist?
-    // struct v4l2_requestbuffers req = {};
-
-    // req.count = 0; // free all buffers
-    // req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    // req.memory = V4L2_MEMORY_USERPTR;
-
-    // if (-1 == tcam_xioctl(m_fd, VIDIOC_REQBUFS, &req))
-    // {
-    //     SPDLOG_ERROR("Error while calling VIDIOC_REQBUFS to empty buffer queue. {}",
-    //                  strerror(errno));
-    // }
-
     uint32_t fourcc = new_format.get_fourcc();
 
     // use greyscale for camera interaction
@@ -474,8 +460,13 @@ bool V4l2Device::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
 void V4l2Device::stop_stream()
 {
-    SPDLOG_DEBUG("Stopping stream");
-    
+    if (!m_is_stream_on)
+    {
+        return;
+    }
+
+    SPDLOG_TRACE("Stopping stream...");
+
     if (m_is_stream_on)
     {
         enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;

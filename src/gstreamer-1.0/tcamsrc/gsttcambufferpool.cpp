@@ -353,16 +353,27 @@ static gboolean gst_tcam_buffer_pool_stop(GstBufferPool* pool)
     state->stop_stream();
     state->stream_cv_.notify_all();
 
+    return TRUE;
+}
+
+
+void gst_tcam_buffer_pool_delete_buffer(GstTcamBufferPool* self)
+{
+
     for (const auto& b : self->state_->buffer)
     {
         //GST_INFO("buffer refcount: %d sh_ptr usecount: %ld", b.gst_buffer->mini_object.refcount, b.tcam_buffer.use_count());
         gst_buffer_unref(b.gst_buffer);
     }
+    struct device_state* state = GST_TCAM_MAINSRC(self->src_element)->device;
 
-    state->buffer_pool->clear();
+    auto res = state->buffer_pool->clear();
+    if (!res)
+    {
+        GST_ERROR("Error while dealing with buffer pool: %s", res.as_failure().error().message().c_str());
+    }
     self->state_->buffer.clear();
-
-    return TRUE;
+    state->device_->free_stream();
 }
 
 
