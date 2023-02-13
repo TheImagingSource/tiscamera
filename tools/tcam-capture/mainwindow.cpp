@@ -1132,10 +1132,15 @@ void MainWindow::save_image_triggered()
 
             auto name = fng.generate();
 
-            image.save(path + "/" + name, extension.toStdString().c_str());
-
-            // show message for 5 seconds
-            statusBar()->showMessage("Saved image: " + path + "/" + name, 5000);
+            if (image.save(path + "/" + name, extension.toStdString().c_str()))
+            {
+                // show message for 5 seconds
+                statusBar()->showMessage("Saved image: " + path + "/" + name, 5000);
+            }
+            else
+            {
+                statusBar()->showMessage("ERROR! No image saved.", 5000);
+            }
 
             gst_buffer_unmap(buffer, &info);
             gst_video_info_free(video_info);
