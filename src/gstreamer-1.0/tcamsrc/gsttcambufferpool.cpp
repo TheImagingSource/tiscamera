@@ -115,6 +115,12 @@ static void gst_tcam_buffer_pool_sh_callback(std::shared_ptr<tcam::ImageBuffer> 
                 }
             }
 
+            if (stats.is_damaged && !state->drop_incomplete_frames_)
+            {
+                GST_WARNING_OBJECT(GST_OBJECT(self), "Delivering damaged buffer.");
+                gst_buffer_set_flags(info.gst_buffer, GST_BUFFER_FLAG_CORRUPTED);
+            }
+
             info.pooled = false;
             state->queue.push(info);
 
