@@ -19,7 +19,7 @@ Mailinglists: https://gstreamer.freedesktop.org/lists/
 V4L2
 ====
 
-Documentation: https://linuxtv.org/downloads/v4l-dvb-apis/uapi/v4l/v4l2.html
+Documentation: https://linuxtv.org/downloads/v4l-dvb-apis-new/userspace-api/v4l/v4l2.html
 
 Mailinglists: https://linuxtv.org/lists.php
 
