@@ -103,7 +103,7 @@ Installation target prefix (defaults to /usr/)
 
 For a complete overview, read the section [cmake options](https://www.theimagingsource.com/documentation/tiscamera/building.html#cmake-options) in out documentation.
 
-### Optional for GigE-Vision devices: Start the gige-daemon
+### Optional for GigE-Vision devices: Start the tcam-gige-daemon
 
 GigE-Vision cameras have a several seconds long delay before they can be reliably detected on the network.
 
@@ -111,9 +111,9 @@ To speed up this process for applications, a background daemon is built and inst
 
 ```
 sudo systemctl daemon-reload                 # make systemd aware of gige-daemon
-sudo systemctl enable gige-daemon.service    # start on every boot
-sudo systemctl start gige-daemon.service     # start the actual daemon
-sudo systemctl status gige-daemon.service    # check if statemd say everything is ok
+sudo systemctl enable tcam-gige-daemon.service    # start on every boot
+sudo systemctl start tcam-gige-daemon.service     # start the actual daemon
+sudo systemctl status tcam-gige-daemon.service    # check if statemd say everything is ok
 ```
 
 ## Where to go from here
