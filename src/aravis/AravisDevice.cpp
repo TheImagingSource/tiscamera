@@ -208,7 +208,16 @@ static double get_framerate(ArvCamera* camera)
     {
         value = arv_gc_float_get_value(ARV_GC_FLOAT(node), &err);
     }
-    else {
+    else if (node && ARV_IS_GC_ENUMERATION(node))
+    {
+        // if it is an enum, it means that FPS
+        // is also available
+        // that has better 'values'
+        auto val = arv_camera_get_integer(camera, "FPS", &err);
+        value = ((10000000 / (double)val) * 100 + 0.5) / 100.0;
+    }
+    else
+    {
         value = arv_camera_get_frame_rate(camera, &err);
     }
 
@@ -220,6 +229,7 @@ static double get_framerate(ArvCamera* camera)
 
     return value;
 }
+
 
 static std::pair<double, double> get_framerate_bounds(ArvCamera* camera)
 {
@@ -253,16 +263,49 @@ void set_frame_rate(ArvCamera* camera, double fps)
 {
     ArvGcNode* node = arv_device_get_feature(arv_camera_get_device(camera), "AcquisitionFrameRate");
 
-
     GError* err = nullptr;
     if (node && ARV_IS_GC_FLOAT_NODE(node))
     {
         arv_gc_float_set_value(ARV_GC_FLOAT(node), fps, &err);
     }
+    else if (node && ARV_IS_GC_ENUMERATION(node))
+    {
+        guint n_fps_values = 0;
+        auto fps_values = arv_device_dup_available_enumeration_feature_values(
+            arv_camera_get_device(camera), "FPS", &n_fps_values, &err);
+
+        if (n_fps_values == 0)
+        {
+            // alternative failed
+            // return empty vector and let format handle it
+            SPDLOG_ERROR("Unable to determine what framerate settings are used. {}",
+                         err->message);
+            return;
+        }
+
+        for (unsigned int i = 0; i < n_fps_values; ++i)
+        {
+            auto val = fps_values[i];
+
+            auto v = (int)((10000000 / (double)val) * 100 + 0.5) / 100.0;
+            if (v == fps)
+            {
+                arv_camera_set_integer(camera, "FPS", val, &err);
+                break;
+            }
+        }
+
+        if (fps_values)
+        {
+            g_free(fps_values);
+        }
+        return;
+    }
     else
     {
-        arv_camera_set_frame_rate(camera, fps, &err);
+            arv_camera_set_frame_rate(camera, fps, &err);
     }
+
     if (err)
     {
         SPDLOG_ERROR("Failed to set framerate. error: {}", err->message);
