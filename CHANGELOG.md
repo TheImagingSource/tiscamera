@@ -20,6 +20,14 @@ tcammainsrc:
 - own bufferpool
 - io-mode property, currently consists out of user-ptr and mmap
 - simple virtual camera, set `TCAM_VIRTCAM_DEVICES=name0:name1` to generate devices
+- Mark GstBuffer with GST_BUFFER_FLAG_CORRUPTED when image is damaged.
+  Requires drop-incomplete-buffer=false
+
+tcambin:
+- GstChildProxy interface
+
+tcamsrc:
+- GstChildProxy interface
 
 tcam-capture:
 - Ability to save images
@@ -33,6 +41,8 @@ dependency-manager:
 - option --ignore for install routine
   Allows preventing dependencies from being installed
 - Warning if 'lsb_release' can not be found
+- dependency description for Debian 10 (Buster)
+- dependency description for Ubuntu 22.10
 
 packaging:
 - split development dependencies into own package
@@ -52,6 +62,9 @@ tcammainsrc:
 tcam-capture:
 - Property JSON description was not updated when re-opening the dialog
 - No more critical warning if camera has no trigger mode
+
+tcam-ctrl:
+- Fix help text for `--load` and `--save`
 
 tcam-gigetool:
 - Fixed misidentification of camera identifier
