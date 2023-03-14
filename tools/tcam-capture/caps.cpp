@@ -155,7 +155,7 @@ std::vector<double> gvalue_to_fps_vector(const GValue* framerate)
             int num = gst_value_get_fraction_numerator(val);
             int den = gst_value_get_fraction_denominator(val);
 
-            framerates.push_back(num / den);
+            framerates.push_back((double)num / (double)den);
         }
         else
         {
@@ -191,7 +191,7 @@ std::vector<double> index_framerates(GstElement& element,
         GstCaps* fps_caps = gst_caps_from_string(c.c_str());
         GstQuery* fps_query = gst_query_new_caps(fps_caps);
         gst_caps_unref(fps_caps);
-    
+
         if (gst_element_query(&element, fps_query))
         {
             GstCaps* caps = nullptr;
