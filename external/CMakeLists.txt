@@ -70,11 +70,17 @@ if (TCAM_BUILD_ARAVIS)
 
     endif (TCAM_ARAVIS_USB_VISION)
 
+    # aravis is cloned during the build phase
+    # that means we cannot identify the commit hash
+    # during the configure phase
+    # set them manually here
+    set(ARAVIS_VERSION "0.8" PARENT_SCOPE)
+    set(ARAVIS_GIT_COMMIT_HASH "e977fa4" PARENT_SCOPE) # hash of ARAVIS_TAG
+
     ExternalProject_Add(aravis
       SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/aravis
       GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
-      # current aravis master
-      GIT_TAG 5602abb08909cf19c7f0d6d1d99f05cb93bbde3b
+      GIT_TAG 0.8.26
       CONFIGURE_COMMAND ${ARAVIS_CONFIG}
       BUILD_COMMAND ninja
       INSTALL_COMMAND ""        # Do not install we are statically linking
@@ -86,19 +92,6 @@ if (TCAM_BUILD_ARAVIS)
       add_dependencies(aravis meson)
 
     endif (TCAM_DOWNLOAD_MESON)
-
-    #
-    # Get the latest abbreviated commit hash of the working branch
-    execute_process(
-      COMMAND git log -1 --format=%h
-      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/aravis"
-      OUTPUT_VARIABLE ARAVIS_GIT_COMMIT_HASH_INTERNAL
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-
-    set(ARAVIS_GIT_COMMIT_HASH "${ARAVIS_GIT_COMMIT_HASH_INTERNAL}" PARENT_SCOPE)
-    set(ARAVIS_VERSION "0.8" PARENT_SCOPE)
-
 
     # cmake integration of generated libraries
     # building with ninja might cause problems otherwise
