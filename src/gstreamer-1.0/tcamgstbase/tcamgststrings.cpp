@@ -347,7 +347,7 @@ std::string tcam::gst::tcam_fourcc_to_gst_1_0_caps_string(uint32_t fourcc)
 
 uint32_t tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(const char* name, const char* format)
 {
-    if (strcmp(name, "") == 0 || strcmp(format, "") == 0)
+    if (strcmp(name, "") == 0 && strcmp(format, "") == 0)
     {
         return 0;
     }
