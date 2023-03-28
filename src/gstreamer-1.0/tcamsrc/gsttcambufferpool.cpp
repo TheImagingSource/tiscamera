@@ -120,6 +120,10 @@ static void gst_tcam_buffer_pool_sh_callback(std::shared_ptr<tcam::ImageBuffer> 
                 GST_WARNING_OBJECT(GST_OBJECT(self), "Delivering damaged buffer.");
                 gst_buffer_set_flags(info.gst_buffer, GST_BUFFER_FLAG_CORRUPTED);
             }
+            // update the image size
+            // not relevant for bayer
+            // image/jpeg relies on this!
+            gst_buffer_set_size(info.gst_buffer, info.tcam_buffer->get_valid_data_length());
 
             info.pooled = false;
             state->queue.push(info);
