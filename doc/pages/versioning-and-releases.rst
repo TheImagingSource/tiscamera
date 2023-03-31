@@ -28,8 +28,6 @@ This can be read as:
   branches to further distinguish them from the master branch. They cannot be
   encountered on the master branch and any kind of official releases.
 - (hash) is an optional git commit hash identifier
-
-These steps are automated with the :any:`create-release script <create_release>`.
   
 ========
 Releases

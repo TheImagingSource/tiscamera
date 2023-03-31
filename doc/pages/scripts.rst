@@ -169,17 +169,3 @@ To source it, call the following in the build directory
    . ./tiscamera-env.sh
 
 The script is not installed. It can be found in the build directory under `./tiscamera-env.sh`
-
-.. _create_release:
-
-==============
-create-release
-==============
-
-The create-release script aims to simplify the steps of versioning and tagging when creating a new release.
-For the rules that are applied by this script, see :any:`Versioning and Releases<versioning_and_release>`.
-These include:
-
-- Updating the CHANGELOG.md file to the next version number
-- Creating a new commit for said changes
-- Tagging the new commit with the appropriate tag
