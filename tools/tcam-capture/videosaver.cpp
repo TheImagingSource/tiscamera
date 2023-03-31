@@ -54,7 +54,7 @@ QString find_codec_pipeline(VideoCodec codec)
         //     return "queue name=save-queue max-size-time=0 max-size-bytes=0 max-size-buffers=0 "
         //            "leaky=downstream"
         //            " ! videoconvert n-threads=4 "
-        //         //" ! queue "
+        //            " ! queue "
         //            " ! x265enc name=save-enc "
         //            " ! mp4mux ! queue max-size-time=0 max-size-bytes=0 max-size-buffers=0 "
         //            " ! filesink async=true sync=false name=save-sink";
@@ -114,8 +114,6 @@ void tcam::tools::capture::VideoSaver::start_saving()
 
     gst_element_set_state(pipeline_, GST_STATE_PLAYING);
     qDebug("Started video saving");
-
-    GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(GST_BIN(pipeline_), GST_DEBUG_GRAPH_SHOW_ALL, "pipeline");
 }
 
 
