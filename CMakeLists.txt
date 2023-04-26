@@ -111,7 +111,8 @@ if (NOT TCAM_EXCLUSIVE_BUILD)
     add_subdirectory(data)
     # TODO: this should not be always on
     install(DIRECTORY examples
-      DESTINATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/")
+      DESTINATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/"
+      COMPONENT dev)
   endif (TCAM_ENABLE_DATA_INSTALL)
 
 
