@@ -131,7 +131,7 @@ bool tcam::LibusbDevice::is_superspeed()
         return false;
     }
 
-    if (libusb_get_device_speed(device_) == LIBUSB_SPEED_SUPER)
+    if (libusb_get_device_speed(device_) >= LIBUSB_SPEED_SUPER)
     {
         return true;
     }
