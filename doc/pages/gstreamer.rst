@@ -435,13 +435,13 @@ work as wanted, the tcambin will require this too.
 
 .. code-block:: sh
 
-   tcamsrc ! video/x-raw,format=rggb16 ! tcamconvert ! video/x-raw,format=BGRx ! appsink
+   tcamsrc ! video/x-bayer,format=rggb16 ! tcamconvert ! video/x-raw,format=BGRx ! appsink
 
 is equal to:
 
 .. code-block:: sh
 
-   tcambin device-caps=video/x-raw,format=rggb16 ! video/x-raw,format=BGRx ! appsink
+   tcambin device-caps=video/x-bayer,format=rggb16 ! video/x-raw,format=BGRx ! appsink
 
 
 *******************
