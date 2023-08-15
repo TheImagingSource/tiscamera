@@ -18,12 +18,15 @@
 
 #include "../../../libs/tcam-property/src/gst/meta/gstmetatcamstatistics.h"
 #include "gst/gstbufferpool.h"
+#include "gst/gstinfo.h"
 #include "gsttcammainsrc.h"
 #include "mainsrc_device_state.h"
+#include "../tcamgstbase/tcamgstbase.h"
 
 struct tcam_pool_state
 {
     std::vector<tcam::mainsrc::buffer_info> buffer;
+    bool is_mjpeg = false;
 };
 
 #define GST_CAT_DEFAULT tcam_mainsrc_debug
@@ -120,11 +123,15 @@ static void gst_tcam_buffer_pool_sh_callback(std::shared_ptr<tcam::ImageBuffer> 
                 GST_WARNING_OBJECT(GST_OBJECT(self), "Delivering damaged buffer.");
                 gst_buffer_set_flags(info.gst_buffer, GST_BUFFER_FLAG_CORRUPTED);
             }
-            // update the image size
-            // not relevant for bayer
-            // image/jpeg relies on this!
-            gst_buffer_set_size(info.gst_buffer, info.tcam_buffer->get_valid_data_length());
 
+            // ubuntu 18 has gstreamer 1.14.x
+            // there set_size causes a stream termination when using mjpeg
+            // other cameras cause problems when this function is not called
+            // more modern systems seem to always need to call this
+            if (GST_VERSION_MINOR >= 15 || !self->state_->is_mjpeg)
+            {
+                gst_buffer_set_size(info.gst_buffer, info.tcam_buffer->get_valid_data_length());
+            }
             info.pooled = false;
             state->queue.push(info);
 
@@ -296,6 +303,8 @@ static gboolean gst_tcam_buffer_pool_start(GstBufferPool* pool)
         GST_ERROR_OBJECT(self, "Invalid config for buffer pool.");
         return false;
     }
+
+    self->state_->is_mjpeg = tcam::gst::contains_jpeg(caps);
 
     auto dev = state->device_;
 
