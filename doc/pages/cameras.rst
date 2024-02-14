@@ -79,7 +79,7 @@ Locate the Firmware
 
    .. group-tab:: Usb-2.0
 
-      Go to the directory `<tiscamera>/data/firmware/usb2/`.
+      Go to the directory `<tcam-firmware-update>/firmware/usb2/`.
       
       Locate the latest firmware for the camera.
 
