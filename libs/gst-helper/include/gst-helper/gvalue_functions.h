@@ -5,6 +5,7 @@
 #include <string_view>
 #include <type_traits>
 #include <string>
+#include <cstdint>
 
 #include "gvalue_helper.h"
 
