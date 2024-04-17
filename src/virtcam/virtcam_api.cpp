@@ -45,9 +45,12 @@ static std::vector<tcam::DeviceInfo> get_virtcam_device_list()
 
         tcam_device_info tmp = {};
         tmp.type = TCAM_DEVICE_TYPE::TCAM_DEVICE_TYPE_VIRTCAM;
-        strncpy(tmp.name, name.c_str(), sizeof(tmp.name));
-        strncpy(tmp.identifier, name.c_str(), sizeof(tmp.identifier));
-        strncpy(tmp.serial_number, serial.c_str(), sizeof(tmp.serial_number));
+        strncpy(tmp.name, name.c_str(), sizeof(tmp.name)-1);
+        tmp.name[sizeof(tmp.name)-1] = '\0';
+        strncpy(tmp.identifier, name.c_str(), sizeof(tmp.identifier)-1);
+        tmp.name[sizeof(tmp.identifier)-1] = '\0';
+        strncpy(tmp.serial_number, serial.c_str(), sizeof(tmp.serial_number)-1);
+        tmp.name[sizeof(tmp.serial_number)-1] = '\0';
 
         rval.push_back( DeviceInfo(tmp) );
     }
