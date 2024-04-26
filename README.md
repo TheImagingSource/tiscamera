@@ -18,6 +18,13 @@ You can find an online version of the included user documentation here:
 
 https://www.theimagingsource.com/documentation/tiscamera/
 
+## Precompiled Debian Packages
+
+Ubuntu 18 lts packages are compatible with ubuntu 22 and ubuntu 24.
+
+As of Ubuntu24.04 LTS arm 32-bit is no longer supported.
+Please use a supported Release (Ubuntu 18 - Ubuntu 22), or switch to a arm64 release.
+
 ## API BREAK
 
 Version 1.0.0 introduces several API changes.
