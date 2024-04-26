@@ -1,0 +1,210 @@
+{
+    "dependencies": [
+        {
+            "name": "git",
+            "version": ">= 1:2.34.1",
+            "phase": "compilation",
+            "modules": ["base"],
+            "include_in_package": false
+        },
+        {
+            "name": "g++",
+            "version": ">= 4:11.2.0",
+            "phase": "compilation",
+            "modules": ["base"],
+            "include_in_package": false
+        },
+        {
+            "name": "cmake",
+            "version": ">= 3.22.1",
+            "phase": "compilation",
+            "modules": ["base"],
+            "include_in_package": false
+        },
+        {
+            "name": "pkg-config",
+            "version": ">= 0.29.2",
+            "phase": "compilation",
+            "modules": ["base"],
+            "include_in_package": false
+        },
+
+        {
+            "name": "libgstreamer1.0-dev",
+            "version": ">= 1.20.1-1",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libgstreamer-plugins-base1.0-dev",
+            "version": ">= 1.20.1-1",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libglib2.0-dev",
+            "version": ">= 2.72.1",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libgirepository1.0-dev",
+            "version": ">= 1.72.0",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libusb-1.0-0-dev",
+            "version": ">= 2:1.0.25",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libzip-dev",
+            "version": ">= 1.7.3",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libzip4",
+            "version": ">= 1.7.3",
+            "phase": "runtime",
+            "modules": ["base", "aravis"]
+        },
+        {
+            "name": "libglib2.0-0",
+            "version": ">= 2.72.1",
+            "phase": "runtime",
+            "modules": ["base"]
+        },
+        {
+            "name": "libgirepository-1.0-1",
+            "version": ">= 1.72.0",
+            "phase": "runtime",
+            "modules": ["base"]
+        },
+        {
+            "name": "libusb-1.0-0",
+            "version": ">= 2:1.0.25",
+            "phase": "runtime",
+            "modules": ["base"]
+        },
+
+        {
+            "name": "libuuid1",
+            "version": ">= 2.37.2",
+            "phase": "runtime",
+            "modules": ["v4l2"]
+        },
+        {
+            "name": "uuid-dev",
+            "version": ">= 2.37.2",
+            "phase": "compilation",
+            "modules": ["v4l2"]
+        },
+
+        {
+            "name": "libudev-dev",
+            "version": ">= 249.11",
+            "phase": "compilation",
+            "modules": ["v4l2", "libusb"]
+        },
+        {
+            "name": "libudev1",
+            "version": ">= 249.11",
+            "phase": "runtime",
+            "modules": ["v4l2", "libusb"]
+        },
+
+        {
+            "name": "python3-sphinx",
+            "version": ">= 4.3.2-1",
+            "phase": "compilation",
+            "modules": ["documentation"],
+            "include_in_package": false
+        },
+
+        {
+            "name": "libgstreamer1.0-0",
+            "version": ">= 1.20.1",
+            "phase": "runtime",
+            "modules": ["gstreamer"]
+        },
+        {
+            "name": "gstreamer1.0-plugins-base",
+            "version": ">= 1.20.1",
+            "phase": "runtime",
+            "modules": ["gstreamer"]
+        },
+        {
+            "name": "gstreamer1.0-plugins-good",
+            "version": ">= 1.20.1",
+            "phase": "runtime",
+            "modules": ["gstreamer"]
+        },
+        {
+            "name": "gstreamer1.0-plugins-bad",
+            "version": ">= 1.20.1",
+            "phase": "runtime",
+            "modules": ["gstreamer"]
+        },
+        {
+            "name": "gstreamer1.0-plugins-ugly",
+            "version": ">= 1.20.1",
+            "phase": "runtime",
+            "modules": ["gstreamer"]
+        },
+        {
+            "name": "qtgstreamer-plugins-qt5",
+            "version": ">=1.2.0",
+            "phase": "runtime",
+            "modules": ["gui"]
+        },
+        {
+            "name": "libxml2-dev",
+            "version": ">= 2.9.13",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
+        {
+            "name": "libxml2",
+            "version": ">= 2.9.13",
+            "phase": "runtime",
+            "modules": ["aravis"]
+        },
+        {
+            "name": "ninja-build",
+            "version": ">= 1.10.1",
+            "phase": "compilation",
+            "modules": ["aravis"],
+            "include_in_package": false
+        },
+        {
+            "name": "libqt5widgets5",
+            "version": ">= 5.15.3",
+            "phase": "runtime",
+            "modules": ["gui"]
+        },
+        {
+            "name": "libqt5gui5",
+            "version": ">= 5.15.3",
+            "phase": "runtime",
+            "modules": ["gui"]
+        },
+        {
+            "name": "qtbase5-dev",
+            "version": ">= 5.15.3",
+            "phase": "compilation",
+            "modules": ["gui"],
+            "include_in_package": false
+        },
+        {
+            "name": "graphviz",
+            "version": ">= 2.46.2",
+            "phase": "compilation",
+            "modules": ["documentation"],
+            "include_in_package": false
+        }
+    ]
+
+}

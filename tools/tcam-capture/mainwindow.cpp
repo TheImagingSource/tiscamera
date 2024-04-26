@@ -279,12 +279,12 @@ gboolean MainWindow::bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer
         }
         case GST_MESSAGE_QOS:
         {
-            const GstStructure* s = gst_message_get_structure(message);
-            GstMessage* forward_msg = NULL;
+            // const GstStructure* s = gst_message_get_structure(message);
+            // GstMessage* forward_msg = NULL;
 
-            gst_structure_get(s, "message", GST_TYPE_MESSAGE, &forward_msg, NULL);
-            qInfo("=================== %s", GST_OBJECT_NAME(GST_MESSAGE_SRC(forward_msg)));
-            gst_message_unref(forward_msg);
+            // gst_structure_get(s, "message", GST_TYPE_MESSAGE, &forward_msg, NULL);
+            // qInfo("=================== %s", GST_OBJECT_NAME(GST_MESSAGE_SRC(forward_msg)));
+            // gst_message_unref(forward_msg);
 
             break;
         }

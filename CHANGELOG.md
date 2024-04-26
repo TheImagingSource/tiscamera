@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+- doc: Directory containing USB-2.0 camera firmware for firmware updates now points to correct dir.
+
 ## [1.1.1] - 2023.04.26
 
 ### Fixed
