@@ -144,8 +144,22 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
         return false;
     }
 
-    set_scaling(new_format.get_scaling());
-
+    // the usb2 72 cameras can have issues with
+    // setting binning before the stream start
+    // their scaling settings are delayed
+    // and can be found in start_stream
+    // the reset of the scaling settings is
+    // so that switching of resolutions succeeds
+    // as setting e.g. 1920x1080 will fail if binning 4x4
+    // is active will fail.
+    if (strcmp(device.get_info().additional_identifier, "8307") != 0)
+    {
+        set_scaling(new_format.get_scaling());
+    }
+    else
+    {
+        set_scaling({});
+    }
     /* validation */
 
     determine_active_video_format();
@@ -451,6 +465,12 @@ bool V4l2Device::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
     update_stream_timeout();
 
     SPDLOG_INFO("Starting stream in work thread.");
+
+    // 72U binning fix
+    if (strcmp(device.get_info().additional_identifier,"8307") == 0)
+    {
+        set_scaling(m_active_video_format.get_scaling());
+    }
 
     this->m_work_thread = std::thread(&V4l2Device::stream, this);
 
