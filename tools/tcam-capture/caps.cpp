@@ -309,6 +309,10 @@ GstCaps* Caps::get_default_caps(GstCaps* intersect)
             "video/x-bayer,format=pwl-rggb12,width=640,height=480,framerate=15/1",
             "video/x-bayer,format=pwl-rggb16H12,width=640,height=480,framerate=15/1",
 
+            "video/x-bayer,format={polarized-grbg8-v0,polarized-bggr8-v0,polarized-rggb8-v0,polarized-grbg8-v0},width=1920,height=1080,framerate=30/1",
+            "video/x-bayer,format={polarized-grbg12p-v0,polarized-bggr12p-v0,polarized-rggb12p-v0,polarized-grbg12p-v0},width=1920,height=1012p0,framerate=30/1",
+            "video/x-bayer,format={polarized-grbg16-v0,polarized-bggr16-v0,polarized-rggb16-v0,polarized-grbg16-v0},width=1920,height=10160,framerate=30/1",
+
             "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=640,height=480,framerate=30/1",
             "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=640,height=480,framerate=15/1",
             "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=30/1",
