@@ -48,7 +48,7 @@ ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="199e", TEST=="power/control", 
 
 #
 # load uvc extensions for USB3 33 cameras
-# Product IDs 0x90xx, 0x94xx, 0x98xx = 33U, 37U, 38U
+# Product IDs 0x90xx, 0x94xx, 0x98xx, 0x9cxx = 33U, 37U, 38U, 32U
 #
 
 @SILENT@ACTION=="add", SUBSYSTEM=="video4linux", \
@@ -63,9 +63,8 @@ ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="199e", TEST=="power/control", 
 @SILENT@               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="98??", \
 @SILENT@               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb33.json"
 
-# explicit rule for DFG/HDMI converter
 @SILENT@ACTION=="add", SUBSYSTEM=="video4linux", \
-@SILENT@               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="9c97", \
+@SILENT@               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="9c??", \
 @SILENT@               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb33.json"
 
 
