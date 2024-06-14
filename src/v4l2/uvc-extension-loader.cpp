@@ -195,16 +195,17 @@ std::string tcam::uvc::determine_extension_file(const std::string& pid_in)
 {
     std::string filename;
 
-    // interpret nuber as hex
+    // interpret number as hex
     int pid = strtol(pid_in.c_str(), NULL, 16);
 
     const int PID_BASE_MASK_33U = 0xFC00;
     const int PID_BASE_MASK_LEGACY = 0xFF00;
 
     if ((pid & PID_BASE_MASK_33U) == 0x9000
-        || (pid & PID_BASE_MASK_33U) == 0x9800)
+        || (pid & PID_BASE_MASK_33U) == 0x9800
+        || (pid & PID_BASE_MASK_33U) == 0x9c00)
     {
-        // usb 33/38
+        // usb 33/38/32
         filename = "usb33.json";
     }
     else if ((pid & PID_BASE_MASK_33U) == 0x9400)
