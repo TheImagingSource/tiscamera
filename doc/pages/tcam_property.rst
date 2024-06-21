@@ -1649,7 +1649,7 @@ tcam_property_float_get_representation
                       
    .. group-tab:: python
    
-       .. py:method:: Tcam.PropertyFloat.get_unit()
+       .. py:method:: Tcam.PropertyFloat.get_representation()
                         
          :exception: May raise an `GLib.Error` when fetching the property fails
          :returns: Returns the :ref:`TcamPropertyFloatRepresentation` of the property
