@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import argparse
+import pathlib
 import subprocess
 import json
 import os
@@ -22,12 +23,27 @@ import re
 import sys
 import shutil
 
-
-def executable_exists(exe_name: str):
+def executable_exists(exe_name: str) -> bool:
     """
-    Returns: True if executable exists
+    Returns:
+        True if executable exists
     """
     return (shutil.which(exe_name) is not None)
+
+
+def with_sudo(base_command: list[str]) -> list[str]:
+    """
+    Adds sudo to a command if sudo exists in this context,
+    otherwise returns a new list containing the entries of the base command.
+
+    Note:
+        This simplifies compatibility with containers builds.
+    """
+    command = []
+    if executable_exists("sudo"):
+        command.append("sudo")
+    command.extend(base_command)
+    return command
 
 
 def convert_to_str(input_list, seperator):
@@ -58,31 +74,33 @@ def get_distribution_release():
                           release.group(1).replace(".", ""))
 
 
-def get_distribution():
+def get_distribution() -> str:
     """
 
     """
     "lsb_release"
 
-# No LSB modules are available.
-# Distributor ID:	Raspbian
-# Description:	Raspbian GNU/Linux 10 (buster)
-# Release:	10
-# Codename:	buster
+    # No LSB modules are available.
+    # Distributor ID:	Raspbian
+    # Description:	Raspbian GNU/Linux 10 (buster)
+    # Release:	10
+    # Codename:	buster
 
-# No LSB modules are available.
-# Distributor ID:	Ubuntu
-# Description:	Ubuntu 20.04 LTS
-# Release:	20.04
-# Codename:	focal
+    # No LSB modules are available.
+    # Distributor ID:	Ubuntu
+    # Description:	Ubuntu 20.04 LTS
+    # Release:	20.04
+    # Codename:	focal
 
-# No LSB modules are available.
-# Distributor ID:	Debian
-# Description:	Debian GNU/Linux 10 (buster)
-# Release:	10
-# Codename:	buster
+    # No LSB modules are available.
+    # Distributor ID:	Debian
+    # Description:	Debian GNU/Linux 10 (buster)
+    # Release:	10
+    # Codename:	buster
 
     # in containers we may not have lsb_release
+    backup_path = pathlib.Path("/etc/os-release")
+    filename = None
     if executable_exists("lsb_release"):
         process = subprocess.Popen(['lsb_release', '-a'],
                                    stdout=subprocess.PIPE,
@@ -95,8 +113,24 @@ def get_distribution():
 
         r = release.group(1).replace(".", "")
         filename = distribution.group(1).lower() + "_" + r + ".dep"
-    else:
-        print("Executable 'lsb_release' could not be found.\n"
+
+    if backup_path.exists():
+        os_id = None
+        version_id = None
+        with open(backup_path, "r", encoding="utf-8") as version_file:
+            for line in version_file:
+                os_id_match = re.search(r"^ID=(\w+)", line)
+                if os_id_match is not None:
+                    os_id = os_id_match[1]
+
+                version_id_match = re.search(r"^VERSION_ID=\"(.*)\"", line)
+                if version_id_match is not None:
+                    version_id = version_id_match[1].replace(".", "")
+        if os_id is not None and version_id is not None:
+            filename = f"{os_id}_{version_id}.dep"
+
+    if filename is None:
+        print("Executable 'lsb_release' could not be found, and backup location is also not available.\n"
               "Install it or use '-f <dependency file>' to manually set the dependency description.\n"
               "cmake will need TCAM_DISTRIBUTION_DESCRIPTION to generate packages.",
               file=sys.stderr)
@@ -109,7 +143,7 @@ def update_package_list():
     """
     Constructs and executes package update command
     """
-    cmd = ["sudo", "apt-get", "update"]
+    cmd = with_sudo(["apt-get", "update"])
     subprocess.call(cmd)
 
 
@@ -118,7 +152,7 @@ def install_packages(package_list: list, yes: bool = False, dry: bool = False):
     Constructs and executes package installation command
     """
 
-    cmd = ["sudo", "apt-get", "install"]
+    cmd = with_sudo(["apt-get", "install"])
     if yes:
         cmd.append("-y")
 
@@ -363,7 +397,6 @@ The most commonly used git commands are:
         'list' subcommand
         """
         if self.args.package == "deb":
-
             self.__print_deb_list(self.collect_dependencies(self.args.compilation, self.args.runtime))
             return
 
@@ -408,7 +441,6 @@ The most commonly used git commands are:
                     print("'{}' is not in the dependency list! Cannot remove.".format(ignore_entry))
 
         install_packages([i.name for i in packages], self.args.yes, self.args.dry_run)
-
 
 if __name__ == "__main__":
     try:
