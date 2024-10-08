@@ -82,24 +82,25 @@ def get_distribution():
 # Release:	10
 # Codename:	buster
 
-    if not executable_exists("lsb_release"):
+    # in containers we may not have lsb_release
+    if executable_exists("lsb_release"):
+        process = subprocess.Popen(['lsb_release', '-a'],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        stdout, _stderr = process.communicate()
+
+        lsb_str = stdout.decode('UTF-8')
+        release = re.search("Release:\\s(.+)$", lsb_str, re.MULTILINE)
+        distribution = re.search("Distributor ID:\\s(.+)$", lsb_str, re.MULTILINE)
+
+        r = release.group(1).replace(".", "")
+        filename = distribution.group(1).lower() + "_" + r + ".dep"
+    else:
         print("Executable 'lsb_release' could not be found.\n"
               "Install it or use '-f <dependency file>' to manually set the dependency description.\n"
               "cmake will need TCAM_DISTRIBUTION_DESCRIPTION to generate packages.",
               file=sys.stderr)
         sys.exit(2)
-
-    process = subprocess.Popen(['lsb_release', '-a'],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-    stdout, _stderr = process.communicate()
-
-    lsb_str = stdout.decode('UTF-8')
-    release = re.search("Release:\\s(.+)$", lsb_str, re.MULTILINE)
-    distribution = re.search("Distributor ID:\\s(.+)$", lsb_str, re.MULTILINE)
-
-    r = release.group(1).replace(".", "")
-    filename = distribution.group(1).lower() + "_" + r + ".dep"
 
     return filename
 
