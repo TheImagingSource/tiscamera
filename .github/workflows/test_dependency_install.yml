@@ -1,0 +1,26 @@
+name: test dependency install script
+
+on:
+  pull_request:
+    branches: [ "master", "development", "release/*" ]
+  merge_group:
+  workflow_dispatch:
+
+jobs:
+  test_installation_on_ubuntu_runners:
+    strategy:
+      matrix:
+        os: [ "ubuntu-latest", "ubuntu-24.04", "ubuntu-22.04", "ubuntu-20.04" ]
+        force_update: [ true,false ]
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v4.2.1
+
+      - name: force update
+        if: ${{matrix.force_update}}
+        run: |
+          sudo apt-get update && sudo apt upgrade -y 
+
+      - name: run dependency install script
+        run: |
+          ./scripts/dependency-manager install
