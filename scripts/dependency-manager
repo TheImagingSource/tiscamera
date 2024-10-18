@@ -22,6 +22,8 @@ import os
 import re
 import sys
 import shutil
+from typing import Sequence, List
+
 
 def executable_exists(exe_name: str) -> bool:
     """
@@ -31,7 +33,7 @@ def executable_exists(exe_name: str) -> bool:
     return (shutil.which(exe_name) is not None)
 
 
-def with_sudo(base_command: list[str]) -> list[str]:
+def with_sudo(base_command: Sequence[str]) -> List[str]:
     """
     Adds sudo to a command if sudo exists in this context,
     otherwise returns a new list containing the entries of the base command.
@@ -441,6 +443,7 @@ The most commonly used git commands are:
                     print("'{}' is not in the dependency list! Cannot remove.".format(ignore_entry))
 
         install_packages([i.name for i in packages], self.args.yes, self.args.dry_run)
+
 
 if __name__ == "__main__":
     try:
