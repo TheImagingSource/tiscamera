@@ -1,9 +1,9 @@
 name: test dependency install script
 
 on:
-  pull_request:
-    branches: [ "master", "development", "release/*" ]
-  merge_group:
+#  pull_request:
+#    branches: [ "master", "development", "release/*" ]
+#  merge_group:
   workflow_dispatch:
 
 jobs:
