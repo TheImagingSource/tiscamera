@@ -92,6 +92,7 @@ std::shared_ptr<DeviceInterface> tcam::open_device_interface(const DeviceInfo& d
 #else
                 SPDLOG_ERROR("Aravis has not been enabled as a backend. Compile tiscamera with "
                              "aravis enabled.");
+                break;
 #endif
             }
             case TCAM_DEVICE_TYPE_V4L2:
@@ -102,6 +103,7 @@ std::shared_ptr<DeviceInterface> tcam::open_device_interface(const DeviceInfo& d
 #else
                 SPDLOG_ERROR("V4L2 has not been enabled as a backend. Compile tiscamera with "
                              "v4l2 enabled.");
+                break;
 #endif
             }
             case TCAM_DEVICE_TYPE_LIBUSB:
@@ -112,6 +114,7 @@ std::shared_ptr<DeviceInterface> tcam::open_device_interface(const DeviceInfo& d
 #else
                 SPDLOG_ERROR("LibUsb has not been enabled as a backend. Compile tiscamera with "
                              "libusb enabled.");
+                break;
 #endif
             }
             case TCAM_DEVICE_TYPE_VIRTCAM:
@@ -122,6 +125,7 @@ std::shared_ptr<DeviceInterface> tcam::open_device_interface(const DeviceInfo& d
 #else
                 SPDLOG_ERROR("Virtcam has not been enabled as a backend. Compile tiscamera with "
                              "virtcam enabled.");
+                break;
 #endif
             }
             default:
