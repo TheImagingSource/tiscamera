@@ -16,7 +16,7 @@ Unit Tests
 .. note::
 
    The GStreamer unit tests will require a camera for indexing.
-   It is also advised to have the gige-daemon running to speed up test runs.
+   It is also advised to have the tcam-gige-daemon running to speed up test runs.
 
 Unit tests are implemented with the help of the catch2 framework.
 
@@ -75,7 +75,7 @@ For most tests, the following configuration is assumed:
   - [ ] installation works
 
     - [ ] ``sudo make install`` runs without warnings/error
-    - [ ] ``sudo systemctl start gige-daemon.service``
+    - [ ] ``sudo systemctl start tcam-gige-daemon.service``
 
 - [ ] tcam-capture
 
@@ -161,9 +161,9 @@ These steps should be executed on a vanilla reference system.
 
 - [ ] ``sudo apt install tiscamera-*.deb`` installs the package without warnings etc.
 
-- [ ] The gige-daemon is running.
+- [ ] The tcam-gige-daemon is running.
 
-  - [ ] The gige-daemon is running after a reboot.
+  - [ ] The tcam-gige-daemon is running after a reboot.
 
 - [ ] ``tcam-ctrl -l`` lists all expected devices and has no waiting period.
 

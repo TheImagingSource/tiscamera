@@ -54,23 +54,25 @@ To see the association of a specific camera execute `lsusb` and use the the seco
 
    * - Device PID
      - Extension File
-   * - 82XX
+   * - 82xx
      - usb2.json
-   * - 83XX
+   * - 83xx
      - usb2.json
-   * - 84XX
+   * - 84xx
      - usb23.json
-   * - 85XX
+   * - 85xx
      - usb23.json
-   * - 86XX
+   * - 86xx
      - usb23.json
-   * - 87XX
+   * - 87xx
      - usb23.json
-   * - 90XX
+   * - 90xx
      - usb33.json
-   * - 94XX
+   * - 94xx
      - usb37.json
-   * - 98XX
+   * - 98xx
+     - usb33.json
+   * - 9Cxx
      - usb33.json
 
 

@@ -14,10 +14,12 @@ This is a simplified folder structure of the tiscamera project:
 |   ├── cmake
 |   │   └── modules
 |   ├── data - static data that is neither compiled or generated
+|   │   ├── bash-completion - for the cmdline helpers
 |   │   ├── images - logos, icons, camera images, etc.
 |   │   ├── systemd - systemd units
 |   │   ├── udev - udev rules for usb cameras, see :doc:`udev`
 |   │   └── uvc-extensions - description files for UVC extension units, see :doc:`uvc`
+|   ├── dependencies - databases for required versions per os
 |   ├── doc - documentation infrastructure
 |   │   ├── images
 |   │   ├── pages
@@ -51,13 +53,13 @@ This is a simplified folder structure of the tiscamera project:
 |   │   │   └── tcamsrc - files related to the tcamconvert gstreamer plugin
 |   │   ├── libusb - libusb-1.0 backend
 |   │   ├── tcam-network - network helper library
+|   │   ├── virtcam
 |   │   └── v4l2 - v4l2 backend
 |   ├── tests - verification code, see :doc:`tests`
 |   │   ├── integration
 |   │   │   └── start_stop
-|   │   └── unit
-|   │       ├── gstreamer-1.0
-|   │       └── tcam-network
+|   │   │   └── num-buffers
+|   │   └── release
 |   └── tools - directory for applications 
 |       ├── :ref:`tcam-capture<tcam_capture>`
 |       ├── :ref:`tcam-ctrl<tcam_ctrl>`
