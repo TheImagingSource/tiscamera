@@ -10,6 +10,9 @@ These examples exist in C and Python3.
 
 The standard installation path for examples is `/usr/share/theimagingsource/tiscamera/examples`.
 
+| They are contained in the `tiscamera-dev` package.
+| In the tiscamera repository they can be found in `<tiscamera>/examples`.
+
 It may be neccessary to install additional development packages when using pre-compiled tiscamera packages.
 See :ref:`dependencies`.
 
