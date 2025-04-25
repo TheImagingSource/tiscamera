@@ -23,6 +23,15 @@ or in the `Linux download section <https://www.theimagingsource.com/support/down
 | The packages contain support for all potential camera types.
 | For a minimal setup it is recommended to manually compile.
 
+To install the downloaded debian packages, execute:
+
+.. code-block:: sh
+
+    sudo apt install ./tiscamera_*.deb
+    sudo apt install ./tiscamera-dev_*.deb
+
+The `tiscamera-dev` package is only required when linking against tiscamera libraries.
+
 The first half of this tutorial describes the configuration and build process
 required to build tiscamera on a local PC.
 For stable releases, precompiled .deb-files are available: see :ref:`packaging`.
