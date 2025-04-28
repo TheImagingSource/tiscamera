@@ -129,10 +129,10 @@ function (create_package_name return_value name version)
 
         if ("${GIT_BRANCH}" STREQUAL "master" OR GIT_BRANCH MATCHES "^release-*")
           set(${return_value}
-            "${name}_${version}.${GIT_COMMIT_COUNT}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${distribution}${build_type}" PARENT_SCOPE)
+            "${name}_${version}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${distribution}${build_type}" PARENT_SCOPE)
         else ()
           set(${return_value}
-            "${name}_${version}.${GIT_COMMIT_COUNT}~${GIT_BRANCH}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${distribution}${build_type}"
+            "${name}_${version}~${GIT_BRANCH}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${distribution}${build_type}"
             PARENT_SCOPE)
 
         endif ("${GIT_BRANCH}" STREQUAL "master" OR GIT_BRANCH MATCHES "^release-*")

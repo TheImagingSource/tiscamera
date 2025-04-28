@@ -24,14 +24,21 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 include(version.cmake)
+include(git-helper)
 
-set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH}${TCAM_VERSION_MODIFIER}" CACHE STRING "Version number")
+# only available when using git
+git_commit_count(GIT_COMMIT_COUNT)
 
+if (GIT_COMMIT_COUNT)
+
+  set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH}.${GIT_COMMIT_COUNT}${TCAM_VERSION_MODIFIER}" CACHE STRING "Version number")
+else ()
+  set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH}${TCAM_VERSION_MODIFIER}" CACHE STRING "Version number")
+endif ()
 
 set(TCAM_ORIGIN "https://github.com/TheImagingSource/tiscamera")
 
 include("cmake/CompilerWarnings.cmake")
-include("cmake/git-helper.cmake")
 
 set(default_build_type "Release")   # Override the default build type to be 'Release' and not 'RelWithDebInfo'
 include("cmake/StandardProjectSettings.cmake")

@@ -225,9 +225,14 @@ else ()
   set(DEV_VERSION "${TCAM_VERSION}")
 endif ()
 
+
+# set dist description to "all" for the dev package
+set(TCAM_DISTRIBUTION_DESCRIPTION "all")
+
 set(CPACK_DEBIAN_DEV_PACKAGE_NAME "${CPACK_DEBIAN_BIN_PACKAGE_NAME_BASE}-dev")
 create_package_name(CPACK_DEBIAN_DEV_FILE_NAME "${CPACK_DEBIAN_BIN_PACKAGE_NAME_BASE}-dev" "${TCAM_VERSION}")
 set(CPACK_DEBIAN_DEV_FILE_NAME "${CPACK_DEBIAN_DEV_FILE_NAME}.deb")
+
 
 set(CPACK_DEBIAN_BIN_PACKAGE_PRIORITY "optional")
 
