@@ -365,6 +365,8 @@ void IntWidget::setup_ui()
         {
             scale = TcamSliderScale::Logarithmic;
         }
+        else
+            scale = TcamSliderScale::Linear;
 
         p_slider = new TcamSlider(scale);
     }
