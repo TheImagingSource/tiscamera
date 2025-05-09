@@ -47,7 +47,7 @@ namespace
 bool has_property (GstElement* element, const char* name)
 {
     return g_object_class_find_property(G_OBJECT_GET_CLASS(element), name) != nullptr;
-};
+}
 
 } // namespace
 
