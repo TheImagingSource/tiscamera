@@ -97,6 +97,7 @@ image_dir.py
 
 .idea/
 build/
+build-debug/
 .vscode/
 nbproject
 .vs/
