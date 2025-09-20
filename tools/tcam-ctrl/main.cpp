@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
     auto list_transform = app.add_subcommand("--transform", "list format transformations of a GstElement");
 
     std::string transform_element = "tcamconvert";
-    list_transform->add_option("-e,--element", transform_element, "Which transform element to use.", true);
+    list_transform->add_option("-e,--element", transform_element, "Which transform element to use.");
 
 
     auto transform_group =list_transform->add_option_group("caps");

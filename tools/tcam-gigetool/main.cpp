@@ -937,7 +937,7 @@ int main(int argc, char* argv[])
                                                 "d - is dhcp enabled\n"
                                                 "S - is static ip enabled\n"
                                                 "M - mac address\n"
-                                                "r - is reachable\n", true);
+                                                "r - is reachable\n");
 
     app_list_format->check(list_validator);
 
