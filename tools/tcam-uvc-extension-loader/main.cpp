@@ -34,14 +34,13 @@ int main(int argc, char** argv)
 
     std::string device = "/dev/video0";
     app.add_option(
-        "-d,--device", device, "Device to which the extension unit shall be applied.", true);
+        "-d,--device", device, "Device to which the extension unit shall be applied.");
 
 
     std::string description_file;
     auto f = app.add_option("-f,--file",
                             description_file,
-                            "JSON file containing the extension unit that shall be applied.",
-                            false);
+                            "JSON file containing the extension unit that shall be applied.");
 
     f->required();
     f->check(CLI::ExistingFile);
