@@ -24,6 +24,7 @@ option(TCAM_BUILD_TOOLS    "Build additional utilities"           ON)
 option(TCAM_BUILD_DOCUMENTATION "Build internal code documentation"    ON)
 option(TCAM_BUILD_TESTS    "Build tests."                         OFF)
 option(TCAM_BUILD_VIRTCAM  "Build virtual camera backend" ON)
+option(TCAM_BUILD_USE_ARM_NEON  "Use ARM neon extention" ON)
 
 option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system libraries" ON)
 option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." ON)
@@ -136,3 +137,9 @@ if (TCAM_BUILD_GIGETOOL_ONLY)
   set(TCAM_ENABLED_MODULES "tcam-gigetool")
 
 endif (TCAM_BUILD_GIGETOOL_ONLY)
+
+if (TCAM_BUILD_USE_ARM_NEON)
+	set(DUTILS_USE_NEON  ON)
+else ()
+	set(DUTILS_USE_NEON  OFF)
+endif (TCAM_BUILD_USE_ARM_NEON)

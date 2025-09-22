@@ -55,6 +55,7 @@ add_library( dutils_img_filter_c STATIC
 	"filter/whitebalance/wb_apply_c.cpp"
 	"filter/whitebalance/wb_apply_by16_c.cpp"
 	"filter/whitebalance/wb_apply_by8_c.cpp"
+	"filter/whitebalance/wb_apply_byfloat_c.cpp"
 
 	"transform/mono_to_bgr/transform_mono_to_bgr.h"
 	"transform/mono_to_bgr/transform_mono_to_bgr_internal.h"

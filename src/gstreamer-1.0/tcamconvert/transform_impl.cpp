@@ -203,11 +203,11 @@ auto tcamconvert::tcamconvert_get_supported_output_fccs(img::fourcc src_fcc)
 
 static auto find_transform_unary_wb_func(img::img_type type)
 {
-#if defined DUTILS_ARCH_ARM
+#if defined __ARM_NEON__
     auto wb_func = img_filter::whitebalance::get_apply_img_neon(type);
 #elif defined DUTILS_ARCH_SSE41
     auto wb_func = img_filter::whitebalance::get_apply_img_sse41(type);
-#elif
+#else
     auto wb_func = img_filter::whitebalance::get_apply_img_c(type);
 #endif
     return wb_func;
@@ -216,11 +216,11 @@ static auto find_transform_unary_wb_func(img::img_type type)
 
 static auto find_transform_mono_to_bgr_func(img::img_type dst_type, img::img_type src_type)
 {
-#if defined DUTILS_ARCH_ARM
+#if defined __ARM_NEON__
     auto func = img_filter::transform::get_transform_mono_to_bgr_neon(dst_type, src_type);
 #elif defined DUTILS_ARCH_SSE41
     auto func = img_filter::transform::get_transform_mono_to_bgr_sse41(dst_type, src_type);
-#elif
+#else
     auto func = img_filter::transform::get_transform_mono_to_bgr_c(dst_type, src_type);
 #endif
     return func;
@@ -233,12 +233,12 @@ static auto find_transform_function_type(img::img_type dst_type, img::img_type s
         img_filter::transform_function_type (*)(const img::img_type&, const img::img_type&);
 
     static func_type func_list[] = {
-#if defined DUTILS_ARCH_ARM
+#if defined __ARM_NEON__
         img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_neon_v0,
         img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_neon_v0,
         img_filter::transform::get_transform_fcc8_to_fcc16_neon,
         img_filter::transform::get_transform_fcc16_to_fcc8_neon,
-#else
+#elif defined DUTILS_ARCH_SSE41
         img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_ssse3,
         img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_ssse3,
         img_filter::transform::get_transform_fcc8_to_fcc16_sse41,
@@ -269,7 +269,7 @@ static auto find_transform_function_wb_type(img::img_type dst_type, img::img_typ
         img_filter::transform_function_param_type (*)(const img::img_type&, const img::img_type&);
 
     static func_type func_list[] = {
-#if defined DUTILS_ARCH_ARM
+#ifdef __ARM_NEON__
         img_filter::transform::fcc1x_packed::get_transform_fcc1x_to_fcc8_neon_v0,
     //img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_neon_v0,
     //img_filter::transform::get_transform_fcc8_to_fcc16_neon,
@@ -303,11 +303,11 @@ static auto find_transform_function_wb_type(img::img_type dst_type, img::img_typ
 static auto find_bayer8_to_bgra_func(const img::img_type& dst_type, const img::img_type& src_type)
     -> tcamconvert::transform_binary_func
 {
-#if defined DUTILS_ARCH_ARM
+#if defined __ARM_NEON__
     auto func = img_filter::transform::by_edge::get_transform_by8_to_dst_neon(dst_type, src_type);
 #elif defined DUTILS_ARCH_SSE41
     auto func = img_filter::transform::by_edge::get_transform_by8_to_dst_sse41(dst_type, src_type);
-#elif
+#else
     auto func = img_filter::transform::by_edge::get_transform_by8_to_dst_c(dst_type, src_type);
 #endif
     return [func](const img::img_descriptor& dst, const img::img_descriptor& src)
