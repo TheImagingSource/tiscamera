@@ -119,7 +119,7 @@ Arguments
       # load string
       tcam-ctrl --load-json <SERIAL> '{\"Exposure\":3000,"Exposure\ Auto\":false}'
 
-.. option:: --transform
+.. option:: transform
 
    List transformations a GStreamer element offers.
    Without arguments tcamconvert will be queried.
@@ -137,7 +137,7 @@ Arguments
 
       .. code-block:: sh
 
-         tcam-ctrl --transform --in video/x-bayer,format=rggb
+         tcam-ctrl transform --in video/x-bayer,format=rggb
 
       output:
 
@@ -153,7 +153,7 @@ Arguments
 
       .. code-block:: sh
 
-         tcam-ctrl --transform --out video/x-raw,format=BGRx
+         tcam-ctrl transform --out video/x-raw,format=BGRx
 
       output:
 
