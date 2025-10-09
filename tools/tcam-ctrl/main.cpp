@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
                                      "Read a JSON string/file containing properties and their "
                                      "values and set them in the device");
 
-    auto list_transform = app.add_subcommand("--transform", "list format transformations of a GstElement");
+    auto list_transform = app.add_subcommand("transform", "list format transformations of a GstElement");
 
     std::string transform_element = "tcamconvert";
     list_transform->add_option("-e,--element", transform_element, "Which transform element to use.");
