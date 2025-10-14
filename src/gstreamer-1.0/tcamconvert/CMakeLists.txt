@@ -34,6 +34,11 @@ target_include_directories(tcamconvert
 
 set_project_warnings(tcamconvert)
 
+set(DUTIL_LIBS_OPTI "")
+if(TCAM_BUILD_USE_ARM_NEON)
+	set(DUTIL_LIBS_OPTI "dutils_img::img_filter_optimized")
+endif(TCAM_BUILD_USE_ARM_NEON)
+
 target_link_libraries(tcamconvert
   PRIVATE
   spdlog::spdlog
@@ -43,10 +48,8 @@ target_link_libraries(tcamconvert
   ${GSTREAMER_LIBRARIES}
   ${GSTREAMER_BASE_LIBRARIES}
   ${GSTREAMER_VIDEO_LIBRARIES}
-
   dutils_img::base
-  dutils_img::img_filter_optimized
-
+  ${DUTIL_LIBS_OPTI}
   tcamprop1::consumer
   )
 
