@@ -35,7 +35,6 @@ struct default_logger_init
         default_logger_->set_pattern("[%Y%m%dT%T] [%^%-7l%$] %s:%#: %v");
 
         spdlog::register_logger(default_logger_);
-        //spdlog::set_default_logger(default_logger_);
     }
 
     void add_stdout_logger_sink()

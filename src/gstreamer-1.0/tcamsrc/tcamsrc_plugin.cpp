@@ -72,10 +72,8 @@ static void init_libtcam_spdlog_binding()
     auto logger = libtcam::get_spdlog_logger();
     logger->sinks().push_back(default_sink);
 
-    spdlog::set_default_logger(logger);
-
     // update spdlog level using the current GST level
-    spdlog::default_logger()->set_level(tcam::gst::log::level_from_gst_debug_min());
+    logger->set_level(tcam::gst::log::level_from_gst_debug_min());
 
     libtcam::print_version_info_once();
 }

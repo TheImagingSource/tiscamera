@@ -24,8 +24,6 @@ GST_DEBUG_CATEGORY(gst_tcambin_debug);
 static void init_libtcam_spdlog_binding()
 {
     libtcam::setup_default_logger(); // setup logging if not yet done
-    spdlog::set_default_logger(
-        libtcam::get_spdlog_logger()); // attach our spdlog instance to the one in libtcam
 
     //Note: We don't do the gst sink dance here, because that is done in tcamsrc
 }
