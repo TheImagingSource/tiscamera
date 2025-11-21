@@ -53,7 +53,7 @@ void ImageSink::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
     }
     else
     {
-        SPDLOG_ERROR("Could not requeue buffer. No Source.");
+        libtcam::logger()->error("Could not requeue buffer. No Source.");
     }
 }
 

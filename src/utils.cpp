@@ -65,7 +65,7 @@ int tcam::tcam_xioctl(int fd, unsigned int request, void* arg)
 
     if (ret && (tries <= 0))
     {
-        SPDLOG_ERROR("ioctl ({}) retried {} times - giving up: {})\n",
+        libtcam::logger()->error("ioctl ({}) retried {} times - giving up: {})\n",
                      request,
                      IOCTL_RETRY,
                      strerror(errno));
@@ -146,7 +146,7 @@ tcam_image_size tcam::calculate_auto_center(const tcam_image_size& sensor,
 
     if (!scale.legal_resolution(sensor, ret))
     {
-        SPDLOG_ERROR("Unable to calculate auto center. This should not happen!");
+        libtcam::logger()->error("Unable to calculate auto center. This should not happen!");
         return {0, 0};
     }
 
@@ -191,13 +191,13 @@ unsigned int tcam::get_pid_from_lockfile(const std::string& filename)
         }
         catch (const std::invalid_argument& e)
         {
-            SPDLOG_ERROR("Could not convert line \"{}\" to valid pid.", line.c_str());
+            libtcam::logger()->error("Could not convert line \"{}\" to valid pid.", line.c_str());
         }
         f.close();
     }
     else
     {
-        SPDLOG_INFO("Could not open file \"{}\"", filename.c_str());
+        libtcam::logger()->info("Could not open file \"{}\"", filename.c_str());
     }
 
     return ret;
@@ -275,7 +275,7 @@ std::optional<int> tcam::get_environment_variable_int(const std::string& name)
     }
     catch (const std::exception& e)
     {
-        SPDLOG_WARN("Failed to parse environment variable '{}' contents={}.", name, value);
+        libtcam::logger()->warn("Failed to parse environment variable '{}' contents={}.", name, value);
     }
     return {};
 }

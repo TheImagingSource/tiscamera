@@ -32,7 +32,7 @@ Indexer::~Indexer()
     }
     catch (const std::system_error& err)
     {
-        SPDLOG_ERROR("Unable to join thread. Exception: {}", err.what());
+        libtcam::logger()->error("Unable to join thread. Exception: {}", err.what());
     }
 }
 
@@ -100,7 +100,7 @@ void Indexer::update_device_list_thread()
 
             if (found == tmp_dev_list.end())
             {
-                SPDLOG_INFO(
+                libtcam::logger()->info(
                     "Lost device {} - {}. Contacting callbacks", d.get_name(), d.get_serial());
                 lost_list.push_back(d);
             }

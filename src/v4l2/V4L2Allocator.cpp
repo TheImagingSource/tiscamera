@@ -38,11 +38,11 @@ bool reqbufs(int fd_,
     {
         if (EINVAL == errno)
         {
-            SPDLOG_INFO("Device does not support {}", err_str);
+            libtcam::logger()->info("Device does not support {}", err_str);
         }
         else
         {
-            SPDLOG_ERROR("VIDIOC_REQBUFS: {}", strerror(errno));
+            libtcam::logger()->error("VIDIOC_REQBUFS: {}", strerror(errno));
         }
         return false;
     }
@@ -105,7 +105,7 @@ std::vector<std::shared_ptr<Memory>> V4L2Allocator::allocate_userptr(size_t leng
         auto ptr = malloc(length);
         if (!ptr)
         {
-            SPDLOG_ERROR("malloc failed ({}): {}", errno, strerror(errno));
+            libtcam::logger()->error("malloc failed ({}): {}", errno, strerror(errno));
             continue;
         }
         buffers.push_back(std::make_shared<Memory>(shared_from_this(), TCAM_MEMORY_TYPE_USERPTR, length, ptr));
@@ -120,7 +120,7 @@ std::vector<std::shared_ptr<Memory>> V4L2Allocator::allocate_mmap(size_t length,
 {
     if (buffer_count < 2)
     {
-        SPDLOG_ERROR("Insufficient buffer memory for mmap");
+        libtcam::logger()->error("Insufficient buffer memory for mmap");
         return {};
     }
 
@@ -138,13 +138,13 @@ std::vector<std::shared_ptr<Memory>> V4L2Allocator::allocate_mmap(size_t length,
 
     if (-1 == tcam_xioctl(fd_, VIDIOC_REQBUFS, &req))
     {
-            SPDLOG_ERROR("VIDIOC_REQBUFS {}", strerror(errno));
+            libtcam::logger()->error("VIDIOC_REQBUFS {}", strerror(errno));
 
     }
 
     if (req.count != buffer_count)
     {
-        SPDLOG_ERROR("Can only allocate {} mmap buffer. Aborting.", req.count);
+        libtcam::logger()->error("Can only allocate {} mmap buffer. Aborting.", req.count);
         return {};
     }
 
@@ -166,11 +166,11 @@ std::vector<std::shared_ptr<Memory>> V4L2Allocator::allocate_mmap(size_t length,
 
         if (ptr == MAP_FAILED)
         {
-            SPDLOG_ERROR("MMAP failed for buffer {}. Aborting. {}", n_buffers, strerror(errno));
+            libtcam::logger()->error("MMAP failed for buffer {}. Aborting. {}", n_buffers, strerror(errno));
             continue;
         }
 
-        SPDLOG_TRACE("New mmap buffer {} {}", n_buffers, fmt::ptr(ptr));
+        libtcam::logger()->trace("New mmap buffer {} {}", n_buffers, fmt::ptr(ptr));
         buffers.push_back(std::make_shared<Memory>(shared_from_this(), TCAM_MEMORY_TYPE_MMAP, length, ptr));
 
         // TODO: find way to ensure fourcc is correctly handled
@@ -214,7 +214,7 @@ std::vector<std::shared_ptr<Memory>> V4L2Allocator::allocate_dma(size_t /*length
         }
         else
         {
-            SPDLOG_ERROR("VIDIOC_REQBUFS");
+            libtcam::logger()->error("VIDIOC_REQBUFS");
         }
     }
 
@@ -259,7 +259,7 @@ void tcam::V4L2Allocator::free_userptr(void* ptr)
 {
     if (ptr)
     {
-        SPDLOG_TRACE("FREE USERPTR");
+        libtcam::logger()->trace("FREE USERPTR");
         std::free(ptr);
     }
 }
@@ -280,7 +280,7 @@ void tcam::V4L2Allocator::free_mmap(void* ptr, size_t length)
     }
     else
     {
-        SPDLOG_TRACE("FREE mmap");
+        libtcam::logger()->trace("FREE mmap");
     }
 }
 
@@ -321,7 +321,7 @@ void tcam::V4L2Allocator::free(TCAM_MEMORY_TYPE type, void* ptr, size_t length, 
         }
         case TCAM_MEMORY_TYPE_DMA_IMPORT:
         {
-            SPDLOG_ERROR("Explicitely not supported");
+            libtcam::logger()->error("Explicitely not supported");
             break;
         }
     }
@@ -348,7 +348,7 @@ std::vector<std::shared_ptr<Memory>> tcam::V4L2Allocator::allocate(
         }
         case TCAM_MEMORY_TYPE_DMA_IMPORT:
         {
-            SPDLOG_ERROR("Nothing to allocate. External memory");
+            libtcam::logger()->error("Nothing to allocate. External memory");
             return {};
         }
     }

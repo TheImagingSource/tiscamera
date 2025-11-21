@@ -65,7 +65,7 @@ CaptureDeviceImpl::CaptureDeviceImpl(const DeviceInfo& device_desc)
     available_output_formats_ = device_->get_available_video_formats();
     if (available_output_formats_.empty())
     {
-        SPDLOG_ERROR("Device '{}-{}-{}' has no video formats",
+        libtcam::logger()->error("Device '{}-{}-{}' has no video formats",
                      device_desc.get_name(),
                      device_desc.get_serial(),
                      device_desc.get_device_type_as_string());
@@ -174,19 +174,19 @@ bool CaptureDeviceImpl::configure_stream(const VideoFormat& format,
         // TODO: error handling
         if (!ret)
         {
-            SPDLOG_ERROR("{}", ret.error().message());
+            libtcam::logger()->error("{}", ret.error().message());
             return false;
         }
     }
     else
     {
-        SPDLOG_INFO("External pool");
+        libtcam::logger()->info("External pool");
         pool_ = pool;
         auto ret = pool_->allocate();
 
         if (!ret)
         {
-            SPDLOG_ERROR("Error while allocating buffer");
+            libtcam::logger()->error("Error while allocating buffer");
             return false;
         }
     }
@@ -214,7 +214,7 @@ bool CaptureDeviceImpl::start_stream()
 {
     if (sink_ == nullptr)
     {
-        SPDLOG_ERROR("No viable sink configured.");
+        libtcam::logger()->error("No viable sink configured.");
         return false;
     }
 
@@ -225,7 +225,7 @@ bool CaptureDeviceImpl::start_stream()
 
     if (!device_->start_stream(shared_from_this()))
     {
-        SPDLOG_ERROR("Unable to start stream from device.");
+        libtcam::logger()->error("Unable to start stream from device.");
 
         stop_stream();
 

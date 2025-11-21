@@ -31,7 +31,7 @@ static void check_and_fixup_range(std::string_view prop_name,
 {
     if (range.stp == 0)
     {
-        SPDLOG_DEBUG("Step size for property '{}' is 0.", prop_name, range.stp);
+        libtcam::logger()->debug("Step size for property '{}' is 0.", prop_name, range.stp);
         range.stp = 1;
     }
     if (range.stp > 0)
@@ -39,7 +39,7 @@ static void check_and_fixup_range(std::string_view prop_name,
         if (range.min > range.max || def < range.min || def > range.max
             || (def - range.min) % range.stp != 0 /*|| range_.stp > (range_.max - range_.min)*/)
         {
-            SPDLOG_DEBUG("Property '{}', invalid range. min={} max={} def={} stp={}.",
+            libtcam::logger()->debug("Property '{}', invalid range. min={} max={} def={} stp={}.",
                          prop_name,
                          range.min,
                          range.max,
@@ -57,7 +57,7 @@ static void check_and_fixup_range(std::string_view prop_name,
     {
         if (range.min > range.max || def < range.min || def > range.max)
         {
-            SPDLOG_DEBUG("Property '{}', invalid range. min={} max={} def={} stp={}.",
+            libtcam::logger()->debug("Property '{}', invalid range. min={} max={} def={} stp={}.",
                          prop_name,
                          range.min,
                          range.max,
@@ -84,7 +84,7 @@ outcome::result<void> tcam::v4l2::V4L2PropertyBackendWrapper::set_backend_value(
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
+        libtcam::logger()->error("Unable to lock v4l2 device backend. Cannot write value.");
         return tcam::status::ResourceNotLockable;
     }
     return outcome::success();
@@ -104,7 +104,7 @@ outcome::result<int64_t> tcam::v4l2::V4L2PropertyBackendWrapper::get_backend_val
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
+        libtcam::logger()->error("Unable to lock v4l2 device backend. Cannot retrieve value.");
         return tcam::status::ResourceNotLockable;
     }
 }
@@ -215,7 +215,7 @@ outcome::result<void> tcam::v4l2::V4L2PropertyIntegerImpl::set_value(int64_t new
 {
     if (range_.min > new_value || new_value > range_.max)
     {
-        SPDLOG_DEBUG("Property '{}', value of {} is not in range of [{},{}].",
+        libtcam::logger()->debug("Property '{}', value of {} is not in range of [{},{}].",
                      get_internal_name(),
                      new_value,
                      range_.min,
@@ -224,7 +224,7 @@ outcome::result<void> tcam::v4l2::V4L2PropertyIntegerImpl::set_value(int64_t new
     }
     if ((new_value % range_.stp) != 0)
     {
-        SPDLOG_DEBUG("Property '{}', value of {} is incompatible with step size of {}.",
+        libtcam::logger()->debug("Property '{}', value of {} is incompatible with step size of {}.",
                      get_internal_name(),
                      new_value,
                      range_.stp);
@@ -315,7 +315,7 @@ outcome::result<void> tcam::v4l2::V4L2PropertyDoubleImpl::set_value(double new_v
         }
         else
         {
-            SPDLOG_DEBUG("Property '{}', value of {} is not in range of [{},{}].",
+            libtcam::logger()->debug("Property '{}', value of {} is not in range of [{},{}].",
                          get_internal_name(),
                          new_value,
                          range_.min,
@@ -414,7 +414,7 @@ outcome::result<void> tcam::v4l2::V4L2PropertyEnumImpl::set_value(
     auto value_to_set = get_entry_value(new_value);
     if (value_to_set.has_error())
     {
-        SPDLOG_DEBUG(
+        libtcam::logger()->debug(
             "Property '{}', value of {} is not in enumeration.", get_internal_name(), new_value);
         return value_to_set.error();
     }
@@ -601,12 +601,12 @@ void tcam::v4l2::prop_impl_offset_auto_center::update_offsets()
 
     if (auto res = prop_offset_x_->set_value(new_offset.width); res.has_error())
     {
-        SPDLOG_DEBUG("Failed to set offset_x due to err={}.", res.error().message());
+        libtcam::logger()->debug("Failed to set offset_x due to err={}.", res.error().message());
         return;
     }
     if (auto res = prop_offset_y_->set_value(new_offset.height); res.has_error())
     {
-        SPDLOG_DEBUG("Failed to set offset_y due to err={}.", res.error().message());
+        libtcam::logger()->debug("Failed to set offset_y due to err={}.", res.error().message());
         return;
     }
 }

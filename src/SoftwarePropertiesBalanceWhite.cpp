@@ -37,7 +37,7 @@ void SoftwareProperties::generate_balance_white_auto()
 
     if (base_r && base_g && base_b)
     {
-        SPDLOG_INFO("Adding BalanceWhiteAuto device based.");
+        libtcam::logger()->info("Adding BalanceWhiteAuto device based.");
 
         m_auto_params.wb.is_software_whitebalance = false;
         m_wb.m_wb_is_claimed = true;
@@ -78,7 +78,7 @@ void SoftwareProperties::generate_balance_white_auto()
     }
     else
     {
-        SPDLOG_INFO("Adding BalanceWhiteAuto software based.");
+        libtcam::logger()->info("Adding BalanceWhiteAuto software based.");
 
         m_auto_params.wb.is_software_whitebalance = true;
         m_wb.m_wb_is_claimed = false;
@@ -129,7 +129,7 @@ outcome::result<double> SoftwareProperties::get_whitebalance_channel(
             return m_auto_params.wb.channels.b;
     }
 
-    SPDLOG_ERROR("Not a whitebalance property");
+    libtcam::logger()->error("Not a whitebalance property");
     return tcam::status::PropertyNotImplemented;
 }
 
@@ -158,6 +158,6 @@ outcome::result<void> SoftwareProperties::set_whitebalance_channel(emulated::sof
         return outcome::success();
     }
 
-    SPDLOG_ERROR("Not a whitebalance property");
+    libtcam::logger()->error("Not a whitebalance property");
     return tcam::status::PropertyNotImplemented;
 }

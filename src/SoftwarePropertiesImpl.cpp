@@ -41,7 +41,7 @@ outcome::result<int64_t> SoftwarePropertyIntegerImpl::get_value() const
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot read value.",
+        libtcam::logger()->error("Unable to lock property backend for {}. Cannot read value.",
                      get_internal_name());
         return tcam::status::ResourceNotLockable;
     }
@@ -56,7 +56,7 @@ outcome::result<void> SoftwarePropertyIntegerImpl::set_value(int64_t new_value)
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot write value.",
+        libtcam::logger()->error("Unable to lock property backend for {}. Cannot write value.",
                      get_internal_name());
         return tcam::status::ResourceNotLockable;
     }
@@ -80,7 +80,7 @@ outcome::result<double> SoftwarePropertyDoubleImpl::get_value() const
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot read value.",
+        libtcam::logger()->error("Unable to lock property backend for {}. Cannot read value.",
                      get_internal_name());
         return tcam::status::ResourceNotLockable;
     }
@@ -94,7 +94,7 @@ outcome::result<void> SoftwarePropertyDoubleImpl::set_value(double new_value)
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot write value.",
+        libtcam::logger()->error("Unable to lock property backend for {}. Cannot write value.",
                      get_internal_name());
         return tcam::status::ResourceNotLockable;
     }
@@ -122,7 +122,7 @@ outcome::result<bool> SoftwarePropertyBoolImpl::get_value() const
         return ret.as_failure();
     }
 
-    SPDLOG_ERROR("Unable to lock property backend for {}. Cannot read value.", get_internal_name());
+    libtcam::logger()->error("Unable to lock property backend for {}. Cannot read value.", get_internal_name());
     return tcam::status::ResourceNotLockable;
 }
 
@@ -133,7 +133,7 @@ outcome::result<void> SoftwarePropertyBoolImpl::set_value(bool new_value)
         return ptr->set_int(m_id, new_value);
     }
 
-    SPDLOG_ERROR("Unable to lock property backend for {}. Cannot write value.",
+    libtcam::logger()->error("Unable to lock property backend for {}. Cannot write value.",
                  get_internal_name());
     return tcam::status::ResourceNotLockable;
 }
@@ -148,7 +148,7 @@ SoftwarePropertyCommandImpl::SoftwarePropertyCommandImpl(
 
 outcome::result<void> SoftwarePropertyCommandImpl::execute()
 {
-    SPDLOG_WARN("Not implemented. {}", get_internal_name());
+    libtcam::logger()->warn("Not implemented. {}", get_internal_name());
     return tcam::status::PropertyNotImplemented;
 }
 
@@ -175,7 +175,7 @@ outcome::result<void> SoftwarePropertyEnumImpl::set_value(std::string_view new_v
             }
             else
             {
-                SPDLOG_ERROR("Unable to lock property backend for {}. Cannot write value.",
+                libtcam::logger()->error("Unable to lock property backend for {}. Cannot write value.",
                              get_internal_name());
                 return tcam::status::ResourceNotLockable;
             }
@@ -199,7 +199,7 @@ outcome::result<std::string_view> SoftwarePropertyEnumImpl::get_value() const
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot retrieve value.",
+        libtcam::logger()->error("Unable to lock property backend for {}. Cannot retrieve value.",
                      get_internal_name());
         return tcam::status::ResourceNotLockable;
     }

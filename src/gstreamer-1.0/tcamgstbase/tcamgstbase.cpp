@@ -194,7 +194,7 @@ bool tcam::gst::tcam_gst_raw_only_has_mono(const GstCaps* caps)
                 }
                 else
                 {
-                    SPDLOG_ERROR("Cannot handle format type in GstStructure.");
+                    libtcam::logger()->error("Cannot handle format type in GstStructure.");
                 }
             }
             else
@@ -733,7 +733,7 @@ static uint32_t find_preferred_format(const std::vector<uint32_t>& vec)
         }
         else
         {
-            SPDLOG_ERROR("Could not associate rank with fourcc 0x{:x} {}",
+            libtcam::logger()->error("Could not associate rank with fourcc 0x{:x} {}",
                          fourcc,
                          img::fcc_to_string(fourcc).c_str());
         }
@@ -851,7 +851,7 @@ GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming, const Gs
         // }
         else
         {
-            SPDLOG_INFO("Field 'width' does not have a supported type. Current type: '{}'",
+            libtcam::logger()->info("Field 'width' does not have a supported type. Current type: '{}'",
                         g_type_name(gst_structure_get_field_type(struc, "width")));
         }
 
@@ -879,7 +879,7 @@ GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming, const Gs
         // }
         else
         {
-            SPDLOG_INFO("Field 'height' does not have a supported type. Current type: '{}'",
+            libtcam::logger()->info("Field 'height' does not have a supported type. Current type: '{}'",
                         g_type_name(gst_structure_get_field_type(struc, "height")));
         }
 
@@ -891,7 +891,7 @@ GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming, const Gs
 
     GstCaps* largest_caps = gst_caps_copy_nth(incoming, largest_index);
 
-    SPDLOG_INFO("Fixating assumed largest caps: {}", gst_helper::to_string(*largest_caps).c_str());
+    libtcam::logger()->info("Fixating assumed largest caps: {}", gst_helper::to_string(*largest_caps).c_str());
 
     if (gst_caps_is_fixed(largest_caps))
     {
@@ -950,7 +950,7 @@ GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming, const Gs
 
     gst_caps_unref(largest_caps);
 
-    SPDLOG_INFO("Largest caps are: {}", gst_helper::to_string(*ret_caps).c_str());
+    libtcam::logger()->info("Largest caps are: {}", gst_helper::to_string(*ret_caps).c_str());
 
     return ret_caps;
 }
@@ -1205,7 +1205,7 @@ tcam::image_scaling tcam::gst::caps_get_scaling(GstCaps* caps)
             }
             catch (const std::exception& e)
             {
-                SPDLOG_ERROR("Caught exception while interpreting {}: {}", name, e.what());
+                libtcam::logger()->error("Caught exception while interpreting {}: {}", name, e.what());
 
                 to_fill_horizontal = 1;
                 to_fill_vertical = 1;
@@ -1213,7 +1213,7 @@ tcam::image_scaling tcam::gst::caps_get_scaling(GstCaps* caps)
         }
         else
         {
-            // SPDLOG_ERROR("No field {}. Using defaults", name);
+            // libtcam::logger()->error("No field {}. Using defaults", name);
             to_fill_horizontal = 1;
             to_fill_vertical = 1;
         }
@@ -1223,7 +1223,7 @@ tcam::image_scaling tcam::gst::caps_get_scaling(GstCaps* caps)
 
     fill_value("skipping", sc.skipping_h, sc.skipping_v);
 
-    //SPDLOG_ERROR("Binning {}x{} Skipping: {}x{}", sc.binning_h, sc.binning_v, sc.skipping_h, sc.skipping_v);
+    //libtcam::logger()->error("Binning {}x{} Skipping: {}x{}", sc.binning_h, sc.binning_v, sc.skipping_h, sc.skipping_v);
 
     return sc;
 }

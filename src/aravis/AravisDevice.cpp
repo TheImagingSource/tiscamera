@@ -38,7 +38,7 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc)
     this->arv_camera_ = arv_camera_new(this->device.get_info().identifier, &err);
     if (err)
     {
-        SPDLOG_ERROR("Error while creating arv_camera: {}", err->message);
+        libtcam::logger()->error("Error while creating arv_camera: {}", err->message);
         g_clear_error(&err);
     }
     if (this->arv_camera_ == NULL)
@@ -50,7 +50,7 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc)
     {
         if (!arv_gv_device_is_controller((ArvGvDevice*)arv_camera_get_device(this->arv_camera_)))
         {
-            SPDLOG_ERROR("This process does not control the device!");
+            libtcam::logger()->error("This process does not control the device!");
             throw std::runtime_error("Device already open.");
         }
         auto_set_packet_size();
@@ -96,7 +96,7 @@ auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
         arv_device_set_integer_feature_value(dev, name, value, &error);
         if (error)
         {
-            SPDLOG_ERROR("Failed to set '{}'. Error: {}", name, error->message);
+            libtcam::logger()->error("Failed to set '{}'. Error: {}", name, error->message);
             return tcam::aravis::consume_GError(error);
         }
         return tcam::status::Success;
@@ -144,13 +144,13 @@ auto AravisDevice::fetch_test_itf_framerates(const VideoFormat& fmt)
     auto min = arv_device_get_float_feature_value(dev, "ResultingMinFPS", &error);
     if (error)
     {
-        SPDLOG_ERROR("Failed to get 'ResultingMinFPS'. Error: {}", error->message);
+        libtcam::logger()->error("Failed to get 'ResultingMinFPS'. Error: {}", error->message);
         return aravis::consume_GError(error);
     }
     auto max = arv_device_get_float_feature_value(dev, "ResultingMaxFPS", &error);
     if (error)
     {
-        SPDLOG_ERROR("Failed to get 'ResultingMaxFPS'. Error: {}", error->message);
+        libtcam::logger()->error("Failed to get 'ResultingMaxFPS'. Error: {}", error->message);
         return aravis::consume_GError(error);
     }
     return tcam::framerate_info { min, max };
@@ -172,7 +172,7 @@ static auto fetch_FPS_enum_framerates(ArvDevice* dev)
     {
         // alternative failed
         // return empty vector and let format handle it
-        SPDLOG_ERROR("Unable to determine what framerate settings are used.");
+        libtcam::logger()->error("Unable to determine what framerate settings are used.");
         return tcam::status::DeviceCouldNotBeOpened;
     }
 
@@ -223,7 +223,7 @@ static double get_framerate(ArvCamera* camera)
 
     if (err)
     {
-        SPDLOG_ERROR("Unable to query framerate: {}", err->message);
+        libtcam::logger()->error("Unable to query framerate: {}", err->message);
         g_clear_error(&err);
     }
 
@@ -251,7 +251,7 @@ static std::pair<double, double> get_framerate_bounds(ArvCamera* camera)
 
     if (err)
     {
-        SPDLOG_ERROR("Unable to query framerate bounds: {}", err->message);
+        libtcam::logger()->error("Unable to query framerate bounds: {}", err->message);
         g_clear_error(&err);
     }
 
@@ -278,7 +278,7 @@ void set_frame_rate(ArvCamera* camera, double fps)
         {
             // alternative failed
             // return empty vector and let format handle it
-            SPDLOG_ERROR("Unable to determine what framerate settings are used. {}",
+            libtcam::logger()->error("Unable to determine what framerate settings are used. {}",
                          err->message);
             return;
         }
@@ -308,7 +308,7 @@ void set_frame_rate(ArvCamera* camera, double fps)
 
     if (err)
     {
-        SPDLOG_ERROR("Failed to set framerate. error: {}", err->message);
+        libtcam::logger()->error("Failed to set framerate. error: {}", err->message);
         g_clear_error(&err);
     }
 }
@@ -331,7 +331,7 @@ static auto restore_data_fetch(ArvCamera* camera, bool has_offsets)
     auto active_format = arv_camera_get_pixel_format(camera, &error);
     if (error)
     {
-        SPDLOG_ERROR("Failed to fetch pixel format. arv_camera_get_pixel_format error: {}",
+        libtcam::logger()->error("Failed to fetch pixel format. arv_camera_get_pixel_format error: {}",
                      error->message);
         return {};
     }
@@ -342,7 +342,7 @@ static auto restore_data_fetch(ArvCamera* camera, bool has_offsets)
         arv_camera_get_region(camera, &x1, &y1, &x2, &y2, &error);
         if (error)
         {
-            SPDLOG_ERROR("Failed to fetch restore region. arv_camera_get_region error: {}",
+            libtcam::logger()->error("Failed to fetch restore region. arv_camera_get_region error: {}",
                          error->message);
             g_clear_error(&error);
             return {};
@@ -354,7 +354,7 @@ static auto restore_data_fetch(ArvCamera* camera, bool has_offsets)
         int width = arv_camera_get_integer(camera, "Width", &error);
         if (error)
         {
-            SPDLOG_ERROR("Failed to fetch 'Width'. arv_camera_get_integer error: {}",
+            libtcam::logger()->error("Failed to fetch 'Width'. arv_camera_get_integer error: {}",
                          error->message);
             g_clear_error(&error);
             return {};
@@ -362,7 +362,7 @@ static auto restore_data_fetch(ArvCamera* camera, bool has_offsets)
         int height = arv_camera_get_integer(camera, "Height", &error);
         if (error)
         {
-            SPDLOG_ERROR("Failed to fetch 'Height'. arv_camera_get_integer error: {}",
+            libtcam::logger()->error("Failed to fetch 'Height'. arv_camera_get_integer error: {}",
                          error->message);
             g_clear_error(&error);
             return {};
@@ -380,7 +380,8 @@ static void restore_data_reapply(ArvCamera* camera, data_to_restore_active_forma
 
         if (error)
         {
-            SPDLOG_WARN("Failed to restore active format region due to: {}", error->message);
+            libtcam::logger()->warn("Failed to restore active format region due to: {}",
+                                         error->message);
             g_clear_error(&error);
         }
     }
@@ -389,13 +390,13 @@ static void restore_data_reapply(ArvCamera* camera, data_to_restore_active_forma
         arv_camera_set_integer(camera, "Width", data.x1, &error);
         if (error)
         {
-            SPDLOG_WARN("Failed to restore 'Width' due to: {}", error->message);
+            libtcam::logger()->warn("Failed to restore 'Width' due to: {}", error->message);
             g_clear_error(&error);
         }
         arv_camera_set_integer(camera, "Height", data.x2, &error);
         if (error)
         {
-            SPDLOG_WARN("Failed to restore 'Height' due to: {}", error->message);
+            libtcam::logger()->warn("Failed to restore 'Height' due to: {}", error->message);
             g_clear_error(&error);
         }
     }
@@ -421,7 +422,7 @@ outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(con
     if (stream_)
     {
         // this means a stream is active do not touch settings
-        SPDLOG_ERROR("Failed to fetch FPS list because the camera is currently open and it does "
+        libtcam::logger()->error("Failed to fetch FPS list because the camera is currently open and it does "
                      "not have 'TestPixelFormat'.");
         return tcam::status::InvalidParameter;
     }
@@ -439,7 +440,7 @@ outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(con
         arv_camera_set_pixel_format(arv_camera_, fourcc2aravis(fmt.get_fourcc()), &err);
         if (err)
         {
-            SPDLOG_ERROR("Failed to set pixelformat. arv_camera_set_pixel_format error: {}",
+            libtcam::logger()->error("Failed to set pixelformat. arv_camera_set_pixel_format error: {}",
                          err->message);
             g_clear_error(&err);
         }
@@ -451,7 +452,7 @@ outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(con
         arv_camera_set_region(arv_camera_, 0, 0, s.width, s.height, &error);
         if (error)
         {
-            SPDLOG_ERROR("Failed to fetch framerate list. arv_camera_set_region error: {}",
+            libtcam::logger()->error("Failed to fetch framerate list. arv_camera_set_region error: {}",
                          error->message);
             g_clear_error(&error);
         }
@@ -462,14 +463,14 @@ outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(con
         arv_camera_set_integer(arv_camera_, "Width", s.width, &error);
         if (error)
         {
-            SPDLOG_ERROR("Failed to fetch framerate list. arv_camera_set_integer error: {}",
+            libtcam::logger()->error("Failed to fetch framerate list. arv_camera_set_integer error: {}",
                          error->message);
             g_clear_error(&error);
         }
         arv_camera_set_integer(arv_camera_, "Height", s.height, &error);
         if (error)
         {
-            SPDLOG_ERROR("Failed to fetch framerate list. arv_camera_set_integer error: {}",
+            libtcam::logger()->error("Failed to fetch framerate list. arv_camera_set_integer error: {}",
                          error->message);
             g_clear_error(&error);
         }
@@ -483,7 +484,7 @@ outcome::result<tcam::framerate_info> tcam::AravisDevice::get_framerate_info(con
     // restore previous settings
     restore_data_reapply(arv_camera_, restore_data.value());
 
-    SPDLOG_TRACE("Queried: {}x{} fourcc {} Received min: {} max {}",
+    libtcam::logger()->trace("Queried: {}x{} fourcc {} Received min: {} max {}",
                  s.width,
                  s.height,
                  fmt.get_fourcc_string(),
@@ -500,7 +501,7 @@ void AravisDevice::disable_chunk_mode()
     arv_camera_set_chunk_mode(arv_camera_, false, &err);
     if (err)
     {
-        SPDLOG_DEBUG("Failed to set 'ChunkModeActive' to false. Ignoring for now. Err: {}",
+        libtcam::logger()->debug("Failed to set 'ChunkModeActive' to false. Ignoring for now. Err: {}",
                     err->message);
         g_clear_error(&err);
     }
@@ -512,7 +513,7 @@ void AravisDevice::disable_chunk_mode()
         auto res = prop_GevGVSPExtendedIDMode->set_value("Off");
         if (res.has_failure())
         {
-            SPDLOG_WARN("Failed to set 'GevGVSPExtendedIDMode' to Off. Ignoring for now. Err: {}",
+            libtcam::logger()->warn("Failed to set 'GevGVSPExtendedIDMode' to Off. Ignoring for now. Err: {}",
                         res.error().message());
         }
     }
@@ -527,7 +528,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         return false;
     }
 
-//    SPDLOG_DEBUG("Setting format to '{}'", new_format.to_string());
+//    libtcam::logger()->debug("Setting format to '{}'", new_format.to_string());
 
     disable_chunk_mode();
 
@@ -540,7 +541,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         arv_camera_get_device(arv_camera_), "TriggerSelector", &err);
     if (err)
     {
-        SPDLOG_WARN("Failed to fetch TriggerSelector. error: {}", err->message);
+        libtcam::logger()->warn("Failed to fetch TriggerSelector. error: {}", err->message);
         g_clear_error(&err);
     }
 
@@ -548,7 +549,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         arv_camera_get_device(arv_camera_), "TriggerMode", &err);
     if (err)
     {
-        SPDLOG_WARN("Failed to fetch TriggerMode. error: {}", err->message);
+        libtcam::logger()->warn("Failed to fetch TriggerMode. error: {}", err->message);
         g_clear_error(&err);
     }
 
@@ -556,7 +557,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
 
     if (err)
     {
-        SPDLOG_ERROR("Unable to set pixel format: {}", err->message);
+        libtcam::logger()->error("Unable to set pixel format: {}", err->message);
         g_clear_error(&err);
         goto set_video_format_finish;
     }
@@ -569,7 +570,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         arv_camera_get_region(arv_camera_, &offset_x, &offset_y, nullptr, nullptr, &err);
         if (err)
         {
-            SPDLOG_ERROR("Unable to verify offsets: {}", err->message);
+            libtcam::logger()->error("Unable to verify offsets: {}", err->message);
             g_clear_error(&err);
             goto set_video_format_finish;
         }
@@ -582,7 +583,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
                               &err);
         if (err)
         {
-            SPDLOG_ERROR("Unable to set region: {}", err->message);
+            libtcam::logger()->error("Unable to set region: {}", err->message);
             g_clear_error(&err);
             goto set_video_format_finish;
         }
@@ -592,14 +593,14 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         arv_camera_set_integer(arv_camera_, "Width", new_format.get_size().width, &err);
         if (err)
         {
-            SPDLOG_ERROR("Unable to set Width: {}", err->message);
+            libtcam::logger()->error("Unable to set Width: {}", err->message);
             g_clear_error(&err);
             goto set_video_format_finish;
         }
         arv_camera_set_integer(arv_camera_, "Height", new_format.get_size().height, &err);
         if (err)
         {
-            SPDLOG_ERROR("Unable to set Height: {}", err->message);
+            libtcam::logger()->error("Unable to set Height: {}", err->message);
             g_clear_error(&err);
             goto set_video_format_finish;
         }
@@ -612,7 +613,7 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
     set_frame_rate(arv_camera_, new_format.get_framerate());
 
     active_video_format_ = read_camera_current_video_format();
-    //SPDLOG_DEBUG("Active format is now '{}'", active_video_format_.to_string());
+    //libtcam::logger()->debug("Active format is now '{}'", active_video_format_.to_string());
     ret = true;
 
 set_video_format_finish:
@@ -623,7 +624,7 @@ set_video_format_finish:
         arv_camera_get_device(arv_camera_), "TriggerSelector", trig_selector, &err);
     if (err)
     {
-        SPDLOG_ERROR("Failed to reset 'TriggerSelector' error: {}", err->message);
+        libtcam::logger()->error("Failed to reset 'TriggerSelector' error: {}", err->message);
         g_clear_error(&err);
     }
     arv_device_set_string_feature_value(
@@ -631,7 +632,7 @@ set_video_format_finish:
 
     if (err)
     {
-        SPDLOG_ERROR("Failed to reset 'TriggerMode' error: {}", err->message);
+        libtcam::logger()->error("Failed to reset 'TriggerMode' error: {}", err->message);
         g_clear_error(&err);
     }
 
@@ -649,7 +650,7 @@ tcam::VideoFormat AravisDevice::read_camera_current_video_format()
     format.set_fourcc(aravis2fourcc(arv_camera_get_pixel_format(this->arv_camera_, &err)));
     if (err)
     {
-        SPDLOG_ERROR("Unable to retrieve pixel format: {}", err->message);
+        libtcam::logger()->error("Unable to retrieve pixel format: {}", err->message);
         g_clear_error(&err);
     }
 
@@ -663,7 +664,7 @@ tcam::VideoFormat AravisDevice::read_camera_current_video_format()
 
         if (err)
         {
-            SPDLOG_ERROR("Unable to retrieve region: {}", err->message);
+            libtcam::logger()->error("Unable to retrieve region: {}", err->message);
             g_clear_error(&err);
             return format;
         }
@@ -676,14 +677,14 @@ tcam::VideoFormat AravisDevice::read_camera_current_video_format()
         width = arv_camera_get_integer(arv_camera_, "Width", &err);
         if (err)
         {
-            SPDLOG_ERROR("Error while retrieving format width: {}", width);
+            libtcam::logger()->error("Error while retrieving format width: {}", width);
             g_clear_error(&err);
         }
 
         height = arv_camera_get_integer(arv_camera_, "Height", &err);
         if (err)
         {
-            SPDLOG_ERROR("Error while retrieving format height: {}", height);
+            libtcam::logger()->error("Error while retrieving format height: {}", height);
             g_clear_error(&err);
         }
     }
@@ -702,7 +703,7 @@ void AravisDevice::auto_set_control_lifetime()
         tcam::get_environment_variable_int("TCAM_GIGE_HEARTBEAT_MS").value_or(default_heartbeat_ms);
 
     arv_camera_set_integer(arv_camera_, "GevHeartbeatTimeout", heartbeat_ms, NULL);
-    SPDLOG_DEBUG("Setting heartbeat timeout to {} ms.", heartbeat_ms);
+    libtcam::logger()->debug("Setting heartbeat timeout to {} ms.", heartbeat_ms);
 }
 
 void AravisDevice::auto_set_packet_size()
@@ -715,11 +716,11 @@ void AravisDevice::auto_set_packet_size()
         guint packet_size = arv_camera_gv_auto_packet_size(this->arv_camera_, &err);
         if (err)
         {
-            SPDLOG_ERROR("Unable to determine auto packet size: {}", err->message);
+            libtcam::logger()->error("Unable to determine auto packet size: {}", err->message);
             g_clear_error(&err);
             return;
         }
-        SPDLOG_INFO("Automatically set packet size to {} bytes", packet_size);
+        libtcam::logger()->info("Automatically set packet size to {} bytes", packet_size);
     }
     else
     {
@@ -727,11 +728,11 @@ void AravisDevice::auto_set_packet_size()
         arv_camera_gv_set_packet_size(arv_camera_, env_packet_size.value(), &err);
         if (err)
         {
-            SPDLOG_ERROR("Unable to set packet size: {}", err->message);
+            libtcam::logger()->error("Unable to set packet size: {}", err->message);
             g_clear_error(&err);
             return;
         }
-        SPDLOG_INFO("Set packet size according to environment to: {}", env_packet_size.value());
+        libtcam::logger()->info("Set packet size according to environment to: {}", env_packet_size.value());
     }
 }
 
@@ -807,7 +808,7 @@ static auto fetch_pixel_format_list(ArvCamera* camera) -> std::vector<pixel_form
     gint64* pixel_format_ints = arv_camera_dup_available_pixel_formats(camera, &n_formats, &err);
     if (err)
     {
-        SPDLOG_ERROR("Unable to retrieve available pixel formats: {}", err->message);
+        libtcam::logger()->error("Unable to retrieve available pixel formats: {}", err->message);
         g_clear_error(&err);
         return {};
     }
@@ -819,7 +820,7 @@ static auto fetch_pixel_format_list(ArvCamera* camera) -> std::vector<pixel_form
     {
         g_free(pixel_format_ints);
 
-        SPDLOG_ERROR("Unable to retrieve pixel format description strings: {}", err->message);
+        libtcam::logger()->error("Unable to retrieve pixel format description strings: {}", err->message);
         g_clear_error(&err);
         return {};
     }
@@ -829,7 +830,7 @@ static auto fetch_pixel_format_list(ArvCamera* camera) -> std::vector<pixel_form
         g_free(pixel_format_ints);
         g_free(format_str);
 
-        SPDLOG_ERROR(
+        libtcam::logger()->error(
             "Format retrieval encountered nonsensical information n_formats={}, n2_formats={}",
             n_formats,
             n2_formats);
@@ -866,7 +867,7 @@ void AravisDevice::generate_video_formats()
 
         if (err)
         {
-            SPDLOG_ERROR("set_region caused error: {}", err->message);
+            libtcam::logger()->error("set_region caused error: {}", err->message);
             g_clear_error(&err);
         }
     }
@@ -875,13 +876,13 @@ void AravisDevice::generate_video_formats()
         arv_camera_set_integer(arv_camera_, "Width", sensor_size.width, &err);
         if (err)
         {
-            SPDLOG_ERROR("set_region caused error: {}", err->message);
+            libtcam::logger()->error("set_region caused error: {}", err->message);
             g_clear_error(&err);
         }
         arv_camera_set_integer(arv_camera_, "Height", sensor_size.height, &err);
         if (err)
         {
-            SPDLOG_ERROR("set_region caused error: {}", err->message);
+            libtcam::logger()->error("set_region caused error: {}", err->message);
             g_clear_error(&err);
         }
     }
@@ -889,7 +890,7 @@ void AravisDevice::generate_video_formats()
 #if 0 // Needed ??
     if (auto pixel_node = has_genicam_property("PixelFormat"); !pixel_node)
     {
-        SPDLOG_ERROR("Found no PixelFormat Node in GenICam document");
+        libtcam::logger()->error("Found no PixelFormat Node in GenICam document");
         return;
     }
 #endif
@@ -902,7 +903,7 @@ void AravisDevice::generate_video_formats()
         const uint32_t fcc = aravis2fourcc(pixel_format_id);
         if (fcc == 0)
         {
-            SPDLOG_INFO(
+            libtcam::logger()->info(
                 "Input format '{}' ({:#x}) not supported.", pixel_format_desc, pixel_format_id);
             continue;
         }
@@ -915,7 +916,7 @@ void AravisDevice::generate_video_formats()
         arv_camera_set_pixel_format(this->arv_camera_, pixel_format_id, &err);
         if (err)
         {
-            SPDLOG_ERROR("Failed to set PixelFormat. Error: {}.", err->message);
+            libtcam::logger()->error("Failed to set PixelFormat. Error: {}.", err->message);
             g_clear_error(&err);
             continue;
         }
@@ -929,7 +930,7 @@ void AravisDevice::generate_video_formats()
         arv_camera_get_width_bounds(this->arv_camera_, &width_min, &width_max, &err);
         if (err)
         {
-            SPDLOG_ERROR("Unable to retrieve width bounds: {}", err->message);
+            libtcam::logger()->error("Unable to retrieve width bounds: {}", err->message);
             g_clear_error(&err);
             continue;
         }
@@ -938,7 +939,7 @@ void AravisDevice::generate_video_formats()
 
         if (err)
         {
-            SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
+            libtcam::logger()->error("Unable to retrieve height bounds: {}", err->message);
             g_clear_error(&err);
             continue;
         }
@@ -946,7 +947,7 @@ void AravisDevice::generate_video_formats()
         auto width_step = arv_camera_get_width_increment(this->arv_camera_, &err);
         if (err)
         {
-            SPDLOG_WARN("Unable to retrieve width increment: {}", err->message);
+            libtcam::logger()->warn("Unable to retrieve width increment: {}", err->message);
             g_clear_error(&err);
             width_step = 1;
         }
@@ -954,7 +955,7 @@ void AravisDevice::generate_video_formats()
         auto height_step = arv_camera_get_height_increment(this->arv_camera_, &err);
         if (err)
         {
-            SPDLOG_WARN("Unable to retrieve height increment: {}", err->message);
+            libtcam::logger()->warn("Unable to retrieve height increment: {}", err->message);
             g_clear_error(&err);
             height_step = 1;
         }
@@ -994,7 +995,7 @@ void AravisDevice::generate_video_formats()
         // later with the appropriate scaling
         //res_vec.push_back(rf);
 
-        SPDLOG_DEBUG("Adding format desc: {} ({:x}) ", desc.description, desc.fourcc);
+        libtcam::logger()->debug("Adding format desc: {} ({:x}) ", desc.description, desc.fourcc);
 
         if(scale_.scaling_info_list.empty())
         {
@@ -1030,7 +1031,7 @@ void AravisDevice::generate_video_formats()
                         (unsigned)width_step, (unsigned)height_step,
                         scaling_info
                     };
-                    // SPDLOG_ERROR("{}x{} max:{}x{} =>",
+                    // libtcam::logger()->error("{}x{} max:{}x{} =>",
                     //              new_rf.resolution.min_size.width, new_rf.resolution.min_size.height,
                     //              new_rf.resolution.max_size.width, new_rf.resolution.max_size.height);
 
@@ -1055,7 +1056,7 @@ tcam_image_size AravisDevice::get_sensor_size() const
 
     if (!width || !height)
     {
-        SPDLOG_ERROR("Unable to find property SensorWidth/SensorHeight");
+        libtcam::logger()->error("Unable to find property SensorWidth/SensorHeight");
         return {};
     }
 
@@ -1063,7 +1064,7 @@ tcam_image_size AravisDevice::get_sensor_size() const
 
     if (!res_w)
     {
-        SPDLOG_ERROR("Unable to retrieve SensorWidth value");
+        libtcam::logger()->error("Unable to retrieve SensorWidth value");
         return {};
     }
 
@@ -1071,7 +1072,7 @@ tcam_image_size AravisDevice::get_sensor_size() const
 
     if (!res_h)
     {
-        SPDLOG_ERROR("Unable to retrieve SensorHeight value");
+        libtcam::logger()->error("Unable to retrieve SensorHeight value");
         return {};
     }
 

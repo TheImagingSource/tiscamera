@@ -84,7 +84,7 @@ std::unique_ptr<LibusbDevice> UsbHandler::open_device_(const std::string& serial
 
         if (r < 0)
         {
-            SPDLOG_ERROR("Unable to open device.");
+            libtcam::logger()->error("Unable to open device.");
             continue;
         }
 
@@ -185,7 +185,7 @@ struct libusb_device_handle* UsbHandler::open_device(const std::string& serial)
 
         if (r < 0)
         {
-            SPDLOG_ERROR("Unable to open device.");
+            libtcam::logger()->error("Unable to open device.");
             continue;
         }
 
@@ -197,7 +197,7 @@ struct libusb_device_handle* UsbHandler::open_device(const std::string& serial)
                                            sizeof(tcam_device_info::serial_number));
         if (serial.compare(tmp_str) == 0)
         {
-            //     SPDLOG_INFO("Max packet size for endpoint 0: {}", libusb_get_max_packet_size(devs[i], 0));
+            //     libtcam::logger()->info("Max packet size for endpoint 0: {}", libusb_get_max_packet_size(devs[i], 0));
 
             // cout<<"Number of endpoints: "<<(int)interdesc->bNumEndpoints<<endl;
             // for(int k=0; k<(int)interdesc->bNumEndpoints; k++) {
@@ -259,7 +259,7 @@ std::vector<DeviceInfo> UsbHandler::get_device_list()
 
         if (r < 0)
         {
-            SPDLOG_ERROR("Unable to open device.");
+            libtcam::logger()->error("Unable to open device.");
             continue;
         }
 

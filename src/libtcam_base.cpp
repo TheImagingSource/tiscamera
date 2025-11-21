@@ -28,13 +28,14 @@ struct default_logger_init
     {
         default_logger_ = std::make_shared<spdlog::logger>("libtcam");
 
-        spdlog::set_level(fetch_default_log_level());
-        spdlog::set_error_handler(
+        default_logger_->set_level(fetch_default_log_level());
+        default_logger_->set_error_handler(
             [](const std::string& msg)
             { fprintf(stderr, "Error while handling logging message: %s\n", msg.c_str()); });
-        spdlog::set_pattern("[%Y%m%dT%T] [%^%-7l%$] %s:%#: %v");
+        default_logger_->set_pattern("[%Y%m%dT%T] [%^%-7l%$] %s:%#: %v");
 
-        spdlog::set_default_logger(default_logger_);
+        spdlog::register_logger(default_logger_);
+        //spdlog::set_default_logger(default_logger_);
     }
 
     void add_stdout_logger_sink()
@@ -49,7 +50,7 @@ struct default_logger_init
 
     bool has_stdout_logger = false;
 
-    std::shared_ptr<spdlog::logger> default_logger_;
+    std::shared_ptr<spdlog::logger> default_logger_ = nullptr;
 };
 
 auto& get_tcam_default_logger()
@@ -82,14 +83,21 @@ void libtcam::setup_default_logger(bool add_stdout_logger)
 
 auto libtcam::get_spdlog_logger() -> std::shared_ptr<spdlog::logger>
 {
-    return spdlog::default_logger();
+    return get_tcam_default_logger().default_logger_;
 }
+
+
+auto libtcam::logger() -> std::shared_ptr<spdlog::logger>
+{
+    return get_tcam_default_logger().default_logger_;
+}
+
 
 void libtcam::print_version_info_once()
 {
     static bool logging_initialized_for_module = false;
     if( !logging_initialized_for_module ) {
-        print_setup_to_logger( spdlog::default_logger() );
+        print_setup_to_logger( logger() );
         logging_initialized_for_module = true;
     }
 }

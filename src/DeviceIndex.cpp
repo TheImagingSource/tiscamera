@@ -67,7 +67,7 @@ std::vector<DeviceInfo> DeviceIndex::get_device_list() const
 {
     if (!indexer_)
     {
-        SPDLOG_ERROR("No Indexer present. Unable to retrieve device list");
+        libtcam::logger()->error("No Indexer present. Unable to retrieve device list");
         return std::vector<DeviceInfo>();
     }
 

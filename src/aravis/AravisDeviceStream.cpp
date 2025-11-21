@@ -45,7 +45,7 @@ bool AravisDevice::initialize_buffers(std::shared_ptr<BufferPool> pool)
     size_t payload = arv_camera_get_payload(this->arv_camera_, &err);
     if (err)
     {
-        SPDLOG_ERROR("Unable to retrieve payload: {}", err->message);
+        libtcam::logger()->error("Unable to retrieve payload: {}", err->message);
         g_clear_error(&err);
         return false;
     }
@@ -58,7 +58,7 @@ bool AravisDevice::initialize_buffers(std::shared_ptr<BufferPool> pool)
     size_t buffer_size = new_list.front().lock()->get_image_buffer_size();
     if( buffer_size < payload)
     {
-        SPDLOG_WARN("Aravis payload-size ({}) > image_buffer_size ({})", payload, buffer_size);
+        libtcam::logger()->warn("Aravis payload-size ({}) > image_buffer_size ({})", payload, buffer_size);
     }
 
     // we build the according items in a 2 step process, so we are able to pass &info to arv_buffer_new_full
@@ -111,7 +111,7 @@ void AravisDevice::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
     }
 
     // we can just drop it here
-    SPDLOG_DEBUG("Buffer not requeued. Already flushed from buffer_list. ptr={}.",
+    libtcam::logger()->debug("Buffer not requeued. Already flushed from buffer_list. ptr={}.",
                  static_cast<void*>(buffer.get()));
 }
 
@@ -143,7 +143,7 @@ static bool set_stream_options(ArvStream* stream)
 
             if (test != res)
             {
-                SPDLOG_ERROR("Setting {} did not go as expected. {} != {}", name, test, res);
+                libtcam::logger()->error("Setting {} did not go as expected. {} != {}", name, test, res);
                 return false;
             }
         }
@@ -168,7 +168,7 @@ static bool set_stream_options(ArvStream* stream)
 
             if (test != res)
             {
-                SPDLOG_ERROR("Setting {} did not go as expected. {} != {}", name, test, res);
+                libtcam::logger()->error("Setting {} did not go as expected. {} != {}", name, test, res);
                 return false;
             }
         }
@@ -185,7 +185,7 @@ static bool set_stream_options(ArvStream* stream)
 
         if (!klass)
         {
-            SPDLOG_ERROR("No GObject klass for arv_stream");
+            libtcam::logger()->error("No GObject klass for arv_stream");
             return false;
         }
 
@@ -219,7 +219,7 @@ static bool set_stream_options(ArvStream* stream)
                     // g_object_get(stream, "packet-resend", &resend, nullptr);
                     // auto val = g_enum_get_value((GEnumClass*)g_type_class_peek(g_type_from_name("ArvGvStreamPacketResend")),
                     //                             resend);
-                    // SPDLOG_ERROR("==== packet resend = {}", val->value_name);
+                    // libtcam::logger()->error("==== packet resend = {}", val->value_name);
 
                     return true;
                 }
@@ -249,7 +249,7 @@ static bool set_stream_options(ArvStream* stream)
 
             if (single_setting.size() != 2)
             {
-                SPDLOG_ERROR("Unable to interpret TCAM_ARV_STREAM_OPTIONS setting: {}", s);
+                libtcam::logger()->error("Unable to interpret TCAM_ARV_STREAM_OPTIONS setting: {}", s);
             }
             else
             {
@@ -263,7 +263,7 @@ static bool set_stream_options(ArvStream* stream)
                     {
                         if (!set_enum(single_setting.at(0), single_setting.at(1)))
                         {
-                            SPDLOG_ERROR("TCAM_ARV_STREAM_OPTIONS: value for '{}' could not be "
+                            libtcam::logger()->error("TCAM_ARV_STREAM_OPTIONS: value for '{}' could not be "
                                          "interpreted. Value is: '{}'",
                                          single_setting.at(0),
                                          single_setting.at(1));
@@ -284,20 +284,20 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
     if (arv_camera_ == nullptr)
     {
-        SPDLOG_ERROR("ArvCamera missing!");
+        libtcam::logger()->error("ArvCamera missing!");
         return false;
     }
 
     assert(stream_ == nullptr);
     if (stream_)
     {
-        SPDLOG_ERROR("Stop was not called previously");
+        libtcam::logger()->error("Stop was not called previously");
         return false;
     }
 
     if (buffer_list_.size() < 2)
     {
-        SPDLOG_ERROR("Need at least two buffers.");
+        libtcam::logger()->error("Need at least two buffers.");
         return false;
     }
 
@@ -311,16 +311,16 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
             {
                 if (!arv_make_thread_high_priority(-10))
                 {
-                    SPDLOG_INFO("Unable to make aravis capture thread real time or high priority");
+                    libtcam::logger()->info("Unable to make aravis capture thread real time or high priority");
                 }
                 else
                 {
-                    SPDLOG_INFO("Aravis capture thread is running in high priority mode");
+                    libtcam::logger()->info("Aravis capture thread is running in high priority mode");
                 }
             }
             else
             {
-                SPDLOG_INFO("Aravis capture thread is running as a real time thread");
+                libtcam::logger()->info("Aravis capture thread is running as a real time thread");
             }
         }
     };
@@ -333,14 +333,14 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
     if (err)
     {
-        SPDLOG_ERROR("Unable to create stream: {}", err->message);
+        libtcam::logger()->error("Unable to create stream: {}", err->message);
         g_clear_error(&err);
         return false;
     }
 
     if (this->stream_ == nullptr)
     {
-        SPDLOG_ERROR("Unable to create ArvStream.");
+        libtcam::logger()->error("Unable to create ArvStream.");
         return false;
     }
 
@@ -357,7 +357,7 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
     if (err)
     {
-        SPDLOG_ERROR("Unable to set acquisition mode: {}", err->message);
+        libtcam::logger()->error("Unable to set acquisition mode: {}", err->message);
         g_clear_error(&err);
         return false;
     }
@@ -366,7 +366,7 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
     g_signal_connect(stream_, "new-buffer", G_CALLBACK(aravis_new_buffer_callback), this);
 
-    SPDLOG_INFO("Starting actual stream...");
+    libtcam::logger()->info("Starting actual stream...");
 
     frames_delivered_ = 0;
     frames_dropped_ = 0;
@@ -377,7 +377,7 @@ bool AravisDevice::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
     if (err)
     {
-        SPDLOG_ERROR("Unable to start stream: {}", err->message);
+        libtcam::logger()->error("Unable to start stream: {}", err->message);
         g_clear_error(&err);
 
         stop_stream();
@@ -413,7 +413,7 @@ void AravisDevice::stop_stream()
 
     if (err)
     {
-        SPDLOG_ERROR("Unable to stop stream: {}", err->message);
+        libtcam::logger()->error("Unable to stop stream: {}", err->message);
         g_clear_error(&err);
         return;
     }
@@ -482,7 +482,7 @@ void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((u
     AravisDevice* self = static_cast<AravisDevice*>(user_data);
     if (self == NULL)
     {
-        SPDLOG_ERROR("Callback camera instance is NULL.");
+        libtcam::logger()->error("Callback camera instance is NULL.");
         return;
     }
     // This should not be a problem, because stop stream guards against this by killing all callbacks before removing the stream variable
@@ -508,7 +508,7 @@ void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((u
     {
         if (self->drop_incomplete_frames_)
         {
-            SPDLOG_DEBUG("Image has missing packets. Dropping incomplete frame as requested.");
+            libtcam::logger()->debug("Image has missing packets. Dropping incomplete frame as requested.");
 
             ++self->frames_dropped_;
 
@@ -516,7 +516,7 @@ void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((u
         }
         else
         {
-            SPDLOG_DEBUG("Image has missing packets. Sending incomplete buffer as requested.");
+            libtcam::logger()->debug("Image has missing packets. Sending incomplete buffer as requested.");
 
             self->complete_aravis_stream_buffer(buffer, true);
         }
@@ -529,7 +529,7 @@ void AravisDevice::aravis_new_buffer_callback(ArvStream* stream __attribute__((u
         auto ptr = translate_arv_buffer_status(status);
         if (ptr)
         {
-            SPDLOG_DEBUG("arvBufferStatus: {}", ptr);
+            libtcam::logger()->debug("arvBufferStatus: {}", ptr);
         }
     }
 }
@@ -554,7 +554,7 @@ void AravisDevice::complete_aravis_stream_buffer(ArvBuffer* buffer, bool is_inco
     {
         ++frames_dropped_;
 
-        SPDLOG_ERROR("Failed to find the associated ImageBuffer for the completed arv buffer.");
+        libtcam::logger()->error("Failed to find the associated ImageBuffer for the completed arv buffer.");
         arv_stream_push_buffer(stream_, buffer);
         return;
     }
@@ -582,7 +582,7 @@ void AravisDevice::complete_aravis_stream_buffer(ArvBuffer* buffer, bool is_inco
     {
         ++frames_dropped_;
 
-        SPDLOG_ERROR("ImageSink expired. Unable to deliver images.");
+        libtcam::logger()->error("ImageSink expired. Unable to deliver images.");
 
         requeue_buffer(completed_buffer);
     }

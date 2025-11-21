@@ -37,7 +37,7 @@ std::string tcam::gst::create_device_settings(TcamPropertyProvider* tcam)
     GSList* names = tcam_property_provider_get_tcam_property_names(tcam, &err_get_name);
     if (err_get_name)
     {
-        SPDLOG_ERROR("Failed to read property names from , err={}.", err_get_name->message);
+        libtcam::logger()->error("Failed to read property names from , err={}.", err_get_name->message);
         g_error_free(err_get_name);
         return {};
     }
@@ -51,7 +51,7 @@ std::string tcam::gst::create_device_settings(TcamPropertyProvider* tcam)
         {
             return false;
         }
-        SPDLOG_ERROR("Reading '{}' caused an error: {}", property_name, err->message);
+        libtcam::logger()->error("Reading '{}' caused an error: {}", property_name, err->message);
         g_error_free(err);
         return true;
     };
@@ -292,14 +292,14 @@ bool tcam::gst::load_device_settings(TcamPropertyProvider* tcam, const std::stri
     }
     catch (json::parse_error& e)
     {
-        SPDLOG_ERROR("Unable to parse property settings. JSON parser returned: {}", e.what());
+        libtcam::logger()->error("Unable to parse property settings. JSON parser returned: {}", e.what());
         return false;
     }
 
     // Report functions
     auto report_error = [](std::string_view property_name, std::string_view error_desc)
     {
-        SPDLOG_WARN("Failed to write property '{}', due to: {}", property_name, error_desc);
+        libtcam::logger()->warn("Failed to write property '{}', due to: {}", property_name, error_desc);
     };
 
     // we use a list of iterators to ease implementation of retries

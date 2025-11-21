@@ -67,7 +67,7 @@ static GSList* gst_tcambin_get_tcam_property_names(TcamPropertyProvider* iface, 
                     [&convert_name](const auto& name) { return name == convert_name; });
 
         if (found) {
-            SPDLOG_WARN("Property '{}' is exported by the source and the conversion element.",
+            libtcam::logger()->warn("Property '{}' is exported by the source and the conversion element.",
                         convert_name);
         }
         else

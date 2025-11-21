@@ -55,7 +55,7 @@ outcome::result<void> tcam::BufferPool::allocate(const VideoFormat& format,
 
     if (memory.size() != buffer_count)
     {
-        SPDLOG_ERROR("Could only allocate {} of {} requested buffer", memory.size(), buffer_count);
+        libtcam::logger()->error("Could only allocate {} of {} requested buffer", memory.size(), buffer_count);
         return status::UndefinedError;
     }
 
@@ -77,7 +77,7 @@ outcome::result<void> tcam::BufferPool::allocate()
 
     if (memory.size() != count_)
     {
-        SPDLOG_ERROR("Could only allocate {} of {} requested buffer", memory.size(), count_);
+        libtcam::logger()->error("Could only allocate {} of {} requested buffer", memory.size(), count_);
         return status::UndefinedError;
     }
 

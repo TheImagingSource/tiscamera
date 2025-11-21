@@ -51,22 +51,22 @@ static void update_prop_info_from_tcamprop1_list(
     const tcamprop1::prop_static_info& static_info)
 {
     if (prop_info.description != static_info.description)
-        SPDLOG_INFO("Property '{}' description='{}' != tcamprop1-description='{}",
+        libtcam::logger()->info("Property '{}' description='{}' != tcamprop1-description='{}",
                     prop_info.name,
                     prop_info.description,
                     static_info.description);
     if (prop_info.display_name != static_info.display_name)
-        SPDLOG_INFO("Property '{}' display_name='{}' != tcamprop1-display_name='{}",
+        libtcam::logger()->info("Property '{}' display_name='{}' != tcamprop1-display_name='{}",
                     prop_info.name,
                     prop_info.display_name,
                     static_info.display_name);
     if (prop_info.visibility != static_info.visibility)
-        SPDLOG_INFO("Property '{}' visibility='{}' != tcamprop1-visibility='{}",
+        libtcam::logger()->info("Property '{}' visibility='{}' != tcamprop1-visibility='{}",
                     prop_info.name,
                     to_string(prop_info.visibility),
                     to_string(static_info.visibility));
         //if (prop_info.access != static_info.access)
-        //    SPDLOG_INFO("Property '{}' display_name='{}' != tcamprop1-display_name='{}",
+        //    libtcam::logger()->info("Property '{}' display_name='{}' != tcamprop1-display_name='{}",
         //                prop_info.name,
         //                to_string(prop_info.access),
         //                to_string(static_info.access));
@@ -82,11 +82,11 @@ void update_with_tcamprop1_static_info(std::string_view tcamprop1_name,
     if (!static_info)
     {
         // This is not an error anymore, many GenICam properties might not have a entry in the prop_list
-        // SPDLOG_DEBUG("tcamprop1 information for '{}' not found!", tcamprop1_name);
+        // libtcam::logger()->debug("tcamprop1 information for '{}' not found!", tcamprop1_name);
         return;
     }
 
-    SPDLOG_DEBUG("tcamprop1 information for '{}' found. Overwriting category of '{}' with '{}'.",
+    libtcam::logger()->debug("tcamprop1 information for '{}' found. Overwriting category of '{}' with '{}'.",
                  tcamprop1_name,
                  gc_node_info.iccategory,
                  static_info.info_ptr->iccategory);
@@ -103,7 +103,7 @@ void update_with_tcamprop1_static_info(std::string_view tcamprop1_name,
         if (tcamprop1_name != "FocusAuto" && tcamprop1_name != "IrisAuto")  // skip these properties from warning about the type difference
         {
 
-            SPDLOG_WARN("{} '{}' type != tcamprop1 type of '{}'.",
+            libtcam::logger()->warn("{} '{}' type != tcamprop1 type of '{}'.",
                         tcamprop1::to_string(gc_node_type),
                         tcamprop1_name,
                         tcamprop1::to_string(static_info.type));
@@ -164,7 +164,7 @@ tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node,
     bool ret_avail = arv_gc_feature_node_is_available(node, &err);
     if (err)
     {
-        SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
+        libtcam::logger()->error("Unable to retrieve node flag information: {}", err->message);
         g_clear_error(&err);
     }
     else
@@ -178,7 +178,7 @@ tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node,
     bool ret_implemented = arv_gc_feature_node_is_implemented(node, &err);
     if (err)
     {
-        SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
+        libtcam::logger()->error("Unable to retrieve node flag information: {}", err->message);
         g_clear_error(&err);
     }
     else
@@ -198,7 +198,7 @@ tcam::property::PropertyFlags arv_gc_get_tcam_flags(ArvGcFeatureNode* node,
         bool ret_locked = arv_gc_feature_node_is_locked(node, &err);
         if (err)
         {
-            SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
+            libtcam::logger()->error("Unable to retrieve node flag information: {}", err->message);
             g_clear_error(&err);
         }
         else
@@ -268,7 +268,7 @@ outcome::result<int64_t> AravisPropertyIntegerImpl::get_value() const
     aravis_backend_guard lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
 
@@ -284,7 +284,7 @@ outcome::result<void> AravisPropertyIntegerImpl::set_value(int64_t new_value)
     aravis_backend_guard lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
 
@@ -308,7 +308,7 @@ tcamprop1::prop_range_integer AravisPropertyIntegerImpl::get_range() const
     range.stp = arv_gc_integer_get_inc(arv_gc_node_, &err);
     if (err)
     {
-        SPDLOG_TRACE("arv_gc_integer_get_inc for '{}': {}", get_name(), err->message);
+        libtcam::logger()->trace("arv_gc_integer_get_inc for '{}': {}", get_name(), err->message);
         g_clear_error(&err);
         range.stp = 1;
     }
@@ -317,13 +317,13 @@ tcamprop1::prop_range_integer AravisPropertyIntegerImpl::get_range() const
     range.min = arv_gc_integer_get_min(arv_gc_node_, &err);
     if (err)
     {
-        SPDLOG_ERROR("arv_gc_integer_get_min for '{}': {}", get_name(), err->message);
+        libtcam::logger()->error("arv_gc_integer_get_min for '{}': {}", get_name(), err->message);
         g_clear_error(&err);
     }
     range.max = arv_gc_integer_get_max(arv_gc_node_, &err);
     if (err)
     {
-        SPDLOG_ERROR("arv_gc_integer_get_max for '{}': {}", get_name(), err->message);
+        libtcam::logger()->error("arv_gc_integer_get_max for '{}': {}", get_name(), err->message);
         g_clear_error(&err);
     }
     return range;
@@ -354,7 +354,7 @@ outcome::result<void> AravisPropertyDoubleImpl::set_value(double new_value)
     auto lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
     GError* err = nullptr;
@@ -369,7 +369,7 @@ outcome::result<double> AravisPropertyDoubleImpl::get_value() const
     auto lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
     GError* err = nullptr;
@@ -384,7 +384,7 @@ tcamprop1::prop_range_float AravisPropertyDoubleImpl::get_range() const
     aravis_backend_guard lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return {};
     }
 
@@ -394,19 +394,19 @@ tcamprop1::prop_range_float AravisPropertyDoubleImpl::get_range() const
     range.min = arv_gc_float_get_min(arv_gc_node_, &err);
     if (err)
     {
-        SPDLOG_ERROR("arv_gc_float_get_min for '{}': {}", get_name(), err->message);
+        libtcam::logger()->error("arv_gc_float_get_min for '{}': {}", get_name(), err->message);
         g_clear_error(&err);
     }
     range.max = arv_gc_float_get_max(arv_gc_node_, &err);
     if (err)
     {
-        SPDLOG_ERROR("arv_gc_float_get_max for '{}': {}", get_name(), err->message);
+        libtcam::logger()->error("arv_gc_float_get_max for '{}': {}", get_name(), err->message);
         g_clear_error(&err);
     }
     range.stp = arv_gc_float_get_inc(arv_gc_node_, &err);
     if (err)
     {
-        SPDLOG_TRACE("arv_gc_float_get_inc for '{}': {}", get_name(), err->message);
+        libtcam::logger()->trace("arv_gc_float_get_inc for '{}': {}", get_name(), err->message);
         g_clear_error(&err);
     }
     return range;
@@ -429,7 +429,7 @@ outcome::result<bool> AravisPropertyBoolImpl::get_value() const
     auto lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
     GError* err = nullptr;
@@ -445,7 +445,7 @@ outcome::result<void> AravisPropertyBoolImpl::set_value(bool new_value)
     auto lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
     GError* err = nullptr;
@@ -473,7 +473,7 @@ outcome::result<void> AravisPropertyCommandImpl::execute()
     auto lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
     GError* err = nullptr;
@@ -499,7 +499,7 @@ AravisPropertyEnumImpl::AravisPropertyEnumImpl(
         auto value = arv_gc_enum_entry_get_value(ptr, &err);
         if (err)
         {
-            SPDLOG_ERROR(
+            libtcam::logger()->error(
                 "Failed to retrieve enum-enry value in '{}'. Error: {}.", get_name(), err->message);
             g_clear_error(&err);
             continue;
@@ -527,7 +527,7 @@ outcome::result<void> AravisPropertyEnumImpl::set_value(std::string_view new_val
     auto lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
     for (auto& e : entries_)
@@ -549,7 +549,7 @@ outcome::result<std::string_view> AravisPropertyEnumImpl::get_value() const
     auto lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
     GError* err = nullptr;
@@ -582,7 +582,7 @@ std::error_code AravisPropertyStringImpl::set_value(std::string_view new_value)
     auto lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
     GError* err = nullptr;
@@ -597,7 +597,7 @@ outcome::result<std::string> AravisPropertyStringImpl::get_value() const
     auto lck = acquire_backend_guard();
     if (!lck)
     {
-        SPDLOG_ERROR("Unable to lock backend.");
+        libtcam::logger()->error("Unable to lock backend.");
         return tcam::status::ResourceNotLockable;
     }
     GError* err = nullptr;
