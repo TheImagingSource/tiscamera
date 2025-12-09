@@ -302,6 +302,8 @@ static const tcam::v4l2::v4l2_genicam_mapping generic_v4l2_conv_table[] = {
     { 0x199e271, mapping_type::internal },                                              // usb23 usb33 Scanning Mode Flag
     { 0x199e273, &prop_lst::ExpandOutputRange},                                         // usb33 dfg/hdmi Expand Output Range
     { 0x199e274, &prop_lst::ShowInfoOverlay},                                           // usb33 dfg/hdmi Show Info Overlay
+    { 0x199e275, &prop_lst::AutoFocusROIWidth},
+    { 0x199e276, &prop_lst::AutoFocusROIHeight},
 
     { 0x199e920, mapping_type::internal },                                             // usb2 "ExtO"
     // 0x199e921- 0x199e923 Gain channels
