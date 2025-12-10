@@ -64,7 +64,7 @@ void fill_image_base(img::img_descriptor dst,
     TStructType struct_even = generate_struct<TStructType>(even);
     TStructType struct_odd = generate_struct<TStructType>(odd);
 
-    //SPDLOG_INFO("filling with [ {},{} : {},{} ]", even.v0, even.v1, odd.v0, odd.v1);
+    //libtcam::logger()->info("filling with [ {},{} : {},{} ]", even.v0, even.v1, odd.v0, odd.v1);
 
     for (int y = 0; y < dst.dim.cy; y += 2)
     {

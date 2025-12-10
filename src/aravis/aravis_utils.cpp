@@ -184,7 +184,7 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
         {
             if (!not_using_gige_deamon_message_reported) // print this message only once and not every time we are queried
             {
-                SPDLOG_INFO("Failed to create shmkey. Not using gige-daemon to enumerate devices.");
+                libtcam::logger()->info("Failed to create shmkey. Not using gige-daemon to enumerate devices.");
                 not_using_gige_deamon_message_reported = true;
             }
             return std::nullopt;
@@ -196,14 +196,14 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
         key_t shm_semaphore_key = ftok(gige_daemon::LOCK_FILE, 'S');
         if (shm_semaphore_key == -1)
         {
-            SPDLOG_INFO("Failed to create shmkey. errno={}.", errno);
+            libtcam::logger()->info("Failed to create shmkey. errno={}.", errno);
             return std::nullopt;
         }
 
         int shm_mem_id = shmget(shmkey, sizeof(gige_daemon::tcam_gige_device_list), 0644);
         if (shm_mem_id < 0)
         {
-            SPDLOG_INFO("Unable to connect to gige-daemon. Using internal methods");
+            libtcam::logger()->info("Unable to connect to gige-daemon. Using internal methods");
             return std::nullopt;
         }
 
@@ -213,14 +213,14 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
         auto ptr = shmat(shm_mem_id, NULL, 0);
         if (ptr == ((void*)-1))
         {
-            SPDLOG_ERROR("shmat failed to map memory. errno={}", errno);
+            libtcam::logger()->error("shmat failed to map memory. errno={}", errno);
             return std::nullopt;
         }
         const gige_daemon::tcam_gige_device_list* shared_mem_list =
             static_cast<const gige_daemon::tcam_gige_device_list*>(ptr);
         if (shared_mem_list == nullptr)
         {
-            SPDLOG_ERROR("shmat returned nullptr.");
+            libtcam::logger()->error("shmat returned nullptr.");
             return std::nullopt;
         }
 
@@ -239,7 +239,7 @@ static std::optional<std::vector<DeviceInfo>> fetch_gige_daemon_device_list()
     }
     catch (const std::exception& ex)
     {
-        SPDLOG_INFO("Failed to fetch devices from gige-daemon, due to exception={}.", ex.what());
+        libtcam::logger()->info("Failed to fetch devices from gige-daemon, due to exception={}.", ex.what());
     }
     return std::nullopt;
 }
@@ -362,7 +362,7 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list()
     {
         if (is_blacklisted_gige(arv_get_device_manufacturer_info(i)))
         {
-            SPDLOG_DEBUG("{} is not a supported device type. Filtering... {}",
+            libtcam::logger()->debug("{} is not a supported device type. Filtering... {}",
                          arv_get_device_id(i),
                          arv_get_device_manufacturer_info(i));
             continue;
@@ -372,7 +372,7 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list()
         auto device_id = arv_get_device_id(i);
         if (!device_id)
         {
-            SPDLOG_WARN("Failed to fetch device_id for aravis device index #{}.", i);
+            libtcam::logger()->warn("Failed to fetch device_id for aravis device index #{}.", i);
             continue;
         }
         memcpy(info.identifier, device_id, sizeof(info.identifier) - 1);
@@ -383,7 +383,7 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list()
         }
         else
         {
-            SPDLOG_WARN("Unable to determine model name for device='{}'.", device_id);
+            libtcam::logger()->warn("Unable to determine model name for device='{}'.", device_id);
         }
 
         if (auto serial = arv_get_device_serial_nbr(i); serial)

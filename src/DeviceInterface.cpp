@@ -90,7 +90,7 @@ std::shared_ptr<DeviceInterface> tcam::open_device_interface(const DeviceInfo& d
 #ifdef HAVE_ARAVIS
                 return AravisBackend::get_instance()->open_device(device);
 #else
-                SPDLOG_ERROR("Aravis has not been enabled as a backend. Compile tiscamera with "
+                libtcam::logger()->error("Aravis has not been enabled as a backend. Compile tiscamera with "
                              "aravis enabled.");
                 break;
 #endif
@@ -101,7 +101,7 @@ std::shared_ptr<DeviceInterface> tcam::open_device_interface(const DeviceInfo& d
 #ifdef HAVE_V4L2
                 return V4L2Backend::get_instance()->open_device(device);
 #else
-                SPDLOG_ERROR("V4L2 has not been enabled as a backend. Compile tiscamera with "
+                libtcam::logger()->error("V4L2 has not been enabled as a backend. Compile tiscamera with "
                              "v4l2 enabled.");
                 break;
 #endif
@@ -112,7 +112,7 @@ std::shared_ptr<DeviceInterface> tcam::open_device_interface(const DeviceInfo& d
 #ifdef HAVE_LIBUSB
                 return LibUsbBackend::get_instance()->open_device(device);
 #else
-                SPDLOG_ERROR("LibUsb has not been enabled as a backend. Compile tiscamera with "
+                libtcam::logger()->error("LibUsb has not been enabled as a backend. Compile tiscamera with "
                              "libusb enabled.");
                 break;
 #endif
@@ -123,26 +123,26 @@ std::shared_ptr<DeviceInterface> tcam::open_device_interface(const DeviceInfo& d
 #ifdef HAVE_VIRTCAM
                 return virtcam::VirtBackend::get_instance()->open_device(device);
 #else
-                SPDLOG_ERROR("Virtcam has not been enabled as a backend. Compile tiscamera with "
+                libtcam::logger()->error("Virtcam has not been enabled as a backend. Compile tiscamera with "
                              "virtcam enabled.");
                 break;
 #endif
             }
             default:
             {
-                SPDLOG_ERROR("Device type not handled.");
+                libtcam::logger()->error("Device type not handled.");
                 break;
             }
         }
     }
     catch (const std::runtime_error& err)
     {
-        SPDLOG_ERROR("Encountered Error while creating device interface. {}", err.what());
+        libtcam::logger()->error("Encountered Error while creating device interface. {}", err.what());
         return nullptr;
     }
     catch (...)
     {
-        SPDLOG_ERROR("Caught unhandled exception while opening device.");
+        libtcam::logger()->error("Caught unhandled exception while opening device.");
     }
     return nullptr;
 }

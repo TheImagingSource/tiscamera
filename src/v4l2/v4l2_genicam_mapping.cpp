@@ -820,7 +820,7 @@ auto tcam::v4l2::create_mapped_prop(
         }
         case tcamprop1::prop_type::String:
         {
-            SPDLOG_ERROR("Currently no string property support implemented in v4l2.");
+            libtcam::logger()->error("Currently no string property support implemented in v4l2.");
             return nullptr;
         }
     }

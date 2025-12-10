@@ -292,7 +292,7 @@ void device_state::populate_tcamprop_interface()
                                      { return existing_prop->get_property_name() == name; });
             if (found)
             {
-                SPDLOG_WARN("Property with name='{}' already in the property list.",
+                libtcam::logger()->warn("Property with name='{}' already in the property list.",
                             prop->get_property_name());
             }
 

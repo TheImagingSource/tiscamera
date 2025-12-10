@@ -413,7 +413,7 @@ int64_t AFU420Device::get_exposure()
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Unable to read property 'Exposure. LibUsb returned {}", ret);
+        libtcam::logger()->error("Unable to read property 'Exposure. LibUsb returned {}", ret);
     }
     return value;
 }
@@ -427,7 +427,7 @@ bool AFU420Device::set_exposure(int64_t exposure)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Unable to write property 'Exposure'. LibUsb returned {}", ret);
+        libtcam::logger()->error("Unable to write property 'Exposure'. LibUsb returned {}", ret);
         return false;
     }
 
@@ -443,11 +443,11 @@ int64_t AFU420Device::get_gain()
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Unable to read property 'Gain'. LibUsb returned {}", ret);
+        libtcam::logger()->error("Unable to read property 'Gain'. LibUsb returned {}", ret);
     }
     else
     {
-        SPDLOG_DEBUG("Gain returned value: {}", value / 100);
+        libtcam::logger()->debug("Gain returned value: {}", value / 100);
     }
     return value / 100;
 }
@@ -461,7 +461,7 @@ bool AFU420Device::set_gain(int64_t gain)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Unable to write property 'Gain'. LibUsb returned {}", ret);
+        libtcam::logger()->error("Unable to write property 'Gain'. LibUsb returned {}", ret);
         return false;
     }
     return true;
@@ -476,7 +476,7 @@ int64_t AFU420Device::get_focus()
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Unable to read property 'Focus'. LibUsb returned {}", ret);
+        libtcam::logger()->error("Unable to read property 'Focus'. LibUsb returned {}", ret);
         return ret;
     }
     return value;
@@ -491,7 +491,7 @@ bool AFU420Device::set_focus(int64_t focus)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Unable to write property 'Focus'. LibUsb returned {}", ret);
+        libtcam::logger()->error("Unable to write property 'Focus'. LibUsb returned {}", ret);
         return false;
     }
     return true;
@@ -505,7 +505,7 @@ bool AFU420Device::set_iris(bool open)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not write Iris flag.");
+        libtcam::logger()->error("Could not write Iris flag.");
         return false;
     }
     return true;
@@ -520,7 +520,7 @@ int64_t AFU420Device::get_hdr()
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not read hdr. Libusb returned {}", ret);
+        libtcam::logger()->error("Could not read hdr. Libusb returned {}", ret);
     }
 
     return value;
@@ -541,7 +541,7 @@ bool AFU420Device::set_hdr(int64_t hdr)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not write hdr value. Libusb returned {}", ret);
+        libtcam::logger()->error("Could not write hdr value. Libusb returned {}", ret);
         return false;
     }
     return true;
@@ -593,7 +593,7 @@ bool AFU420Device::set_color_gain_factor(color_gain eColor, double value)
 
     if (!((dValue >= 0.0) && (dValue <= (4.0 - (1.0 / 256.0)))))
     {
-        SPDLOG_ERROR("color gain is out of bounds {}", dValue);
+        libtcam::logger()->error("color gain is out of bounds {}", dValue);
         return false;
     }
 
@@ -628,7 +628,7 @@ bool AFU420Device::set_color_gain_factor(color_gain eColor, double value)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not set color gain value. Libsub returned {}", ret);
+        libtcam::logger()->error("Could not set color gain value. Libsub returned {}", ret);
         return false;
     }
 
@@ -647,7 +647,7 @@ int AFU420Device::read_strobe(strobe_data& strobe)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not read strobe. Libusb returned {}", ret);
+        libtcam::logger()->error("Could not read strobe. Libusb returned {}", ret);
     }
     return ret;
 }
@@ -715,7 +715,7 @@ bool AFU420Device::set_strobe(strobe_parameter param, int64_t strobe)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not write strobe. Libusb returned {}", ret);
+        libtcam::logger()->error("Could not write strobe. Libusb returned {}", ret);
         return false;
     }
 
@@ -731,7 +731,7 @@ int64_t AFU420Device::get_ois_mode()
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not read ois mode. Libusb returned {}", ret);
+        libtcam::logger()->error("Could not read ois mode. Libusb returned {}", ret);
         return ret;
     }
     return mode;
@@ -744,7 +744,7 @@ bool AFU420Device::set_ois_mode(int64_t mode)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not write ois mode. Libusb returned {}", ret);
+        libtcam::logger()->error("Could not write ois mode. Libusb returned {}", ret);
 
         return false;
     }
@@ -765,7 +765,7 @@ bool AFU420Device::set_ois_pos(const int64_t& x_pos, const int64_t& y_pos)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not write OIS position. Libusb returned {}", ret);
+        libtcam::logger()->error("Could not write OIS position. Libusb returned {}", ret);
         return false;
     }
 

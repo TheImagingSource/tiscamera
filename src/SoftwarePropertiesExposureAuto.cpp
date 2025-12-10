@@ -30,12 +30,12 @@ void tcam::property::SoftwareProperties::generate_exposure_auto()
     }
     else
     {
-        SPDLOG_WARN("Unable to retrieve value for property '{}', due to {}",
+        libtcam::logger()->warn("Unable to retrieve value for property '{}', due to {}",
                     m_dev_exposure->get_name(),
                     exp_val.error().message());
     }
 
-    SPDLOG_INFO("Adding software ExposureAuto.");
+    libtcam::logger()->info("Adding software ExposureAuto.");
 
     m_auto_params.exposure.granularity = m_dev_exposure->get_range().stp;
 
@@ -101,7 +101,7 @@ void tcam::property::SoftwareProperties::generate_gain_auto()
         return;
     }
 
-    SPDLOG_INFO("Adding software GainAuto.");
+    libtcam::logger()->info("Adding software GainAuto.");
 
     if (auto gain_val = m_dev_gain->get_value(); gain_val)
     {
@@ -109,7 +109,7 @@ void tcam::property::SoftwareProperties::generate_gain_auto()
     }
     else
     {
-        SPDLOG_ERROR("Unable to retrieve value for property '{}', due to {}",
+        libtcam::logger()->error("Unable to retrieve value for property '{}', due to {}",
                      m_dev_gain->get_name(),
                      gain_val.error().message());
     }
@@ -179,10 +179,10 @@ void tcam::property::SoftwareProperties::generate_iris_auto()
     }
     else
     {
-        SPDLOG_ERROR("Unable to retrieve Iris value: {}", val.error().message());
+        libtcam::logger()->error("Unable to retrieve Iris value: {}", val.error().message());
     }
 
-    SPDLOG_INFO("Adding software IrisAuto.");
+    libtcam::logger()->info("Adding software IrisAuto.");
 
     // #TODO: granularity/step
 
@@ -205,7 +205,7 @@ void tcam::property::SoftwareProperties::generate_auto_functions_roi()
     {
         return;
     }
-    SPDLOG_INFO("Adding software AutoFunctionsROI");
+    libtcam::logger()->info("Adding software AutoFunctionsROI");
 
     prop_ptr_vec new_list;
 
@@ -337,10 +337,10 @@ void tcam::property::SoftwareProperties::generate_focus_auto()
     }
     else
     {
-        SPDLOG_ERROR("Unable to retrieve value: {}", val.error().message());
+        libtcam::logger()->error("Unable to retrieve value: {}", val.error().message());
     }
 
-    SPDLOG_INFO("Adding Software FocusAuto.");
+    libtcam::logger()->info("Adding Software FocusAuto.");
 
     m_auto_params.focus_onepush_params.enable_focus = true;
     m_auto_params.focus_onepush_params.run_cmd_params.focus_range_min =

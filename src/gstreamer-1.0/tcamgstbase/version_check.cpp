@@ -75,7 +75,7 @@ bool tcam::gst::is_version_compatible_with_tiscamera(const std::string& element_
 
     if (reference == std::end(version_restrictions))
     {
-        SPDLOG_ERROR("No compatability information available for {}", element_name);
+        libtcam::logger()->error("No compatability information available for {}", element_name);
         return false;
     }
 

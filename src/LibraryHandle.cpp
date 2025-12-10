@@ -66,7 +66,7 @@ void* tcam::LibraryHandle::open_library(const std::string& name, const std::stri
 
     if (!library_handle)
     {
-        SPDLOG_INFO("Could not load library {}. Reason: {}", library_name, dlerror() );
+        libtcam::logger()->info("Could not load library {}. Reason: {}", library_name, dlerror() );
     }
 
     return library_handle;

@@ -40,7 +40,8 @@ ImageBuffer::ImageBuffer(const VideoFormat& format, size_t buffer_size_to_alloca
 #else
     assert(buffer_size_to_allocate >= format.get_required_buffer_size());
 #endif
-    SPDLOG_ERROR("NO Memory");
+    libtcam::logger()->error("NO Memory");
+
     // buffer_ptr_ = malloc(buffer_size_);
     // if (buffer_ptr_ == nullptr)
     // {

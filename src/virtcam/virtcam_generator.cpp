@@ -21,6 +21,7 @@
 #include <memory>
 #include "dutils_img/image_fourcc_func.h"
 #include "spdlog/spdlog.h"
+#include "../libtcam_base.h"
 
 #include "generator/mono_generator.h"
 #include "generator/rgb_generator.h"
@@ -66,7 +67,7 @@ std::unique_ptr<tcam::generator::IGenerator> tcam::virtcam::get_generator(img::f
         }
         default:
         {
-            SPDLOG_ERROR("Generator not implemented for fourcc: {}", img::fcc_to_string(fcc));
+            libtcam::logger()->error("Generator not implemented for fourcc: {}", img::fcc_to_string(fcc));
             return nullptr;
         }
     }

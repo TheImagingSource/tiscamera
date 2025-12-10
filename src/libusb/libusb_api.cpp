@@ -35,7 +35,7 @@ std::shared_ptr<tcam::DeviceInterface> tcam::LibUsbBackend::open_device(const tc
     }
     else
     {
-        SPDLOG_ERROR("Unable to identify requested LibUsb Backend %x",
+        libtcam::logger()->error("Unable to identify requested LibUsb Backend %x",
                      device.get_info().additional_identifier);
         return nullptr;
     }

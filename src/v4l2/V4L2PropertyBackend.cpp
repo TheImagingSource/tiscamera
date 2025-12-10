@@ -39,7 +39,7 @@ static outcome::result<int64_t> v4l2_control_ioctl(int fd, unsigned int request,
         action = "SET";
     }
 
-    SPDLOG_ERROR(
+    libtcam::logger()->error(
         "ioctl returned {} reported error while {} ({}): {}", ret, action, errno, strerror(errno));
     switch (errno)
     {

@@ -49,7 +49,7 @@ static auto create_unmapped_prop(
         case V4L2_CTRL_TYPE_STRING:
         default:
         {
-            SPDLOG_WARN("Unknown v4l2 property type - {}.", qctrl.type);
+            libtcam::logger()->warn("Unknown v4l2 property type - {}.", qctrl.type);
             return nullptr;
         }
     }
@@ -80,14 +80,14 @@ void tcam::V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qc
         auto map_info = tcam::v4l2::find_mapping_info(dev_type, product_id, qctrl.id);
         if (map_info.preferred_v4l2_id && is_id_present(qctrl_list, map_info.preferred_v4l2_id))
         {
-            SPDLOG_TRACE("Skipping property id={:#x} due to presence of id={:#x}.",
+            libtcam::logger()->trace("Skipping property id={:#x} due to presence of id={:#x}.",
                          qctrl.id,
                          map_info.preferred_v4l2_id);
             continue;
         }
         if (map_info.mapping_type_ == mapping_type::blacklist)
         {
-            SPDLOG_TRACE("Skipping property id={:#x}, because it is blacklisted.", qctrl.id);
+            libtcam::logger()->trace("Skipping property id={:#x}, because it is blacklisted.", qctrl.id);
             continue;
         }
 
@@ -97,7 +97,7 @@ void tcam::V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qc
             if (map_info.mapping_type_
                 != mapping_type::internal) // there was an entry but no mapping
             {
-                SPDLOG_WARN("Failed to find mapping entry for v4l2 ctrl id=0x{:x}, name='{}'.",
+                libtcam::logger()->warn("Failed to find mapping entry for v4l2 ctrl id=0x{:x}, name='{}'.",
                             qctrl.id,
                             (char*)qctrl.name);
             }
@@ -164,7 +164,7 @@ bool tcam::V4l2Device::load_extension_unit()
 {
     auto message_cb = [](const std::string& message)
     {
-        SPDLOG_DEBUG("{}", message.c_str());
+        libtcam::logger()->debug("{}", message.c_str());
     };
 
     std::string extension_file =
@@ -172,14 +172,14 @@ bool tcam::V4l2Device::load_extension_unit()
 
     if (extension_file.empty())
     {
-        SPDLOG_WARN("Unable to determine uvc extension file");
+        libtcam::logger()->warn("Unable to determine uvc extension file");
         return false;
     }
 
     auto mappings = tcam::uvc::load_description_file(extension_file, message_cb);
     if (mappings.empty())
     {
-        SPDLOG_WARN("Unable to load uvc extension file");
+        libtcam::logger()->warn("Unable to load uvc extension file");
         return false;
     }
     tcam::uvc::apply_mappings(m_fd, mappings, message_cb);
@@ -199,7 +199,7 @@ void tcam::V4l2Device::create_properties()
 
     if (!extension_unit_exists)
     {
-        SPDLOG_WARN(
+        libtcam::logger()->warn(
             "The property extension unit does not exist. Not all properties will be accessible.");
     }
 

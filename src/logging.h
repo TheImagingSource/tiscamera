@@ -22,5 +22,6 @@
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 
 #include <spdlog/spdlog.h>
+#include "libtcam_base.h"
 
 #endif /* TCAM_LOGGING_H */

@@ -40,7 +40,7 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
 
     if ((m_fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
     {
-        SPDLOG_ERROR("Unable to open device \'{}\'. Reported error: {}({})",
+        libtcam::logger()->error("Unable to open device \'{}\'. Reported error: {}({})",
                      device.get_info().identifier,
                      strerror(errno),
                      errno);
@@ -95,11 +95,11 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
 {
     if (m_is_stream_on == true)
     {
-        SPDLOG_ERROR("Device is streaming.");
+        libtcam::logger()->error("Device is streaming.");
         return false;
     }
 
-    SPDLOG_DEBUG("Requested format change to '{}' {:x}",
+    libtcam::logger()->debug("Requested format change to '{}' {:x}",
                  new_format.to_string(),
                  new_format.get_fourcc());
 
@@ -132,7 +132,7 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Error while setting format '{}'", strerror(errno));
+        libtcam::logger()->error("Error while setting format '{}'", strerror(errno));
         return false;
     }
 
@@ -140,7 +140,7 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
 
     if (!set_framerate(new_format.get_framerate()))
     {
-        SPDLOG_ERROR("Unable to set framerate to {}", new_format.get_framerate());
+        libtcam::logger()->error("Unable to set framerate to {}", new_format.get_framerate());
         return false;
     }
 
@@ -149,7 +149,7 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
     /* validation */
 
     determine_active_video_format();
-    SPDLOG_DEBUG("Active format is: '{}'", m_active_video_format.to_string().c_str());
+    libtcam::logger()->debug("Active format is: '{}'", m_active_video_format.to_string().c_str());
 
     update_properties(new_format);
 
@@ -164,7 +164,7 @@ VideoFormat V4l2Device::get_active_video_format() const
 
 std::vector<VideoFormatDescription> V4l2Device::get_available_video_formats()
 {
-    //SPDLOG_DEBUG("Returning {} formats.", m_available_videoformats.size());
+    //libtcam::logger()->debug("Returning {} formats.", m_available_videoformats.size());
     return m_available_videoformats;
 }
 
@@ -173,7 +173,7 @@ bool V4l2Device::set_framerate(double framerate)
 {
     if (m_is_stream_on == true)
     {
-        SPDLOG_ERROR("Device is streaming.");
+        libtcam::logger()->error("Device is streaming.");
         return false;
     }
 
@@ -187,7 +187,7 @@ bool V4l2Device::set_framerate(double framerate)
 
     if (iter_low == vec.end())
     {
-        SPDLOG_ERROR("No framerates available");
+        libtcam::logger()->error("No framerates available");
         return false;
     }
 
@@ -203,7 +203,7 @@ bool V4l2Device::set_framerate(double framerate)
 
     if (fps == framerate_conversions.end())
     {
-        SPDLOG_ERROR("unable to find corresponding framerate settings.");
+        libtcam::logger()->error("unable to find corresponding framerate settings.");
         return false;
     }
 
@@ -213,7 +213,7 @@ bool V4l2Device::set_framerate(double framerate)
 
     parm.parm.capture.timeperframe.numerator = fps->numerator;
     parm.parm.capture.timeperframe.denominator = fps->denominator;
-    SPDLOG_TRACE("Setting framerate to '{}' =  {} / {}",
+    libtcam::logger()->trace("Setting framerate to '{}' =  {} / {}",
                  framerate,
                  parm.parm.capture.timeperframe.denominator,
                  parm.parm.capture.timeperframe.numerator);
@@ -222,7 +222,7 @@ bool V4l2Device::set_framerate(double framerate)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Failed to set frame rate\n");
+        libtcam::logger()->error("Failed to set frame rate\n");
         return false;
     }
 
@@ -242,11 +242,11 @@ double V4l2Device::get_framerate()
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Failed to get frame rate\n");
+        libtcam::logger()->error("Failed to get frame rate\n");
         return 0.0;
     }
 
-    SPDLOG_INFO("Current framerate is {} / {} fps",
+    libtcam::logger()->info("Current framerate is {} / {} fps",
                 parm.parm.capture.timeperframe.denominator,
                 parm.parm.capture.timeperframe.numerator);
 
@@ -258,7 +258,7 @@ bool V4l2Device::initialize_buffers(std::shared_ptr<BufferPool> pool)
 {
     if (m_is_stream_on)
     {
-        SPDLOG_ERROR("Stream running.");
+        libtcam::logger()->error("Stream running.");
         return false;
     }
 
@@ -296,7 +296,7 @@ bool V4l2Device::release_buffers()
 
     if (-1 == tcam_xioctl(m_fd, VIDIOC_REQBUFS, &req))
     {
-        SPDLOG_ERROR("Error while calling VIDIOC_REQBUFS to empty buffer queue. {}",
+        libtcam::logger()->error("Error while calling VIDIOC_REQBUFS to empty buffer queue. {}",
                      strerror(errno));
     }
 
@@ -317,7 +317,7 @@ bool V4l2Device::queue_mmap(int i, std::shared_ptr<ImageBuffer> b)
     int ret = tcam_xioctl(m_fd, VIDIOC_QBUF, &buf);
     if (ret == -1)
     {
-        SPDLOG_ERROR("Unable to queue mmap buffer({}): {} {}", errno, strerror(errno), fmt::ptr(b->get_image_buffer_ptr()));
+        libtcam::logger()->error("Unable to queue mmap buffer({}): {} {}", errno, strerror(errno), fmt::ptr(b->get_image_buffer_ptr()));
         return false;
     }
 
@@ -340,7 +340,7 @@ bool V4l2Device::queue_userptr(int i, std::shared_ptr<ImageBuffer> b)
     int ret = tcam_xioctl(m_fd, VIDIOC_QBUF, &buf);
     if (ret == -1)
     {
-        SPDLOG_ERROR("Could not requeue buffer");
+        libtcam::logger()->error("Could not requeue buffer");
         return false;
     }
     return true;
@@ -380,7 +380,7 @@ void V4l2Device::requeue_buffer(const std::shared_ptr<ImageBuffer>& buffer)
                 case TCAM_MEMORY_TYPE_DMA:
                 case TCAM_MEMORY_TYPE_DMA_IMPORT:
                 {
-                    SPDLOG_ERROR("Queueing of DMA not implemented");
+                    libtcam::logger()->error("Queueing of DMA not implemented");
                     break;
                 }
             }
@@ -408,7 +408,7 @@ void V4l2Device::update_stream_timeout()
             break;
         }
     }
-    SPDLOG_DEBUG("Setting stream timeout to {}", m_stream_timeout_sec.load());
+    libtcam::logger()->debug("Setting stream timeout to {}", m_stream_timeout_sec.load());
 }
 
 
@@ -423,14 +423,14 @@ bool V4l2Device::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
         }
         case TCAM_MEMORY_TYPE_MMAP:
         {
-            SPDLOG_DEBUG("init mmap");
+            libtcam::logger()->debug("init mmap");
             init_mmap_buffers();
             break;
         }
         case TCAM_MEMORY_TYPE_DMA:
         case TCAM_MEMORY_TYPE_DMA_IMPORT:
         {
-            SPDLOG_ERROR("MEMORY type not implemented");
+            libtcam::logger()->error("MEMORY type not implemented");
             return false;
         }
     }
@@ -438,7 +438,7 @@ bool V4l2Device::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
     v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (-1 == tcam_xioctl(m_fd, VIDIOC_STREAMON, &type))
     {
-        SPDLOG_ERROR("Unable to set ioctl VIDIOC_STREAMON {} {}", errno, strerror(errno));
+        libtcam::logger()->error("Unable to set ioctl VIDIOC_STREAMON {} {}", errno, strerror(errno));
         return false;
     }
 
@@ -450,7 +450,7 @@ bool V4l2Device::start_stream(const std::shared_ptr<IImageBufferSink>& sink)
 
     update_stream_timeout();
 
-    SPDLOG_INFO("Starting stream in work thread.");
+    libtcam::logger()->info("Starting stream in work thread.");
 
     this->m_work_thread = std::thread(&V4l2Device::stream, this);
 
@@ -465,7 +465,7 @@ void V4l2Device::stop_stream()
         return;
     }
 
-    SPDLOG_TRACE("Stopping stream...");
+    libtcam::logger()->trace("Stopping stream...");
 
     if (m_is_stream_on)
     {
@@ -474,7 +474,7 @@ void V4l2Device::stop_stream()
 
         if (ret < 0)
         {
-            SPDLOG_ERROR("Unable to set ioctl VIDIOC_STREAMOFF {}", errno);
+            libtcam::logger()->error("Unable to set ioctl VIDIOC_STREAMOFF {}", errno);
         }
     }
 
@@ -487,13 +487,13 @@ void V4l2Device::stop_stream()
 
     m_listener.reset();
 
-    SPDLOG_DEBUG("Stopped stream");
+    libtcam::logger()->debug("Stopped stream");
 }
 
 
 void V4l2Device::notify_device_lost_func()
 {
-    SPDLOG_INFO("notifying callbacks about lost device");
+    libtcam::logger()->info("notifying callbacks about lost device");
     if (this->m_is_stream_on)
     {
         stop_stream();
@@ -593,7 +593,7 @@ void V4l2Device::determine_scaling()
             }
             else
             {
-                SPDLOG_ERROR("Unable to find Scanning Mode property \"{}\". Disabling Binning/Skipping", entry);
+                libtcam::logger()->error("Unable to find Scanning Mode property \"{}\". Disabling Binning/Skipping", entry);
                 m_scale.scale_type = ImageScalingType::None;
                 m_scale.properties.clear();
             }
@@ -642,7 +642,7 @@ image_scaling V4l2Device::get_current_scaling()
         auto override_scanning_mode = tcam::property::find_property(m_internal_properties, "Override Scanning Mode");
         if (!override_scanning_mode)
         {
-            SPDLOG_ERROR("Unable to find 'Override Scanning Mode'");
+            libtcam::logger()->error("Unable to find 'Override Scanning Mode'");
             return {};
         }
 
@@ -651,7 +651,7 @@ image_scaling V4l2Device::get_current_scaling()
 
         if (!ret)
         {
-            SPDLOG_ERROR("Unable to retrieve value for 'Override Scanning Mode': {}", ret.error().message());
+            libtcam::logger()->error("Unable to retrieve value for 'Override Scanning Mode': {}", ret.error().message());
             return {};
         }
 
@@ -681,7 +681,7 @@ image_scaling V4l2Device::get_current_scaling()
             auto res = bin->get_value();
             if (!res)
             {
-                SPDLOG_ERROR("Unable to retrieve value for Binning: {}", res.as_failure().error().message());
+                libtcam::logger()->error("Unable to retrieve value for Binning: {}", res.as_failure().error().message());
                 return {};
             }
 
@@ -701,14 +701,14 @@ image_scaling V4l2Device::get_current_scaling()
 
             if (!res)
             {
-                SPDLOG_ERROR("Unable to retrieve value for BinningHorizontal: {}", res.as_failure().error().message());
+                libtcam::logger()->error("Unable to retrieve value for BinningHorizontal: {}", res.as_failure().error().message());
                 return {};
             }
             ret.binning_h = res.value();
             res = bin_v->get_value();
             if (!res)
             {
-                SPDLOG_ERROR("Unable to retrieve value for BinningVertical: {}", res.as_failure().error().message());
+                libtcam::logger()->error("Unable to retrieve value for BinningVertical: {}", res.as_failure().error().message());
                 return {};
             }
             ret.binning_v = res.value();
@@ -717,7 +717,7 @@ image_scaling V4l2Device::get_current_scaling()
     }
     if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
     {
-        SPDLOG_ERROR("SKIPPING NOT IMPLEMENTED");
+        libtcam::logger()->error("SKIPPING NOT IMPLEMENTED");
 
     }
 
@@ -746,7 +746,7 @@ bool V4l2Device::set_scaling(const image_scaling& scale)
     }
     if (!is_valid)
     {
-        SPDLOG_ERROR("Scaling description is not valid.");
+        libtcam::logger()->error("Scaling description is not valid.");
         return false;
     }
 
@@ -763,13 +763,13 @@ bool V4l2Device::set_scaling(const image_scaling& scale)
 
             auto override_prop = dynamic_cast<tcam::property::IPropertyInteger*>(over.get());
 
-            SPDLOG_INFO("Setting override mode to: {}", 1);
+            libtcam::logger()->info("Setting override mode to: {}", 1);
 
             auto ret = override_prop->set_value(1);
 
             if (!ret)
             {
-                SPDLOG_ERROR("Unable to set 'Override Scanning Mode': {}", ret.as_failure().error().message());
+                libtcam::logger()->error("Unable to set 'Override Scanning Mode': {}", ret.as_failure().error().message());
                 return false;
             }
             return true;
@@ -787,13 +787,13 @@ bool V4l2Device::set_scaling(const image_scaling& scale)
 
                         auto override_prop = dynamic_cast<tcam::property::IPropertyInteger*>(over.get());
 
-                        SPDLOG_INFO("Setting override mode to: {}", o.override_value);
+                        libtcam::logger()->info("Setting override mode to: {}", o.override_value);
 
                         auto ret = override_prop->set_value(o.override_value);
 
                         if (!ret)
                         {
-                            SPDLOG_ERROR("Unable to set 'Override Scanning Mode': {}", ret.as_failure().error().message());
+                            libtcam::logger()->error("Unable to set 'Override Scanning Mode': {}", ret.as_failure().error().message());
                             return false;
                         }
                         return true;
@@ -844,7 +844,7 @@ bool V4l2Device::set_scaling(const image_scaling& scale)
         }
         if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
         {
-            SPDLOG_ERROR("SKIPPING NOT IMPLEMENTED");
+            libtcam::logger()->error("SKIPPING NOT IMPLEMENTED");
             return false;
         }
     }
@@ -898,7 +898,7 @@ void V4l2Device::generate_scales()
         {
             if (!mode->set_value(i))
             {
-                SPDLOG_ERROR("mode could not be changed");
+                libtcam::logger()->error("mode could not be changed");
                 continue;
             }
 
@@ -909,7 +909,7 @@ void V4l2Device::generate_scales()
                 continue;
             }
 
-            // SPDLOG_ERROR("mode: {} ident: {} bin h: {} bin v: {} skip h: {} skip v: {} flags: {}",
+            // libtcam::logger()->error("mode: {} ident: {} bin h: {} bin v: {} skip h: {} skip v: {} flags: {}",
             //              i, identifier->get_value().value(),
             //              binning_h->get_value().value(), binning_v->get_value().value(),
             //              skipping_h->get_value().value(), skipping_v->get_value().value(),
@@ -932,7 +932,7 @@ void V4l2Device::generate_scales()
         auto ret = mode->set_value(current_value);
         if (!ret)
         {
-            SPDLOG_ERROR("Probing override scanning mode ended with an error: {}", ret.as_failure().error().message());
+            libtcam::logger()->error("Probing override scanning mode ended with an error: {}", ret.as_failure().error().message());
         }
     }
 
@@ -957,7 +957,7 @@ void V4l2Device::generate_scales()
                 new_scale.binning_h = i;
                 new_scale.binning_v = i;
 
-                // SPDLOG_INFO("New binning: {}x{}", i, i);
+                // libtcam::logger()->info("New binning: {}x{}", i, i);
 
                 m_scale.scales.push_back(new_scale);
             }
@@ -969,7 +969,7 @@ void V4l2Device::generate_scales()
     if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
     {
         // TODO add skipping
-        SPDLOG_ERROR("Skipping not implemented");
+        libtcam::logger()->error("Skipping not implemented");
     }
 
 }
@@ -1045,7 +1045,7 @@ void V4l2Device::index_formats()
             else
             {
                 // TIS USB cameras do not have this kind of setting
-                SPDLOG_ERROR("Encountered unknown V4L2_FRMSIZE_TYPE");
+                libtcam::logger()->error("Encountered unknown V4L2_FRMSIZE_TYPE");
             }
         }
 
@@ -1060,7 +1060,7 @@ void V4l2Device::index_formats()
         VideoFormatDescription format(nullptr, desc, rf);
         this->m_available_videoformats.push_back(format);
 
-        SPDLOG_DEBUG("Found format: {}", img::fcc_to_string(format.get_fourcc()));
+        libtcam::logger()->debug("Found format: {}", img::fcc_to_string(format.get_fourcc()));
     }
 }
 
@@ -1115,7 +1115,7 @@ void V4l2Device::determine_active_video_format()
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Error while querying video format");
+        libtcam::logger()->error("Error while querying video format");
 
         return;
     }
@@ -1129,7 +1129,7 @@ void V4l2Device::determine_active_video_format()
     if (ret < 0)
     {
 
-        SPDLOG_ERROR("Failed to set frame rate");
+        libtcam::logger()->error("Failed to set frame rate");
         return;
     }
 
@@ -1216,7 +1216,7 @@ void V4l2Device::stream()
             else
             {
                 /* error during select */
-                SPDLOG_ERROR("Error during select. errno: %d (%s)", errno, strerror(errno));
+                libtcam::logger()->error("Error during select. errno: %d (%s)", errno, strerror(errno));
                 return;
             }
         }
@@ -1241,7 +1241,7 @@ void V4l2Device::stream()
             }
             else
             {
-                SPDLOG_ERROR("Timeout while waiting for new image buffer.");
+                libtcam::logger()->error("Timeout while waiting for new image buffer.");
                 m_statistics.frames_dropped++;
                 waited_seconds = 0;
                 lost_countdown--;
@@ -1263,7 +1263,7 @@ void V4l2Device::stream()
         }
         if (lost_countdown <= 0 && log_repetition_counter < log_repetition)
         {
-            SPDLOG_WARN("Did not receive image for long time.");
+            libtcam::logger()->warn("Did not receive image for long time.");
             lost_countdown = lost_countdown_default;
             if (log_repetition_counter < log_repetition)
             {
@@ -1271,7 +1271,7 @@ void V4l2Device::stream()
             }
             if (log_repetition_counter >= log_repetition)
             {
-                SPDLOG_WARN("Stopping messages \"Did not receive image for long time.\".");
+                libtcam::logger()->warn("Stopping messages \"Did not receive image for long time.\".");
             }
         }
     }
@@ -1317,7 +1317,7 @@ bool V4l2Device::get_frame()
 
     if (ret == -1)
     {
-        SPDLOG_TRACE("Unable to dequeue buffer.");
+        libtcam::logger()->trace("Unable to dequeue buffer.");
         return false;
     }
 
@@ -1342,11 +1342,11 @@ bool V4l2Device::get_frame()
         {
             if (m_already_received_valid_image)
             {
-                SPDLOG_ERROR("Buffer has wrong size. Got: {} Expected: {} Dropping...",
+                libtcam::logger()->error("Buffer has wrong size. Got: {} Expected: {} Dropping...",
                              buf.bytesused,
                              this->m_active_video_format.get_required_buffer_size());
             }
-            //SPDLOG_ERROR("error requeue");
+            //libtcam::logger()->error("error requeue");
             requeue_buffer(image_buffer.buffer.lock());
             return true;
         }
@@ -1361,7 +1361,7 @@ bool V4l2Device::get_frame()
     b->set_statistics(m_statistics);
     b->set_valid_data_length(buf.bytesused);
 
-    //SPDLOG_INFO("pushing new buffer");
+    //libtcam::logger()->info("pushing new buffer");
 
     if (auto ptr = m_listener.lock())
     {
@@ -1369,7 +1369,7 @@ bool V4l2Device::get_frame()
     }
     else
     {
-        SPDLOG_ERROR("ImageSink expired. Unable to deliver images.");
+        libtcam::logger()->error("ImageSink expired. Unable to deliver images.");
         return false;
     }
 
@@ -1389,12 +1389,12 @@ void V4l2Device::init_userptr_buffers()
     {
         if (EINVAL == errno)
         {
-            SPDLOG_ERROR("{} does not support user pointer i/o", device.get_serial());
+            libtcam::logger()->error("{} does not support user pointer i/o", device.get_serial());
             return;
         }
         else
         {
-            SPDLOG_ERROR("VIDIOC_REQBUFS {}", strerror(errno));
+            libtcam::logger()->error("VIDIOC_REQBUFS {}", strerror(errno));
         }
     }
 
@@ -1411,16 +1411,16 @@ void V4l2Device::init_userptr_buffers()
         buf.m.userptr = (unsigned long)b->get_image_buffer_ptr();
         buf.length = b->get_image_buffer_size();
 
-        SPDLOG_DEBUG("Queueing buffer({}) with length {}", fmt::ptr(b->get_image_buffer_ptr()), buf.length);
+        libtcam::logger()->debug("Queueing buffer({}) with length {}", fmt::ptr(b->get_image_buffer_ptr()), buf.length);
 
         if (-1 == tcam_xioctl(m_fd, VIDIOC_QBUF, &buf))
         {
-            SPDLOG_ERROR("Unable to queue v4l2_buffer 'VIDIOC_QBUF' {}", strerror(errno));
+            libtcam::logger()->error("Unable to queue v4l2_buffer 'VIDIOC_QBUF' {}", strerror(errno));
             return;
         }
         else
         {
-            //SPDLOG_TRACE("Successfully queued v4l2_buffer");
+            //libtcam::logger()->trace("Successfully queued v4l2_buffer");
             m_buffers.at(i).is_queued = true;
         }
     }
@@ -1440,7 +1440,7 @@ void V4l2Device::init_mmap_buffers()
     //     return;
     // }
     // if (req.count < 2) {
-    //     SPDLOG_ERROR("Insufficient memory for memory mapping{}", req.count);
+    //     libtcam::logger()->error("Insufficient memory for memory mapping{}", req.count);
     //     return;
     // }
 
@@ -1454,7 +1454,7 @@ void V4l2Device::init_mmap_buffers()
 
         if (tcam_xioctl(m_fd, VIDIOC_QUERYBUF, &buf) == -1)
         {
-            SPDLOG_ERROR("WHAT index: {} {} {}", buf.index, errno, strerror(errno));
+            libtcam::logger()->error("WHAT index: {} {} {}", buf.index, errno, strerror(errno));
             //return;
         }
     }
@@ -1512,7 +1512,7 @@ void V4l2Device::monitor_v4l2_thread_func()
     auto udev = udev_new();
     if (!udev)
     {
-        SPDLOG_ERROR("Failed to create udev context");
+        libtcam::logger()->error("Failed to create udev context");
         return;
     }
 
@@ -1520,7 +1520,7 @@ void V4l2Device::monitor_v4l2_thread_func()
     auto mon = udev_monitor_new_from_netlink(udev, "udev");
     if (!mon)
     {
-        SPDLOG_ERROR("Failed to create udev monitor");
+        libtcam::logger()->error("Failed to create udev monitor");
         udev_unref(udev);
         return;
     }
@@ -1564,13 +1564,13 @@ void V4l2Device::monitor_v4l2_thread_func()
                 {
                     if (strcmp(udev_device_get_action(dev), "remove") == 0)
                     {
-                        SPDLOG_ERROR("Lost device! {}", device.get_name().c_str());
+                        libtcam::logger()->error("Lost device! {}", device.get_name().c_str());
                         this->lost_device();
                         break;
                     }
                     else
                     {
-                        SPDLOG_WARN("Received an event for device: '{}' This should not happen.",
+                        libtcam::logger()->warn("Received an event for device: '{}' This should not happen.",
                                     udev_device_get_action(dev));
                     }
                 }
@@ -1579,7 +1579,7 @@ void V4l2Device::monitor_v4l2_thread_func()
             }
             else
             {
-                SPDLOG_ERROR("No Device from udev_monitor_receive_device. An error occured.");
+                libtcam::logger()->error("No Device from udev_monitor_receive_device. An error occured.");
             }
         }
     }

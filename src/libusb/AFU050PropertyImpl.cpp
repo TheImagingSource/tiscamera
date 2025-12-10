@@ -65,12 +65,12 @@ AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(const std::string& name, co
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        libtcam::logger()->error("static information for {} do not exist!", m_name);
         p_static_info = nullptr;
     }
     else
     {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        libtcam::logger()->error("static information for {} have the wrong type!", m_name);
         p_static_info = nullptr;
     }
 }
@@ -107,7 +107,7 @@ AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
+        libtcam::logger()->error("Unable to lock property backend. Cannot retrieve value.");
     }
 
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
@@ -120,12 +120,12 @@ AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        libtcam::logger()->error("static information for {} do not exist!", m_name);
         p_static_info = nullptr;
     }
     else
     {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        libtcam::logger()->error("static information for {} have the wrong type!", m_name);
         p_static_info = nullptr;
     }
 }
@@ -163,7 +163,7 @@ outcome::result<int64_t> AFU050PropertyIntegerImpl::get_value() const
             return m_value;
         }
 
-        SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
+        libtcam::logger()->error("Unable to lock property backend. Cannot retrieve value.");
         return tcam::status::ResourceNotLockable;
     }
 }
@@ -185,7 +185,7 @@ outcome::result<void> AFU050PropertyIntegerImpl::set_value(int64_t new_value)
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
+        libtcam::logger()->error("Unable to lock property backend. Cannot retrieve value.");
         return tcam::status::ResourceNotLockable;
     }
 }
@@ -241,7 +241,7 @@ AFU050PropertyDoubleImpl::AFU050PropertyDoubleImpl(
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
+        libtcam::logger()->error("Unable to lock property backend. Cannot retrieve value.");
     }
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 
@@ -253,12 +253,12 @@ AFU050PropertyDoubleImpl::AFU050PropertyDoubleImpl(
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        libtcam::logger()->error("static information for {} do not exist!", m_name);
         p_static_info = nullptr;
     }
     else
     {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        libtcam::logger()->error("static information for {} have the wrong type!", m_name);
         p_static_info = nullptr;
     }
 }
@@ -300,7 +300,7 @@ outcome::result<double> AFU050PropertyDoubleImpl::get_value() const
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
+        libtcam::logger()->error("Unable to lock property backend. Cannot retrieve value.");
         return tcam::status::ResourceNotLockable;
     }
 }
@@ -322,7 +322,7 @@ outcome::result<void> AFU050PropertyDoubleImpl::set_value(double new_value)
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
+        libtcam::logger()->error("Unable to lock property backend. Cannot retrieve value.");
         return tcam::status::ResourceNotLockable;
     }
 }
@@ -373,12 +373,12 @@ AFU050PropertyEnumImpl::AFU050PropertyEnumImpl(const std::string& name,
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        libtcam::logger()->error("static information for {} do not exist!", m_name);
         p_static_info = nullptr;
     }
     else
     {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        libtcam::logger()->error("static information for {} have the wrong type!", m_name);
         p_static_info = nullptr;
     }
 
@@ -392,7 +392,7 @@ AFU050PropertyEnumImpl::AFU050PropertyEnumImpl(const std::string& name,
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock propertybackend. Cannot retrieve value.");
+        libtcam::logger()->error("Unable to lock propertybackend. Cannot retrieve value.");
     }
 }
 
@@ -420,14 +420,14 @@ outcome::result<void> AFU050PropertyEnumImpl::set_value_int(int64_t new_value)
     {
         if (!ptr->set_int(m_ctrl, new_value))
         {
-            SPDLOG_ERROR("Something went wrong while writing {}", m_name);
+            libtcam::logger()->error("Something went wrong while writing {}", m_name);
             return tcam::status::ResourceNotLockable;
         }
         update_dependent_lock_state();
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot write value.");
+        libtcam::logger()->error("Unable to lock property backend. Cannot write value.");
         return tcam::status::ResourceNotLockable;
     }
 
@@ -453,7 +453,7 @@ outcome::result<int64_t> AFU050PropertyEnumImpl::get_value_int() const
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock propertybackend. Cannot retrieve value.");
+        libtcam::logger()->error("Unable to lock propertybackend. Cannot retrieve value.");
         return tcam::status::ResourceNotLockable;
     }
 }

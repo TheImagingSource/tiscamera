@@ -398,7 +398,7 @@ bool TcamBinConversion::is_compatible(GstCaps* to_check, CAPS_TYPE compatible_wi
 
     if (!comp_caps)
     {
-        SPDLOG_ERROR("No caps description for {}", compatible_with);
+        libtcam::logger()->error("No caps description for {}", compatible_with);
         return false;
     }
 

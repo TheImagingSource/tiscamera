@@ -21,7 +21,7 @@ tcam::property::SoftwareProperties::SoftwareProperties(
     auto ptr = find_property(m_properties, "SensorWidth");
     if (!ptr)
     {
-        SPDLOG_ERROR(
+        libtcam::logger()->error(
             "Unable to determine sensor size. This will cause problems for some properties.");
     }
     else
@@ -33,7 +33,7 @@ tcam::property::SoftwareProperties::SoftwareProperties(
     auto ptr2 = find_property(m_properties, "SensorHeight");
     if (!ptr2)
     {
-        SPDLOG_ERROR(
+        libtcam::logger()->error(
             "Unable to determine sensor size. This will cause problems for some properties.");
     }
     else
@@ -98,7 +98,7 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
         auto set_exp = m_dev_exposure->set_value(auto_pass_ret.exposure_value);
         if (!set_exp)
         {
-            SPDLOG_ERROR("Unable to set exposure: {}", set_exp.error().message());
+            libtcam::logger()->error("Unable to set exposure: {}", set_exp.error().message());
         }
     }
 
@@ -108,7 +108,7 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
         auto set_gain = m_dev_gain->set_value(auto_pass_ret.gain_value);
         if (!set_gain)
         {
-            SPDLOG_ERROR("Unable to set gain: {}", set_gain.error().message());
+            libtcam::logger()->error("Unable to set gain: {}", set_gain.error().message());
         }
     }
 
@@ -118,7 +118,7 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
         auto set_iris = m_dev_iris->set_value(auto_pass_ret.iris_value);
         if (!set_iris)
         {
-            SPDLOG_ERROR("Unable to set iris: {}", set_iris.error().message());
+            libtcam::logger()->error("Unable to set iris: {}", set_iris.error().message());
         }
     }
 
@@ -128,7 +128,7 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
         auto set_foc = m_dev_focus->set_value(auto_pass_ret.focus_value);
         if (!set_foc)
         {
-            SPDLOG_ERROR("Unable to set focus: {}", set_foc.error().message());
+            libtcam::logger()->error("Unable to set focus: {}", set_foc.error().message());
         }
     }
 
@@ -137,9 +137,9 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
         m_auto_params.wb.channels = auto_pass_ret.wb.channels;
         m_auto_params.wb.one_push_enabled = auto_pass_ret.wb.one_push_still_running;
 
-        // SPDLOG_DEBUG("WB r: {}", auto_pass_ret.wb.channels.r);
-        // SPDLOG_DEBUG("WB g: {}", auto_pass_ret.wb.channels.g);
-        // SPDLOG_DEBUG("WB b: {}", auto_pass_ret.wb.channels.b);
+        // libtcam::logger()->debug("WB r: {}", auto_pass_ret.wb.channels.r);
+        // libtcam::logger()->debug("WB g: {}", auto_pass_ret.wb.channels.g);
+        // libtcam::logger()->debug("WB b: {}", auto_pass_ret.wb.channels.b);
 
         if (m_wb.is_dev_wb())
         {
@@ -148,14 +148,14 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
 
             if (!res)
             {
-                SPDLOG_DEBUG("Setting whitebalance caused an error: {}",
+                libtcam::logger()->debug("Setting whitebalance caused an error: {}",
                              res.as_failure().error().message());
             }
             res = set_whitebalance_channel(emulated::software_prop::BalanceWhiteGreen,
                                            auto_pass_ret.wb.channels.g);
             if (!res)
             {
-                SPDLOG_DEBUG("Setting whitebalance caused an error: {}",
+                libtcam::logger()->debug("Setting whitebalance caused an error: {}",
                              res.as_failure().error().message());
             }
 
@@ -163,7 +163,7 @@ void tcam::property::SoftwareProperties::auto_pass(const img::img_descriptor& im
                                            auto_pass_ret.wb.channels.b);
             if (!res)
             {
-                SPDLOG_DEBUG("Setting whitebalance caused an error: {}",
+                libtcam::logger()->debug("Setting whitebalance caused an error: {}",
                              res.as_failure().error().message());
             }
         }
@@ -286,7 +286,7 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
             return res.value();
         }
     }
-    SPDLOG_WARN("Not implemented. ID: {}", prop_id);
+    libtcam::logger()->warn("Not implemented. ID: {}", prop_id);
     return tcam::status::PropertyNotImplemented;
 }
 
@@ -489,7 +489,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
             return m_dev_color_transform_enable->set_value(new_val);
         }
     }
-    SPDLOG_WARN("Not implemented. ID: {} value: {}", prop_id, new_val);
+    libtcam::logger()->warn("Not implemented. ID: {} value: {}", prop_id, new_val);
     return tcam::status::PropertyNotImplemented;
 }
 
@@ -581,7 +581,7 @@ outcome::result<double> tcam::property::SoftwareProperties::get_double(
             return get_device_color_transform(prop_id);
     }
 
-    SPDLOG_WARN("not implemented {}", prop_id);
+    libtcam::logger()->warn("not implemented {}", prop_id);
     return tcam::status::PropertyNotImplemented;
 }
 
@@ -685,7 +685,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
             return set_device_color_transform(prop_id, new_val);
         }
     }
-    SPDLOG_WARN("not implemented {}", prop_id);
+    libtcam::logger()->warn("not implemented {}", prop_id);
     return tcam::status::PropertyNotImplemented;
 }
 

@@ -231,7 +231,7 @@ auto build_property_from_node(std::string_view name,
     }
     else
     {
-        SPDLOG_INFO("Property '{}' node-name '{}' not implemented.",
+        libtcam::logger()->info("Property '{}' node-name '{}' not implemented.",
                     prop_name,
                     arv_dom_node_get_node_name(ARV_DOM_NODE(node)));
     }

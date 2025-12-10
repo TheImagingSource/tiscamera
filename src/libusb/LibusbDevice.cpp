@@ -29,7 +29,7 @@ tcam::LibusbDevice::LibusbDevice(const std::shared_ptr<tcam::UsbSession>& s,
     device_handle_ = UsbHandler::get_instance().open_device(serial);
     if (!device_handle_)
     {
-        SPDLOG_ERROR("Failed to open device.");
+        libtcam::logger()->error("Failed to open device.");
     }
 }
 
@@ -44,7 +44,7 @@ tcam::LibusbDevice::LibusbDevice(const std::shared_ptr<tcam::UsbSession>& s, lib
 
         if (ret < 0)
         {
-            SPDLOG_ERROR("Unable to open device.");
+            libtcam::logger()->error("Unable to open device.");
             throw std::runtime_error("Unable to open device. LibUsb returned "
                                      + std::to_string(ret));
         }
@@ -85,7 +85,7 @@ bool tcam::LibusbDevice::open_interface(int interface)
     if (std::find(open_interfaces_.begin(), open_interfaces_.end(), interface)
         != open_interfaces_.end())
     {
-        SPDLOG_WARN("Interface {} is already open.", interface);
+        libtcam::logger()->warn("Interface {} is already open.", interface);
         return false;
     }
 
@@ -93,7 +93,7 @@ bool tcam::LibusbDevice::open_interface(int interface)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not claim interface {}", interface);
+        libtcam::logger()->error("Could not claim interface {}", interface);
         return false;
     }
 
@@ -109,7 +109,7 @@ bool tcam::LibusbDevice::close_interface(int interface)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Could not release interface {}", interface);
+        libtcam::logger()->error("Could not release interface {}", interface);
         return false;
     }
 
@@ -167,6 +167,6 @@ void tcam::LibusbDevice::halt_endpoint(int endpoint)
 {
     if (libusb_clear_halt(device_handle_, endpoint) != 0)
     {
-        SPDLOG_ERROR("Could not halt endpoint");
+        libtcam::logger()->error("Could not halt endpoint");
     }
 }

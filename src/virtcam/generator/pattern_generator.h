@@ -186,7 +186,7 @@ public:
             rising_ = nullptr;
             descending_ = &b_;
         }
-        //SPDLOG_INFO("{}:{}:{} - {}", r_, g_, b_, speed_);
+        //libtcam::logger()->info("{}:{}:{} - {}", r_, g_, b_, speed_);
     }
 
     inline img::pixel_type::BGRA64 get_pixel() const

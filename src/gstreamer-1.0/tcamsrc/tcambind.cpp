@@ -309,7 +309,7 @@ gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
     {
         if (desc.get_fourcc() == 0)
         {
-            SPDLOG_INFO("Format has empty fourcc. Format-desc='{}'",
+            libtcam::logger()->info("Format has empty fourcc. Format-desc='{}'",
                         desc.get_video_format_description_string());
             continue;
         }
@@ -317,7 +317,7 @@ gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
         const auto caps_string = tcam::gst::tcam_fourcc_to_gst_1_0_caps_string(desc.get_fourcc());
         if (caps_string.empty())
         {
-            SPDLOG_INFO("Format has empty caps string. Ignoring {}",
+            libtcam::logger()->info("Format has empty caps string. Ignoring {}",
                         img::fcc_to_string(desc.get_fourcc()));
             continue;
         }
@@ -340,7 +340,7 @@ gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
 
         if (res.empty())
         {
-            SPDLOG_INFO("Format has empty resolution list. Ignoring {}",
+            libtcam::logger()->info("Format has empty resolution list. Ignoring {}",
                         img::fcc_to_string(desc.get_fourcc()));
             continue;
         }

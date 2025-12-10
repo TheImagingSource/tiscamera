@@ -169,7 +169,7 @@ void tcam::virtcam::VirtcamDevice::stream_thread_main()
 
     std::chrono::steady_clock::time_point next_time = std::chrono::steady_clock::now();
 
-    // SPDLOG_ERROR("Start thread");
+    // libtcam::logger()->error("Start thread");
 
     while (true)
     {
@@ -207,7 +207,7 @@ void tcam::virtcam::VirtcamDevice::stream_thread_main()
             std::shared_ptr<ImageBuffer> buf = fetch_free_buffer();
             if (buf)
             {
-                // SPDLOG_ERROR("next image"); //
+                // libtcam::logger()->error("next image"); //
 
                 auto dst = buf->get_img_descriptor();
 

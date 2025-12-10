@@ -114,8 +114,8 @@ void AravisDevice::generate_scaling_information()
                     new_scale.binning_h = i;
                     new_scale.binning_v = v;
 
-                    // SPDLOG_INFO("New binning: {}x{}", i, i);
-                    //SPDLOG_ERROR("new", bh->);
+                    // libtcam::logger()->info("New binning: {}x{}", i, i);
+                    //libtcam::logger()->error("new", bh->);
 
                     scale_.scaling_info_list.push_back(new_scale);
                 }
@@ -147,7 +147,7 @@ void AravisDevice::generate_scaling_information()
                     }
                     else
                     {
-                        SPDLOG_WARN("Binning entry '{}' not implemented.", entry);
+                        libtcam::logger()->warn("Binning entry '{}' not implemented.", entry);
                     }
                 }
 
@@ -201,7 +201,7 @@ void AravisDevice::generate_scaling_information()
 
             if (err)
             {
-                SPDLOG_ERROR("Received error: {}", err->message);
+                libtcam::logger()->error("Received error: {}", err->message);
                 g_clear_error(&err);
             }
 
@@ -216,7 +216,7 @@ void AravisDevice::generate_scaling_information()
 
             if (err)
             {
-                SPDLOG_ERROR("Received error: {}", err->message);
+                libtcam::logger()->error("Received error: {}", err->message);
                 g_clear_error(&err);
             }
         };
@@ -286,8 +286,8 @@ void AravisDevice::generate_scaling_information()
                         is.skipping_h = get_value("TestDecimationHorizontal");
                         is.skipping_v = get_value("TestDecimationVertical");
 
-                        // SPDLOG_ERROR("testing: {}x{} {}x{}", bin_h, bin_v, sk_h, sk_v);
-                        // SPDLOG_ERROR("scale: {}x{} {}x{}", is.binning_h, is.binning_v, is.skipping_h, is.skipping_v);
+                        // libtcam::logger()->error("testing: {}x{} {}x{}", bin_h, bin_v, sk_h, sk_v);
+                        // libtcam::logger()->error("scale: {}x{} {}x{}", is.binning_h, is.binning_v, is.skipping_h, is.skipping_v);
 
                         // no need for duplicates
                         // setting skipping 1x2 or 2x1 might both result in 2x2
@@ -313,7 +313,7 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
         auto binning_base = tcam::property::find_property(scale_.properties, "Binning");
         if (binning_base)
         {
-            SPDLOG_TRACE("Setting binning to: {}x{}", scale.binning_h, scale.binning_v);
+            libtcam::logger()->trace("Setting binning to: {}x{}", scale.binning_h, scale.binning_v);
 
             auto binning = dynamic_cast<tcam::property::IPropertyEnum*>(binning_base.get());
 
@@ -335,14 +335,14 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
             }
             else
             {
-                SPDLOG_ERROR("Binning type not implemented");
+                libtcam::logger()->error("Binning type not implemented");
             }
 
             auto ret = binning->set_value(value);
 
             if (!ret)
             {
-                SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+                libtcam::logger()->error("Unable to set binning: {}", ret.as_failure().error().message());
 
                 return false;
             }
@@ -355,13 +355,13 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
             auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
             auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
 
-            SPDLOG_TRACE("Setting binning to: {}x{}", scale.binning_h, scale.binning_v);
+            libtcam::logger()->trace("Setting binning to: {}x{}", scale.binning_h, scale.binning_v);
 
             auto ret = bin_h->set_value(scale.binning_h);
 
             if (!ret)
             {
-                SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+                libtcam::logger()->error("Unable to set binning: {}", ret.as_failure().error().message());
                 return false;
             }
 
@@ -369,7 +369,7 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
 
             if (!ret)
             {
-                SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+                libtcam::logger()->error("Unable to set binning: {}", ret.as_failure().error().message());
                 return false;
             }
         }
@@ -384,12 +384,12 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
         auto sk_h = dynamic_cast<tcam::property::IPropertyInteger*>(sk_hb.get());
         auto sk_v = dynamic_cast<tcam::property::IPropertyInteger*>(sk_vb.get());
 
-        SPDLOG_TRACE("Setting skipping to: {}x{}", scale.skipping_h, scale.skipping_v);
+        libtcam::logger()->trace("Setting skipping to: {}x{}", scale.skipping_h, scale.skipping_v);
         auto ret = sk_h->set_value(scale.skipping_h);
 
         if (!ret)
         {
-            SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+            libtcam::logger()->error("Unable to set binning: {}", ret.as_failure().error().message());
             return false;
         }
 
@@ -397,7 +397,7 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
 
         if (!ret)
         {
-            SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+            libtcam::logger()->error("Unable to set binning: {}", ret.as_failure().error().message());
             return false;
         }
     }
@@ -425,7 +425,7 @@ image_scaling AravisDevice::get_current_scaling()
 
             if (!value)
             {
-                SPDLOG_ERROR("Unable to retrieve value for Binning: {}",
+                libtcam::logger()->error("Unable to retrieve value for Binning: {}",
                              value.as_failure().error().message());
                 return {};
             }
@@ -447,7 +447,7 @@ image_scaling AravisDevice::get_current_scaling()
             }
             else
             {
-                SPDLOG_WARN("Binning entry '{}' not implemented.", value.value());
+                libtcam::logger()->warn("Binning entry '{}' not implemented.", value.value());
                 return {};
             }
         }
@@ -463,7 +463,7 @@ image_scaling AravisDevice::get_current_scaling()
 
             if (!res)
             {
-                SPDLOG_ERROR("Unable to retrieve value for BinningHorizontal: {}",
+                libtcam::logger()->error("Unable to retrieve value for BinningHorizontal: {}",
                              res.as_failure().error().message());
                 return {};
             }
@@ -471,7 +471,7 @@ image_scaling AravisDevice::get_current_scaling()
             res = bin_v->get_value();
             if (!res)
             {
-                SPDLOG_ERROR("Unable to retrieve value for BinningVertical: {}",
+                libtcam::logger()->error("Unable to retrieve value for BinningVertical: {}",
                              res.as_failure().error().message());
                 return {};
             }
@@ -487,7 +487,7 @@ image_scaling AravisDevice::get_current_scaling()
 
         if (auto res = sk_h->get_value(); !res)
         {
-            SPDLOG_ERROR("Unable to retrieve value for SkippingHorizontal: {}",
+            libtcam::logger()->error("Unable to retrieve value for SkippingHorizontal: {}",
                          res.as_failure().error().message());
             return {};
         }
@@ -498,7 +498,7 @@ image_scaling AravisDevice::get_current_scaling()
 
         if (auto res = sk_v->get_value(); !res)
         {
-            SPDLOG_ERROR("Unable to retrieve value for SkippingVertical: {}",
+            libtcam::logger()->error("Unable to retrieve value for SkippingVertical: {}",
                          res.as_failure().error().message());
             return {};
         }

@@ -30,6 +30,8 @@ auto get_spdlog_logger() -> std::shared_ptr<spdlog::logger>;
 
 void print_version_info_once();
 
+ auto logger() -> std::shared_ptr<spdlog::logger>;
+
 } // namespace libtcam
 
 VISIBILITY_POP
