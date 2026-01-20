@@ -423,7 +423,6 @@ protected:
 
     bool set_partial_scan_offset();
     tcam::tcam_image_size calc_partial_scan_offset_positions();
-                                           
 
 private:
     int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex = 0);

@@ -245,7 +245,8 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
             if( p_device->set_partial_scan_offset())
             {
                 return outcome::success();
-            }             return outcome::success();
+            }
+            return outcome::success();
         }
         case tcam::afu420::AFU420Property::OffsetY:
         {
@@ -253,7 +254,7 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
             if( p_device->set_partial_scan_offset())
             {
                 return outcome::success();
-            } 
+            }
             return outcome::success();
         }
         default:
