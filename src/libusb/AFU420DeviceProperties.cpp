@@ -29,7 +29,7 @@ bool AFU420Device::create_exposure()
 {
     tcam_value_double d = {};
     d.min = 100.0;
-    d.max = 30'000'000.0;
+    d.max = 500'000.0;;
     d.step = 100.0;
     d.value = 100.0;
     d.default_value = 100.0;
@@ -51,6 +51,7 @@ bool AFU420Device::create_gain()
     d.min = 64.0;
     d.max = 520.0;
     d.step = 1.0;
+    d.default_value = d.min; 
 
     auto value = get_gain();
 
@@ -68,6 +69,7 @@ bool AFU420Device::create_gain()
     auto exp = std::make_shared<AFU420PropertyDoubleImpl>(
         "Gain", d, tcam::afu420::AFU420Property::Gain, m_backend);
 
+    set_gain(d.min);  
     m_properties.push_back(exp);
 
     return true;
@@ -407,7 +409,7 @@ void AFU420Device::create_properties()
 
 int64_t AFU420Device::get_exposure()
 {
-    uint16_t value = 0;
+    uint32_t value = 0;
 
     int ret = control_read(value, BASIC_USB_TO_PC_GET_EXPOSURE);
 
@@ -421,15 +423,32 @@ int64_t AFU420Device::get_exposure()
 
 bool AFU420Device::set_exposure(int64_t exposure)
 {
-    uint16_t value = exposure;
+    uint32_t value = exposure;  
+    auto fps = get_framerate();
 
-    int ret = control_write(BASIC_PC_TO_USB_EXPOSURE, value);
+    double frame_rate_from_exposure = 1'000'000.0 / (double)exposure;
 
+    std::cout << "current fps : " << fps << "  exposure fps :" << frame_rate_from_exposure << ":" << exposure << "/" << value <<std::endl;
+    if( frame_rate_from_exposure < fps ) 
+    {
+        set_framerate(frame_rate_from_exposure);
+    }
+    else
+    {
+        set_framerate(fps);
+    }                            
+
+    int ret = control_write(BASIC_PC_TO_USB_EXPOSURE,
+                                0,
+                                0,
+                                value);
     if (ret < 0)
     {
-        libtcam::logger()->error("Unable to write property 'Exposure'. LibUsb returned {}", ret);
+        libtcam::logger()->error("Unable to write property 'Exposure'. LibUsb returned {}", ret);   
         return false;
     }
+
+
 
     return true;
 }
@@ -771,3 +790,50 @@ bool AFU420Device::set_ois_pos(const int64_t& x_pos, const int64_t& y_pos)
 
     return true;
 }
+
+/// @brief Calculate the new partical scan offset
+/// @return the new offset.
+tcam::tcam_image_size AFU420Device::calc_partial_scan_offset_positions()
+{
+
+    tcam::tcam_image_size new_offset = m_offset;
+    int32_t max_width = (m_uPixelMaxX - step.width )/  active_video_format.get_scaling().binning_v;
+    int32_t max_height = (m_uPixelMaxY - step.height)   /  active_video_format.get_scaling().binning_h;
+
+    if(m_offset_auto)
+    {
+        new_offset.width =  (max_width - active_video_format.get_size().width) / 2;
+        new_offset.height = (max_height - active_video_format.get_size().height) /2;
+    }
+    else
+    {
+        if( new_offset.width > max_width - active_video_format.get_size().width )
+        { 
+            new_offset.width = max_width - active_video_format.get_size().width; 
+        }
+
+        if( new_offset.height > max_height - active_video_format.get_size().height )
+        { 
+            new_offset.height = max_height - active_video_format.get_size().height;
+        }
+    }
+    return new_offset;
+}
+
+/// @brief Set the Partial Scan ROI
+/// The x and y pos are in the "m_offset" attribute of this class
+/// @return Success
+bool AFU420Device::set_partial_scan_offset()
+{    
+    auto new_offset = calc_partial_scan_offset_positions();
+
+    int ret = control_write(BASIC_PC_TO_USB_ROI_POS,  (uint16_t)new_offset.width, (uint16_t)new_offset.height);
+
+    if (ret < 0)
+    {
+        SPDLOG_ERROR("Unable to write property 'ROI_POS'. LibUsb returned {}", ret);
+        return false;
+    }
+
+    return true;
+}                              
