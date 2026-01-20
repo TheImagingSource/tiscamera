@@ -159,7 +159,7 @@ int tcam::LibusbDevice::internal_control_transfer(uint8_t RequestType,
                                                   unsigned int timeout)
 {
     return libusb_control_transfer(
-        device_handle_, RequestType, Request, Value, Index, (unsigned char*)&data, size, timeout);
+        device_handle_, RequestType, Request, Value, Index, data, size, timeout);
 }
 
 
