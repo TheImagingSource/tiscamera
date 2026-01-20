@@ -236,16 +236,24 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
         case tcam::afu420::AFU420Property::OffsetAuto:
         {
             p_device->m_offset_auto = new_value;
+            p_device->set_partial_scan_offset();
             return outcome::success();
         }
         case tcam::afu420::AFU420Property::OffsetX:
         {
             p_device->m_offset.width = new_value;
-            return outcome::success();
+            if( p_device->set_partial_scan_offset())
+            {
+                return outcome::success();
+            }             return outcome::success();
         }
         case tcam::afu420::AFU420Property::OffsetY:
         {
             p_device->m_offset.height = new_value;
+            if( p_device->set_partial_scan_offset())
+            {
+                return outcome::success();
+            } 
             return outcome::success();
         }
         default:
