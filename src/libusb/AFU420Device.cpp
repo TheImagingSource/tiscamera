@@ -459,7 +459,7 @@ void AFU420Device::create_formats()
             double fps_min = 0;
             double fps_max = 0;
 
-            //this->get_frame_rate_range(_fmt.fmt, 1, size, fps_min, fps_max);
+            this->get_frame_rate_range(_fmt.fmt, 1, size, fps_min, fps_max);
 
             std::vector<double> f = create_steps_for_range(fps_min, fps_max);
 
