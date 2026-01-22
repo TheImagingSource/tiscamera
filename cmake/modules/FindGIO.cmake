@@ -38,16 +38,9 @@ if (NOT GIO_FIND_QUIETLY)
   MESSAGE(STATUS "found gio main include dir: ${GIO_MAIN_INCLUDE_DIR}")
 endif (NOT GIO_FIND_QUIETLY)
 
-# search the glibconfig.h include dir under the same root where the library is found
 find_library(GIO_LIBRARIES
         NAMES gio-2.0
-        PATHS ${PKG_GIO_INCLUDEDIR}
-        NO_DEFAULT_PATH)
-
-find_library(GIO_LIBRARIES
-        NAMES gio-2.0
-        PATHS ${PKG_GIO_LIBDIR})
-
+        HINTS ${PKG_GIO_LIBRARY_DIRS} ${PKG_GIO_LIBDIR})
 
 get_filename_component(GIOLibDir "${PKG_GIO_LIBRARIES}" PATH)
 
