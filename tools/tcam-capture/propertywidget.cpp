@@ -480,14 +480,15 @@ void DoubleWidget::update()
         }
         if (p_box)
         {
-            const QSignalBlocker blocker(p_box);
-
+            p_box->blockSignals(true);
             p_box->setDisabled(false);
             p_box->setRange(min, max);
             p_box->setSingleStep(step);
 
             p_box->setValue(value);
             p_box->setReadOnly(lock);
+            p_box->blockSignals(false);
+
         }
     }
 }
