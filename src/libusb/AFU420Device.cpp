@@ -37,7 +37,6 @@ tcam::AFU420Device::AFU420Device(const DeviceInfo& info)
 {
     device = info;
 
-
     usb_device_ = UsbHandler::get_instance().open_device_(info.get_serial());
 
     if (usb_device_ == nullptr)
@@ -521,8 +520,7 @@ tcam_image_size tcam::AFU420Device::calculate_auto_offset(uint32_t fourcc,
 }
 
 
-AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf(
-    const VideoFormat& format)
+AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf(const VideoFormat& format)
 {
 
     tcam_image_size binning = { static_cast<unsigned int>(format.get_scaling().binning_h),

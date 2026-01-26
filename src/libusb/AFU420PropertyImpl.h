@@ -120,7 +120,8 @@ public:
     AFU420PropertyDoubleImpl(const std::string& name,
                              tcam_value_double d,
                              tcam::afu420::AFU420Property id,
-                             std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
+                             std::shared_ptr<tcam::property::AFU420DeviceBackend> backend,
+                             bool use_cache=false);
 
     virtual tcamprop1::prop_static_info get_static_info() const final
     {
@@ -167,6 +168,13 @@ private:
     double m_max;
     double m_step;
     double m_default;
+    // some properties do not return the correct
+    // values when the device is queried
+    // by setting use_cache=true in the constructor
+    // m_current_value will be returned as our
+    // internally cached value
+    double m_current_value;
+    bool m_use_cache = false;
 
     tcam::afu420::AFU420Property m_id;
     const tcamprop1::prop_static_info_float* p_static_info;
@@ -186,6 +194,7 @@ public:
         {
             return *p_static_info;
         }
+
         return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
     }
 
@@ -228,6 +237,7 @@ private:
     PropertyFlags m_flags;
 
     std::string m_default;
+    int m_current_value;
 
     tcam::afu420::AFU420Property m_id;
     const tcamprop1::prop_static_info_enumeration* p_static_info;

@@ -140,8 +140,9 @@ AFU420PropertyDoubleImpl::AFU420PropertyDoubleImpl(
     const std::string& name,
     tcam_value_double d,
     tcam::afu420::AFU420Property id,
-    std::shared_ptr<tcam::property::AFU420DeviceBackend> cam)
-    : m_cam(cam), m_name(name), m_id(id)
+    std::shared_ptr<tcam::property::AFU420DeviceBackend> cam,
+    bool use_cache)
+    : m_cam(cam), m_name(name), m_use_cache(use_cache), m_id(id)
 {
     m_default = d.default_value;
     m_min = d.min;
@@ -194,6 +195,11 @@ tcamprop1::FloatRepresentation_t AFU420PropertyDoubleImpl::get_representation() 
 
 outcome::result<double> AFU420PropertyDoubleImpl::get_value() const
 {
+    if (m_use_cache)
+    {
+        return m_current_value;
+    }
+
     if (auto ptr = m_cam.lock())
     {
         auto ret = ptr->get_float(m_id);
@@ -216,6 +222,7 @@ outcome::result<void> AFU420PropertyDoubleImpl::set_value(double new_value)
     if (auto ptr = m_cam.lock())
     {
         OUTCOME_TRY(ptr->set_float(m_id, new_value));
+        m_current_value = new_value;
         return outcome::success();
     }
     else
@@ -245,18 +252,6 @@ AFU420PropertyEnumImpl::AFU420PropertyEnumImpl(const std::string& name,
 {
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 
-    // if (auto ptr = m_cam.lock())
-    // {
-    //     auto ret = ptr->get_int(m_ctrl, GET_DEF);
-    //     if (ret)
-    //     {
-    //         m_default = m_entries.at(ret.value());
-    //     }
-    // }
-    // else
-    // {
-    //     libtcam::logger()->error("Unable to lock propertybackend. Cannot retrieve value.");
-    // }
     auto static_info = tcamprop1::find_prop_static_info(m_name);
 
     if (static_info.type == tcamprop1::prop_type::Enumeration && static_info.info_ptr)

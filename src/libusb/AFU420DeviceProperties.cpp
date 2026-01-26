@@ -32,12 +32,12 @@ bool AFU420Device::create_exposure()
     d.max = 500'000.0;
     d.step = 100.0;
     d.value = 100.0;
-    d.default_value = 100.0;
+    d.default_value = 3'333'333;
 
     auto exp = std::make_shared<AFU420PropertyDoubleImpl>(
-        "ExposureTime", d, tcam::afu420::AFU420Property::ExposureTime, m_backend);
+        "ExposureTime", d, tcam::afu420::AFU420Property::ExposureTime, m_backend, true);
 
-    set_exposure(100.0);
+    set_exposure(d.default_value);
 
     m_properties.push_back(exp);
 
@@ -52,25 +52,13 @@ bool AFU420Device::create_gain()
     d.max = 520.0;
     d.step = 1.0;
     d.default_value = d.min; 
+    d.value = d.min;
 
-    auto value = get_gain();
-
-    if (value == 0)
-    {
-        d.value = 292;
-        set_gain(292);
-    }
-    else
-    {
-        d.value = value;
-    }
-    d.default_value = 292.0;
-
-    auto exp = std::make_shared<AFU420PropertyDoubleImpl>(
-        "Gain", d, tcam::afu420::AFU420Property::Gain, m_backend);
+    auto gain = std::make_shared<AFU420PropertyDoubleImpl>(
+        "Gain", d, tcam::afu420::AFU420Property::Gain, m_backend, true);
 
     set_gain(d.min);  
-    m_properties.push_back(exp);
+    m_properties.push_back(gain);
 
     return true;
 }
@@ -81,8 +69,8 @@ bool AFU420Device::create_focus()
     auto value = get_focus();
 
     tcam_value_int i = {};
-    i.min = 0;
-    i.max = 1023;
+    i.min = 140;
+    i.max = 780;
     i.step = 1;
     i.default_value = value;
 
@@ -208,7 +196,7 @@ bool AFU420Device::create_strobe()
 
     tcam_value_int i_sde = {};
     i_sde.min = 0;
-    i_sde.max = 1700000;
+    i_sde.max = 1'700'000;
     i_sde.step = 1;
     i_sde.value = get_strobe(strobe_parameter::first_strobe_delay);
     i_sde.default_value = i_sde.value;
@@ -218,7 +206,7 @@ bool AFU420Device::create_strobe()
 
     tcam_value_int i_sdu = {};
     i_sdu.min = 10;
-    i_sdu.max = 682000;
+    i_sdu.max = 682'000;
     i_sdu.step = 1;
     i_sdu.value = get_strobe(strobe_parameter::first_strobe_duration);
     i_sdu.default_value = i_sdu.value;
