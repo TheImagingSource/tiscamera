@@ -41,7 +41,7 @@ These are loaded automatically when the camera is connected to ensure full opera
 
 .. code-block:: sh
 
-   ACTION=="add", SUBSYSTEM=="video4linux", \
+   ACTION=="add", SUBSYSTEM=="video4linux", ATTR{index}=="0", \
                   ATTRS{idVendor}=="199e", ATTRS{idProduct}=="<DEVICE productID>", \
                   RUN+="/install-path-to/tcam-uvc-extension-loader --device=/dev/%k -f /install-path-to-uvc-extension-unit/extension.json"
 

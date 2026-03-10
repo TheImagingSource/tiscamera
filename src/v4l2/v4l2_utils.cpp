@@ -75,6 +75,14 @@ std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
         path = udev_list_entry_get_name(dev_list_entry);
         struct udev_device* dev = udev_device_new_from_syspath(udev, path);
 
+        // Skip metadata/sibling nodes and keep the primary capture node only.
+        const char* node_index = udev_device_get_sysattr_value(dev, "index");
+        if (node_index != nullptr && strcmp(node_index, "0") != 0)
+        {
+            udev_device_unref(dev);
+            continue;
+        }
+
         /* The device pointed to by dev contains information about
            the hidraw device. In order to get information about the
            USB device, get the parent device with the
