@@ -19,8 +19,20 @@
 
 #include <cstring>
 #include <fcntl.h> // O_RDWR
+#include <linux/videodev2.h>
+#include <sys/ioctl.h>
 #include <unistd.h> // close()
 #include <vector>
+
+
+static __u32 get_effective_caps(const v4l2_capability& caps)
+{
+    if (caps.capabilities & V4L2_CAP_DEVICE_CAPS)
+    {
+        return caps.device_caps;
+    }
+    return caps.capabilities;
+}
 
 
 int main(int argc, char** argv)
@@ -74,6 +86,23 @@ int main(int argc, char** argv)
     if (fd == -1)
     {
         printf("Unable to open device \"%s\": %s\n", device.c_str(), strerror(errno));
+        return 1;
+    }
+
+    struct v4l2_capability caps = {};
+    if (ioctl(fd, VIDIOC_QUERYCAP, &caps) == -1)
+    {
+        printf("Unable to query device capabilities for \"%s\": %s\n",
+               device.c_str(),
+               strerror(errno));
+        close(fd);
+        return 1;
+    }
+
+    if (get_effective_caps(caps) & V4L2_CAP_META_CAPTURE)
+    {
+        printf("Refusing metadata capture device node \"%s\".\n", device.c_str());
+        close(fd);
         return 1;
     }
 
