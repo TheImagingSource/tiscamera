@@ -15,6 +15,7 @@
  */
 
 #include "CLI11.hpp"
+#include "uvc-extension-loader-check.h"
 #include "uvc-extension-loader.h"
 
 #include <cstring>
@@ -23,16 +24,6 @@
 #include <sys/ioctl.h>
 #include <unistd.h> // close()
 #include <vector>
-
-
-static __u32 get_effective_caps(const v4l2_capability& caps)
-{
-    if (caps.capabilities & V4L2_CAP_DEVICE_CAPS)
-    {
-        return caps.device_caps;
-    }
-    return caps.capabilities;
-}
 
 
 int main(int argc, char** argv)
@@ -99,7 +90,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    if (get_effective_caps(caps) & V4L2_CAP_META_CAPTURE)
+    if (tcam::uvc::is_metadata_capture_device(caps))
     {
         printf("Refusing metadata capture device node \"%s\".\n", device.c_str());
         close(fd);

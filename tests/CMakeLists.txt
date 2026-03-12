@@ -23,6 +23,7 @@ include_directories("${TCAM_SOURCE_DIR}/src/gobject")
 
 link_libraries( dutils_img::base )
 
+add_subdirectory(unit)
 add_subdirectory(integration)
 
 find_package(GStreamer REQUIRED QUIET)
