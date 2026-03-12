@@ -37,6 +37,8 @@ tcam-uvc-extension-loader has the following arguments:
     -d, --device  Device that shall receive the extension unit. (Default: /dev/video0)
     -f, --file    Extension unit file that shall be loaded (This flag is required)
 
+The device node must be a video capture node. Metadata capture nodes are rejected.
+
 Plug & Play
 ===========
 
