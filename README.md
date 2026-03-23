@@ -3,6 +3,34 @@
 
 This repository will give you additional resources to control your TIS camera.
 
+## EOL Announcement
+
+We would like to inform you about the planned End-of-Life (EOL) of the tiscamera SDK and outline the transition to its successor, IC Imaging Control 4 or newer.
+
+The official EOL date for tiscamera SDK is __April 1st, 2029__.
+
+This timeline aligns with the end of the standard lifecycle of Ubuntu 24 LTS, which is currently the reference system we support.  
+Please note that Ubuntu 26 LTS will no longer receive active implementation support from our side.  
+Effective immediately, tiscamera SDK and all related projects have entered maintenance mode.  
+This means:
+- No further active development will take place.
+- Bug fixes will be implemented only where feasible and with minimal effort.
+
+At the EOL date, the tiscamera SDK repository will be archived in accordance with [GitHub’s archiving guidelines](https://docs.github.com/en/repositories/archiving-a-github-repository/archiving-repositories).  
+The EOL announcement also applies to the following related projects (unless already announced separately): 
+- tcamdutils
+- tcamdutils-cuda
+- tcamtegrasrc
+
+As a successor, we recommend transitioning to IC Imaging Control 4 or newer.  
+In particular, the [ic4-gstreamer](https://github.com/TheImagingSource/ic4-gstreamer) package 
+provides a GStreamer source that is nearly identical in functionality to tcamsrc/tcambin,  
+enabling a straightforward migration path. We strongly encourage all users to begin planning  
+their transition to IC Imaging Control to ensure continued support and access to future enhancements.  
+
+If you have any questions or require assistance with migration, please do not hesitate to contact us.
+
+
 ## What do we offer?
 
 * gstreamer elements
@@ -114,7 +142,9 @@ For a complete overview, read the section [cmake options](https://www.theimaging
 
 GigE-Vision cameras have a several seconds long delay before they can be reliably detected on the network.
 
-To speed up this process for applications, a background daemon is built and installed, which detects cameras before an application starts. The following commands will activate the daemon on your system:
+To speed up this process for applications, a background daemon is built and installed,  
+which detects cameras before an application starts.  
+The following commands will activate the daemon on your system:
 
 ```
 sudo systemctl daemon-reload                 # make systemd aware of gige-daemon
