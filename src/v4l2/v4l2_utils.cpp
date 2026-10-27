@@ -25,6 +25,7 @@
 
 #include <glob.h>
 #include <linux/videodev2.h>
+#include <array>
 #include <regex>
 
 std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
@@ -35,7 +36,10 @@ std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
         return {};
     }
 
-    static const std::regex device_blacklist[] = {
+    // Intentionally never destroyed: the Indexer thread can still call this
+    // function while exit() runs static destructors, which would leave it
+    // reading a destroyed std::regex (std::length_error or a failed allocation on shutdown).
+    static const auto& device_blacklist = *new std::array<std::regex, 3> {
         std::regex("81.."), // 21/31/41
         std::regex("84.."), // 23U, AFU130
         std::regex("8221"), // DFK 73
