@@ -25,7 +25,6 @@
 
 #include <glob.h>
 #include <linux/videodev2.h>
-#include <regex>
 
 std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
 {
@@ -35,10 +34,11 @@ std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
         return {};
     }
 
-    static const std::regex device_blacklist[] = {
-        std::regex("81.."), // 21/31/41
-        std::regex("84.."), // 23U, AFU130
-        std::regex("8221"), // DFK 73
+    // these are a the first characters of the usb product id
+    static const char* device_blacklist[] = {
+        "81",   // 21/31/41
+        "84",   // 23U, AFU130
+        "8221", // DFK 73
     };
 
     // check here to prevent multiple checks while iterating devices
@@ -138,7 +138,7 @@ std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
                     }
                     for (const auto& bl_entry : device_blacklist)
                     {
-                        if (std::regex_search(idp, bl_entry))
+                        if (std::string(idp).rfind(bl_entry, 0) == 0)
                         {
                             return true;
                         }
